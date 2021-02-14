@@ -1,0 +1,108 @@
+import pygame
+import csv
+
+import sound
+import tilemap
+import states
+import levelscene
+import worldmapscene
+import introscene
+from resources import resource_path
+import sys
+import menuscene
+import creditsscene
+import simplesprite
+from colors import *
+
+DEV = True
+SCALE = 2
+RES = (500,300)
+OBJ = {
+}
+class Game:
+    def __init__(self, save):
+        #pygame.display.set_icon(pygame.image.load(resource_path("assets/icon_2_256.png")))
+        pygame.mixer.pre_init(buffer=256)
+        pygame.init()
+        self.save = save
+        self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
+        pygame.display.set_caption("Star Charge")
+        #sound.init()
+        self.screen = pygame.Surface(RES)
+        if len(sys.argv) > 1 and DEV:
+            self.scene = levelscene.LevelScene(self, sys.argv[1])
+        else:
+            self.scene = introscene.IntroScene(self)
+        self.playing_level_index = None
+
+    def run(self):
+        clock = pygame.time.Clock()
+        running = True
+        self.scene.start()
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == sound.MUSIC_ENDEVENT:
+                    sound.end_of_music()
+
+                if event.type == pygame.QUIT:
+                    running = False
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT: self.scene.take_input("left", event)
+                    elif event.key == pygame.K_RIGHT: self.scene.take_input("right", event)
+                    elif event.key == pygame.K_UP: self.scene.take_input("up", event)
+                    elif event.key == pygame.K_DOWN: self.scene.take_input("down", event)
+                    elif event.key == pygame.K_SPACE: self.scene.take_input("action", event)
+                    elif event.key == pygame.K_ESCAPE: self.scene.take_input("back", event)
+                    else:
+                        self.scene.take_input("other", event)
+
+                if event.type == pygame.MOUSEBUTTONDOWN and DEV:
+                    if event.button == 1: self.scene.take_input("click", event)
+                    if event.button == 3: self.scene.take_input("rightclick", event)
+
+            dt = clock.tick() / 1000.0
+
+            self.scene.update(dt)
+            self.render()
+
+    def render(self):
+        self.scene.render()
+        pygame.transform.scale(self.screen, self.scaled_screen.get_size(), self.scaled_screen)
+        pygame.display.update()
+
+    def start_level(self, level, index):
+        self.playing_level_index = index
+        self.scene = levelscene.LevelScene(self, level)
+        self.scene.start()
+
+    def return_to_map(self, won=False):
+        level = self.playing_level_index
+        if won and self.playing_level_index is not None:
+            level = self.playing_level_index + 1
+        self.scene = worldmapscene.WorldMapScene(self, level)
+        self.scene.start() 
+
+    def record_victory(self, steps):
+        if self.playing_level_index is not None:
+            level = worldmapscene.LEVELS[self.playing_level_index]
+            s3, s2, s1 = level[4:]
+            print(steps, s3,s2,s1)
+            stars = 0
+            if steps <= s3: stars = 3
+            elif steps <= s2: stars = 2
+            elif steps <= s1: stars = 1
+            old_state = self.save.get_level_state(self.playing_level_index)
+            if not old_state['beaten'] or steps < old_state['steps'] or stars > old_state['stars']:
+                self.save.set_level_state(self.playing_level_index, True, steps, stars)
+                self.save.save()
+
+    def go_to_menu(self):
+        self.scene = menuscene.MenuScene(self)
+        self.scene.start()
+
+    def update_scale(self, scale):
+        global SCALE
+        SCALE = scale
+        self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
