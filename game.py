@@ -13,6 +13,7 @@ import menuscene
 import creditsscene
 import simplesprite
 from colors import *
+from v2 import V2
 
 DEV = True
 SCALE = 2
@@ -58,9 +59,22 @@ class Game:
                     else:
                         self.scene.take_input("other", event)
 
-                if event.type == pygame.MOUSEBUTTONDOWN and DEV:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
                     if event.button == 1: self.scene.take_input("click", event)
                     if event.button == 3: self.scene.take_input("rightclick", event)
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    if event.button == 1: self.scene.take_input("unclick", event)
+                    if event.button == 3: self.scene.take_input("unrightclick", event)                    
+
+                if event.type == pygame.MOUSEMOTION:
+                    event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    if event.buttons[0]:
+                        self.scene.take_input("mouse_drag", event)
+                    else:
+                        self.scene.take_input("mouse_move", event)
 
             dt = clock.tick() / 1000.0
 
