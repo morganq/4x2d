@@ -10,13 +10,22 @@ RESOURCE_COLORS = {
 
 class Resources:
     def __init__(self, iron=0, ice=0, gas=0):
-        self.values = {'iron':iron, 'ice':ice, 'gas':gas}
+        self.data = {'iron':iron, 'ice':ice, 'gas':gas}
+        self.handlers = []
+
+    def on_change(self, fn):
+        self.handlers.append(fn)
+
+    def set_resource(self, r, v):
+        self.data[r] = v
+        for handler in self.handlers:
+            handler(r,v)
 
     @property
-    def ice(self): return self.values['ice']
+    def ice(self): return self.data['ice']
 
     @property
-    def gas(self): return self.values['gas']
+    def gas(self): return self.data['gas']
 
     @property
-    def iron(self): return self.values['iron']        
+    def iron(self): return self.data['iron']        

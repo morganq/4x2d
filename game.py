@@ -12,6 +12,7 @@ import sys
 import menuscene
 import creditsscene
 import simplesprite
+import text
 from colors import *
 from v2 import V2
 
@@ -35,6 +36,8 @@ class Game:
         else:
             self.scene = introscene.IntroScene(self)
         self.playing_level_index = None
+
+        self.frame_time = 0
 
     def run(self):
         clock = pygame.time.Clock()
@@ -84,6 +87,9 @@ class Game:
     def render(self):
         self.scene.render()
         pygame.transform.scale(self.screen, self.scaled_screen.get_size(), self.scaled_screen)
+        t = pygame.time.get_ticks() - self.frame_time
+        self.frame_time = pygame.time.get_ticks()
+        text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))
         pygame.display.update()
 
     def start_level(self, level, index):

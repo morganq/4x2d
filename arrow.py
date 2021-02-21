@@ -8,6 +8,7 @@ import game
 class OrderArrow(SpriteBase):
     def __init__(self):
         SpriteBase.__init__(self, V2(0,0))
+        self._layer = -1
 
     def setup(self, start_planet, end, end_planet=None):
         thickness = 6

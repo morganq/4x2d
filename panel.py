@@ -4,6 +4,7 @@ from v2 import V2
 import pygame
 import text
 import resources
+import game
 
 class Panel(spritebase.SpriteBase):
     def __init__(self, pos, panel_for):
@@ -14,6 +15,17 @@ class Panel(spritebase.SpriteBase):
         self._background_offset = V2(0,0)
 
         self.tab = None
+
+    def position_nicely(self, scene):
+        x = self.panel_for.x - self._width / 2
+        y = self.panel_for.y - self._height / 2
+        if x > game.RES[0] / 2:
+            x = self.panel_for.x - self.panel_for._width / 2 - self._width - 10
+        else:
+            x = self.panel_for.x + self.panel_for._width / 2 + 10
+        y = max(min(y, game.RES[1] - self._height - 2), 2)
+        self.pos = V2(x,y)
+        self._reposition_children()
 
     def kill(self):
         for ci in self._controls:
@@ -53,7 +65,7 @@ class Panel(spritebase.SpriteBase):
         self.image = pygame.Surface((box_width, box_height + tab_offset), pygame.SRCALPHA)
         pygame.draw.rect(self.image, PICO_DARKBLUE, (0,tab_offset, box_width, box_height), 0)
         self._width = box_width
-        self._height = box_height
+        self._height = box_height + tab_offset
         pygame.draw.rect(self.image, PICO_WHITE, (0, tab_offset, box_width, box_height), 1)
 
         if self.tab:

@@ -22,6 +22,9 @@ class V2:
     # Alias the __matmul__ method to dot so we can use a @ b as well as a.dot(b).
     __matmul__ = dot
 
+    def cross(self, other):
+        return self.x * other.y - self.y * other.x
+
     def __sub__(self, other):
         """Vector subtraction."""
         return V2(self.x - other.x, self.y - other.y)
@@ -77,3 +80,7 @@ class V2:
 
     def tuple(self):
         return (self.x, self.y)
+
+    @staticmethod
+    def from_angle(angle):
+        return V2(math.cos(angle), math.sin(angle))

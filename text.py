@@ -7,7 +7,9 @@ import spritebase
 pygame.freetype.init()
 
 FONTS = {
+    'tiny':pygame.freetype.Font(resource_path("assets/Pixeled.ttf"), 5),
     'small':pygame.freetype.Font(resource_path("assets/Minecraftia-Regular.ttf"), 8),
+    'medium':pygame.freetype.Font(resource_path("assets/Pixeled.ttf"), 10),
     'big':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 20),
     'huge':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 30)
 }
@@ -28,14 +30,14 @@ class Text(spritebase.SpriteBase):
         
     def set_text(self, text):
         self._text = text
-        self.update()
+        self.update_image()
 
-    def update(self):
+    def update_image(self):
         self.image = render_multiline(self._text, self.size, self.color, self.multiline_width)
         w, h = self.image.get_size()
         self._width = w
         self._height = h
-        self.rect = (self.pos.x, self.pos.y, w, h)
+        self._recalc_rect()
 
 
 def render_multiline(text, size, color, wrap_width=None):

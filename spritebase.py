@@ -21,6 +21,9 @@ class SpriteBase(pygame.sprite.DirtySprite):
         self.selectable = False
         self.dirty = 2
 
+        self.collidable = False
+        self.collision_radius = 0
+
     def _recalc_rect(self):
         self.rect = pygame.Rect(
             self._pos.x - self._width * self.offset[0],
@@ -74,4 +77,7 @@ class SpriteBase(pygame.sprite.DirtySprite):
     def get_selection_info(self): return None
 
     def update(self, dt):
+        pass
+
+    def collide(self, other):
         pass
