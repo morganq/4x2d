@@ -28,7 +28,7 @@ class Game:
         pygame.init()
         self.save = save
         self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
-        pygame.display.set_caption("Star Charge")
+        pygame.display.set_caption("Hostile Quadrant")
         #sound.init()
         self.screen = pygame.Surface(RES)
         if len(sys.argv) > 1 and DEV:

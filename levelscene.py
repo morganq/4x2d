@@ -294,7 +294,7 @@ class LevelScene(scene.Scene):
             self.enemy.render(self.game.screen)
             debug_render(self.game.screen, self)
 
-        FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))            
+        #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))            
 
 
     def take_input(self, inp, event):
