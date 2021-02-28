@@ -264,10 +264,11 @@ class LevelScene(scene.Scene):
                     colliders[j].collide(colliders[i])
 
         if len(self.my_civ.upgrades) > 0:
-            if self.upgrade_button.visible == False:
-                r = self.my_civ.upgrades[0]
+            r = self.my_civ.upgrades[0]
+            text = "UPGRADE - %s" % r.upper()
+            if self.upgrade_button.visible == False or self.upgrade_button.text != text:
                 self.upgrade_button.visible = True
-                self.upgrade_button.text = "UPGRADE - %s" % r.upper()
+                self.upgrade_button.text = text
                 self.upgrade_button.color = RESOURCE_COLORS[r]
                 self.upgrade_button._generate_image()
         else:
@@ -301,4 +302,8 @@ class LevelScene(scene.Scene):
         if inp == "other":
             if event.key == pygame.K_d:
                 self.debug = not self.debug
+            if event.key == pygame.K_1:
+                self.game_speed = 1.0
+            if event.key == pygame.K_0:
+                self.game_speed = 10.0
         return super().take_input(inp, event)

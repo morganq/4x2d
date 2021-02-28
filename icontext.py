@@ -39,7 +39,7 @@ class IconText(SpriteBase):
         self._recalc_rect()
 
     def update(self, dt):
-        self.pos += V2(0, (-dt * 25) / (self.time + 1))
+        self.pos += V2(0, (-dt * 18) / (self.time + 1))
         self.time += dt
-        if self.time > 1.5:
+        if self.time > 1.0:
             self.kill()

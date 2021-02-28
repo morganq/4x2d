@@ -16,6 +16,7 @@ from meter import Meter
 from healthy import Healthy
 import economy
 import text
+from planet.shipcounter import ShipCounter
 from icontext import IconText
 from collections import defaultdict
 from .building import BUILDINGS
@@ -81,6 +82,9 @@ class Planet(framesprite.FrameSprite, Healthy):
 
         self._generate_frames()
         self.frame = 0        
+
+        self.shipcounter = ShipCounter(self)
+        self.scene.ui_group.add(self.shipcounter)
 
         Healthy.__init__(self, scene)
 
@@ -193,7 +197,7 @@ class Planet(framesprite.FrameSprite, Healthy):
                     # Add to score!!
                     self.scene.score += v
                     it = IconText(self.pos, None, "+%d" % v, economy.RESOURCE_COLORS[r])
-                    it.pos = self.pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+                    it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
                     self.scene.ui_group.add(it)
 
         # Ship production
@@ -209,7 +213,7 @@ class Planet(framesprite.FrameSprite, Healthy):
                 self.ships[fighter_name] -= 1
                 if self.owning_civ == self.scene.my_civ:
                     it = IconText(self.pos, "assets/i-%s.png" % fighter_name, "-1", PICO_PINK)
-                    it.pos = self.pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+                    it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
                     self.scene.ui_group.add(it)          
                 self.destroy_excess_ships_timer = 0
                 self.needs_panel_update = True      
@@ -227,8 +231,12 @@ class Planet(framesprite.FrameSprite, Healthy):
                     self.needs_panel_update = True
                     if self.owning_civ == self.scene.my_civ:
                         it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
-                        it.pos = self.pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+                        it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
                         self.scene.ui_group.add(it)
+
+        if self.health <= 0:
+            self.buildings = []
+            self.population = 0
 
         # Building stuff
         for b in self.buildings:

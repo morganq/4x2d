@@ -81,6 +81,9 @@ class V2:
     def tuple(self):
         return (self.x, self.y)
 
+    def tuple_int(self):
+        return (int(self.x), int(self.y))
+
     @staticmethod
     def from_angle(angle):
         return V2(math.cos(angle), math.sin(angle))
