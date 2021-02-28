@@ -44,9 +44,11 @@ class PlanetPanel(Panel):
         self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))
         y += 5
 
-        # TODO: center-justify?
         self.add(SimpleSprite((0,0), 'assets/i-pop.png'), V2(34,y))
-        self.add(Text("%d/%d" %(planet.population, planet.size), "small", (0,0), PICO_WHITE, False), V2(47,y+1))
+        color = PICO_WHITE
+        if planet.population == 0 or planet.population >= planet.get_max_pop():
+            color = PICO_YELLOW
+        self.add(Text("%d/%d" %(planet.population, planet.get_max_pop()), "small", (0,0), color, False), V2(47,y+1))
 
         if planet.ships and is_mine:
             y += 14
@@ -54,9 +56,20 @@ class PlanetPanel(Panel):
             y += 4
             ships_alpha = sorted(planet.ships.keys())
             for ship in ships_alpha:
-                self.add(SimpleSprite((0,0), 'assets/i-%s.png' % ship), V2(0,y))
+                if "alien" in ship:
+                    continue
+                if planet.ships[ship] <= 0:
+                    continue
+                try:
+                    self.add(SimpleSprite((0,0), 'assets/i-%s.png' % ship), V2(0,y))
+                except:
+                    print("ERROR FINDING ICON FOR %s" % ship)
+                    pass
                 self.add(Text("%ss" % ship.title(), "small", (0,0), PICO_WHITE, False), V2(15,y + 2))
-                self.add(Text("%d" % planet.ships[ship], "small", (0,0), PICO_WHITE, False), V2(88,y + 2))
+                color = PICO_WHITE
+                if planet.ships[ship] > planet.get_max_fighters():
+                    color = PICO_RED
+                self.add(Text("%d" % planet.ships[ship], "small", (0,0), color, False), V2(88,y + 2))
                 y += 15
 
         self.redraw()

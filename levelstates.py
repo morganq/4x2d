@@ -1,3 +1,4 @@
+from colors import *
 from simplesprite import SimpleSprite
 from states import State
 import framesprite
@@ -7,29 +8,41 @@ import csv
 import math
 import pygame
 import sound
+import save
 from resources import resource_path
 from funnotification import FunNotification
 from planet.planetpanel import PlanetPanel
 from orderpanel import OrderPanel
+from helppanel import HelpPanel
 from selector import Selector
 from arrow import OrderArrow
+import levelscene
 from upgrade.upgradepanel import UpgradePanel
 from v2 import V2
 
 class UIEnabledState(State):
+    def __init__(self, scene):
+        State.__init__(self, scene)
+        self.hover_filter = lambda x: True
+
+    def filter_only_panel_ui(self, o):
+        return o in [c['control'] for c in self.panel._controls]
+
     def enter(self):
         self.hover_sprite = None # Mouse is over this one
         self.clicking_sprite = None # Currently mouse-down-ing this one
         self.last_clicked_sprite = None # Last clicked, clears when clicking on nothing
         self.dragging_from_sprite = None # When dragging, this is the sprite dragging FROM
         self.dragging_to = None # When dragging, this is the position dragging TO
-        self.hover_filter = lambda x: True
 
     def deselect(self):
         pass
 
     def release_drag(self):
         pass
+
+    def filter_only_ui(self, o):
+        return o in self.scene.ui_group.sprites()
 
     def take_input(self, input, event):
         all_sprites = self.scene.game_group.sprites()[::]
@@ -123,6 +136,11 @@ class PlayState(UIEnabledState):
                     self.current_panel.kill()
                     self.current_panel = None
 
+                if self.current_panel and self.last_clicked_sprite.needs_panel_update:
+                    self.last_clicked_sprite.needs_panel_update = False
+                    self.current_panel.kill()
+                    self.current_panel = None                    
+
                 if not self.current_panel:
                     self.current_panel = PlanetPanel(self.last_clicked_sprite)
                     self.current_panel.position_nicely(self.scene)
@@ -156,6 +174,31 @@ class PlayState(UIEnabledState):
                 self.arrow.visible = False        
 
 
+class HelpState(UIEnabledState):
+    def __init__(self, scene):
+        UIEnabledState.__init__(self, scene)
+
+    def enter(self):
+        UIEnabledState.enter(self)
+        self.panel = HelpPanel(V2(0,0))
+        self.panel.add_all_to_group(self.scene.ui_group)
+        self.panel.pos = V2(game.RES[0] /2 - self.panel.width / 2, game.RES[1] / 2 - self.panel.height / 2)
+        self.panel._reposition_children()
+        self.scene.paused = True
+        
+
+    def exit(self):
+        self.panel.kill()
+        self.scene.paused = False
+
+    def take_input(self, input, event):
+        if input == "click":
+            pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
+            if not pr.collidepoint(event.gpos.tuple()):
+                self.scene.sm.transition(PlayState(self.scene))
+        return super().take_input(input, event)        
+
+
 class OrderShipsState(UIEnabledState):
     def __init__(self, scene, planet_from, planet_to):
         UIEnabledState.__init__(self, scene)
@@ -167,6 +210,7 @@ class OrderShipsState(UIEnabledState):
 
     def enter(self):
         UIEnabledState.enter(self)
+        self.hover_filter = self.filter_only_panel_ui
         self.panel = OrderPanel(V2(0,0), self.planet_from, self.planet_to, self.on_order)
         self.panel.position_nicely(self.scene)
         self.panel.add_all_to_group(self.scene.ui_group)
@@ -175,18 +219,17 @@ class OrderShipsState(UIEnabledState):
         self.arrow.setup(self.planet_from, None, self.planet_to)
 
     def exit(self):
+        self.hover_filter = lambda x: True
         self.panel.kill()
         self.arrow.kill()
 
     def on_order(self, values):
         for ship,num in values.items():
             if ship == "colonist":
-                self.planet_from.population -= num
-                self.planet_from.emit_ships_queue.append((ship, {"to":self.planet_to, "num":num}))
+                self.planet_from.emit_ship(ship, {"to":self.planet_to, "num":num})
             else:
-                self.planet_from.ships[ship] -= num
                 for i in range(num):
-                    self.planet_from.emit_ships_queue.append((ship, {"to":self.planet_to}))
+                    self.planet_from.emit_ship(ship, {"to":self.planet_to})
         self.scene.sm.transition(PlayState(self.scene))
 
     def take_input(self, input, event):
@@ -209,9 +252,11 @@ class UpgradeState(UIEnabledState):
         self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.upgrades[0], self.on_select)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
+        self.hover_filter = self.filter_only_panel_ui
         super().enter()
 
     def exit(self):
+        self.hover_filter = lambda x:True
         self.scene.paused = False
         if self.cursor_icon:
             self.cursor_icon.kill()
@@ -249,7 +294,6 @@ class UpgradeState(UIEnabledState):
             if input == "click" and self.hover_sprite:
                 sel = self.hover_sprite.get_selection_info()
                 if sel and sel['type'] == "planet" and self.hover_sprite.owning_civ == self.scene.my_civ:
-                    self.hover_sprite.planet_upgrades.append(self.pending_upgrade.name)
                     u = self.pending_upgrade().apply(self.hover_sprite)
                     self.finish(target=self.hover_sprite)
         else:
@@ -257,3 +301,32 @@ class UpgradeState(UIEnabledState):
                 pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
                 if not pr.collidepoint(event.gpos.tuple()):
                     self.finish(cancel = True)
+
+class GameOverState(State):
+    def enter(self):
+        scores = save.SAVE_OBJ.add_highscore(self.scene.score)
+        self.scene.game_group.empty()
+        self.scene.ui_group.empty()
+        save.SAVE_OBJ.save()
+        picked_one = False
+        self.scene.ui_group.add(text.Text("- High Scores -", "big", V2(170, 60), PICO_BLUE, multiline_width=200))
+        places = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th']
+        for i, score in enumerate(save.SAVE_OBJ.get_highscores()):
+            color = PICO_WHITE
+            if score == int(self.scene.score) and not picked_one:
+                color = PICO_BLUE
+                picked_one = True
+            t1 = text.Text(places[i], "big", V2(240, i * 18 + 90), color)
+            t1.offset = (1, 0)
+            t1._recalc_rect()
+            t2 = text.Text("%d" % score, "big", V2(250, i * 18 + 90), color)
+            self.scene.ui_group.add(t1)
+            self.scene.ui_group.add(t2)
+
+        return super().enter()
+
+    def take_input(self, input, event):
+        if input == "action" or input == "click":
+            self.scene.game.scene = levelscene.LevelScene(self.scene.game)
+            self.scene.game.scene.start()
+                

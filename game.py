@@ -18,7 +18,7 @@ from v2 import V2
 
 DEV = True
 SCALE = 2
-RES = (500,300)
+RES = (500,360)
 OBJ = {
 }
 class Game:
@@ -58,7 +58,10 @@ class Game:
                     elif event.key == pygame.K_UP: self.scene.take_input("up", event)
                     elif event.key == pygame.K_DOWN: self.scene.take_input("down", event)
                     elif event.key == pygame.K_SPACE: self.scene.take_input("action", event)
-                    elif event.key == pygame.K_ESCAPE: self.scene.take_input("back", event)
+                    elif event.key == pygame.K_ESCAPE:
+                        self.scene.take_input("back", event)
+                        self.scene = levelscene.LevelScene(self, sys.argv[1])
+                        self.scene.start()
                     else:
                         self.scene.take_input("other", event)
 

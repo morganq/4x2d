@@ -13,7 +13,7 @@ class FunNotification(Text):
         size = "big"
         if target:
             size="small"
-        super().__init__(text, size, V2(0,0), color=COLORS[0], border=False, multiline_width=game.RES[0])
+        super().__init__(text.upper(), size, V2(0,0), color=COLORS[0], border=False, multiline_width=game.RES[0], shadow=PICO_BLACK)
         self.pos = V2(game.RES[0] / 2, game.RES[1] / 2)
         if target:
             self.pos = V2(

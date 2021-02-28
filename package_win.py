@@ -1,6 +1,6 @@
 import os
 
-NAME = "PicketPuzzle"
+NAME = "HostileQuadrant"
 CONTENTS = "dist\\%s" % NAME
 
 os.system("rmdir /Q /S dist")

@@ -2,26 +2,32 @@ from colors import *
 from v2 import V2
 from spritebase import SpriteBase
 import pygame
+import math
 
-VEL = 20
+VEL = 30
 DEATH_TIME = 5
 
 class Bullet(SpriteBase):
-    def __init__(self, pos, target, shooter, mods):
+    def __init__(self, pos, target, shooter, vel=None, mods=None):
         SpriteBase.__init__(self, pos)
         self.target = target
         self.shooter = shooter
         self.owning_civ = self.shooter.owning_civ
         self.collidable = True
         self.collision_radius = 2
-        self.vel = (self.get_target_pos() - self.pos).normalized() * VEL
+        self.mods = mods or {}
+        if vel:
+            self.vel = vel
+        else:
+            self.vel = (self.get_target_pos() - self.pos).normalized() * VEL
         self.offset = (0.5, 0.5)
         self.time = 0
         self._generate_image()
 
     def collide(self, other):
         if other.owning_civ == self.shooter.owning_civ: return
-        other.health -= 2
+        if not getattr(other, "health", None): return
+        other.health -= 2 * self.mods.get("damage_debuff", 1.0)
         self.kill()
 
     def get_target_pos(self):
@@ -40,9 +46,29 @@ class Bullet(SpriteBase):
         self._height = 9
         self._recalc_rect()
 
+    def homing(self, dt):
+        towards = (self.target.pos - self.pos).normalized()
+        speed, angle = self.vel.to_polar()
+        facing = self.vel.normalized()
+        cp = facing.cross(towards)
+        try:
+            ao = math.acos(facing.dot(towards))
+        except ValueError:
+            ao = 0
+        if ao < 0.25:
+            angle = math.atan2(towards.y, towards.x)
+        else:
+            if cp > 0:
+                angle += 3 * dt
+            else:
+                angle -= 3 * dt
+        self.vel = V2.from_angle(angle) * speed
+        self._generate_image()
 
     def update(self, dt):
         self.pos += self.vel * dt
+        if self.mods.get("homing", False) and self.target.health > 0:
+            self.homing(dt)
         self.time += dt
         if self.time > DEATH_TIME:
             self.kill()

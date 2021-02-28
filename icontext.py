@@ -14,24 +14,28 @@ class IconText(SpriteBase):
             self.icon = None
         self.text = text
         self.color = color
+        self.offset = (0.5,0.5)
         self._generate_image()
         self.time = 0
+        self.layer = -1
 
     def _generate_image(self):
-        tr = text.FONTS['small'].get_rect(self.text)
+        tr = text.FONTS['tiny'].get_rect(self.text)
         if self.icon:
             self._width = tr[2] + 4 + self.icon.get_width()
             self._height = self.icon.get_height()
         else:
             self._width = tr[2]
-            self._height = tr[3]
+            self._height = tr[3] + 1
         
         self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
         if self.icon:
             self.image.blit(self.icon, (0,0))
-            text.FONTS['small'].render_to(self.image, (self.icon.get_width() + 4, 0), self.text, self.color)
+            text.FONTS['tiny'].render_to(self.image, (self.icon.get_width() + 2, 4), self.text, PICO_BLACK)
+            text.FONTS['tiny'].render_to(self.image, (self.icon.get_width() + 2, 3), self.text, self.color)
         else:
-            text.FONTS['small'].render_to(self.image, (0, 0), self.text, self.color)
+            text.FONTS['tiny'].render_to(self.image, (0, 1), self.text, PICO_BLACK)
+            text.FONTS['tiny'].render_to(self.image, (0, 0), self.text, self.color)
         self._recalc_rect()
 
     def update(self, dt):

@@ -5,6 +5,7 @@ import pygame
 import text
 import resources
 import game
+from helper import clamp
 
 class Panel(spritebase.SpriteBase):
     def __init__(self, pos, panel_for):
@@ -23,7 +24,7 @@ class Panel(spritebase.SpriteBase):
             x = self.panel_for.x - self.panel_for._width / 2 - self._width - 10
         else:
             x = self.panel_for.x + self.panel_for._width / 2 + 10
-        y = max(min(y, game.RES[1] - self._height - 2), 2)
+        y = clamp(y, 2, game.RES[1] - self._height - 2 - 40)
         self.pos = V2(x,y)
         self._reposition_children()
 

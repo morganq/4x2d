@@ -19,12 +19,14 @@ class Save:
             data = {}
 
         self.level_state = {int(k):v for k,v in data.get("level_state", {}).items()}
+        self.highscores = data.get("highscores", [])
         self.settings = data.get("settings", DEFAULT_SETTINGS)
         SAVE_OBJ = self
 
     def save(self):
         data = {
             'level_state': self.level_state,
+            'highscores': self.highscores,
             'settings': self.settings
         }
         json.dump(data, open(resource_path(FILENAME), "w"))
@@ -44,3 +46,10 @@ class Save:
 
     def set_setting(self, key, value):
         self.settings[key] = value
+
+    def add_highscore(self, score):
+        self.highscores.append(int(score))
+        self.highscores.sort(reverse=True)
+
+    def get_highscores(self):
+        return self.highscores[0:10]

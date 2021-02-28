@@ -11,6 +11,11 @@ class AnimRotSprite(SpriteBase):
         self._angle = 0
         self._update_image()
 
+    def _change_image(self, sheet, frame_width):
+        self._sheet = pygame.image.load(resource_path(sheet)).convert_alpha()
+        self._frame_width = frame_width
+        self._update_image()
+
     def _update_image(self):
         sw = self._sheet.get_width()
         h = self._sheet.get_height()

@@ -3,3 +3,6 @@ __pycache__
 dist
 env
 env.sh
+save.json
+build
+*.spec

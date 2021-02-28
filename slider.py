@@ -14,19 +14,21 @@ class Slider(SpriteBase):
         self._generate_image()
 
     def _generate_image(self):
-        w = self.meter_width + 8
+        pad = 6
+        w = self.meter_width + pad * 2
         h = 22
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
-        pygame.draw.line(self.image, PICO_WHITE, (4,0), (4,5), 1)
-        pygame.draw.line(self.image, PICO_WHITE, (w - 4,0), (w - 4,5), 1)
-        pygame.draw.line(self.image, PICO_WHITE, (4,2), (w-4,2), 1)
+        pygame.draw.line(self.image, PICO_WHITE, (pad,0), (pad,5), 1)
+        pygame.draw.line(self.image, PICO_WHITE, (w - pad,0), (w - pad,5), 1)
+        pygame.draw.line(self.image, PICO_WHITE, (pad,2), (w-pad,2), 1)
         t = ((self.value - self.min) / self.max - self.min)
-        x = int((w-8) * t + 4)
+        x = int((w-(pad * 2)) * t + pad)
         pts = [(x, 4), (x + 3, 10), (x - 3, 10)]
         pygame.draw.polygon(self.image, PICO_WHITE, pts,0)
 
-        text.FONTS['small'].render_to(self.image, (x - 2,13), str(self.value), PICO_WHITE)
+        tw = text.FONTS['small'].get_rect(str(self.value))[2]
+        text.FONTS['small'].render_to(self.image, (x - tw / 2 + 1,13), str(self.value), PICO_WHITE)
 
         self._width = w
         self._height = h
