@@ -183,9 +183,9 @@ class Planet(framesprite.FrameSprite, Healthy):
         elif self.resources.gas > self.resources.iron and self.resources.gas > self.resources.ice:
             top_resource = "gas"
         for r in self.resources.data.keys():
-            num_mining_buildings = len([b for b in self.buildings if b['building'].upgrade == "mining_rate"])
             stat_rate = 1
             if top_resource == r:
+                num_mining_buildings = len([b for b in self.buildings if b['building'].upgrade == "mining_rate"])                
                 stat_rate = num_mining_buildings * 0.15 + 1
             workers = min(self.population, self.size)
             self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * stat_rate
@@ -221,18 +221,17 @@ class Planet(framesprite.FrameSprite, Healthy):
             self.destroy_excess_ships_timer = 0
 
         # Population Growth
-        if self.owning_civ:
-            if self.population > 0:
-                self.population_growth_timer += dt
-                max_pop = self.get_max_pop()
-                if self.population_growth_timer >= POPULATION_GROWTH_TIME and self.population < max_pop:
-                    self.population_growth_timer = 0
-                    self.population += 1
-                    self.needs_panel_update = True
-                    if self.owning_civ == self.scene.my_civ:
-                        it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
-                        it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
-                        self.scene.ui_group.add(it)
+        if self.owning_civ and self.population > 0:
+            self.population_growth_timer += dt
+            max_pop = self.get_max_pop()
+            if self.population_growth_timer >= POPULATION_GROWTH_TIME and self.population < max_pop:
+                self.population_growth_timer = 0
+                self.population += 1
+                self.needs_panel_update = True
+                if self.owning_civ == self.scene.my_civ:
+                    it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
+                    it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+                    self.scene.ui_group.add(it)
 
         if self.health <= 0:
             self.buildings = []
@@ -244,9 +243,9 @@ class Planet(framesprite.FrameSprite, Healthy):
 
         # Detect enemies
         if self.get_threats():
-            for i in range(self.ships[self.get_ship_name("fighter")]):
+            for _ in range(self.ships[self.get_ship_name("fighter")]):
                 self.emit_ship(self.get_ship_name("fighter"), {"to":self})
-            for i in range(self.ships['alien-battleship']):
+            for _ in range(self.ships['alien-battleship']):
                 self.emit_ship('alien-battleship', {"to":self})
 
     def get_max_fighters(self):
