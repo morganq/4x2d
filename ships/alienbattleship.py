@@ -30,7 +30,7 @@ class AlienBattleship(Fighter):
 
         towards = (target.pos - self.pos).normalized()
         cross = self.turn_towards(towards, dt)
-        rate = FIRE_RATE / (1 + self.owning_civ.upgrade_stats['fire_rate'])
+        rate = FIRE_RATE / (1 + self.owning_civ.get_stat("fire_rate"))
         if abs(cross) < 0.1 and self.fire_time >= rate:
             self.fire_time = 0
             b = Bullet(self.pos, target, self, {})

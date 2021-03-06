@@ -53,7 +53,7 @@ class Ship(AnimRotSprite, Healthy):
         Healthy.__init__(self, self.scene, (14,3))
 
     def get_max_health(self):
-        return self.base_health * (1 + self.owning_civ.upgrade_stats['ship_health'])
+        return self.base_health * (1 + self.owning_civ.get_stat('ship_health'))
 
     def update(self, dt):
         self.health_bar.pos = self.pos + V2(0, -self.height / 2)
@@ -108,7 +108,7 @@ class Ship(AnimRotSprite, Healthy):
         return cp
 
     def try_warp(self, dt):
-        if self.owning_civ.upgrade_stats['warp_drive'] == 0:
+        if self.owning_civ.get_stat('warp_drive') == 0:
             return
         if self.warp_drive_countdown > 0:
             return
@@ -131,7 +131,7 @@ class Ship(AnimRotSprite, Healthy):
 
         exit_dist = (self.target.pos - self.pos).magnitude() - self.target.get_radius() - WARP_PLANET_MIN_DIST
 
-        max_dist = self.owning_civ.upgrade_stats['warp_drive'] + 30
+        max_dist = self.owning_civ.get_stat('warp_drive') + 30
         dist = min(exit_dist, max_dist)
 
         print(dist)
@@ -176,7 +176,7 @@ class Ship(AnimRotSprite, Healthy):
 
         self.speed_t += dt
         speed = math.sin(self.speed_t) * 2 + self.base_speed
-        speed *= self.owning_civ.upgrade_stats['move_speed'] + 1
+        speed *= self.owning_civ.get_stat('move_speed') + 1
         self.velocity = V2.from_angle(self._angle) * speed
 
         self.try_warp(dt)            

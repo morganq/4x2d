@@ -60,8 +60,6 @@ class Planet(framesprite.FrameSprite, Healthy):
         self.population = 0
         self.population_growth_timer = 0
 
-        self.upgrade_stats = defaultdict(float)
-
         self.ships = defaultdict(int)
         self.emit_ships_queue = []
         self.emit_ships_timer = 0
@@ -95,6 +93,9 @@ class Planet(framesprite.FrameSprite, Healthy):
         self.buildings = []
         self.ships = defaultdict(int)
         self._generate_frames()
+
+    def get_stat(self, stat):
+        return sum([b['building'].stats[stat] for b in self.buildings])        
 
     def _generate_frame(self, border = False):
         radius = self.size + 8
@@ -183,10 +184,9 @@ class Planet(framesprite.FrameSprite, Healthy):
         elif self.resources.gas > self.resources.iron and self.resources.gas > self.resources.ice:
             top_resource = "gas"
         for r in self.resources.data.keys():
-            num_mining_buildings = len([b for b in self.buildings if b['building'].upgrade == "mining_rate"])
             stat_rate = 1
             if top_resource == r:
-                stat_rate = num_mining_buildings * 0.15 + 1
+                stat_rate = self.get_stat("top_mining_rate") + 1
             workers = min(self.population, self.size)
             self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * stat_rate
             v = (self.resources.data[r] / 10.0)

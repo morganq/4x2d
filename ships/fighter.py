@@ -39,7 +39,7 @@ class Fighter(Ship):
 
         towards = (target.pos - self.pos).normalized()
         cross = self.turn_towards(towards, dt)
-        rate = FIRE_RATE / (1 + self.owning_civ.upgrade_stats['fire_rate'])
+        rate = FIRE_RATE / (1 + self.owning_civ.get_stat('fire_rate'))
         if abs(cross) < 0.1 and self.fire_time >= rate:
             self.fire_time = 0
             b = Bullet(self.pos, target, self, {})
@@ -81,7 +81,7 @@ class Fighter(Ship):
             self.turn_towards(target_vector, dt)
             self.speed_t += dt
             speed = math.sin(self.speed_t) * 2 + self.base_speed
-            speed *= self.owning_civ.upgrade_stats['move_speed'] + 1
+            speed *= self.owning_civ.get_stat('move_speed') + 1
             self.velocity = V2.from_angle(self._angle) * speed
 
             self.thrust_particle_time += dt

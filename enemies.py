@@ -45,9 +45,10 @@ class EnemyController:
                     if len(p.buildings) < 5:
                         p.add_building(random.choice(["mining_rate", "regen", "armory"]))
                 else:
-                    self.civ.upgrade_stats['fire_rate'] += 0.1
+                    pass
+                    #self.civ.upgrade_stats['fire_rate'] += 0.1 # Fix
 
-            self._status.append(str(dict(self.civ.upgrade_stats)))
+            #self._status.append(str(dict(self.civ.upgrade_stats))) # Fix
 
             self._status.append("%.2f" % self.add_fighter_timer)
             self.add_fighter_timer += dt * general_rate

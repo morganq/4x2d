@@ -201,7 +201,7 @@ class LevelScene(scene.Scene):
 
     def on_civ_resource_change(self, res_type, val):
         while self.my_civ.resources.data[res_type] >= self.my_civ.upgrade_limits.data[res_type]:
-            self.my_civ.upgrades.append(res_type)
+            self.my_civ.upgrades_stocked.append(res_type)
             self.my_civ.resources.data[res_type] -= self.my_civ.upgrade_limits.data[res_type]
             self.my_civ.upgrade_limits.data[res_type] += 25
         self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
@@ -263,8 +263,8 @@ class LevelScene(scene.Scene):
                     colliders[i].collide(colliders[j])
                     colliders[j].collide(colliders[i])
 
-        if len(self.my_civ.upgrades) > 0:
-            r = self.my_civ.upgrades[0]
+        if len(self.my_civ.upgrades_stocked) > 0:
+            r = self.my_civ.upgrades_stocked[0]
             text = "UPGRADE - %s" % r.upper()
             if self.upgrade_button.visible == False or self.upgrade_button.text != text:
                 self.upgrade_button.visible = True
@@ -276,7 +276,7 @@ class LevelScene(scene.Scene):
                 self.upgrade_button.visible = False
 
         for res_type in self.my_civ.resources.data.keys():
-            num = len([u for u in self.my_civ.upgrades if u == res_type])
+            num = len([u for u in self.my_civ.upgrades_stocked if u == res_type])
             if num > 0:
                 self.upgrade_texts[res_type].set_text("%d upgrade%s available!" % (num, "s" if num > 1 else ""))
             else:

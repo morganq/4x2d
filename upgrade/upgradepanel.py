@@ -7,7 +7,7 @@ from upgrade.upgradebutton import UpgradeButton
 import economy
 import game
 import random
-from upgrade import proto
+from upgrade import upgrades
 from v2 import V2
 
 class UpgradePanel(Panel):
@@ -22,14 +22,14 @@ class UpgradePanel(Panel):
         y = 30
         # need fn for closure
         def add_button(uname):
-            u = proto.UPGRADE_CLASSES[uname]
+            u = upgrades.UPGRADE_CLASSES[uname]
             b = UpgradeButton(V2(0,0), u, lambda:on_select(u))
             self.add(b, V2(0,y + 12))
 
         cts = {'buildings':'Base Construction', 'ships':'Ship Production', 'tech':'Technology'}
-        for category,upgrades in proto.UPGRADES[self.resource].items():
-            self.add(Text(cts[category], "small", V2(0,0), proto.UPGRADE_CATEGORY_COLORS[category], multiline_width=150), V2(10,y))
-            uname = random.choice(upgrades)
+        for category,ups in upgrades.UPGRADES[self.resource].items():
+            self.add(Text(cts[category], "small", V2(0,0), upgrades.UPGRADE_CATEGORY_COLORS[category], multiline_width=150), V2(10,y))
+            uname = random.choice(ups)
             add_button(uname)
             y += 60
 

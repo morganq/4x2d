@@ -4,7 +4,7 @@ from spritebase import SpriteBase
 import pygame
 import text
 from economy import RESOURCE_COLORS
-from upgrade.proto import UPGRADE_CATEGORY_COLORS
+from upgrade.upgrades import UPGRADE_CATEGORY_COLORS
 
 HOVER_COLORS = {
     PICO_BLUE:PICO_DARKBLUE,

@@ -1,5 +1,6 @@
 from productionorder import ProductionOrder
 from colors import *
+from stats import Stats
 
 UPGRADES = {
     'iron':{},
@@ -19,6 +20,7 @@ class Upgrade:
     description = ""
     cursor = None
     icon = None
+    stats = Stats()
     def apply(self, to):
         pass
 
@@ -30,8 +32,14 @@ def upgrade(cls):
     UPGRADES[cls.resource_type][cls.category] = [cls.name]
     return cls
 
+
+class AddBuildingUpgrade:
+    building = None
+    def apply(self, to):
+        to.add_building(self.building)
+
 @upgrade
-class EconUpgrade(Upgrade):
+class EconUpgrade(AddBuildingUpgrade):
     name = "econ"
     resource_type = "iron"
     category = "buildings"
@@ -39,12 +47,10 @@ class EconUpgrade(Upgrade):
     description = "+15% Mining Rate for Primary Resource"
     icon = "mining"
     cursor = "allied_planet"
-
-    def apply(self, to):
-        to.add_building("mining_rate")
+    building = "mining_rate"
 
 @upgrade
-class RegenUpgrade(Upgrade):
+class RegenUpgrade(AddBuildingUpgrade):
     name = "regen"
     resource_type = "ice"
     category = "buildings"
@@ -52,12 +58,10 @@ class RegenUpgrade(Upgrade):
     description = "Planet regenerates +1 health per second"
     icon="planetregen"
     cursor = "allied_planet"
-
-    def apply(self, to):
-        to.add_building("regen")
+    building = "regen"
 
 @upgrade
-class ArmoryUpgrade(Upgrade):
+class ArmoryUpgrade(AddBuildingUpgrade):
     name = "armory"
     resource_type = "gas"
     category = "buildings"
@@ -65,9 +69,7 @@ class ArmoryUpgrade(Upgrade):
     description = "Workers Attack Nearby Ships"
     icon = "militia"
     cursor = "allied_planet"
-
-    def apply(self, to):
-        to.add_building("armory")
+    building = "armory"
 
 @upgrade
 class FightersUpgrade(Upgrade):
@@ -120,10 +122,7 @@ class RateOfFireUpgrade(Upgrade):
     title = "Rapid Fire"
     description = "+15% Rate of Fire"
     icon = "rateoffire"
-
-    def apply(self, to):
-        to.upgrade_stats['fire_rate'] += 0.15
-
+    stats = Stats(fire_rate = 0.15)
 
 @upgrade
 class ArmorUpgrade(Upgrade):
@@ -133,9 +132,7 @@ class ArmorUpgrade(Upgrade):
     title = "Fragment Plating"
     description = "+25% Health for All Ships"
     icon="armor"
-
-    def apply(self, to):
-        to.upgrade_stats['ship_health'] += 0.25
+    stats = Stats(ship_health = 0.15)
 
 @upgrade
 class WarpUpgrade(Upgrade):
@@ -145,6 +142,4 @@ class WarpUpgrade(Upgrade):
     title = "Warp Drive"
     description = "+15 Warp Drive Distance"
     icon = "warp"
-
-    def apply(self, to):
-        to.upgrade_stats['warp_drive'] += 50
+    stats = Stats(warp_drive=50)

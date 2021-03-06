@@ -3,6 +3,7 @@ from colors import *
 import pygame
 from bullet import Bullet
 import random
+from stats import Stats
 
 BUILDINGS = {
 
@@ -15,6 +16,7 @@ def building(cls):
 class Building:
     def __init__(self):
         self.shapes = []
+        self.stats = Stats()
 
     def update(self, planet, dt):
         pass
@@ -55,6 +57,7 @@ class MiningRateBuilding(Building):
             ([V2(-1,-3), V2(6,-3), V2(6,0), V2(3,0), V2(3,3), V2(-1,3)], PICO_GREYPURPLE),
             ([V2(-1,-3), V2(0,-3), V2(0,3), V2(-1,3)], PICO_LIGHTGRAY)
         ]
+        self.stats = Stats(top_mining_rate = 0.15)
 
 @building
 class RegenBuilding(Building):
