@@ -12,3 +12,13 @@ The only thing upgrades do is have stats and optionally take one-time actions.
 
 Many stats are used whenever the relevant thing is calculated. Bullets will check the shooter's civ's damage stat.
 Some stats do something per-frame or whatever. That can be just in a big conditional in the civ, or in the planet, or in the building or w/e. 
+
+====
+
+Refactor the complicated stats as they are used right now, to set stage for many stats
+
+===
+New text class
+Many options, well organized.
+Full border. Shadow. Multiline. Render to surf instead of create obj. 
+Parse text and extract [] to make a different color for putting stats in

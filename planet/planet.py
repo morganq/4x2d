@@ -161,7 +161,7 @@ class Planet(framesprite.FrameSprite, Healthy):
         return self.size * POP_MAX_MUL + POP_MAX_ADD
 
     def update(self, dt):
-        # Spawn ships
+        # Emit ships which are queued
         if self.emit_ships_queue:
             self.emit_ships_timer += dt
             if self.emit_ships_timer >= EMIT_SHIPS_RATE:
@@ -177,19 +177,28 @@ class Planet(framesprite.FrameSprite, Healthy):
                 self.scene.game_group.add(s)
                 self.emit_ships_timer -= EMIT_SHIPS_RATE
 
-        # Resource production
+        ### Resource production ###
+        # Figure out which is the "top" resource
         top_resource = "iron"
         if self.resources.ice > self.resources.iron and self.resources.ice >= self.resources.gas:
             top_resource = "ice"
         elif self.resources.gas > self.resources.iron and self.resources.gas > self.resources.ice:
             top_resource = "gas"
         for r in self.resources.data.keys():
-            stat_rate = 1
+            rate_modifier = 1
+
+            ### Resource Stats ###
+
+            # Top resource mining rate
             if top_resource == r:
-                stat_rate = self.get_stat("top_mining_rate") + 1
+                rate_modifier = self.get_stat("top_mining_rate") + 1
+
+            # Resources mined is based on num workers
             workers = min(self.population, self.size)
-            self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * stat_rate
-            v = (self.resources.data[r] / 10.0)
+
+            # Add to the timers based on the mining rate
+            self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * rate_modifier
+            v = (self.resources.data[r] / 10.0) # if planet has 100% iron, you get 10 iron every 10 resource ticks.
             if self.resource_timers.data[r] > v:
                 self.resource_timers.data[r] -= v
                 self.owning_civ.resources.set_resource(r, self.owning_civ.resources.data[r] + v)
