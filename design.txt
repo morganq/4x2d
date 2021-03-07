@@ -1,0 +1,18 @@
+Possibilities:
+- Lose access to a portion of your planets. Keep everything else.
+- Full reset, keep just the last planet
+- Partial reset, keep technologies
+  - So, lose access to all ships other than fighters, have to rebuild
+  - Between levels you gain special techs that you otherwise do not have access to
+  - Get rid of tech upgrades in game and make them only at the end?
+- Partial reset: random selection about what to keep:
+  - Star systems with Memory Crystal reward: Keep 2 technologies researched
+  - Warp Field reward: Start each level with the ships from a production order
+  - Miniaturization reward: Colonist ships bring a building along with them
+  - Alien Insights reward: Improve 2 upgrades.
+
+
+Concept:
+Alien invasions have scattered humanity across the stars.
+You detect a distress signal from a distant galaxy...
+Standing between you and your goal are lightyears of alien-infested star systems

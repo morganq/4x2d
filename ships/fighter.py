@@ -16,8 +16,10 @@ THREAT_RANGE_DEFENSE = 60
 BAD_TARGET_FIND_NEW_TIME = 10.0
 
 class Fighter(Ship):
+    HEALTHBAR_SIZE = (12,2)
     def __init__(self, scene, pos, owning_civ):
-        Ship.__init__(self, scene, pos, owning_civ, "assets/fighter.png")
+        Ship.__init__(self, scene, pos, owning_civ)
+        self.set_sprite_sheet("assets/fighter.png", 12)
         self.collision_radius = 4
         self.state = "traveling"
         self.name = "fighter"
@@ -81,7 +83,6 @@ class Fighter(Ship):
             self.turn_towards(target_vector, dt)
             self.speed_t += dt
             speed = math.sin(self.speed_t) * 2 + self.base_speed
-            speed *= self.owning_civ.get_stat('move_speed') + 1
             self.velocity = V2.from_angle(self._angle) * speed
 
             self.thrust_particle_time += dt

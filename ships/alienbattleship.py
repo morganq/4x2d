@@ -10,9 +10,10 @@ FIRE_RATE = 0.65
 FIND_NEW_PLANET_TIME = 9
 
 class AlienBattleship(Fighter):
+    HEALTHBAR_SIZE = (24,2)
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)
-        self._change_image("assets/alien-battleship.png", 12)
+        self.set_sprite_sheet("assets/alien-battleship.png", 12)
         self.name = "alien-battleship"
         self.base_health = 70
         self.health = 70

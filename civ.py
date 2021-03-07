@@ -12,7 +12,7 @@ class Civ:
         self.upgrades = []
 
     def get_stat(self, stat):
-        return sum([u[stat] for u in self.upgrades])
+        return sum([u.stats[stat] for u in self.upgrades])
 
 class PlayerCiv(Civ):
     def __init__(self):

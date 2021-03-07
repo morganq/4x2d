@@ -1,22 +1,17 @@
-from spritebase import SpriteBase
+from framesprite import FrameSprite
 import pygame
 from resources import resource_path
 
-class AnimRotSprite(SpriteBase):
-    def __init__(self, pos, sheet, frame_width):
-        SpriteBase.__init__(self, pos)
-        self._sheet = pygame.image.load(resource_path(sheet)).convert_alpha()
-        self._frame_width = frame_width
-        self._frame = 0
+class AnimRotSprite(FrameSprite):
+    def __init__(self, pos, sprite_sheet=None, frame_width=0):
         self._angle = 0
-        self._update_image()
-
-    def _change_image(self, sheet, frame_width):
-        self._sheet = pygame.image.load(resource_path(sheet)).convert_alpha()
-        self._frame_width = frame_width
-        self._update_image()
+        FrameSprite.__init__(self, pos, sprite_sheet=sprite_sheet, frame_width=frame_width)
 
     def _update_image(self):
+        if not self._sheet:
+            self.image = pygame.Surface((1,1), pygame.SRCALPHA)
+            return
+            
         sw = self._sheet.get_width()
         h = self._sheet.get_height()
         midframe = (sw / self._frame_width) // 2

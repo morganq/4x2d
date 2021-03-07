@@ -12,7 +12,7 @@ class SpriteBase(pygame.sprite.DirtySprite):
             self._pos = pos
         else:
             self._pos = V2(*pos)
-        self.offset = (0,0)
+        self._offset = (0,0)
         self._recalc_rect()
 
         self.is_mouse_over = False
@@ -29,6 +29,15 @@ class SpriteBase(pygame.sprite.DirtySprite):
             self._pos.x - self._width * self.offset[0],
             self._pos.y - self._height * self.offset[1],
             self._width, self._height)
+
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, value):
+        self._offset = value
+        self._recalc_rect()
 
     @property
     def width(self):

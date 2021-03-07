@@ -1,12 +1,11 @@
 from colors import PICO_DARKGRAY, PICO_PINK, PICO_WHITE
 from v2 import V2
-from animrotsprite import AnimRotSprite
+from spaceobject import SpaceObject
 import random
 import math
 import particle
 import bullet
 import helper
-from healthy import Healthy
 
 FLEET_RADIUS = 15
 
@@ -25,32 +24,31 @@ THRUST_PARTICLE_RATE = 0.25
 
 # Particle effects
 
-class Ship(AnimRotSprite, Healthy):
-    def __init__(self, scene, pos, owning_civ, sheet):
-        AnimRotSprite.__init__(self, pos, sheet, 12)
+class Ship(SpaceObject):
+    HEALTHBAR_SIZE = (14,2)
+    def __init__(self, scene, pos, owning_civ):
+        SpaceObject.__init__(self, scene, pos)
         self.base_speed = 7
-        self.scene = scene
-        self.owning_civ = owning_civ
-        self.target = None
-        self.offset = (0.5,0.5)
-        self.speed_t = random.random() * 6.2818
-        self._layer = 2
+        self.target = None        
         self.velocity = V2(0,0)
         self.push_velocity = V2(0,0)
         self.orbits = True
-
+        
         self.collidable = True
         self.collision_radius = 1
 
-        self.thrust_particle_time = 0
-        self._recalc_rect()
+        self.thrust_particle_time = 0        
 
         self.warp_drive_countdown = 0
         self.warp_drive_t = 0
-        self.base_health = BASE_HEALTH
-        self.size = 2
+        self.base_health = BASE_HEALTH                
+        self.owning_civ = owning_civ
+        self.offset = (0.5,0.5)
+        self.speed_t = random.random() * 6.2818
+        self._layer = 2
 
-        Healthy.__init__(self, self.scene, (14,3))
+        self._recalc_rect()
+        self.set_health(self.get_max_health())
 
     def get_max_health(self):
         return self.base_health * (1 + self.owning_civ.get_stat('ship_health'))
@@ -63,7 +61,7 @@ class Ship(AnimRotSprite, Healthy):
         self.warp_drive_countdown -= dt
 
         self.push_from_planets(dt)
-        AnimRotSprite.update(self,dt)
+        super().update(dt)
 
     def push_from_planets(self,dt):
         for planet in self.scene.get_planets():
@@ -161,7 +159,7 @@ class Ship(AnimRotSprite, Healthy):
 
         # Towards target
         if self.orbits:
-            orbital_pos = (self.pos - self.target.pos).normalized() * (self.target.size + 20) + self.target.pos
+            orbital_pos = (self.pos - self.target.pos).normalized() * (self.target.radius + 20) + self.target.pos
             towards_angle = (orbital_pos - self.pos).to_polar()[1]
         else:
             towards_angle = (self.target.pos - self.pos).to_polar()[1]
@@ -176,7 +174,6 @@ class Ship(AnimRotSprite, Healthy):
 
         self.speed_t += dt
         speed = math.sin(self.speed_t) * 2 + self.base_speed
-        speed *= self.owning_civ.get_stat('move_speed') + 1
         self.velocity = V2.from_angle(self._angle) * speed
 
         self.try_warp(dt)            
@@ -188,7 +185,7 @@ class Ship(AnimRotSprite, Healthy):
             if self.thrust_particle_time > THRUST_PARTICLE_RATE:
                 pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
                 pvel += -self.velocity / 2
-                p = particle.Particle("assets/thrustparticle.png",1,self.pos + -self.velocity.normalized() * self.size,1,pvel)
+                p = particle.Particle("assets/thrustparticle.png",1,self.pos + -self.velocity.normalized() * self.radius,1,pvel)
                 self.scene.game_group.add(p)
                 self.thrust_particle_time -= THRUST_PARTICLE_RATE
 

@@ -6,8 +6,10 @@ from v2 import V2
 from text import Text
 
 class Colonist(Ship):
+    HEALTHBAR_SIZE = (16,2)
     def __init__(self, scene, pos, owning_civ):
-        Ship.__init__(self, scene, pos, owning_civ, "assets/colonist.png")
+        Ship.__init__(self, scene, pos, owning_civ)
+        self.set_sprite_sheet("assets/colonist.png", 12)
         self.collision_radius = 4
         self.orbits = True
         self.population = 0

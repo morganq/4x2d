@@ -223,7 +223,7 @@ class LevelScene(scene.Scene):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ == civ]        
 
     def get_starting_state(self):
-        return levelstates.HelpState(self)
+        return levelstates.PlayState(self)
 
     def initialize_state(self):
         self.sm = states.Machine(self.get_starting_state())        

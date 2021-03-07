@@ -22,6 +22,7 @@ from collections import defaultdict
 from .building import BUILDINGS
 from helper import get_nearest
 from .planetart import generate_planet_art
+from spaceobject import SpaceObject
 
 EMIT_SHIPS_RATE = 0.125
 EMIT_CLASSES = {
@@ -41,12 +42,13 @@ HP_PER_BUILDING = 5
 DEFENSE_RANGE = 30
 DESTROY_EXCESS_SHIPS_TIME = 7
 
-class Planet(framesprite.FrameSprite, Healthy):
+class Planet(SpaceObject):
+    HEALTHBAR_SIZE = (30,4)
     def __init__(self, scene, pos, size, resources):
-        framesprite.FrameSprite.__init__(self, pos, None, 1)
-        self.scene = scene
-        self.object_type = "planet"
+        SpaceObject.__init__(self, scene, pos)
         self.size = size
+        self.scene = scene
+        self.object_type = "planet"        
         self.resources = resources
         self.art = generate_planet_art(self.get_radius(), self.resources.iron, self.resources.ice, self.resources.gas)
         self.resource_timers = economy.Resources(0,0,0)
@@ -62,7 +64,7 @@ class Planet(framesprite.FrameSprite, Healthy):
 
         self.ships = defaultdict(int)
         self.emit_ships_queue = []
-        self.emit_ships_timer = 0
+        self.emit_ships_timer = 0        
 
         self.selectable = True
         self.selection_radius = self.size + 14
@@ -70,9 +72,6 @@ class Planet(framesprite.FrameSprite, Healthy):
         self._layer = 0
         self.collidable = True
         self.collision_radius = self.size + 8
-
-        self.rotate_rate = random.random() * 0.9 + 1
-        self.rotate_timer = random.random() * self.rotate_rate
 
         self.destroy_excess_ships_timer = 0
 
@@ -83,12 +82,11 @@ class Planet(framesprite.FrameSprite, Healthy):
 
         self.shipcounter = ShipCounter(self)
         self.scene.ui_group.add(self.shipcounter)
-
-        Healthy.__init__(self, scene)
+        self.set_health(self.get_max_health())
 
     def change_owner(self, civ):
         self.owning_civ = civ
-        self.health += self.get_max_health() / 4
+        self.health = max(self.health, self.get_max_health() / 4)
         self.population = min(self.population, 1)
         self.buildings = []
         self.ships = defaultdict(int)
