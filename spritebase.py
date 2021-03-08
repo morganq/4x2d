@@ -23,6 +23,7 @@ class SpriteBase(pygame.sprite.DirtySprite):
 
         self.collidable = False
         self.collision_radius = 0
+        self._timers = {}
 
     def _recalc_rect(self):
         self.rect = pygame.Rect(
@@ -86,7 +87,8 @@ class SpriteBase(pygame.sprite.DirtySprite):
     def get_selection_info(self): return None
 
     def update(self, dt):
-        pass
+        for k in self._timers.keys():
+            self._timers[k] += dt
 
     def collide(self, other):
         pass

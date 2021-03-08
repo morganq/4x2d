@@ -47,6 +47,7 @@ class Planet(SpaceObject):
     def __init__(self, scene, pos, size, resources):
         SpaceObject.__init__(self, scene, pos)
         self.size = size
+        self.radius = self.get_radius()
         self.scene = scene
         self.object_type = "planet"        
         self.resources = resources
@@ -170,8 +171,11 @@ class Planet(SpaceObject):
                 s = ship_class(self.scene, self.pos + off * self.get_radius(), self.owning_civ)
                 if ship_type in ["colonist", "alien-colonist"]:
                     s.set_pop(data['num'])
-                s.target = target
-                s._angle = math.atan2(off.y, off.x)
+                s.set_target(target)
+                if 'path' in data:
+                    s.set_path(data['path'])
+                s.angle = math.atan2(off.y, off.x)
+                s.velocity = off * 10
                 self.scene.game_group.add(s)
                 self.emit_ships_timer -= EMIT_SHIPS_RATE
 

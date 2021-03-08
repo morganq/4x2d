@@ -7,6 +7,7 @@ import text
 import csv
 import math
 import pygame
+import pathfinder
 import sound
 import save
 from resources import resource_path
@@ -123,10 +124,14 @@ class PlayState(UIEnabledState):
             self.current_panel = None
 
     def release_drag(self):
+        # Just made an order
         if self.hover_sprite and self.dragging_from_sprite != self.hover_sprite:
             target_selection = self.hover_sprite.get_selection_info()
             if target_selection['type'] == 'planet' and self.dragging_from_sprite.owning_civ == self.scene.my_civ:
-                self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite))
+                path = pathfinder.Pathfinder(self.scene).find_path(self.dragging_from_sprite, self.hover_sprite)
+                if path:
+                    path = path[4:-4] # Skip the first and last bits.
+                    self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite, path=path))
 
     def update(self, dt):
         if self.last_clicked_sprite:
@@ -200,10 +205,11 @@ class HelpState(UIEnabledState):
 
 
 class OrderShipsState(UIEnabledState):
-    def __init__(self, scene, planet_from, planet_to):
+    def __init__(self, scene, planet_from, planet_to, path=None):
         UIEnabledState.__init__(self, scene)
         self.planet_from = planet_from
         self.planet_to = planet_to
+        self.path = path
 
     def deselect(self):
         pass
@@ -226,10 +232,10 @@ class OrderShipsState(UIEnabledState):
     def on_order(self, values):
         for ship,num in values.items():
             if ship == "colonist":
-                self.planet_from.emit_ship(ship, {"to":self.planet_to, "num":num})
+                self.planet_from.emit_ship(ship, {"to":self.planet_to, "path":self.path, "num":num})
             else:
                 for i in range(num):
-                    self.planet_from.emit_ship(ship, {"to":self.planet_to})
+                    self.planet_from.emit_ship(ship, {"to":self.planet_to, "path":self.path})
         self.scene.sm.transition(PlayState(self.scene))
 
     def take_input(self, input, event):

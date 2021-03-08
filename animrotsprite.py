@@ -7,6 +7,15 @@ class AnimRotSprite(FrameSprite):
         self._angle = 0
         FrameSprite.__init__(self, pos, sprite_sheet=sprite_sheet, frame_width=frame_width)
 
+    @property
+    def angle(self):
+        return self._angle
+
+    @angle.setter
+    def angle(self, value):
+        self._angle = value
+        self._update_image()
+
     def _update_image(self):
         if not self._sheet:
             self.image = pygame.Surface((1,1), pygame.SRCALPHA)

@@ -10,3 +10,7 @@ class SpaceObject(AnimRotSprite, Healthy):
         self.owning_civ = None
         
         Healthy.__init__(self, scene, meter_size=self.HEALTHBAR_SIZE)
+
+    def kill(self):
+        self.health_bar.kill()
+        return super().kill()

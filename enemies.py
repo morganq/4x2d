@@ -89,8 +89,8 @@ class EnemyController:
             ]
             planet = random.choice(near_planets)
             bsp = planet.pos + V2.from_angle(random.random() * 6.2818) * 40
-            ww = WarpWarning(planet, self.scene, bsp)
-            self.scene.game_group.add(ww)
+            #ww = WarpWarning(planet, self.scene, bsp)
+            #self.scene.game_group.add(ww)
 
     def render(self, screen):
         for i,status in enumerate(self._status):

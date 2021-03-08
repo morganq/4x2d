@@ -1,6 +1,7 @@
 from colors import *
 from particle import Particle
-from .ship import Ship, THRUST_PARTICLE_RATE
+from planet import planet
+from .ship import STATE_WAITING, Ship, THRUST_PARTICLE_RATE
 import random
 from v2 import V2
 from text import Text
@@ -11,7 +12,6 @@ class Colonist(Ship):
         Ship.__init__(self, scene, pos, owning_civ)
         self.set_sprite_sheet("assets/colonist.png", 12)
         self.collision_radius = 4
-        self.orbits = True
         self.population = 0
     
     def set_pop(self, pop):
@@ -20,7 +20,11 @@ class Colonist(Ship):
         self.scene.ui_group.add(self.num_label)
 
     def can_land(self, other):
-        return other == self.target and (other.owning_civ == None or other.owning_civ == self.owning_civ or other.health < other.get_max_health() / 4)
+        return (
+            other == self.effective_target and
+            isinstance(other, planet. Planet) and
+            (other.owning_civ == None or other.owning_civ == self.owning_civ or other.health < other.get_max_health() / 4)
+        )
 
     def collide(self, other):
         if self.can_land(other):
@@ -31,13 +35,8 @@ class Colonist(Ship):
             other.needs_panel_update = True
 
     def update(self, dt):
-        if self.can_land(self.target):
-            self.orbits = False
-        else:
-            self.orbits = True
-        self.default_update(dt)
+        super().update(dt)
         self.num_label.pos = self.pos + V2(7, -7)
-        return super().update(dt)
 
     def kill(self):
         self.num_label.kill()

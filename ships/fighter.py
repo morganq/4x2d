@@ -15,140 +15,114 @@ THREAT_RANGE_DEFENSE = 60
 
 BAD_TARGET_FIND_NEW_TIME = 10.0
 
+STATE_DOGFIGHT = 'dogfight'
+
 class Fighter(Ship):
-    HEALTHBAR_SIZE = (12,2)
+    HEALTHBAR_SIZE = (10,2)
+    SHIP_NAME = "fighter"
+
     def __init__(self, scene, pos, owning_civ):
         Ship.__init__(self, scene, pos, owning_civ)
         self.set_sprite_sheet("assets/fighter.png", 12)
-        self.collision_radius = 4
-        self.state = "traveling"
-        self.name = "fighter"
+        self.states[STATE_DOGFIGHT] = {
+            'update':self.state_dogfight,
+            'enter':self.enter_state_dogfight,
+            'exit':self.exit_state_dogfight
+        }
+        self._timers['gun'] = 0
+        self._timers['dogfight'] = 0
 
-        self.fire_time = 0
-        self.force_travel_time = 0
-
-        self.bad_target_timer = 0
-        self.bad_target = False
-
-        self.current_dogfight_target = None
-
-    def assault(self, target, dt):
-        self.fire_time += dt
-        fleet_target_vector = self.get_fleet_target_vector()
-        if fleet_target_vector.sqr_magnitude() > 2 ** 2:
-            self.state = "traveling"
-            self.force_travel_time = 1.0
-
-        towards = (target.pos - self.pos).normalized()
-        cross = self.turn_towards(towards, dt)
-        rate = FIRE_RATE / (1 + self.owning_civ.get_stat('fire_rate'))
-        if abs(cross) < 0.1 and self.fire_time >= rate:
-            self.fire_time = 0
-            b = Bullet(self.pos, target, self, {})
-            self.scene.game_group.add(b)
-
-            self.velocity += -towards * 2
-            self.pos += -towards * 2
-            self.thrust_particle_time = THRUST_PARTICLE_RATE
-
-            for i in range(10):
-                pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
-                p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-                self.scene.game_group.add(p)
-
-    def is_assault_target(self, t):
-        return t.owning_civ != None and t.owning_civ != self.owning_civ and t.health > 0
-
-    def is_good_target(self, t):
-        return self.is_assault_target(t) or t.owning_civ == self.owning_civ
+    def wants_to_land(self):
+        return self.state != STATE_DOGFIGHT
 
     def get_threats(self):
         enemies = self.scene.get_enemy_ships(self.owning_civ)
         threat_range = THREAT_RANGE_DEFAULT
-        if self.target.owning_civ == self.owning_civ:
+        if self.chosen_target.owning_civ == self.owning_civ:
             threat_range = THREAT_RANGE_DEFENSE
-        return [e for e in enemies if (e.pos - self.pos).sqr_magnitude() < threat_range ** 2]
+        return [e for e in enemies if (e.pos - self.pos).sqr_magnitude() < threat_range ** 2]        
 
-    def dogfight(self, threats, dt):
-        if self.current_dogfight_target == None or self.current_dogfight_target.health <= 0:
-            self.current_dogfight_target = random.choice(threats)
-        dist = (self.current_dogfight_target.pos - self.pos).sqr_magnitude()
-        if dist < RANGE ** 2:
-            self.assault(self.current_dogfight_target, dt)
-        else:
-            towards = (self.current_dogfight_target.pos - self.pos).normalized()
-            target_vector = towards
-            target_vector += self.get_fleet_target_vector()            
-            target_vector = target_vector.normalized()
-            self.turn_towards(target_vector, dt)
-            self.speed_t += dt
-            speed = math.sin(self.speed_t) * 2 + self.base_speed
-            self.velocity = V2.from_angle(self._angle) * speed
-
-            self.thrust_particle_time += dt
-            if self.thrust_particle_time > THRUST_PARTICLE_RATE:
-                pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
-                pvel += -self.velocity / 2
-                p = Particle("assets/thrustparticle.png",1,self.pos,1,pvel)
-                self.scene.game_group.add(p)
-                self.thrust_particle_time -= THRUST_PARTICLE_RATE            
-
-    def collide(self, other):
-        if not self.get_threats() and self.can_land(other):
-            self.kill()
-            other.add_ship(self.name)
-
-    def update(self, dt):
-        delta = (self.target.pos - self.pos)
-        in_range = delta.sqr_magnitude() < (RANGE + self.target.collision_radius) ** 2
+    def find_target(self):
         threats = self.get_threats()
         if threats:
-            if self.state == "traveling":
-                self.velocity = self.velocity * 0.5            
-            self.state = "dogfighting"
-
-        elif self.is_assault_target(self.target) and in_range:
-            if self.state == "traveling":
-                self.velocity = self.velocity * 0.5
-            self.state = "firing"
+            self.effective_target = random.choice(threats)        
         else:
-            self.state = "traveling"
+            self.effective_target = None
 
-        self.force_travel_time -= dt
+    def fire(self, at):
+        towards = (at.pos - self.pos).normalized()
+        b = Bullet(self.pos, at, self, {})
+        self.scene.game_group.add(b)
 
-        if self.state == "traveling" or self.force_travel_time > 0:
-            if self.can_land(self.target):
-                self.orbits = False
-            else:
-                self.orbits = True
-            self.travel_to_target(dt)
+        #self.velocity += -towards * 2
+        self.pos += -towards * 2
+        self.thrust_particle_time = THRUST_PARTICLE_RATE
 
-        elif self.state == "firing":
-            self.assault(self.target, dt)
-            self.pos += (self.velocity + self.push_velocity) * dt
+        for i in range(10):
+            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
+            p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
+            self.scene.game_group.add(p)        
 
-        elif self.state == "dogfighting":
-            self.dogfight(threats, dt)
-            self.pos += (self.velocity + self.push_velocity) * dt
+    ### Dogfighting ###
 
-        nearby = delta.sqr_magnitude() < (NEARBY_RANGE + self.target.collision_radius) ** 2
+    def enter_state_dogfight(self):
+        self.post_dogfight_state = self.state
+        self.post_dogfight_target = self.effective_target
+        self.dogfight_initial_pos = self.pos.copy()
+        self.find_target()
+        self._timers['gun'] = 0
 
-        if (not self.is_good_target(self.target)) and nearby:
-            self.bad_target_timer += dt
-            if self.bad_target_timer > BAD_TARGET_FIND_NEW_TIME:
-                self.bad_target = True
+    def state_dogfight(self, dt):
+        # If our target is dead or w/e, find a new one
+        if not self.effective_target or self.effective_target.health <= 0:
+            self.find_target()
+
+        if not self.effective_target: # Still no target? Go back to whatever we were doing.
+            self.set_state(self.post_dogfight_state)
+            return
+
+        # Swoop towards and away
+        rate = 1 / 3
+        gt = self._timers['dogfight'] * rate
+        t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
+        if self._timers['gun'] >= 1 / rate:
+            self._timers['gun'] = self._timers['gun'] % (1 / rate)
+            self.fire(self.effective_target)
+        t2 = math.cos(gt * 3.14159)
+        
+        vtowards = (self.effective_target.pos - self.pos).normalized()
+        vside = (V2(vtowards.y, -vtowards.x) * t2).normalized()
+
+        if t > 0.5:
+            dir = vtowards
+            self.target_heading = vtowards.to_polar()[1]
         else:
-            self.bad_target_timer = 0
+            dir = vside
+        #dir = vtowards * t + vside * (1-t)
+        # Hacky stufffff
+        if (self.effective_target.pos - self.pos).sqr_magnitude() < 10 ** 2:
+            dir = -vtowards
 
-        if self.bad_target:
-            dist = 9999999
-            for p in self.scene.get_civ_planets(self.owning_civ):
-                delta = (p.pos - self.pos).sqr_magnitude()
-                if delta < dist:
-                    dist = delta
-                    self.target = p
-            
+        # dist to starting spot
+        delta = self.dogfight_initial_pos - self.pos
+        if delta.sqr_magnitude() > 30 ** 2:
+            dir = delta.normalized()
 
-        self._update_image()       
+        self.target_velocity = dir * self.get_max_speed()
 
-        return super().update(dt)
+    def exit_state_dogfight(self):
+        self.effective_target = self.post_dogfight_target
+
+    def state_cruising(self, dt):
+        threats = self.get_threats()
+        if threats:
+            self.set_state(STATE_DOGFIGHT)
+            return
+        return super().state_cruising(dt)
+
+    def state_waiting(self, dt):
+        threats = self.get_threats()
+        if threats:
+            self.set_state(STATE_DOGFIGHT)
+            return
+        return super().state_waiting(dt)

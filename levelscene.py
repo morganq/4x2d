@@ -71,7 +71,6 @@ class LevelScene(scene.Scene):
         self.game_group.add(p)
         num_planets = 2
 
-
         # TODO: Planet resources more constrained
         while num_planets < 15:
             pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))

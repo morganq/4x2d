@@ -4,7 +4,7 @@ from spritebase import SpriteBase
 import pygame
 import math
 
-VEL = 30
+VEL = 80
 DEATH_TIME = 5
 
 class Bullet(SpriteBase):

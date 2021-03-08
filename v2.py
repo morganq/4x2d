@@ -75,6 +75,8 @@ class V2:
         return self.x ** 2 + self.y ** 2
 
     def normalized(self):
+        if self.x == 0 and self.y == 0:
+            return V2(0,0)        
         d = self.magnitude()
         return V2(self.x / d, self.y / d)
 
@@ -83,6 +85,15 @@ class V2:
 
     def tuple_int(self):
         return (int(self.x), int(self.y))
+
+    def max(self, max_mag):
+        if self.sqr_magnitude() > max_mag ** 2:
+            return self.normalized() * max_mag
+        else:
+            return self
+
+    def copy(self):
+        return V2(self.x, self.y)
 
     @staticmethod
     def from_angle(angle):
