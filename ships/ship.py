@@ -8,6 +8,7 @@ import particle
 import bullet
 import helper
 
+ROTATE_SPEED = 6.2818
 FLEET_RADIUS = 25
 FLEET_POWER = 1.5
 FLEET_SEPARATION_POWER = 2
@@ -60,6 +61,7 @@ class Ship(SpaceObject):
 
         # Other stuff
         self._timers["movement_variation"] = random.random() * 6.2818
+        self._timers['thrust_particle_time'] = 0
 
         self.set_health(self.get_max_health())
 
@@ -126,7 +128,21 @@ class Ship(SpaceObject):
                 _, self.angle = self.velocity.to_polar()
 
         else:
-            self.angle = self.target_heading # TODO: lerp
+            angle_delta = helper.get_angle_delta(self.angle, self.target_heading)
+            if abs(angle_delta) < ROTATE_SPEED * dt:
+                self.angle = self.target_heading
+            elif angle_delta < 0:
+                self.angle -= ROTATE_SPEED * dt
+            else:
+                self.angle += ROTATE_SPEED * dt
+
+        if self.velocity.sqr_magnitude() > 0:
+            if self._timers['thrust_particle_time'] > THRUST_PARTICLE_RATE:
+                pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
+                pvel += -self.velocity / 2
+                p = particle.Particle("assets/thrustparticle.png",1,self.pos + -self.velocity.normalized() * self.radius,1,pvel)
+                self.scene.game_group.add(p)
+                self._timers['thrust_particle_time'] = 0
 
         self.pos += self.velocity * dt
         self.health_bar.pos = self.pos + V2(0, -6)

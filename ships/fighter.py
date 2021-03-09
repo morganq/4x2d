@@ -82,7 +82,7 @@ class Fighter(Ship):
             return
 
         # Swoop towards and away
-        rate = 1 / 3
+        rate = 1 / 5
         gt = self._timers['dogfight'] * rate
         t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
         if self._timers['gun'] >= 1 / rate:

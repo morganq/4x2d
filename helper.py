@@ -13,3 +13,12 @@ def get_nearest(pos, others):
             dist = delta
             res = other
     return res, dist
+
+PI = 3.14159
+PI2 = 6.2818
+def get_angle_delta(a, b):
+    a = (a + PI2) % PI2
+    b = (b + PI2) % PI2
+    result = b - a
+    result = (result + PI) % PI2 - PI
+    return result
