@@ -1,0 +1,31 @@
+# Buildings
+ - Base resource rate: 1: Medium % inc, 2: Big bonus but cut colonists, 2: Big bonus but can’t build fighters, 3: Every building gives small +% inc.
+ - Colonists: 1: Medium % inc, 2: Flat inc, 2: +1, Each colonist fires a rocket for defense, 3: Medium % inc, cut health
+ - Health: 1: +big flat health, 2: Fast health regen, 2: +health for nearby allied ships, 3: Thorns
+ - Dangerous: 1: has a weapon to shoot ships, 2: increase weapon range and allow to shoot planets, 2: if planet is lost, your buildings go underground and can be restored when you retake. 3: ?
+ - Hangar: 1: Planet makes +25% fighters when producing them, 2a: Unlock bombers. Planet makes +50% bombers, 2b: Unlock interceptors. Planet makes +25% interceptors, 3a: Unlock Destoyers. Planet makes destroyers 50% faster, 3b: Planet fighter production is increased by 50%
+
+ - shield defense, weapon defense, buildings for making specific ships, improve overall ship production here, increase ally move speed in radius, buff ally in radius, higher max population (but not size)
+
+# Ship Prod
+ - 8 fighters over 1 minute
+ - 6 fighters now
+ - 50 fighters over 5 minutes
+ - 5 colonists now
+ - 3 colonists and 2 fighters now
+ - 10 colonists over 2 minutes
+ - 6 bombers over 3 minutes
+ - 2 bombers and 10 fighters over 2 minutes
+ - 3 bombers in 2 minutes
+ - 2 interceptors now
+ - 5 interceptors over 2 minutes
+ - 3 fighters + 1 ship of every hanger type you have on the planet
+ - Ship based on the main resource type
+
+# Tech
+ - Health: 1: all ships +5hp. 2: fighters +5 hp. 2: ships regenerate health. 3: when ships die they heal a random nearby allied ship
+ - Damage A: 1: ships +25% damage. 2: "dart" mechanic. 2: enemies at full health take +50% damage. 3: ships +2 damage
+ - Damage B: 1:2:bullets targeting planets have a chance of destroying a building. 2:3:
+ - Speed: 1: ship speed faster when far from planets. 2: warp tech. 2: damage increased by move speed. 3: strafe / evade
+ - ROF 1: +15% rate of fire. 2: +25% rate of fire when alone. 2:  3: 
+ - Pop: 1: 2: -1 max pop, +15% mining rate. 2: pop grows at 0. 3: 
