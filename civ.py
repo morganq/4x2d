@@ -10,6 +10,7 @@ class Civ:
         self.upgrade_limits = economy.Resources(50,50,50)
         self.upgrades_stocked = []
         self.upgrades = []
+        self.researched_upgrade_names = set()
 
     def get_stat(self, stat):
         return sum([u.stats[stat] for u in self.upgrades])

@@ -255,7 +255,7 @@ class UpgradeState(UIEnabledState):
 
     def enter(self):
         self.scene.paused = True
-        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.upgrades_stocked[0], self.on_select)
+        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ, self.scene.my_civ.upgrades_stocked[0], self.on_select)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.hover_filter = self.filter_only_panel_ui
@@ -271,6 +271,7 @@ class UpgradeState(UIEnabledState):
         if not cancel:
             self.scene.ui_group.add(FunNotification(self.pending_upgrade.title, target))
             self.scene.my_civ.upgrades_stocked.pop(0)
+            self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
         if self.panel:
             self.panel.kill()
         self.scene.sm.transition(PlayState(self.scene))

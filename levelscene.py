@@ -159,7 +159,7 @@ class LevelScene(scene.Scene):
         self.my_civ.resources.set_resource("iron", 30)
 
         if self.options == "iron":
-            self.my_civ.resources.set_resource("iron", 150)
+            self.my_civ.resources.set_resource("iron", 350)
 
         if self.options == "ice":
             self.my_civ.resources.set_resource("ice", 150)

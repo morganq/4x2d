@@ -4,6 +4,7 @@ import pygame
 from bullet import Bullet
 import random
 from stats import Stats
+import json
 
 BUILDINGS = {
 
@@ -17,6 +18,12 @@ class Building:
     def __init__(self):
         self.shapes = []
         self.stats = Stats()
+
+    def load_shapes(self, name):
+        data = json.load(open("assets/buildings/%s.json" % name))
+        self.shapes = [
+            ([V2(*pt) for pt in shape[0]], shape[1]) for shape in data
+        ]
 
     def update(self, planet, dt):
         pass
@@ -57,6 +64,7 @@ class MiningRateBuilding(Building):
             ([V2(-1,-3), V2(6,-3), V2(6,0), V2(3,0), V2(3,3), V2(-1,3)], PICO_GREYPURPLE),
             ([V2(-1,-3), V2(0,-3), V2(0,3), V2(-1,3)], PICO_LIGHTGRAY)
         ]
+        self.load_shapes("test")
         self.stats = Stats(top_mining_rate = 0.15)
 
 @building
@@ -68,6 +76,7 @@ class RegenBuilding(Building):
             ([V2(-1,-4), V2(2,-2), V2(5,0), V2(2,2), V2(-1,4)], PICO_BLUE),
             ([V2(-1,-4), V2(0,-4), V2(0,4), V2(-1,4)], PICO_LIGHTGRAY)
         ]        
+        
         
     def update(self, planet, dt):
         planet.health += 1 * dt

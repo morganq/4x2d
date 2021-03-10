@@ -1,11 +1,12 @@
 from productionorder import ProductionOrder
 from colors import *
 from stats import Stats
+from collections import defaultdict
 
 UPGRADES = {
-    'iron':{},
-    'ice':{},
-    'gas':{}
+    'iron':defaultdict(list),
+    'ice':defaultdict(list),
+    'gas':defaultdict(list)
 }
 
 UPGRADE_CATEGORY_COLORS = {
@@ -21,6 +22,8 @@ class Upgrade:
     cursor = None
     icon = None
     stats = Stats()
+    requires = ()
+    infinite = False
     def apply(self, to):
         pass
 
@@ -29,11 +32,11 @@ UPGRADE_CLASSES = {}
 
 def upgrade(cls):
     UPGRADE_CLASSES[cls.name] = cls
-    UPGRADES[cls.resource_type][cls.category] = [cls.name]
+    UPGRADES[cls.resource_type][cls.category].append(cls.name)
     return cls
 
 
-class AddBuildingUpgrade:
+class AddBuildingUpgrade(Upgrade):
     building = None
     def apply(self, to):
         to.add_building(self.building)
@@ -48,6 +51,31 @@ class EconUpgrade(AddBuildingUpgrade):
     icon = "mining"
     cursor = "allied_planet"
     building = "mining_rate"
+
+@upgrade
+class Econ2Upgrade(AddBuildingUpgrade):
+    name = "econ2"
+    resource_type = "iron"
+    category = "buildings"
+    title = "Refinery 2"
+    description = "+25% Mining Rate for Primary Resource"
+    icon = "mining"
+    cursor = "allied_planet"
+    building = "mining_rate"
+    requires = ("econ",)
+
+@upgrade
+class Econ3Upgrade(AddBuildingUpgrade):
+    name = "econ3"
+    resource_type = "iron"
+    category = "buildings"
+    title = "Refinery 3"
+    description = "+35% Mining Rate for Primary Resource"
+    icon = "mining"
+    cursor = "allied_planet"
+    building = "mining_rate"
+    requires = ("econ","econ2")
+    infinite = True
 
 @upgrade
 class RegenUpgrade(AddBuildingUpgrade):

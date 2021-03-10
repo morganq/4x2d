@@ -7,6 +7,7 @@ import states
 import levelscene
 import worldmapscene
 import introscene
+import buildingcreatorscene
 from resources import resource_path
 import sys
 import menuscene
@@ -32,7 +33,10 @@ class Game:
         #sound.init()
         self.screen = pygame.Surface(RES)
         if len(sys.argv) > 1 and DEV:
-            self.scene = levelscene.LevelScene(self, sys.argv[1])
+            if sys.argv[1] == "draw":
+                self.scene = buildingcreatorscene.BuildingCreatorScene(self)
+            else:
+                self.scene = levelscene.LevelScene(self, sys.argv[1])
         else:
             self.scene = introscene.IntroScene(self)
         self.playing_level_index = None

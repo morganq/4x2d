@@ -11,7 +11,7 @@ from upgrade import upgrades
 from v2 import V2
 
 class UpgradePanel(Panel):
-    def __init__(self, pos, resource, on_select):
+    def __init__(self, pos, civ, resource, on_select):
         Panel.__init__(self, pos, None)
         self.resource = resource
         self.padding = 15
@@ -27,9 +27,16 @@ class UpgradePanel(Panel):
             self.add(b, V2(0,y + 12))
 
         cts = {'buildings':'Base Construction', 'ships':'Ship Production', 'tech':'Technology'}
+        def can_research(uname):
+            u = upgrades.UPGRADE_CLASSES[uname]
+            if u.name in civ.researched_upgrade_names and not u.infinite: return False
+            if not u.requires: return True
+            return all([ru in civ.researched_upgrade_names for ru in u.requires])
+
         for category,ups in upgrades.UPGRADES[self.resource].items():
             self.add(Text(cts[category], "small", V2(0,0), upgrades.UPGRADE_CATEGORY_COLORS[category], multiline_width=150), V2(10,y))
-            uname = random.choice(ups)
+            allowed_ups = [u for u in ups if can_research(u)]
+            uname = random.choice(allowed_ups)
             add_button(uname)
             y += 60
 
