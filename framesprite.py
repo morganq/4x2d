@@ -26,7 +26,10 @@ class FrameSprite(SimpleSprite):
         self._width = self._frame_width
         self._recalc_rect()
         self._num_frames = self._sheet_width // self._frame_width
-        self._frame = self._frame % self._num_frames
+        try:
+            self._frame = self._frame % self._num_frames
+        except:
+            print(self._sheet_width, self._frame_width)
         self._update_image()
 
     def _update_image(self):

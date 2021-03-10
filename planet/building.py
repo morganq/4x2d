@@ -64,7 +64,7 @@ class MiningRateBuilding(Building):
             ([V2(-1,-3), V2(6,-3), V2(6,0), V2(3,0), V2(3,3), V2(-1,3)], PICO_GREYPURPLE),
             ([V2(-1,-3), V2(0,-3), V2(0,3), V2(-1,3)], PICO_LIGHTGRAY)
         ]
-        self.load_shapes("test")
+        #self.load_shapes("test")
         self.stats = Stats(top_mining_rate = 0.15)
 
 @building

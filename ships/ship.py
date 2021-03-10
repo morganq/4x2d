@@ -1,4 +1,4 @@
-from colors import PICO_DARKGRAY, PICO_PINK, PICO_WHITE
+from colors import DARKEN_COLOR, PICO_BLACK, PICO_DARKGRAY, PICO_LIGHTGRAY, PICO_PINK, PICO_WHITE
 from v2 import V2
 from spaceobject import SpaceObject
 from planet import planet
@@ -213,3 +213,21 @@ class Ship(SpaceObject):
         if isinstance(self.effective_target, planet.Planet):
             if self.can_land(self.effective_target):
                 self.set_state(STATE_CRUISING)
+
+    def kill(self):
+        if self.health <= 0:
+            base_angle = random.random() * 6.2818
+            for x in range(self._width):
+                for y in range(self._height):
+                    color = tuple(self.image.get_at((x,y)))
+                    if color[3] >= 128:
+                        _,a = (V2(x,y) - V2(5.5,5.5)).to_polar()
+                        if abs(helper.get_angle_delta(a, base_angle)) > 3.14159/2:
+                            a = base_angle + 3.14159
+                        else:
+                            a = base_angle
+                        pvel = V2.from_angle(a) * 6
+                        p = particle.Particle([color, DARKEN_COLOR.get(color[0:3],PICO_BLACK), PICO_DARKGRAY],1,self.pos + V2(x - 6,y - 6),1.25,pvel)
+                        self.scene.game_group.add(p)                    
+
+        return super().kill()

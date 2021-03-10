@@ -90,4 +90,12 @@ def generate_planet_art(radius, white_pct, blue_pct, red_pct):
         temp_image = palettize(img, minb, maxb, (0,0,0,0), PICO_PINK)
         out_image.blit(temp_image, (0,0))        
 
+    for x in range(radius * 2):
+        for y in range(radius * 2):
+            d = (V2(x,y) - V2(radius * 0.84, radius * 0.54)).sqr_magnitude()
+            if d > (radius * 1.0) ** 2:
+                c = out_image.get_at((x,y))
+                if c[3] > 128:
+                    out_image.set_at((x,y), DARKEN_COLOR[c[0:3]])
+
     return out_image
