@@ -194,12 +194,6 @@ class Ship(SpaceObject):
             delta = self.effective_target.pos - self.pos
             self.target_velocity = delta.normalized() * self.get_cruise_speed() * 0.8
 
-        delta = self.effective_target.pos - self.pos
-        if isinstance(self.effective_target, planet.Planet):
-            if (delta.magnitude() - self.effective_target.radius - ATMO_DISTANCE) <= 0:
-                if not self.can_land(self.effective_target):
-                    self.set_state(STATE_WAITING)    
-
     def state_returning(self, dt):
         pass
 

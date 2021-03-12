@@ -2,6 +2,7 @@ from productionorder import ProductionOrder
 from colors import *
 from stats import Stats
 from collections import defaultdict
+from planet.building import make_simple_stats_building
 
 UPGRADES = {
     'iron':defaultdict(list),
@@ -24,15 +25,18 @@ class Upgrade:
     stats = Stats()
     requires = ()
     infinite = False
+    family = None
     def apply(self, to):
         pass
 
 
 UPGRADE_CLASSES = {}
+ALL_UPGRADE_CLASSES = []
 
 def upgrade(cls):
     UPGRADE_CLASSES[cls.name] = cls
     UPGRADES[cls.resource_type][cls.category].append(cls.name)
+    ALL_UPGRADE_CLASSES.append(cls)
     return cls
 
 
@@ -43,50 +47,106 @@ class AddBuildingUpgrade(Upgrade):
 
 @upgrade
 class EconUpgrade(AddBuildingUpgrade):
-    name = "econ"
+    name = "econ1"
     resource_type = "iron"
     category = "buildings"
     title = "Refinery"
-    description = "+15% Mining Rate for Primary Resource"
+    description = "[^+15%] [Mining Rate] for [Primary Resource]"
     icon = "mining"
     cursor = "allied_planet"
-    building = "mining_rate"
+    family = {'tree':'econ', 'parents':[]}
+    building = make_simple_stats_building("econ1", stats=Stats(top_mining_rate=0.15), shape="test")
 
 @upgrade
-class Econ2Upgrade(AddBuildingUpgrade):
-    name = "econ2"
+class Econ2AUpgrade(AddBuildingUpgrade):
+    name = "econ2a"
     resource_type = "iron"
     category = "buildings"
-    title = "Refinery 2"
-    description = "+25% Mining Rate for Primary Resource"
+    title = "Nuclear Reactor"
+    description = "[^+35%] [Mining Rate] for [Primary Resource], [!-2] [Population]"
     icon = "mining"
     cursor = "allied_planet"
-    building = "mining_rate"
-    requires = ("econ",)
+    building = make_simple_stats_building("econ2a", stats=Stats(top_mining_rate=0.35, pop_max_add=-2), shape="test")
+    requires = ("econ1",)
+    family = {'tree':'econ', 'parents':['econ1']}
+
+@upgrade
+class Econ2BUpgrade(AddBuildingUpgrade):
+    name = "econ2b"
+    resource_type = "iron"
+    category = "buildings"
+    title = "Military Surplus"
+    description = "[^+25%] [Mining Rate] for [Primary Resource], [!-50%] [Fighter Production]"
+    icon = "mining"
+    cursor = "allied_planet"
+    building = make_simple_stats_building("econ2b", stats=Stats(top_mining_rate=0.25, fighter_production_halving=1), shape="test")
+    requires = ("econ1",)    
+    family = {'tree':'econ', 'parents':['econ1']}
 
 @upgrade
 class Econ3Upgrade(AddBuildingUpgrade):
     name = "econ3"
     resource_type = "iron"
     category = "buildings"
-    title = "Refinery 3"
-    description = "+35% Mining Rate for Primary Resource"
+    title = "IO Matrix"
+    description = "[^+5%] [Mining Rate] for [Primary Resource] per Building"
     icon = "mining"
     cursor = "allied_planet"
-    building = "mining_rate"
-    requires = ("econ","econ2")
+    building = make_simple_stats_building("econ3", stats=Stats(top_mining_per_building=0.05), shape="test")
+    requires = lambda x:"econ1" in x and ("econ2a" in x or "econ2b" in x)
     infinite = True
+    family = {'tree':'econ', 'parents':['econ2a','econ2b']}
 
 @upgrade
-class RegenUpgrade(AddBuildingUpgrade):
-    name = "regen"
-    resource_type = "ice"
+class Health1Upgrade(AddBuildingUpgrade):
+    name = "health1"
+    resource_type = "iron"
+    category = "buildings"
+    title = "Low Orbit Defenses"
+    description = "Planet has [^+50%] [Health]"
+    icon="planetregen"
+    cursor = "allied_planet"
+    building = make_simple_stats_building("health1", stats=Stats(planet_health_mul=0.5), shape="test")
+    family = {'tree':'planethealth', 'parents':[]}
+
+@upgrade
+class Health2AUpgrade(AddBuildingUpgrade):
+    name = "health2a"
+    resource_type = "iron"
     category = "buildings"
     title = "Repair Bay"
-    description = "Planet regenerates +1 health per second"
+    description = "Planet Regenerates [^+1] [Health/Sec]"
     icon="planetregen"
     cursor = "allied_planet"
     building = "regen"
+    requires = ("health1",)
+    family = {'tree':'planethealth', 'parents':['health1']}
+
+@upgrade
+class Health2BUpgrade(AddBuildingUpgrade):
+    name = "health2b"
+    resource_type = "iron"
+    category = "buildings"
+    title = "High Orbit Defenses"
+    description = "Grants [^+10] [Health] to Nearby Ships"
+    icon="planetregen"
+    cursor = "allied_planet"
+    building = make_simple_stats_building("health2b", stats=Stats(planet_health_aura=10), shape="test")
+    requires = ("health1",)  
+    family = {'tree':'planethealth', 'parents':['health1']}
+
+@upgrade
+class Health3Upgrade(AddBuildingUpgrade):
+    name = "health3"
+    resource_type = "iron"
+    category = "buildings"
+    title = "Auto Artillery"
+    description = "When Hit, Planet Fires Back"
+    icon="planetregen"
+    cursor = "allied_planet"
+    building = make_simple_stats_building("health3", stats=Stats(planet_thorns=1), shape="test")
+    requires = lambda x:'health1' in x and ('health2a' in x or 'health2b' in x)
+    family = {'tree':'planethealth', 'parents':['health2a','health2b']}
 
 @upgrade
 class ArmoryUpgrade(AddBuildingUpgrade):
@@ -105,13 +165,14 @@ class FightersUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Standard Order"
-    description = "6 Fighters Over 40 seconds"
+    description = "[^6] [Fighters] Over [40 seconds]"
     icon = "fighters6"
     cursor = "allied_planet"
+    infinte = True
 
     def apply(self, to):
         p = ProductionOrder("fighter", 6, 40)
-        to.production.append(p)
+        to.add_production(p)
 
 @upgrade
 class FightersLongUpgrade(Upgrade):
@@ -119,13 +180,13 @@ class FightersLongUpgrade(Upgrade):
     resource_type = "ice"
     category = "ships"
     title = "Extended Contract"
-    description = "30 Fighters Over 3 minutes"
+    description = "[^30] [Fighters] Over [3 minutes]"
     icon = "fighters30"
     cursor = "allied_planet"
 
     def apply(self, to):
         p = ProductionOrder("fighter", 30, 180)
-        to.production.append(p)        
+        to.add_production(p)
 
 @upgrade
 class FightersNowUpgrade(Upgrade):
@@ -133,13 +194,13 @@ class FightersNowUpgrade(Upgrade):
     resource_type = "gas"
     category = "ships"
     title = "Emergency Supplies"
-    description = "3 Fighters and +3 population instantly"
+    description = "[^3] [Fighters] and [^+3] [population] instantly"
     icon = "fighters3pop"
     cursor = "allied_planet"
 
     def apply(self, to):
         p = ProductionOrder("fighter", 3, 0.25)
-        to.production.append(p)
+        to.add_production(p)
         to.population += 3
 
 @upgrade
@@ -148,7 +209,7 @@ class RateOfFireUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Rapid Fire"
-    description = "+15% Rate of Fire"
+    description = "[^+15%] [Rate of Fire]"
     icon = "rateoffire"
     stats = Stats(fire_rate = 0.15)
 
@@ -158,7 +219,7 @@ class ArmorUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Fragment Plating"
-    description = "+25% Health for All Ships"
+    description = "[^+25%] [Health] for [All Ships]"
     icon="armor"
     stats = Stats(ship_health = 0.15)
 
@@ -168,6 +229,6 @@ class WarpUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Warp Drive"
-    description = "+15 Warp Drive Distance"
+    description = "[^+15] [Warp Drive Distance]"
     icon = "warp"
     stats = Stats(warp_drive=50)

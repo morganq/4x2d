@@ -36,8 +36,6 @@ EMIT_CLASSES = {
 RESOURCE_BASE_RATE = 1/220.0
 
 POPULATION_GROWTH_TIME = 15
-POP_MAX_MUL = 1.0
-POP_MAX_ADD = 0
 HP_PER_BUILDING = 5
 DEFENSE_RANGE = 30
 DESTROY_EXCESS_SHIPS_TIME = 7
@@ -154,10 +152,12 @@ class Planet(SpaceObject):
         return self.size + 8
 
     def get_max_health(self):
-        return self.size * 10 + len(self.buildings) * HP_PER_BUILDING
+        base = self.size * 20 + len(self.buildings) * HP_PER_BUILDING
+        max_hp = round(base * (1 + self.get_stat("planet_health_mul")))
+        return max_hp
 
     def get_max_pop(self):
-        return self.size * POP_MAX_MUL + POP_MAX_ADD
+        return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add")
 
     def update(self, dt):
         # Emit ships which are queued
@@ -194,6 +194,7 @@ class Planet(SpaceObject):
             # Top resource mining rate
             if top_resource == r:
                 rate_modifier = self.get_stat("top_mining_rate") + 1
+                rate_modifier *= 1 + self.get_stat("top_mining_per_building") * len(self.buildings)
 
             # Resources mined is based on num workers
             workers = min(self.population, self.size)
@@ -314,3 +315,9 @@ class Planet(SpaceObject):
         self.needs_panel_update = True # Maybe not but w/e
         mh_after = self.get_max_health()
         self._health += mh_after - mh_before 
+
+    def add_production(self, order):
+        if order.ship_type == "fighter":
+            order.number = round(order.number * 1 + self.get_stat("fighter_production"))
+            order.number = round(order.number / (2 ** self.get_stat("fighter_production_halving")))
+        self.production.append(order)

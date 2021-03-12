@@ -5,6 +5,14 @@ VALID_STAT_NAMES = [
     'ship_health',
     'warp_drive',
     'top_mining_rate',
+    'top_mining_per_building',
+    'pop_max_mul',
+    'pop_max_add',
+    'fighter_production',
+    'fighter_production_halving',
+    'planet_health_mul',
+    'planet_health_aura',
+    'planet_thorns'
 ]
 
 class Stats:

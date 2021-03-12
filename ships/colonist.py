@@ -1,7 +1,7 @@
 from colors import *
 from particle import Particle
 from planet import planet
-from .ship import STATE_WAITING, Ship, THRUST_PARTICLE_RATE
+from .ship import STATE_WAITING, Ship, THRUST_PARTICLE_RATE, ATMO_DISTANCE
 import random
 from v2 import V2
 from text import Text
@@ -41,3 +41,12 @@ class Colonist(Ship):
     def kill(self):
         self.num_label.kill()
         return super().kill()
+
+    def state_cruising(self, dt):
+        delta = self.effective_target.pos - self.pos
+        if isinstance(self.effective_target, planet.Planet):
+            if (delta.magnitude() - self.effective_target.radius - ATMO_DISTANCE) <= 0:
+                if not self.can_land(self.effective_target):
+                    self.set_state(STATE_WAITING)
+                    return        
+        return super().state_cruising(dt)

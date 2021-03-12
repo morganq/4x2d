@@ -23,6 +23,7 @@ RES = (500,360)
 OBJ = {
 }
 class Game:
+    inst = None
     def __init__(self, save):
         #pygame.display.set_icon(pygame.image.load(resource_path("assets/icon_2_256.png")))
         pygame.mixer.pre_init(buffer=256)
@@ -42,6 +43,7 @@ class Game:
         self.playing_level_index = None
 
         self.frame_time = 0
+        Game.inst = self
 
     def run(self):
         clock = pygame.time.Clock()

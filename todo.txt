@@ -12,3 +12,6 @@ This will allow creation of asteroids and shit
 
 Make it possible to order ships. Maybe on a timer so you can't micro.
 
+=====
+
+Fix hover / mouse input in a holistic way

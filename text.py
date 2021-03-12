@@ -3,6 +3,7 @@ import pygame
 import pygame.freetype
 from resources import resource_path
 import spritebase
+import re
 
 pygame.freetype.init()
 
@@ -54,6 +55,29 @@ class Text(spritebase.SpriteBase):
         self._height = h
         self._recalc_rect()
 
+def render_multiline_to(surface, pos, text, size, color, wrap_width=None, center=True):
+    s = render_multiline(text, size, color, wrap_width, center)
+    surface.blit(s, pos)
+
+parens_re = re.compile("\((.+?)\).*")
+TEXT_COLORS = {'!':PICO_RED,'^':PICO_GREEN}
+def get_groups(line, inside_group=None):
+    groups = [(inside_group, "")]
+    x = 0
+    while x < len(line):
+        if line[x] == "[":
+            if line[x+1] in TEXT_COLORS.keys():
+                color = line[x+1]
+                groups.append((TEXT_COLORS[color], ""))
+                x += 1
+            else:
+                groups.append((PICO_WHITE, ""))
+        elif line[x] == "]":
+            groups.append((False, ""))
+        else:
+            groups[-1] = (groups[-1][0], groups[-1][1] + line[x])
+        x += 1
+    return groups
 
 def render_multiline(text, size, color, wrap_width=None, center=True):
     f = FONTS[size]
@@ -76,15 +100,39 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
         _,_,fw,fh = f.get_rect(line)
         h += fh
         w = max(w, fw)
-    h += (len(lines) - 1) * 2
+    #h += (len(lines) - 1)
     text_surf = pygame.Surface((w,h), pygame.SRCALPHA)
     y = 0
+    is_in_color = None
     for line in lines:
         _,_,fw,fh = f.get_rect(line)
-        if center:
-            x = (w - fw) // 2
-        else:
-            x = 0
-        f.render_to(text_surf, (x,y), line, color, (0,0,0,0))
-        y += fh + 2
+        groups = get_groups(line, is_in_color)
+        running_x = 0
+        for group in groups:            
+            if center:
+                x = (w - fw) // 2
+            else:
+                x = 0
+            group_color = color
+            if group[0]:
+                group_color = group[0]
+            group_text = group[1]
+            if group_text.startswith(" "):
+                running_x += 1
+            rect = f.get_rect(group_text)
+            yo = 0
+            # Hacky comma detection...
+            if rect[3] <= 7 and rect[1] <= 7:
+                yo = 6
+            
+            f.render_to(text_surf, (x + running_x,y + yo), group_text, group_color, (0,0,0,0))
+            if group_text.endswith(" "):
+                running_x += 1
+            
+            running_x += rect[2] + 1
+            is_in_color = group[0]
+        y += fh
     return text_surf
+
+if __name__ == "__main__":
+    print(get_groups("hello [world] how is [it] going?"))

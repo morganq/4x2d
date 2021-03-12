@@ -55,17 +55,16 @@ class Building:
             self.draw_shape(surface, points, color, offset + V2(0,-1), angle, expand)
             self.draw_shape(surface, points, color, offset + V2(0,+1), angle, expand)
 
-@building
-class MiningRateBuilding(Building):
-    upgrade = "mining_rate"
-    def __init__(self):
-        Building.__init__(self)
-        self.shapes = [
-            ([V2(-1,-3), V2(6,-3), V2(6,0), V2(3,0), V2(3,3), V2(-1,3)], PICO_GREYPURPLE),
-            ([V2(-1,-3), V2(0,-3), V2(0,3), V2(-1,3)], PICO_LIGHTGRAY)
-        ]
-        #self.load_shapes("test")
-        self.stats = Stats(top_mining_rate = 0.15)
+def make_simple_stats_building(name, stats=None, shape=None):
+    class AdHocBuilding(Building):
+        upgrade = name
+        def __init__(self):
+            super().__init__()
+            self.load_shapes(shape)
+            self.stats = stats
+
+    building(AdHocBuilding)
+    return name
 
 @building
 class RegenBuilding(Building):

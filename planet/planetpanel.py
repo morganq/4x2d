@@ -2,6 +2,7 @@ from piechart import PieChart
 from panel import Panel
 from text import Text
 from simplesprite import SimpleSprite
+from upgrade.upgradeicon import UpgradeIcon
 from piechart import PieChart
 from colors import *
 from line import Line
@@ -24,7 +25,7 @@ class PlanetPanel(Panel):
                 owner = "Your"
                 is_mine = True
 
-        self.tab = {'text':'%s Planet' % owner, 'color':color, 'icon':'assets/i-planet.png'}
+        self.tab = {'text':'%s Planet - %d HP' % (owner, planet.health), 'color':color, 'icon':'assets/i-planet.png'}
         self.add(Text("Resources", "small", (0,0), PICO_WHITE, False), V2(0,0))
         
         y = 15
@@ -71,5 +72,17 @@ class PlanetPanel(Panel):
                     color = PICO_RED
                 self.add(Text("%d" % planet.ships[ship], "small", (0,0), color, False), V2(88,y + 2))
                 y += 15
+
+        if planet.buildings and is_mine:
+            
+            self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))
+            y += 5
+            for i, building in enumerate(planet.buildings):
+                x = (i % 3) * 33
+                if (i % 3) == 0 and i > 0: y += 27
+                s = UpgradeIcon(V2(0,0),building['building'].upgrade,None,True)
+                self.add(s, V2(x + 3,y))
+
+            y += 14
 
         self.redraw()

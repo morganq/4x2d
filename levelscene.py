@@ -1,4 +1,4 @@
-from simplesprite import SimpleSprite
+import simplesprite
 import sys
 import traceback
 import random
@@ -58,9 +58,8 @@ class LevelScene(scene.Scene):
         # Me
         homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
         homeworld.change_owner(self.my_civ)
-        homeworld.population = 4
+        homeworld.population = 7
         homeworld.ships['fighter'] = 2
-        homeworld.add_building("mining_rate")
         self.game_group.add(homeworld)
 
         # Alien
@@ -130,7 +129,7 @@ class LevelScene(scene.Scene):
         for i,r in enumerate(self.my_civ.resources.data.keys()):
             self.meters[r] = Meter(V2(15,3 + i * 14), 120, 9, RESOURCE_COLORS[r], self.my_civ.upgrade_limits.data[r])
             self.meters[r].stay = True
-            self.ui_group.add(SimpleSprite(V2(2,2 + i * 14), "assets/i-%s.png" % r))
+            self.ui_group.add(simplesprite.SimpleSprite(V2(2,2 + i * 14), "assets/i-%s.png" % r))
             self.ui_group.add(self.meters[r])
             self.upgrade_texts[r] = Text("", "small", V2(140, 4 + i * 14), multiline_width=200)
             self.ui_group.add(self.upgrade_texts[r])
@@ -165,13 +164,19 @@ class LevelScene(scene.Scene):
             self.my_civ.resources.set_resource("ice", 150)
 
         if self.options == "gas":
-            self.my_civ.resources.set_resource("gas", 150)        
+            self.my_civ.resources.set_resource("gas", 150)    
+
+        if self.options == "buildings":
+            homeworld.add_building("econ1")
+            homeworld.add_building("econ2a")
+            homeworld.add_building("econ2b")
+            homeworld.add_building("econ3")
 
         if self.options == "surround":
             for planet in self.get_civ_planets(None):
                 planet.change_owner(self.enemy.civ)
-                planet.add_ship("alien-fighter")
-                planet.add_ship("alien-fighter")
+                #planet.add_ship("alien-fighter")
+                #planet.add_ship("alien-fighter")
                 #self.my_civ.resources.set_resource("iron", 50)
                 #self.my_civ.resources.set_resource("ice", 50)
                 self.my_civ.resources.set_resource("gas", 50)
@@ -185,9 +190,6 @@ class LevelScene(scene.Scene):
             bs = AlienBattleship(self, V2(150, 250), self.enemy.civ)
             bs.target = homeworld
             self.game_group.add(bs)
-
-        if self.options == "fast":
-            self.game_speed = 10
 
         if self.options == "score":
             homeworld.change_owner(self.enemy.civ)

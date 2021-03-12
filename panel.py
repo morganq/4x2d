@@ -36,6 +36,9 @@ class Panel(spritebase.SpriteBase):
     def add(self, control, pos):
         self._controls.append({'control':control,'pos':pos})
 
+    def remove(self, control):
+        self._controls = [c for c in self._controls if c['control'] != control]
+
     def add_all_to_group(self, group):
         group.add(self)
         for ci in self._controls:

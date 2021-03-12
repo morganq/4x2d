@@ -27,6 +27,9 @@ class UIEnabledState(State):
         self.hover_filter = lambda x: True
 
     def filter_only_panel_ui(self, o):
+        if hasattr(self.panel, "tree_children"):
+            if o in self.panel.tree_children:
+                return True
         return o in [c['control'] for c in self.panel._controls]
 
     def enter(self):
@@ -49,7 +52,7 @@ class UIEnabledState(State):
         all_sprites = self.scene.game_group.sprites()[::]
         all_sprites.extend(self.scene.ui_group.sprites()[::])
         selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]
-        selectable_sprites.sort(key=lambda x:x.layer, reverse=True)
+        selectable_sprites.sort(key=lambda x:x.layer, reverse=True) 
         is_mouse_event = False
         if input in ["mouse_move", "mouse_drag", "click", "unclick"]:
             is_mouse_event = True
@@ -255,7 +258,8 @@ class UpgradeState(UIEnabledState):
 
     def enter(self):
         self.scene.paused = True
-        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ, self.scene.my_civ.upgrades_stocked[0], self.on_select)
+        resource = self.scene.my_civ.upgrades_stocked[0]
+        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.hover_filter = self.filter_only_panel_ui
@@ -272,6 +276,7 @@ class UpgradeState(UIEnabledState):
             self.scene.ui_group.add(FunNotification(self.pending_upgrade.title, target))
             self.scene.my_civ.upgrades_stocked.pop(0)
             self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+            self.scene.my_civ.clear_offers()
         if self.panel:
             self.panel.kill()
         self.scene.sm.transition(PlayState(self.scene))
