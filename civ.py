@@ -5,7 +5,8 @@ from collections import defaultdict
 import random
 
 class Civ:
-    def __init__(self):
+    def __init__(self, scene):
+        self.scene = scene
         self.color = PICO_RED
         self.is_enemy = True        
         self.resources = economy.Resources()
@@ -14,12 +15,30 @@ class Civ:
         self.upgrades = []
         self.researched_upgrade_names = set()
 
+        ### Upgrades Stuff ###
+        self.nuclear_instability_timer = 0
+
+    def update(self, dt):
+        self.upgrades_update(dt)
+
+    def upgrades_update(self, dt):
+        if self.get_stat("nuclear_instability"):
+            self.nuclear_instability_timer += dt * self.get_stat("nuclear_instability")
+            NIT = 60
+            if self.nuclear_instability_timer >= NIT:
+                self.nuclear_instability_timer = (self.nuclear_instability_timer - NIT) % NIT
+                ships = self.scene.get_civ_ships(self)
+                if ships:
+                    random.choice(ships).kill()
+                    # TODO: particles
+
+
     def get_stat(self, stat):
         return sum([u.stats[stat] for u in self.upgrades])
 
 class PlayerCiv(Civ):
-    def __init__(self):
-        Civ.__init__(self)
+    def __init__(self, scene):
+        Civ.__init__(self, scene)
         self.color = PICO_GREEN
         self.is_enemy = False
 
@@ -40,7 +59,6 @@ class PlayerCiv(Civ):
 
     def offer_upgrades(self, resource):
         if not self.offered_upgrades:
-            print("New offer")
             for upgrade_type, ups in upgrades.UPGRADES[resource].items():
                 allowed_ups = [u for u in ups if self.can_research(u)]
                 uname = random.choice(allowed_ups)

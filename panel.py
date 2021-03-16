@@ -58,6 +58,16 @@ class Panel(spritebase.SpriteBase):
             pos = ci['pos']
             xmax = max(pos.x + control.width, xmax)
             ymax = max(pos.y + control.height, ymax)
+
+        tab_width = 0
+        if self.tab:
+            icon_offset = 0
+            icon = None
+            if 'icon' in self.tab:
+                icon = pygame.image.load(resources.resource_path(self.tab['icon']))
+                icon_offset = icon.get_width() + 4                
+            tab_text = text.render_multiline(self.tab['text'], 'small', PICO_BLACK)
+            tab_width = tab_text.get_size()[0] + 8 + icon_offset            
         
         box_width = xmax + self.padding * 2
         box_height = ymax + self.padding * 2
@@ -72,14 +82,7 @@ class Panel(spritebase.SpriteBase):
         self._height = box_height + tab_offset
         pygame.draw.rect(self.image, PICO_WHITE, (0, tab_offset, box_width, box_height), 1)
 
-        if self.tab:
-            icon_offset = 0
-            icon = None
-            if 'icon' in self.tab:
-                icon = pygame.image.load(resources.resource_path(self.tab['icon']))
-                icon_offset = icon.get_width() + 4            
-            tab_text = text.render_multiline(self.tab['text'], 'small', PICO_BLACK)
-            tab_width = tab_text.get_size()[0] + 8 + icon_offset
+        if self.tab:        
             pygame.draw.rect(self.image, self.tab['color'], (0, 0, tab_width, tab_offset + 1), 0)
             pygame.draw.rect(self.image, PICO_WHITE, (0, 0, tab_width, tab_offset + 1), 1)
             if 'icon' in self.tab:

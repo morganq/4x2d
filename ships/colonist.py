@@ -3,8 +3,11 @@ from particle import Particle
 from planet import planet
 from .ship import STATE_WAITING, Ship, THRUST_PARTICLE_RATE, ATMO_DISTANCE
 import random
+import helper
 from v2 import V2
 from text import Text
+
+ATOMIC_BOMB_RANGE = 50
 
 class Colonist(Ship):
     HEALTHBAR_SIZE = (16,2)
@@ -39,6 +42,15 @@ class Colonist(Ship):
         self.num_label.pos = self.pos + V2(7, -7)
 
     def kill(self):
+        if self.get_stat("atomic_bomb"):
+            print("nuke")
+            range_adjust = 0.75 + self.population * 0.25
+            enemy_objs = self.scene.get_enemy_objects(self.owning_civ)
+            near_enemies = helper.all_nearby(self.pos, enemy_objs, ATOMIC_BOMB_RANGE * range_adjust)
+            for enemy in near_enemies:
+                enemy.health -= 50
+            # TODO: particles
+            
         self.num_label.kill()
         return super().kill()
 

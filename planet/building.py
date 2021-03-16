@@ -29,6 +29,7 @@ class Building:
         pass
 
     def draw_shape(self, surface, shape, color, offset, angle, expand=False):
+        angle += 3.14159 / 2
         center = offset
         for pt in shape:
             center += pt * (1 / len(shape))
@@ -71,10 +72,7 @@ class RegenBuilding(Building):
     upgrade = "regen"
     def __init__(self):
         Building.__init__(self)
-        self.shapes = [
-            ([V2(-1,-4), V2(2,-2), V2(5,0), V2(2,2), V2(-1,4)], PICO_BLUE),
-            ([V2(-1,-4), V2(0,-4), V2(0,4), V2(-1,4)], PICO_LIGHTGRAY)
-        ]        
+        self.load_shapes("repairbay")
         
         
     def update(self, planet, dt):
@@ -83,13 +81,10 @@ class RegenBuilding(Building):
 @building
 class ArmoryBuilding(Building):
     FIRE_RATE = 5
-    upgrade = "armory"
+    upgrade = "pop2b"
     def __init__(self):
         Building.__init__(self)
-        self.shapes = [
-            ([V2(-1,-1), V2(2,-1), V2(2,-4), V2(4,-4), V2(4,4), V2(2,4), V2(2,1), V2(-1,1)], PICO_PINK),
-            ([V2(-1,-1), V2(0,-2), V2(0,1), V2(-1,1)], PICO_LIGHTGRAY)
-        ]        
+        self.load_shapes("armory")
         self.fire_time = 0
         
     def update(self, planet, dt):

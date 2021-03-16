@@ -66,7 +66,9 @@ class UpgradePanel(Panel):
             for i in range(3):
                 rows.append([])
                 for u in same_fam:
-                    if set(u.family['parents']) == set(cur_parents):
+                    if not u.family['parents'] and not cur_parents:
+                        rows[-1].append(u)
+                    elif u.family['parents'] and set(u.family['parents']).issubset(set(cur_parents)):
                         rows[-1].append(u)
                 cur_parents = [u.name for u in rows[-1]]
                 
@@ -94,7 +96,7 @@ class UpgradePanel(Panel):
                     pp = positions[parent]
                     pygame.draw.line(self.image, color, (pos + V2(11, 11) - self.pos).tuple(), (pp + V2(11,11) - self.pos).tuple(), 1)
                 if name == button.upgrade.name:
-                    pygame.draw.rect(self.image, PICO_GREEN, (pos.x - self.pos.x - 3, pos.y - self.pos.y - 3, 29, 29), 1)
+                    pygame.draw.rect(self.image, PICO_GREEN, (pos.x - self.pos.x - 1, pos.y - self.pos.y, 28, 28), 2)
         else:
             self.redraw()
 
@@ -118,7 +120,7 @@ class UpgradePanel(Panel):
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + 68, y0 + y3), (x0 + 254 - self.padding, y0 + y3))
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + 254 - self.padding, y0 + y3), (x0 + 254 - self.padding, y0 + y3+5))
 
-        pygame.draw.rect(self.image, PICO_DARKGRAY, (self.width - 85, 15, 84, self.height - 16))
+        pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 85, 15, 84, self.height - 16))
 
     def kill(self):
         for child in self.tree_children:

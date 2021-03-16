@@ -25,10 +25,11 @@ class PlanetPanel(Panel):
                 owner = "Your"
                 is_mine = True
 
-        self.tab = {'text':'%s Planet - %d HP' % (owner, planet.health), 'color':color, 'icon':'assets/i-planet.png'}
-        self.add(Text("Resources", "small", (0,0), PICO_WHITE, False), V2(0,0))
+        self.tab = {'text':'%s Planet' % (owner,), 'color':color, 'icon':'assets/i-planet.png'}
+        self.add(Text("Health: %d/%d" % (planet.health, planet.get_max_health()), "small", (0,0), PICO_WHITE, False), V2(0,0))
+        self.add(Text("Resources", "small", (0,0), PICO_WHITE, False), V2(0,15))
         
-        y = 15
+        y = 30
         chart_data = {}
         for r in RESOURCES:
             pr = getattr(planet.resources, r)

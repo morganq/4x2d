@@ -23,9 +23,15 @@ class Resources:
 
     @property
     def ice(self): return self.data['ice']
+    @ice.setter
+    def ice(self, value): self.set_resource('ice', value)
 
     @property
     def gas(self): return self.data['gas']
+    @gas.setter
+    def gas(self, value): self.set_resource('gas', value)
 
     @property
-    def iron(self): return self.data['iron']        
+    def iron(self): return self.data['iron']   
+    @iron.setter
+    def iron(self, value): self.set_resource('iron', value)         

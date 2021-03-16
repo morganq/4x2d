@@ -20,7 +20,7 @@ from planet.shipcounter import ShipCounter
 from icontext import IconText
 from collections import defaultdict
 from .building import BUILDINGS
-from helper import get_nearest
+from helper import clamp, get_nearest
 from .planetart import generate_planet_art
 from spaceobject import SpaceObject
 
@@ -58,7 +58,7 @@ class Planet(SpaceObject):
 
         self.base_angle = 0
 
-        self.population = 0
+        self._population = 0
         self.population_growth_timer = 0
 
         self.ships = defaultdict(int)
@@ -83,16 +83,28 @@ class Planet(SpaceObject):
         self.scene.ui_group.add(self.shipcounter)
         self.set_health(self.get_max_health())
 
+        ### Upgrades ###
+        self.unstable_reaction = 0
+
+    @property
+    def population(self): return self._population
+    @population.setter
+    def population(self, value):
+        self._population = clamp(value, 0, 999)
+
     def change_owner(self, civ):
         self.owning_civ = civ
         self.health = max(self.health, self.get_max_health() / 4)
-        self.population = min(self.population, 1)
+        self._population = min(self._population, 1)
         self.buildings = []
         self.ships = defaultdict(int)
         self._generate_frames()
 
     def get_stat(self, stat):
-        return sum([b['building'].stats[stat] for b in self.buildings])        
+        owning_civ_stat = 0
+        if self.owning_civ:
+            owning_civ_stat += self.owning_civ.get_stat(stat)
+        return sum([b['building'].stats[stat] for b in self.buildings]) + owning_civ_stat
 
     def _generate_frame(self, border = False):
         radius = self.size + 8
@@ -196,8 +208,11 @@ class Planet(SpaceObject):
                 rate_modifier = self.get_stat("top_mining_rate") + 1
                 rate_modifier *= 1 + self.get_stat("top_mining_per_building") * len(self.buildings)
 
+            # Unstable Reaction
+            rate_modifier *= (1 + self.get_stat("mining_rate") + self.unstable_reaction)
+
             # Resources mined is based on num workers
-            workers = min(self.population, self.size)
+            workers = min(self._population, self.size)
 
             # Add to the timers based on the mining rate
             self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * rate_modifier
@@ -214,7 +229,7 @@ class Planet(SpaceObject):
 
         # Ship production
         for prod in self.production:
-            prod.update(self, dt)
+            prod.update(self, dt * (1 + self.get_stat("ship_production_rate")))
         self.production = [p for p in self.production if not p.done]
 
         # Ship destruction
@@ -234,12 +249,12 @@ class Planet(SpaceObject):
 
         # Population Growth
         if self.owning_civ:
-            if self.population > 0:
+            if self._population >= 1 - self.get_stat("pop_growth_min_reduction"):
                 self.population_growth_timer += dt
                 max_pop = self.get_max_pop()
-                if self.population_growth_timer >= POPULATION_GROWTH_TIME and self.population < max_pop:
+                if self.population_growth_timer >= POPULATION_GROWTH_TIME and self._population < max_pop:
                     self.population_growth_timer = 0
-                    self.population += 1
+                    self._population += 1
                     self.needs_panel_update = True
                     if self.owning_civ == self.scene.my_civ:
                         it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
@@ -248,7 +263,7 @@ class Planet(SpaceObject):
 
         if self.health <= 0:
             self.buildings = []
-            self.population = 0
+            self._population = 0
 
         # Building stuff
         for b in self.buildings:
@@ -260,6 +275,14 @@ class Planet(SpaceObject):
                 self.emit_ship(self.get_ship_name("fighter"), {"to":self})
             for i in range(self.ships['alien-battleship']):
                 self.emit_ship('alien-battleship', {"to":self})
+
+        self.upgrade_update(dt)
+
+    def upgrade_update(self, dt):
+        if self.get_stat("unstable_reaction") > 0:
+            USR = 1 / 60
+            # Slowly increase to 1
+            self.unstable_reaction = clamp(self.unstable_reaction * (dt * self.get_stat("unstable_reaction") * USR), 0, self.get_stat("unstable_reaction"))
 
     def get_max_fighters(self):
         return self.size * 2
@@ -279,12 +302,12 @@ class Planet(SpaceObject):
         return type
 
     def get_workers(self):
-        return min(self.population, self.size)
+        return min(self._population, self.size)
 
     def emit_ship(self, type, data):
         if type in ['colonist', 'alien-colonist']:
             self.emit_ships_queue.append((type, data))
-            self.population -= data['num']
+            self._population -= data['num']
         elif self.ships[type] > 0:
             self.emit_ships_queue.append((type, data))
             self.ships[type] -= 1
@@ -310,14 +333,21 @@ class Planet(SpaceObject):
             self.building_slots[choice] = True
         else:
             angle = random.random() * 6.2818
-        self.buildings.append({"building":BUILDINGS[upgrade](), "angle":angle})
+        b = BUILDINGS[upgrade]()
+        self.buildings.append({"building":b, "angle":angle})
         self._generate_frames()
-        self.needs_panel_update = True # Maybe not but w/e
+        self.needs_panel_update = True 
         mh_after = self.get_max_health()
         self._health += mh_after - mh_before 
+        return b
 
     def add_production(self, order):
         if order.ship_type == "fighter":
             order.number = round(order.number * 1 + self.get_stat("fighter_production"))
             order.number = round(order.number / (2 ** self.get_stat("fighter_production_halving")))
         self.production.append(order)
+
+    def on_health_changed(self, old, new):
+        if new < old:
+            self.unstable_reaction = 0
+        return super().on_health_changed(old, new)

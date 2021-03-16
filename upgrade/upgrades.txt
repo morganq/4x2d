@@ -1,6 +1,6 @@
 # Buildings
  - Base resource rate: 1: Medium % inc, 2: Big bonus but cut colonists, 2: Big bonus but can’t build fighters, 3: Every building gives small +% inc.
- - Colonists: 1: Medium % inc, 2: Flat inc, 2: +1, Each colonist fires a rocket for defense, 3: Medium % inc, cut health
+ - Population: 1: Medium % inc, 2: Flat inc, 2: +1, Each colonist fires a rocket for defense, 3: Medium % inc, cut health
  - Health: 1: +big flat health, 2: Fast health regen, 2: +health for nearby allied ships, 3: Thorns
  - Dangerous: 1: has a weapon to shoot ships, 2: increase weapon range and allow to shoot planets, 2: if planet is lost, your buildings go underground and can be restored when you retake. 3: ?
  - Hangar: 1: Planet makes +25% fighters when producing them, 2a: Unlock bombers. Planet makes +50% bombers, 2b: Unlock interceptors. Planet makes +25% interceptors, 3a: Unlock Destoyers. Planet makes destroyers 50% faster, 3b: Planet fighter production is increased by 50%
@@ -8,7 +8,14 @@
  - shield defense, weapon defense, buildings for making specific ships, improve overall ship production here, increase ally move speed in radius, buff ally in radius, higher max population (but not size)
 
 # Ship Prod
- - 8 fighters over 1 minute
+ - Normal Fighters: 1: 4 fighters over 30 seconds, 2: 4 fighters over 25 seconds, 3: 4 fighters over 20 seconds
+ - Instant Fighters: 1: 2 fighters now, 2a: 3 fighters now, -2 pop, 2b: 3 fighters now, planet takes damage, 3a: 4 fighters now, -3 pop, 3b: 4 fighters now, planet takes damage
+ - Long Term Fighters: 1: 4 fighters over 90 seconds, +25 iron; 2a: 5 fighters over 100 seconds, 2b: 4 fighters over 100 seconds, +50 iron; 3: 8 fighters over 120 seconds;
+ - Multi: 1: 2 fighters and 1 ship of each hangar type on the planet over 50 seconds, 2: same over 45 seconds, 3: 3 fighters + same over 40 seconds
+ - Emergency Fighters: 1: 5 fighters over 30 seconds, freeze iron for 10 seconds; 2: 2 bombers over 30 seconds, freeze; 3: 1 battleship, freeze;
+ - Conversion: 1: Convert all fighters into interceptors;
+
+
  - 6 fighters now
  - 50 fighters over 5 minutes
  - 5 colonists now
@@ -29,3 +36,58 @@
  - Speed: 1: ship speed faster when far from planets. 2: warp tech. 2: damage increased by move speed. 3: strafe / evade
  - ROF 1: +15% rate of fire. 2: +25% rate of fire when alone. 2:  3: 
  - Pop: 1: 2: -1 max pop, +15% mining rate. 2: pop grows at 0. 3: 
+
+
+
+== Nanotechnology ==
+   * Repair Bots: Ship regeneration +1 hp/sec
+   i (Unlimited) Hull Reconfiguration: When a ship is destroyed, it heals a random allied ship nearby
+   * Grey Goo: -50% fighter missile damage. Fighter missiles infect the target with grey goo nanobots; each nanobot deals 1 damage for each nanobot per second
+   i Nanobot Collection: Each enemy infected with Grey Goo provides 1 iron per second
+
+== Advanced Mechanics ==
+   i Precise Assembly: Ships have +15% rate of fire
+   * Robotics: Population grows on planets with 0 population
+   i Shrapnel: Fighter missiles gain a wide blast radius
+   i Staged Booster: Ships have +100% max speed for 5 seconds after take-off
+   i (Unlimited) Accelerated Payload: Ship weapons deal +25% damage based on the ship's bonus speed
+
+== Nuclear ==
+   i Nuclear Battery: +15% mining rate, lose a random ship once per minute
+   i Unstable Reaction: Each planet's mining rate increases slowly to +25%, but resets if the planet is attacked
+   i Atomic Bomb: When a colonist ship dies, it explodes (radius based on population on ship) for 50 damage
+   i (Unlimited) Quantum Unfolding: Warp Drive
+
+== Plasma ==
+   i Plasma Shield: All ships +5 hp
+   i Plasma Thruster: +50% ship speed in deep space
+   i Weaponized Thruster: -1 HP when firing, +50% missile velocity, +3 missile damage
+   i (Unlimited) Extra Tank: +15% ship speed   
+
+== AI ==
+   i Networked Economy: Ship Production orders are 10% faster
+   i Realtime Prediction: Ships dodge 10% of incoming projectiles
+   i Overclock: Ships have +33% rate of fire when alone
+   i (Unlimited) Neural Imaging: Ships have +25% weapon range
+
+
+- Double resources from asteroids
+- Ship Type can fly through Hazard Type
+- Deal more damage for a bit after warp drive (offensive only)
+- 
+
+Potentially Viable Strategies:
+ * Rush
+   + Early upgrades with not great follow up
+   + Instantly gain a bunch of each resource
+   + Overclock
+ * Contain
+   + Interceptors
+   + Something like siege tanks - maybe planetary weapons
+ * Fast Expand
+ * Quick Tech
+ * Turtle
+   + mining rate, - mining rate for each planet
+   + building grant more hp
+ * Battleships
+ * Bomber Strat

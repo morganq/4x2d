@@ -29,6 +29,10 @@ class Healthy:
             self.health_bar.value = self._health
             self.health_bar.max_value = self.get_max_health()
             self.health_bar.show()
+            self.on_health_changed(old, self._health)
+
+    def on_health_changed(self, old, new):
+        pass
 
     def get_max_health(self):
         return 1

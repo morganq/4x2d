@@ -5,6 +5,7 @@ import pygame
 import text
 from economy import RESOURCE_COLORS
 from upgrade.upgrades import UPGRADE_CATEGORY_COLORS
+from upgrade import upgradeicon
 
 HOVER_COLORS = {
     PICO_BLUE:PICO_DARKBLUE,
@@ -37,17 +38,11 @@ class UpgradeButton(SpriteBase):
             pygame.draw.rect(self.image, PICO_BLACK, (0,0,w,h), 0)
             text_color = PICO_LIGHTGRAY
         else:
-            pygame.draw.rect(self.image, PICO_PURPLE, (0,0,w,h), 0)
+            pygame.draw.rect(self.image, PICO_DARKGRAY, (0,0,w,h), 0)
             text_color = PICO_LIGHTGRAY            
 
-        pygame.draw.rect(self.image, resource_color, (pad+1,pad,21,23), 0)
-        pygame.draw.rect(self.image, resource_color, (pad,pad+1,23,21), 0)
-        try:
-            icon = pygame.image.load(resource_path("assets/upgrades/%s.png" % self.upgrade.icon)).convert_alpha()
-            self.image.blit(icon, (pad + 2, pad + 2))
-        except:
-            print(self.upgrade.icon)
-        
+        icon = upgradeicon.generate_upgrade_image(self.upgrade)
+        self.image.blit(icon, (pad - 2, pad - 3))
         
         text.FONTS["small"].render_to(self.image, (31 + pad, pad + 1), self.upgrade.title, text_color)
         text.render_multiline_to(self.image, (31 + pad, pad + 14), self.upgrade.description, "small", text_color, 200, False)

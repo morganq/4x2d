@@ -17,6 +17,7 @@ FLEET_SEPARATION_MAX = 12
 FLEET_PROXIMITY_POWER = 0.5
 ATMO_DISTANCE = 15
 WARP_PLANET_MIN_DIST = 15
+DEEP_SPACE_DIST = 40
 
 THRUST_PARTICLE_RATE = 0.25
 
@@ -62,13 +63,32 @@ class Ship(SpaceObject):
         # Other stuff
         self._timers["movement_variation"] = random.random() * 6.2818
         self._timers['thrust_particle_time'] = 0
+        self._timers['staged_booster'] = -self.get_stat("staged_booster_time")
 
         self.set_health(self.get_max_health())
 
-    def get_thrust_accel(self): return self.THRUST_ACCEL
-    def get_max_speed(self): return self.MAX_SPEED
-    def get_cruise_speed(self): return self.MAX_SPEED * 0.80
-    def get_max_health(self): return self.BASE_HEALTH
+    def get_stat(self, stat):
+        return self.owning_civ.get_stat(stat)
+
+    def get_thrust_accel(self):
+        accel = self.THRUST_ACCEL
+        if self._timers['staged_booster'] < 0:
+            accel *= 3
+        return accel
+
+    def get_max_speed(self):
+        speed = self.MAX_SPEED
+        nearest, distsq = helper.get_nearest(self.pos, self.scene.get_hazards())
+        if distsq > DEEP_SPACE_DIST ** 2:
+            speed *= (1 + self.get_stat("deep_space_drive"))
+        if self._timers['staged_booster'] < 0:
+            speed *= 2
+        return speed
+
+    def get_cruise_speed(self): return self.get_max_speed() * 0.80
+
+    def get_max_health(self):
+        return self.BASE_HEALTH * (self.get_stat("ship_health_mul") + 1) + self.get_stat("ship_health_add")
 
     def wants_to_land(self):
         return True
@@ -146,7 +166,17 @@ class Ship(SpaceObject):
 
         self.pos += self.velocity * dt
         self.health_bar.pos = self.pos + V2(0, -6)
+
+        self.special_stat_update(dt)
+
         super().update(dt)
+
+    def special_stat_update(self, dt):
+        # Regenerate
+        self.health += self.get_stat("ship_regenerate") * dt
+
+        # Strafe
+        # TODO: implement
 
     def collide(self, other):
         if self.can_land(other) and self.wants_to_land():
@@ -188,11 +218,11 @@ class Ship(SpaceObject):
 
         if self.path:
             delta = (self.path[0] - self.pos)
-            self.target_velocity = delta.normalized() * self.get_cruise_speed() * 0.8
+            self.target_velocity = delta.normalized() * self.get_cruise_speed()
 
         else:
             delta = self.effective_target.pos - self.pos
-            self.target_velocity = delta.normalized() * self.get_cruise_speed() * 0.8
+            self.target_velocity = delta.normalized() * self.get_cruise_speed()
 
     def state_returning(self, dt):
         pass
@@ -222,6 +252,12 @@ class Ship(SpaceObject):
                             a = base_angle
                         pvel = V2.from_angle(a) * 6
                         p = particle.Particle([color, DARKEN_COLOR.get(color[0:3],PICO_BLACK), PICO_DARKGRAY],1,self.pos + V2(x - 6,y - 6),1.25,pvel)
-                        self.scene.game_group.add(p)                    
+                        self.scene.game_group.add(p)        
+
+        if self.get_stat("ship_death_heal") > 0:
+            nearby = helper.all_nearby(self.pos,[s for s in self.scene.get_civ_ships(self.owning_civ) if s is not self], FLEET_RADIUS)
+            if nearby:
+                other = random.choice(nearby)
+                other.health += self.get_stat("ship_death_heal") # TODO: Particles!
 
         return super().kill()

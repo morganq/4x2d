@@ -98,7 +98,7 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
     w = 0
     for line in lines:
         _,_,fw,fh = f.get_rect(line)
-        h += fh
+        h += max(12, fh)
         w = max(w, fw)
     #h += (len(lines) - 1)
     text_surf = pygame.Surface((w,h), pygame.SRCALPHA)

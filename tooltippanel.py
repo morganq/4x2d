@@ -11,7 +11,7 @@ class TooltipPanel(Panel):
         self.add(t, V2(0,0))
         t = Text(description, "small", (0,0), PICO_LIGHTGRAY, False, multiline_width=160, center=False)
         t.layer = 3
-        self.add(t, V2(0,20))
+        t._height -= 4
+        self.add(t, V2(0,15))
         self.layer = 2
-
         self.redraw()

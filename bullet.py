@@ -1,11 +1,15 @@
+from status_effect import GreyGooEffect
 from colors import *
 from v2 import V2
 from spritebase import SpriteBase
 import pygame
 import math
+import helper
+import random
 
 VEL = 80
 DEATH_TIME = 5
+DAMAGE = 2
 
 class Bullet(SpriteBase):
     def __init__(self, pos, target, shooter, vel=None, mods=None):
@@ -16,10 +20,11 @@ class Bullet(SpriteBase):
         self.collidable = True
         self.collision_radius = 2
         self.mods = mods or {}
+        speed = VEL * (1 + self.mods.get("ship_missile_speed", 0))
         if vel:
-            self.vel = vel
+            self.vel = vel.normalized() * speed
         else:
-            self.vel = (self.get_target_pos() - self.pos).normalized() * VEL
+            self.vel = (self.get_target_pos() - self.pos).normalized() * speed
         self.offset = (0.5, 0.5)
         self.time = 0
         self._generate_image()
@@ -27,7 +32,23 @@ class Bullet(SpriteBase):
     def collide(self, other):
         if other.owning_civ == self.shooter.owning_civ: return
         if not getattr(other, "health", None): return
-        other.health -= 2 * self.mods.get("damage_debuff", 1.0)
+        if other.get_stat("ship_dodge") > 0:
+            if random.random() <= other.get_stat("ship_dodge"):
+                print("dodge")
+                self.kill()
+                return
+                
+        damage = 2
+        damage *= 1 + self.mods.get("damage_mul", 0)
+        damage += self.mods.get("damage_add", 0)
+        objs_hit = [other]
+        if self.mods.get("blast_radius", False):
+            objs_hit = helper.all_nearby(self.pos, self.shooter.scene.get_enemy_objects(self.owning_civ), self.mods.get("blast_radius"))
+            
+        for obj in objs_hit:
+            obj.health -= damage
+            if self.mods.get("grey_goo", False):
+                obj.add_effect(GreyGooEffect(other, self))
         self.kill()
 
     def get_target_pos(self):

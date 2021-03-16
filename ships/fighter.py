@@ -1,7 +1,7 @@
-from helper import get_nearest
+from helper import all_nearby, clamp, get_nearest
 from colors import PICO_BLUE, PICO_DARKBLUE, PICO_WHITE
 from particle import Particle
-from .ship import STATE_WAITING, Ship, THRUST_PARTICLE_RATE
+from .ship import FLEET_RADIUS, STATE_WAITING, Ship, THRUST_PARTICLE_RATE
 from bullet import Bullet
 from planet import planet
 import random
@@ -38,6 +38,26 @@ class Fighter(Ship):
         self._timers['gun'] = 0
         self._timers['dogfight'] = 0
 
+    def get_fire_rate(self):
+        rate = FIRE_RATE
+        if self.get_stat("overclock"):
+            friendly = self.scene.get_my_ships(self.owning_civ)
+            # None nearby?
+            if not all_nearby(self.pos, friendly, FLEET_RADIUS):
+                rate *= 1 + self.get_stat("overclock")
+            
+        return rate
+
+    def get_max_health(self):
+        return self.BASE_HEALTH * (
+            self.get_stat("ship_health_mul") + self.get_stat("fighter_health_mul") + 1
+        ) + self.get_stat("ship_health_add") + self.get_stat("fighter_health_add")
+
+    def get_weapon_range(self):
+        range = FIRE_RANGE
+        range *= (1 + self.get_stat("ship_weapon_range"))
+        return range
+
     def wants_to_land(self):
         return self.state != STATE_DOGFIGHT
 
@@ -57,7 +77,23 @@ class Fighter(Ship):
 
     def fire(self, at):
         towards = (at.pos - self.pos).normalized()
-        b = Bullet(self.pos, at, self, {})
+
+        if self.get_stat("ship_take_damage_on_fire"):
+            self.health -= self.get_stat("ship_take_damage_on_fire")
+
+        damage_add = 0
+        extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
+        damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
+        damage_add += self.get_stat("ship_weapon_damage")
+        damage_mul = self.get_stat("fighter_damage_mul")
+        blast_radius = self.get_stat("fighter_blast_radius")
+        b = Bullet(self.pos, at, self, mods={
+            'grey_goo': self.get_stat('grey_goo'),
+            'damage_mul': damage_mul,
+            'damage_add': damage_add,
+            'blast_radius': blast_radius,
+            'ship_missile_speed':self.get_stat("ship_missile_speed")
+        })
         self.scene.game_group.add(b)
 
         #self.velocity += -towards * 2
@@ -77,9 +113,6 @@ class Fighter(Ship):
         self.find_target()
         self._timers['gun'] = 0
 
-    def get_fire_rate(self):
-        return FIRE_RATE
-
     def state_dogfight(self, dt):
         # If our target is dead or w/e, find a new one
         if not self.effective_target or self.effective_target.health <= 0:
@@ -94,8 +127,9 @@ class Fighter(Ship):
         gt = self._timers['dogfight'] * rate
         t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
         if self._timers['gun'] >= 1 / rate:
-            self._timers['gun'] = self._timers['gun'] % (1 / rate)
-            self.fire(self.effective_target)
+            if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
+                self._timers['gun'] = self._timers['gun'] % (1 / rate)
+                self.fire(self.effective_target)
         t2 = math.cos(gt * 3.14159)
         
         vtowards = (self.effective_target.pos - self.pos).normalized()
@@ -134,7 +168,7 @@ class Fighter(Ship):
 
         delta = self.effective_target.pos - self.pos
         # In range?
-        if delta.magnitude() - self.effective_target.radius <= FIRE_RANGE:
+        if delta.magnitude() - self.effective_target.radius <= self.get_weapon_range():
             rate = self.get_fire_rate()
             if self._timers['gun'] >= 1 / rate:
                 self._timers['gun'] = self._timers['gun'] % (1 / rate)
@@ -143,7 +177,7 @@ class Fighter(Ship):
         else: # Out of range? head towards.
             self.target_heading = None
         
-        tp = (self.pos - self.effective_target.pos).normalized() * (self.effective_target.radius + FIRE_RANGE * 0.75) + self.effective_target.pos
+        tp = (self.pos - self.effective_target.pos).normalized() * (self.effective_target.radius + self.get_weapon_range() * 0.75) + self.effective_target.pos
         delta = tp - self.pos
         if delta.sqr_magnitude() > 5 ** 2:
             self.target_velocity = delta.normalized() * self.get_cruise_speed()
@@ -160,7 +194,7 @@ class Fighter(Ship):
 
         delta = self.effective_target.pos - self.pos
         if isinstance(self.effective_target, planet.Planet):
-            if (delta.magnitude() - self.effective_target.radius - FIRE_RANGE) <= 0:
+            if (delta.magnitude() - self.effective_target.radius - self.get_weapon_range()) <= 0:
                 if not self.effective_target.owning_civ or self.effective_target.health <= 0:
                     self.set_state(STATE_WAITING)
                     return

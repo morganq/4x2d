@@ -15,6 +15,15 @@ HOVER_COLORS = {
     PICO_GREEN:PICO_DARKGREEN
 }
 
+def generate_upgrade_image(upgrade):
+    image = pygame.image.load(resource_path("assets/up-back-iron.png")).convert_alpha()
+    icon = pygame.image.load(resource_path("assets/upgrades/%s.png" % upgrade.icon)).convert_alpha()
+    category_icons = {'buildings':'i-up-building', 'tech':'i-up-tech', 'ships':'i-up-ship'}
+    category_icon = pygame.image.load(resource_path("assets/%s.png" % category_icons[upgrade.category])).convert_alpha()
+    image.blit(icon, (4,5))
+    image.blit(category_icon, (0,0))
+    return image
+
 class UpgradeIcon(SpriteBase):
     def __init__(self, pos, upgrade_name, onclick = None, tooltip = False):
         super().__init__(pos)
@@ -29,24 +38,10 @@ class UpgradeIcon(SpriteBase):
         self._generate_image()
 
     def _generate_image(self, hover=False):
-        w = 23
-        h = 23
-        pad = 0
-        resource_color = RESOURCE_COLORS[self.upgrade.resource_type]
-        upgrade_color = UPGRADE_CATEGORY_COLORS[self.upgrade.category]
+        self.image = generate_upgrade_image(self.upgrade)
 
-        self.image = pygame.Surface((w,h), pygame.SRCALPHA)       
-
-        pygame.draw.rect(self.image, resource_color, (pad+1,pad,21,23), 0)
-        pygame.draw.rect(self.image, resource_color, (pad,pad+1,23,21), 0)
-        try:
-            icon = pygame.image.load(resource_path("assets/upgrades/%s.png" % self.upgrade.icon)).convert_alpha()
-            self.image.blit(icon, (pad + 2, pad + 2))
-        except:
-            print(self.upgrade.icon)
-
-        self._width = w
-        self._height = h
+        self._width = self.image.get_width()
+        self._height = self.image.get_height()
         self._recalc_rect()    
 
     def on_mouse_enter(self, pos):

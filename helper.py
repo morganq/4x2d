@@ -14,6 +14,9 @@ def get_nearest(pos, others):
             res = other
     return res, dist
 
+def all_nearby(pos, others, range):
+    return [o for o in others if (pos - o.pos).sqr_magnitude() < range ** 2]
+
 PI = 3.14159
 PI2 = 6.2818
 def get_angle_delta(a, b):

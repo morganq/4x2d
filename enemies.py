@@ -43,7 +43,7 @@ class EnemyController:
                 if random.random() > 0.25:
                     p = random.choice(my_planets)
                     if len(p.buildings) < 5:
-                        p.add_building(random.choice(["econ1", "regen", "armory"]))
+                        pass#p.add_building(random.choice(["econ1", "regen", "armory"]))
                 else:
                     pass
                     #self.civ.upgrade_stats['fire_rate'] += 0.1 # Fix

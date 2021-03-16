@@ -29,8 +29,8 @@ class LevelScene(scene.Scene):
         scene.Scene.__init__(self, game)
         self.options = options
         self.animation_timer = 0
-        self.my_civ = PlayerCiv()
-        self.enemy = EnemyController(self, Civ())
+        self.my_civ = PlayerCiv(self)
+        self.enemy = EnemyController(self, Civ(self))
 
         self.paused = False
         self.game_speed = 1.0
@@ -158,13 +158,13 @@ class LevelScene(scene.Scene):
         self.my_civ.resources.set_resource("iron", 30)
 
         if self.options == "iron":
-            self.my_civ.resources.set_resource("iron", 350)
+            self.my_civ.resources.set_resource("iron", 1150)
 
         if self.options == "ice":
-            self.my_civ.resources.set_resource("ice", 150)
+            self.my_civ.resources.set_resource("ice", 1150)
 
         if self.options == "gas":
-            self.my_civ.resources.set_resource("gas", 150)    
+            self.my_civ.resources.set_resource("gas", 1150)    
 
         if self.options == "buildings":
             homeworld.add_building("econ1")
@@ -217,11 +217,20 @@ class LevelScene(scene.Scene):
     def get_ships(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship)]
 
+    def get_my_ships(self):
+        return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ == civ]
+
     def get_enemy_ships(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ != civ]
 
+    def get_enemy_objects(self, civ):
+        return [s for s in self.game_group.sprites() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ != civ]
+
     def get_civ_ships(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ == civ]        
+
+    def get_hazards(self):
+        return self.get_planets()
 
     def get_starting_state(self):
         return levelstates.PlayState(self)
