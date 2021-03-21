@@ -61,7 +61,10 @@ class PlayerCiv(Civ):
         if not self.offered_upgrades:
             for upgrade_type, ups in upgrades.UPGRADES[resource].items():
                 allowed_ups = [u for u in ups if self.can_research(u)]
-                uname = random.choice(allowed_ups)
+                if allowed_ups:
+                    uname = random.choice(allowed_ups)
+                else:
+                    uname = None
                 self.offered_upgrades[upgrade_type] = uname
         return self.offered_upgrades
 

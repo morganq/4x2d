@@ -38,7 +38,7 @@ class Bullet(SpriteBase):
                 self.kill()
                 return
                 
-        damage = 2
+        damage = self.mods.get("damage_base", 1)
         damage *= 1 + self.mods.get("damage_mul", 0)
         damage += self.mods.get("damage_add", 0)
         objs_hit = [other]
@@ -61,7 +61,7 @@ class Bullet(SpriteBase):
         vn = self.vel.normalized()
         p1 = V2(4,4)
         p2 = V2(4,4) + vn * 2
-        pygame.draw.line(self.image, PICO_BLUE, p1.tuple(), p2.tuple(), 1)
+        pygame.draw.line(self.image, self.mods.get("color", PICO_BLUE), p1.tuple(), p2.tuple(), 1)
 
         self._width = 9
         self._height = 9

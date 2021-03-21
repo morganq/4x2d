@@ -36,8 +36,11 @@ class UpgradePanel(Panel):
         for category,uname in offered_upgrades.items():
             self.header_ys.append(y + 7)
             self.add(Text(cts[category], "small", V2(0,0), upgrades.UPGRADE_CATEGORY_COLORS[category], multiline_width=150), V2(10,y))
-            b = add_button(uname)
-            y += 20 + b.height
+            if uname:
+                b = add_button(uname)
+                y += 20 + b.height
+            else:
+                y += 20
 
         box = SpriteBase(V2(0,0))
         box._width = 75
@@ -74,6 +77,7 @@ class UpgradePanel(Panel):
                 
             positions = {}
             for rx, row in enumerate(rows):
+                row.sort(key=lambda x:x.name)
                 for cy,upg in enumerate(row):
                     pos = V2(self.width - 55, 0)
                     if len(row) > 1:
@@ -94,7 +98,7 @@ class UpgradePanel(Panel):
                     color = PICO_GREEN
                 for parent in u.family['parents']:
                     pp = positions[parent]
-                    pygame.draw.line(self.image, color, (pos + V2(11, 11) - self.pos).tuple(), (pp + V2(11,11) - self.pos).tuple(), 1)
+                    pygame.draw.line(self.image, color, (pos + V2(14, 12) - self.pos).tuple(), (pp + V2(14,12) - self.pos).tuple(), 1)
                 if name == button.upgrade.name:
                     pygame.draw.rect(self.image, PICO_GREEN, (pos.x - self.pos.x - 1, pos.y - self.pos.y, 28, 28), 2)
         else:

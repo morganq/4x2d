@@ -11,6 +11,8 @@ ATOMIC_BOMB_RANGE = 50
 
 class Colonist(Ship):
     HEALTHBAR_SIZE = (16,2)
+    BASE_HEALTH = 35
+    
     def __init__(self, scene, pos, owning_civ):
         Ship.__init__(self, scene, pos, owning_civ)
         self.set_sprite_sheet("assets/colonist.png", 12)

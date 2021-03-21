@@ -31,7 +31,7 @@ class Ship(SpaceObject):
     HEALTHBAR_SIZE = (14,2)
     THRUST_ACCEL = 5
     MAX_SPEED = 8
-    BASE_HEALTH = 10
+    BASE_HEALTH = 20
     WARP_DRIVE_TIME = 30.0
     SHIP_NAME = None
 
@@ -45,7 +45,7 @@ class Ship(SpaceObject):
         self.states = {
             STATE_CRUISING:{'update':self.state_cruising},
             STATE_WAITING:{'update':self.state_waiting},
-            STATE_RETURNING:{'update':self.state_returning},
+            STATE_RETURNING:{'update':self.state_returning, 'enter':self.enter_state_returning},
         }
         self.state = None
         self.set_state(STATE_CRUISING)
@@ -183,6 +183,9 @@ class Ship(SpaceObject):
             self.kill()
             other.add_ship(self.SHIP_NAME)
             other.needs_panel_update = True
+        else:
+            delta=(other.pos-self.pos).normalized()
+            self.pos += -delta
 
     def get_fleet_forces(self, dt):
         forces = V2(0,0)
@@ -224,9 +227,14 @@ class Ship(SpaceObject):
             delta = self.effective_target.pos - self.pos
             self.target_velocity = delta.normalized() * self.get_cruise_speed()
 
-    def state_returning(self, dt):
-        pass
+    def enter_state_returning(self):
+        nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
+        if nearest:
+            self.effective_target = nearest
 
+    def state_returning(self, dt):
+        delta = self.effective_target.pos - self.pos
+        self.target_velocity = delta.normalized() * self.get_cruise_speed()
 
     def state_waiting(self, dt):
         _,a = (self.pos - self.effective_target.pos).to_polar()

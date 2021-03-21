@@ -3,6 +3,7 @@ import random
 from warpwarning import WarpWarning
 from ships.alienbattleship import AlienBattleship
 from colors import *
+import pathfinder
 from v2 import V2
 
 # - Enemy waves come from outside
@@ -68,14 +69,17 @@ class EnemyController:
                 my_planets_with_fighters = [p for p in my_planets if p.ships['alien-fighter'] > 0]
                 if my_planets_with_fighters:
                     p = random.choice(my_planets_with_fighters)
+                    path = self.scene.pathfinder.find_path(p, target)
+                    if path:
+                        path = path[4:-4] # Skip the first and last bits.
                     for _ in range(random.randint(1,p.ships['alien-fighter'])):
-                        p.emit_ship('alien-fighter', {'to':target})
+                        p.emit_ship('alien-fighter', {'to':target, 'path':path})
                     if p.ships['alien-battleship']:
                         for _ in range(random.randint(1,p.ships['alien-battleship'])):
-                            p.emit_ship('alien-battleship', {'to':target})
+                            p.emit_ship('alien-battleship', {'to':target, 'path':path})
                     if p.population > 1:
                         pop = random.randint(1, p.population-1)
-                        p.emit_ship('alien-colonist', {'to':target, 'num':pop})
+                        p.emit_ship('alien-colonist', {'to':target, 'path':path, 'num':pop})
                     self.invade_timer = 0
                     p.needs_panel_update = True
 

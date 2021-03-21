@@ -4,7 +4,9 @@
  - Health: 1: +big flat health, 2: Fast health regen, 2: +health for nearby allied ships, 3: Thorns
  - Dangerous: 1: has a weapon to shoot ships, 2: increase weapon range and allow to shoot planets, 2: if planet is lost, your buildings go underground and can be restored when you retake. 3: ?
  - Hangar: 1: Planet makes +25% fighters when producing them, 2a: Unlock bombers. Planet makes +50% bombers, 2b: Unlock interceptors. Planet makes +25% interceptors, 3a: Unlock Destoyers. Planet makes destroyers 50% faster, 3b: Planet fighter production is increased by 50%
-
+ - Defensive: 1: nearby planets with this building form a matrix which hurts ships flying into
+ - lowest resource mining rate
+ - population growth
  - shield defense, weapon defense, buildings for making specific ships, improve overall ship production here, increase ally move speed in radius, buff ally in radius, higher max population (but not size)
 
 # Ship Prod
@@ -40,10 +42,11 @@
 
 
 == Nanotechnology ==
-   * Repair Bots: Ship regeneration +1 hp/sec
+   * Repair Bots: Ship regeneration +1 hp/sec - (macro)
    i (Unlimited) Hull Reconfiguration: When a ship is destroyed, it heals a random allied ship nearby
    * Grey Goo: -50% fighter missile damage. Fighter missiles infect the target with grey goo nanobots; each nanobot deals 1 damage for each nanobot per second
    i Nanobot Collection: Each enemy infected with Grey Goo provides 1 iron per second
+   
 
 == Advanced Mechanics ==
    i Precise Assembly: Ships have +15% rate of fire
@@ -79,15 +82,121 @@
 Potentially Viable Strategies:
  * Rush
    + Early upgrades with not great follow up
+   + Early upgrade synergy which plateaus (flat numbers for example)
    + Instantly gain a bunch of each resource
    + Overclock
+   + Intercept
  * Contain
-   + Interceptors
    + Something like siege tanks - maybe planetary weapons
  * Fast Expand
  * Quick Tech
  * Turtle
-   + mining rate, - mining rate for each planet
+   + mining rate, but - mining rate for each planet
    + building grant more hp
  * Battleships
  * Bomber Strat
+ * Midrange / "Macro"
+   + stacking cross-upgrade synergies
+
+upgrade categories:
+iron:
+1. rush, fast expand, rush, rush synergy
+2. macro, quick tech, quick tech, macro, late game
+3. turtle, rush, rush, turtle synergy
+4. fast expand, macro, macro, fast expand synergy
+ice:
+5. interceptor, contain, rush, interceptor
+6. turtle, macro, turtle, ice synergy
+7. Bomber, contain, contain, bomber
+gas:
+8. battleship, battleship exclusivity, rush, late game
+9. rush, fast expand, turtle, late game
+10. meta, macro,macro, tech
+
+iron:
+1. mechanics
+ - fighters gain +33% as [rush]
+ - pop bonus but fighter sacrifice [fe]
+ - ships move 33% faster flying to enemy planets [rush]
+ - ships gain a shield when far from friendly planets [rush] (inf)
+2. atomic
+ - +10% mining rate, lose a ship every minute [macro]
+ - freeze iron for 15 seconds. gain 100 ice and 50 gas [qt] (inf)
+ - non-fighter production rate increased by 15% [qt]
+ - planets' mining rate grows to +20%, resets if attacked or launches ship [macro]
+3. biologic
+ - planet health [turtle]
+ - population grows 5% faster for each docked ship [turtle]
+ - planets gain +2 hp regen when no ships are docked [rush?]
+ - armory [turtle] (inf)
+4. quantum 
+ - gain +25 ice for each planet you control [fe]
+ - ships +25% hp [macro]
+ - warp drive [macro] (inf)
+ - a colonist ship that enters warp drive gets +1 population [fe]
+ice:
+5. crystal
+ - interceptors fire 33% faster in deep space
+ - ships near enemy planets have a 15% chance to dodge missiles
+ - atomic bomb
+ - interceptor shots bounce like glaive
+6. ai - turtle, macro, turtle, ice synergy
+ - ships gain +100% attack speed for 4 seconds after take-off [turtle]
+ - population grows on planets with 0 population [turtle]
+ - whenever you gain a new planet, at a random building [macro]
+ - interceptors fire faster near bombers
+7. proximity - Bomber, contain, contain, bomber
+ - bombers have a chance to destroy a random building 
+ - planets near enemy planets produce ships fifteen percent faster
+ - planets near hazards mine fifteen percent faster
+ - bomb damage increased by ten percent
+gas:
+8. optics - battleship, battleship exclusivity, rush, late game
+ - battleships fire lasers rather than missiles
+ - ships have minus twenty five percent health, but battleships get plus fifty percent health
+ - ships gains fifteen percent attacks speed over the course of their first minute flying 
+ - a group of eight or more ships gains a twenty damage shield
+9. exotic material - rush, fast expand, turtle, late game
+ - gain plus fifty percent from asteroids
+ - planets getplus one hundred percent health for the first minute you control them
+ - planets get plus fifty percent health if near other ally planets
+ - ships get plus fifteen percent range
+10. alien - meta, macro, macro, tech
+ - gain three rerolls
+ - ships move fifteen percent faster
+ - ships deal bonus damage based on bonus speed
+ - ice production is ten percent faster, and gas production is five percent faster
+
+upgrade ideas:
+rush:
+-ships move faster when flying to enemy planets
+-upgraded when alone
+-fighter centric
+-atomic bomb
+-degrade with number of planets
+-upgrade is on a timer
+turtle:
+-bonus when ships are docked
+-planetary weapon
+-bonus but slow down ships
+-ship siege mode when defending
+-line between nearby planets as defense
+-create hazards
+-unstable reactor
+fast expand:
+-static resource bonus based on number of planets  
+-population bonus with fighter sacrifice
+-add a defense building to existing planets
+-fighters move faster when going to allied planets
+quick tech:
+-trade iron for other resource
+-battleship-related
+-interceptor ability like corsair
+-this strategy is implicit more or less
+macro:
+-scaling ship improvements
+-iron production  
+-upgrade synergy lines
+-balance across upgrades
+
+many ofthese ideas have drawbacks, but opportunity cost may be sufficient

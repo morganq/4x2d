@@ -199,3 +199,52 @@ class LongFighters3Upgrade(Upgrade):
         p = ProductionOrder("fighter", 6, 120)
         to.add_production(p)        
         to.owning_civ.resources.gas += 50
+        
+
+@register_upgrade
+class Interceptors1Upgrade(Upgrade):
+    name = "basicinterceptors1"
+    resource_type = "ice"
+    category = "ships"
+    title = "Interceptors"
+    description = "[^2] [Interceptors] Over 30 seconds"
+    icon = "fighters6"
+    cursor = "allied_planet"
+    family = {'tree':'basicinterceptors', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("interceptor", 2, 30)
+        to.add_production(p)
+
+@register_upgrade
+class Bombers1Upgrade(Upgrade):
+    name = "basicbombers1"
+    resource_type = "ice"
+    category = "ships"
+    title = "Bombers"
+    description = "[^2] [Bombers] Over 30 seconds"
+    icon = "fighters6"
+    cursor = "allied_planet"
+    family = {'tree':'basicbombers', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("bomber", 2, 30)
+        to.add_production(p)       
+
+@register_upgrade
+class Battleships1Upgrade(Upgrade):
+    name = "basicbattleships1"
+    resource_type = "gas"
+    category = "ships"
+    title = "Battleships"
+    description = "[^2] [Battleships] Over 30 seconds"
+    icon = "fighters6"
+    cursor = "allied_planet"
+    family = {'tree':'basicbattleships', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("battleship", 2, 30)
+        to.add_production(p)         

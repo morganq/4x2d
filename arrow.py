@@ -19,7 +19,7 @@ class OrderArrow(SpriteBase):
         if end_planet:
             end = end_planet.pos
             color = PICO_WHITE
-            end_offset = 20
+            end_offset = (end_planet.radius + 6)
         pt1 = start_planet.pos
         pt2 = end
         delta = pt2 - pt1

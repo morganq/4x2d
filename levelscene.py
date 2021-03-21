@@ -1,3 +1,5 @@
+from pathfinder import Pathfinder
+from spaceobject import SpaceObject
 import simplesprite
 import sys
 import traceback
@@ -9,6 +11,7 @@ import game
 import levelstates
 import scene
 import states
+from asteroid import Asteroid
 from background import Background
 from civ import PlayerCiv, Civ
 from meter import Meter
@@ -47,6 +50,33 @@ class LevelScene(scene.Scene):
         self._score = value
         self.score_text.set_text("%d" % value)
 
+    def random_object_pos(self):
+        pos = None
+        while pos is None:
+            pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
+            
+            near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
+            if near_button.collidepoint(*pos.tuple()):
+                pos = None
+                continue
+
+            near_meters = pygame.Rect(0, 0, 250, 60)
+            if near_meters.collidepoint(*pos.tuple()):
+                pos = None
+                continue
+
+            dist = 999999
+            for obj in self.get_objects():
+                delta = (obj.pos - pos).sqr_magnitude()
+                if delta < dist:
+                    dist = delta
+            if dist <= 30 ** 2:
+                pos = None
+                continue
+
+            
+        return pos
+
     def load(self):
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
@@ -58,7 +88,7 @@ class LevelScene(scene.Scene):
         # Me
         homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
         homeworld.change_owner(self.my_civ)
-        homeworld.population = 7
+        homeworld.population = 4
         homeworld.ships['fighter'] = 2
         self.game_group.add(homeworld)
 
@@ -83,8 +113,8 @@ class LevelScene(scene.Scene):
                 continue            
             
             dist = 999999
-            for planet in self.get_planets():
-                delta = (planet.pos - pos).sqr_magnitude()
+            for obj in self.get_objects():
+                delta = (obj.pos - pos).sqr_magnitude()
                 if delta < dist:
                     dist = delta
             if dist > 70 ** 2:
@@ -123,6 +153,10 @@ class LevelScene(scene.Scene):
                         size -= 1
                 self.game_group.add(Planet(self, pos, size, pr))
                 num_planets += 1
+
+        for i in range(20):
+            pos = self.random_object_pos()
+            self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))
 
         self.meters = {}
         self.upgrade_texts = {}
@@ -194,6 +228,9 @@ class LevelScene(scene.Scene):
         if self.options == "score":
             homeworld.change_owner(self.enemy.civ)
 
+        self.pathfinder = Pathfinder(self)
+        self.pathfinder.generate_grid()
+
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
 
@@ -207,6 +244,9 @@ class LevelScene(scene.Scene):
             self.my_civ.upgrade_limits.data[res_type] += 25
         self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
         self.meters[res_type].value = self.my_civ.resources.data[res_type]
+
+    def get_objects(self):
+        return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
 
     def get_planets(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet)]

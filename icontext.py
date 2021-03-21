@@ -41,5 +41,5 @@ class IconText(SpriteBase):
     def update(self, dt):
         self.pos += V2(0, (-dt * 18) / (self.time + 1))
         self.time += dt
-        if self.time > 1.0:
+        if self.time > 1.66:
             self.kill()

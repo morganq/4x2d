@@ -1,12 +1,17 @@
+finish notes on upgrades
+get MVP of upgrades implemented
+implement interceptor, bomber, battleship
+implement a simple alien race
+implement level progression
+implement another alien race
+~ level rewards and star map
+
+==
+
 New text class
 Many options, well organized.
 Full border. Shadow. Multiline. Render to surf instead of create obj. 
 Parse text and extract [] to make a different color for putting stats in
-
-=====
-
-Planet and Ship etc. derive from base object with health, radius, pos, etc....
-This will allow creation of asteroids and shit
 
 ====
 

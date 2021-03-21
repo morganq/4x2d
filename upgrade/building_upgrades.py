@@ -14,11 +14,11 @@ class EconUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Refinery"
-    description = "[^+15%] [Mining Rate] for [Primary Resource]"
+    description = "[^+25%] [Mining Rate] for [Primary Resource]"
     icon = "refinery"
     cursor = "allied_planet"
     family = {'tree':'econ', 'parents':[]}
-    building = make_simple_stats_building("econ1", stats=Stats(top_mining_rate=0.15), shape="refinery")
+    building = make_simple_stats_building("econ1", stats=Stats(top_mining_rate=0.25), shape="refinery")
 
 @register_upgrade
 class Econ2AUpgrade(AddBuildingUpgrade):
@@ -26,10 +26,10 @@ class Econ2AUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Nuclear Reactor"
-    description = "[^+35%] [Mining Rate] for [Primary Resource], [!-2] [Max Population]"
+    description = "[^+50%] [Mining Rate] for [Primary Resource], [!-2] [Max Population]"
     icon = "nuclearreactor"
     cursor = "allied_planet"
-    building = make_simple_stats_building("econ2a", stats=Stats(top_mining_rate=0.35, pop_max_add=-2), shape="nuclearreactor")
+    building = make_simple_stats_building("econ2a", stats=Stats(top_mining_rate=0.5, pop_max_add=-2), shape="nuclearreactor")
     requires = ("econ1",)
     family = {'tree':'econ', 'parents':['econ1']}
 
@@ -52,10 +52,10 @@ class Econ3Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "IO Matrix"
-    description = "[^+5%] [Mining Rate] for [Primary Resource] per Building"
+    description = "[^+10%] [Mining Rate] for [Primary Resource] per Building"
     icon = "iomatrix"
     cursor = "allied_planet"
-    building = make_simple_stats_building("econ3", stats=Stats(top_mining_per_building=0.05), shape="iomatrix")
+    building = make_simple_stats_building("econ3", stats=Stats(top_mining_per_building=0.1), shape="iomatrix")
     requires = lambda x:"econ1" in x and ("econ2a" in x or "econ2b" in x)
     infinite = True
     family = {'tree':'econ', 'parents':['econ2a','econ2b']}
@@ -162,3 +162,81 @@ class Pop3Upgrade(AddBuildingUpgrade):
     building = make_simple_stats_building("pop3", stats=Stats(pop_max_mul=0.25, planet_health_mul=-0.30), shape="undergroundshelter")
     requires = lambda x:'pop1' in x and ('pop2a' in x or 'pop2b' in x)
     infinite = True
+
+@register_upgrade
+class Hangar1Upgrade(AddBuildingUpgrade):
+    name = "hangar1"
+    resource_type = "iron"
+    category = "buildings"
+    title = "Fighter Hangar"
+    description = "[^+33%] [Fighter] Production Quantity"
+    icon = "mining"
+    cursor = "allied_planet"
+    family = {'tree':'hangar', 'parents':[]}
+    building = make_simple_stats_building("hangar1", stats=Stats(fighter_production=0.33), shape="modulardwellings")
+
+@register_upgrade
+class Hangar2aUpgrade(AddBuildingUpgrade):
+    name = "hangar2a"
+    resource_type = "ice"
+    category = "buildings"
+    title = "Interceptor Hangar"
+    description = "Unlock Interceptors. [^+50%] [Interceptor] Production Quantity"
+    icon = "mining"
+    cursor = "allied_planet"
+    family = {'tree':'hangar', 'parents':['hangar1']}
+    building = make_simple_stats_building("hangar2a", stats=Stats(interceptor_production=0.5), shape="lifesupport")
+    requires = ('hangar1',)
+
+@register_upgrade
+class Hangar2bUpgrade(AddBuildingUpgrade):
+    name = "hangar2b"
+    resource_type = "ice"
+    category = "buildings"
+    title = "Bomber Hangar"
+    description = "Unlock Bombers. [^+50%] [Bomber] Production Quantity"
+    icon = "mining"
+    cursor = "allied_planet"
+    family = {'tree':'hangar', 'parents':['hangar1']}
+    building = make_simple_stats_building("hangar2b", stats=Stats(bomber_production=0.5), shape="lifesupport")
+    requires = ('hangar1',)
+
+@register_upgrade
+class Hangar3Upgrade(AddBuildingUpgrade):
+    name = "hangar3"
+    resource_type = "gas"
+    category = "buildings"
+    title = "Battleship Hangar"
+    description = "Unlock Battleships. [^+10%] [Battleship] Production Speed"
+    icon = "mining"
+    cursor = "allied_planet"
+    family = {'tree':'hangar', 'parents':['hangar2a', 'hangar2b']}
+    building = make_simple_stats_building("hangar3", stats=Stats(battleship_production=0.5), shape="lifesupport")
+    requires = lambda x:'hangar1' in x and ('hangar2a' in x or 'hangar2b' in x)
+    infinite = True     
+    
+@register_upgrade
+class GrowthUpgrade(AddBuildingUpgrade):
+    name = "growth1"
+    resource_type = "ice"
+    category = "buildings"
+    title = "Farm"
+    description = "[^+33%] faster Population growth rate"
+    icon = "refinery"
+    cursor = "allied_planet"
+    family = {'tree':'growth', 'parents':[]}
+    building = make_simple_stats_building("growth", stats=Stats(pop_growth_rate=0.33), shape="refinery")
+    infinite=True
+
+@register_upgrade
+class ScarcestResourceUpgrade(AddBuildingUpgrade):
+    name = "scarcest1"
+    resource_type = "gas"
+    category = "buildings"
+    title = "Strip Mining"
+    description = "[^+25%] faster mining rate for the scarcest available resource"
+    icon = "refinery"
+    cursor = "allied_planet"
+    family = {'tree':'scarcest', 'parents':[]}
+    building = make_simple_stats_building("scarcest", stats=Stats(scarcest_mining_rate=0.25), shape="refinery")
+    infinite=True

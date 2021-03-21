@@ -8,6 +8,7 @@ import levelscene
 import worldmapscene
 import introscene
 import buildingcreatorscene
+import leveleditorscene
 from resources import resource_path
 import sys
 import menuscene
@@ -36,6 +37,8 @@ class Game:
         if len(sys.argv) > 1 and DEV:
             if sys.argv[1] == "draw":
                 self.scene = buildingcreatorscene.BuildingCreatorScene(self)
+            elif sys.argv[1] == "editor":
+                self.scene = leveleditorscene.LevelEditorScene(self)
             else:
                 self.scene = levelscene.LevelScene(self, sys.argv[1])
         else:

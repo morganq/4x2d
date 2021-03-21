@@ -35,7 +35,7 @@ EMIT_CLASSES = {
 
 RESOURCE_BASE_RATE = 1/220.0
 
-POPULATION_GROWTH_TIME = 15
+POPULATION_GROWTH_TIME = 30
 HP_PER_BUILDING = 5
 DEFENSE_RANGE = 30
 DESTROY_EXCESS_SHIPS_TIME = 7
@@ -168,6 +168,9 @@ class Planet(SpaceObject):
         max_hp = round(base * (1 + self.get_stat("planet_health_mul")))
         return max_hp
 
+    def get_pop_growth_time(self):
+        return POPULATION_GROWTH_TIME / (1 + self.get_stat('pop_growth_rate'))
+
     def get_max_pop(self):
         return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add")
 
@@ -178,8 +181,10 @@ class Planet(SpaceObject):
             if self.emit_ships_timer >= EMIT_SHIPS_RATE:
                 ship_type, data = self.emit_ships_queue.pop(0)
                 target = data['to']
-                ship_class = EMIT_CLASSES[ship_type]
-                off = V2(random.random() - 0.5, random.random() - 0.5).normalized()
+                towards_angle = (target.pos - self.pos).to_polar()[1]
+                towards_angle += random.random() - 0.5
+                ship_class = EMIT_CLASSES[ship_type]                                
+                off = V2.from_angle(towards_angle)
                 s = ship_class(self.scene, self.pos + off * self.get_radius(), self.owning_civ)
                 if ship_type in ["colonist", "alien-colonist"]:
                     s.set_pop(data['num'])
@@ -193,11 +198,11 @@ class Planet(SpaceObject):
 
         ### Resource production ###
         # Figure out which is the "top" resource
-        top_resource = "iron"
-        if self.resources.ice > self.resources.iron and self.resources.ice >= self.resources.gas:
-            top_resource = "ice"
-        elif self.resources.gas > self.resources.iron and self.resources.gas > self.resources.ice:
-            top_resource = "gas"
+        resource_order = [(a,b) for (a,b) in self.resources.data.items() if b > 0]
+        resource_order.sort(key=lambda x:x[1])
+        top_resource = resource_order[0][0]
+        bottom_resource = resource_order[-1][0]
+
         for r in self.resources.data.keys():
             rate_modifier = 1
 
@@ -205,8 +210,12 @@ class Planet(SpaceObject):
 
             # Top resource mining rate
             if top_resource == r:
-                rate_modifier = self.get_stat("top_mining_rate") + 1
+                rate_modifier += self.get_stat("top_mining_rate")
                 rate_modifier *= 1 + self.get_stat("top_mining_per_building") * len(self.buildings)
+
+            # Scarcest resource mining rate
+            if bottom_resource == r:
+                rate_modifier += self.get_stat("scarcest_mining_rate")
 
             # Unstable Reaction
             rate_modifier *= (1 + self.get_stat("mining_rate") + self.unstable_reaction)
@@ -229,7 +238,10 @@ class Planet(SpaceObject):
 
         # Ship production
         for prod in self.production:
-            prod.update(self, dt * (1 + self.get_stat("ship_production_rate")))
+            prod_rate = 1 + self.get_stat("ship_production_rate")
+            if prod.ship_type in ['fighter', 'interceptor', 'bomber', 'battleship']:
+                prod_rate *= 1 + self.get_stat("%s_production_rate" % prod.ship_type)
+            prod.update(self, dt * prod_rate)
         self.production = [p for p in self.production if not p.done]
 
         # Ship destruction
@@ -252,7 +264,7 @@ class Planet(SpaceObject):
             if self._population >= 1 - self.get_stat("pop_growth_min_reduction"):
                 self.population_growth_timer += dt
                 max_pop = self.get_max_pop()
-                if self.population_growth_timer >= POPULATION_GROWTH_TIME and self._population < max_pop:
+                if self.population_growth_timer >= self.get_pop_growth_time() and self._population < max_pop:
                     self.population_growth_timer = 0
                     self._population += 1
                     self.needs_panel_update = True

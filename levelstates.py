@@ -128,18 +128,27 @@ class PlayState(UIEnabledState):
 
     def release_drag(self):
         # Just made an order
-        if self.hover_sprite and self.dragging_from_sprite != self.hover_sprite:
-            target_selection = self.hover_sprite.get_selection_info()
-            if target_selection['type'] == 'planet' and self.dragging_from_sprite.owning_civ == self.scene.my_civ:
-                path = pathfinder.Pathfinder(self.scene).find_path(self.dragging_from_sprite, self.hover_sprite)
-                if path:
-                    path = path[4:-4] # Skip the first and last bits.
-                    self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite, path=path))
+        if self.dragging_from_sprite and self.dragging_from_sprite.get_selection_info() and self.dragging_from_sprite.owning_civ == self.scene.my_civ:
+            if self.hover_sprite and self.dragging_from_sprite != self.hover_sprite:
+                target_selection = self.hover_sprite.get_selection_info()
+                if target_selection:
+                    if target_selection['type'] == 'planet' and self.dragging_from_sprite.owning_civ == self.scene.my_civ:
+                        path = self.scene.pathfinder.find_path(self.dragging_from_sprite, self.hover_sprite)
+                        if path:
+                            path = path[4:-4] # Skip the first and last bits.
+                            self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite, path=path))
+
+                    if target_selection['type'] == 'asteroid':
+                        path = self.scene.pathfinder.find_path(self.dragging_from_sprite, self.hover_sprite)
+                        if path:
+                            path = path[4:-4] # Skip the first and last bits.
+                            self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite, path=path))
+            
 
     def update(self, dt):
         if self.last_clicked_sprite:
             selection_info = self.last_clicked_sprite.get_selection_info()
-            if selection_info:
+            if selection_info and selection_info['type'] == 'planet':
                 if self.current_panel and self.current_panel.panel_for != self.last_clicked_sprite:
                     self.current_panel.kill()
                     self.current_panel = None
