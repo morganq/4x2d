@@ -42,7 +42,7 @@ class Econ2BUpgrade(AddBuildingUpgrade):
     description = "[^+25%] [Mining Rate] for [Primary Resource], [!-50%] [Fighter Production]"
     icon = "militarysurplus"
     cursor = "allied_planet"
-    building = make_simple_stats_building("econ2b", stats=Stats(top_mining_rate=0.25, fighter_production_halving=1), shape="militarysurplus")
+    building = make_simple_stats_building("econ2b", stats=Stats(top_mining_rate=0.25, fighter_production_amt_halving=1), shape="militarysurplus")
     requires = ("econ1",)    
     family = {'tree':'econ', 'parents':['econ1']}
 
@@ -173,7 +173,7 @@ class Hangar1Upgrade(AddBuildingUpgrade):
     icon = "mining"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':[]}
-    building = make_simple_stats_building("hangar1", stats=Stats(fighter_production=0.33), shape="modulardwellings")
+    building = make_simple_stats_building("hangar1", stats=Stats(fighter_production_amt=0.33), shape="modulardwellings")
 
 @register_upgrade
 class Hangar2aUpgrade(AddBuildingUpgrade):
@@ -240,3 +240,16 @@ class ScarcestResourceUpgrade(AddBuildingUpgrade):
     family = {'tree':'scarcest', 'parents':[]}
     building = make_simple_stats_building("scarcest", stats=Stats(scarcest_mining_rate=0.25), shape="refinery")
     infinite=True
+
+@register_upgrade
+class AlienHomedDefenseUpgrade(AddBuildingUpgrade):
+    name = "alienhomedefense"
+    resource_type = "alien"
+    category = "buildings"
+    title = "Alien Home Defense"
+    description = "Planet fires missiles at nearby enemy ships"
+    icon = "mining"
+    cursor = "allied_planet"
+    family = {}
+    building = "alienhomedefense"
+    requires = None    

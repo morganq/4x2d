@@ -16,3 +16,17 @@ Concept:
 Alien invasions have scattered humanity across the stars.
 You detect a distress signal from a distant galaxy...
 Standing between you and your goal are lightyears of alien-infested star systems
+
+
+====
+
+Level concept:
+ - You start from 0 (+ bonuses)
+ - Enemy start is based on difficulty and level setup
+ - Enemy base always has a defense cannon which makes destroying the planet early very difficult
+ - Win when they have no more planets
+ - Bonus conditions:
+   - Win in under 8 minutes
+   - Research 6 gas or ice technologies in under 8 minutes
+
+how to prevent rushes? a defensive strategy and starting point for certain levels / aliens

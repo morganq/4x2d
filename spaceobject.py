@@ -4,13 +4,15 @@ from collections import defaultdict
 
 class SpaceObject(AnimRotSprite, Healthy):
     HEALTHBAR_SIZE = (20, 3)
+    SOID = 0
     def __init__(self, scene, pos):
         AnimRotSprite.__init__(self, pos)
         self.scene = scene
         self.status_effects = []
         self.radius = 1
         self.owning_civ = None
-        
+        self.debug_id = self.SOID
+        SpaceObject.SOID += 1
         Healthy.__init__(self, scene, meter_size=self.HEALTHBAR_SIZE)
 
     def get_stat(self, stat):

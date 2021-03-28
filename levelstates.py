@@ -264,6 +264,7 @@ class UpgradeState(UIEnabledState):
         self.pending_upgrade = None
         self.cursor_type = None
         self.cursor_icon = None
+        self.selection_info_text = None
 
     def enter(self):
         self.scene.paused = True
@@ -277,6 +278,8 @@ class UpgradeState(UIEnabledState):
     def exit(self):
         self.hover_filter = lambda x:True
         self.scene.paused = False
+        if self.selection_info_text:
+            self.selection_info_text.kill()
         if self.cursor_icon:
             self.cursor_icon.kill()
 
@@ -305,6 +308,8 @@ class UpgradeState(UIEnabledState):
             self.scene.ui_group.add(self.cursor_icon)
             self.hover_filter = lambda x:(x.get_selection_info() and x.get_selection_info()['type'] == 'planet' and x.owning_civ == self.scene.my_civ)
             self.panel.kill()
+            self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+            self.scene.ui_group.add(self.selection_info_text)
 
     def take_input(self, input, event):
         super().take_input(input, event)
@@ -351,3 +356,16 @@ class GameOverState(State):
             self.scene.game.scene = levelscene.LevelScene(self.scene.game)
             self.scene.game.scene.start()
                 
+
+class VictoryState(State):
+    def enter(self):
+        self.scene.ui_group.empty()
+        self.scene.ui_group.add(text.Text("Victory!", "big", V2(170, 60), PICO_BLUE, multiline_width=200))
+
+        return super().enter()
+
+    def take_input(self, input, event):
+        if input == "action" or input == "click":
+            self.scene.game.scene = levelscene.LevelScene(self.scene.game)
+            self.scene.game.scene.start()
+                                

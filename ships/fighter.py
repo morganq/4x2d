@@ -173,7 +173,11 @@ class Fighter(Ship):
             return
 
         if not self.effective_target or self.effective_target.health <= 0:
-            self.set_state(STATE_RETURNING)
+            # If we just killed a planet, stay in waiting.
+            if self.effective_target and isinstance(self.effective_target, planet.Planet):
+                self.set_state(STATE_WAITING)
+            else:
+                self.set_state(STATE_RETURNING)
             return
 
         delta = self.effective_target.pos - self.pos

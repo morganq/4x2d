@@ -194,12 +194,33 @@ class LongFighters3Upgrade(Upgrade):
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':['longfighters2a', 'longfighters2b']}
     requires = lambda x:'longfighters1' in x and ('longfighters2a' in x or 'longfighters2b' in x)
+    infinite = True
 
     def apply(self, to):
         p = ProductionOrder("fighter", 6, 120)
         to.add_production(p)        
         to.owning_civ.resources.gas += 50
-        
+
+@register_upgrade
+class InterceptorFighters1Upgrade(Upgrade):
+    name = "interceptorfighters1"
+    resource_type = "ice"
+    category = "ships"
+    title = "Interceptor Convoy"
+    description = "[^2] [Fighters] and [^1] [Interceptor] Over 30 seconds. If Interceptor is not unlocked, [^+1] Population"
+    icon = "fighters6"
+    cursor = "allied_planet"
+    family = {'tree':'interceptorfighters', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("fighter", 2, 30)
+        to.add_production(p)
+        if 'hangar2a' in to.owning_civ.researched_upgrade_names:
+            p = ProductionOrder("interceptor", 1, 30)
+            to.add_production(p)
+        else:
+            to.population += 1
 
 @register_upgrade
 class Interceptors1Upgrade(Upgrade):
@@ -211,6 +232,7 @@ class Interceptors1Upgrade(Upgrade):
     icon = "fighters6"
     cursor = "allied_planet"
     family = {'tree':'basicinterceptors', 'parents':[]}
+    requires = ('hangar2a',)
     infinite = True
 
     def apply(self, to):
@@ -227,11 +249,33 @@ class Bombers1Upgrade(Upgrade):
     icon = "fighters6"
     cursor = "allied_planet"
     family = {'tree':'basicbombers', 'parents':[]}
+    requires = ('hangar2b',)
     infinite = True
 
     def apply(self, to):
         p = ProductionOrder("bomber", 2, 30)
         to.add_production(p)       
+
+@register_upgrade
+class BattleshipFighters1Upgrade(Upgrade):
+    name = "battleshipfighters1"
+    resource_type = "gas"
+    category = "ships"
+    title = "Battleship Convoy"
+    description = "[^3] [Fighters] and [^1] [Battleship] Over 50 seconds. If Battleship is not unlocked, [^+2] Population"
+    icon = "fighters6"
+    cursor = "allied_planet"
+    family = {'tree':'battleshipfighters', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("fighter", 3, 50)
+        to.add_production(p)
+        if 'hangar3' in to.owning_civ.researched_upgrade_names:
+            p = ProductionOrder("battleship", 1, 50)
+            to.add_production(p)
+        else:
+            to.population += 2
 
 @register_upgrade
 class Battleships1Upgrade(Upgrade):
@@ -243,6 +287,7 @@ class Battleships1Upgrade(Upgrade):
     icon = "fighters6"
     cursor = "allied_planet"
     family = {'tree':'basicbattleships', 'parents':[]}
+    requires = ('hangar3',)
     infinite = True
 
     def apply(self, to):

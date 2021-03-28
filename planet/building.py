@@ -97,6 +97,33 @@ class ArmoryBuilding(Building):
                 b = Bullet(
                     planet.pos + V2.from_angle(angle) * planet.get_radius(),
                     random.choice(threats), 
-                    planet, vel=V2.from_angle(angle) * 20, mods={'homing':True, "damage_debuff":0.5}
+                    planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "damage_debuff":0.5}
                     )
                 planet.scene.game_group.add(b)
+
+@building
+class AlienHomeDefenseBuilding(Building):
+    FIRE_RATE = 0.40
+    upgrade = "alienhomedefense"
+    def __init__(self):
+        Building.__init__(self)
+        self.load_shapes("armory")
+        self.fire_time = 0
+        
+    def update(self, planet, dt):
+        # Regenerate
+        planet.health += 1 * dt
+        # Fire at threats
+        self.fire_time += dt
+        threats = planet.get_threats()
+        if self.fire_time > self.FIRE_RATE and threats:
+            self.fire_time = 0
+            threat = random.choice(threats)
+            _,angle = (threat.pos - planet.pos).to_polar()
+            angle += random.random() * 0.5 - 0.25
+            b = Bullet(
+                planet.pos + V2.from_angle(angle) * planet.get_radius(),
+                threat, 
+                planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "color":PICO_RED},
+                )
+            planet.scene.game_group.add(b)

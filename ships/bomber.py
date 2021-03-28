@@ -13,14 +13,16 @@ class Bomber(Fighter):
     BASE_HEALTH = 35
     BLAST_RADIUS = 0
     FIRE_RATE = 0.2
-    BASE_DAMAGE = 40
+    BASE_DAMAGE = 35
 
-    FIRE_RANGE = 40
+    FIRE_RANGE = 35
     THREAT_RANGE_DEFAULT = 40
     THREAT_RANGE_DEFENSE = 60
 
     BOMBS = True
     DOGFIGHTS = False
+
+    # TODO: waiting-style movement for siege
 
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)

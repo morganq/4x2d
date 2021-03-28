@@ -11,8 +11,9 @@ VALID_STAT_NAMES = [
     'fighter_fire_rate',
     'fighter_health_add',
     'fighter_health_mul',
-    'fighter_production_halving',
+    'fighter_production_amt_halving',
     'fighter_production',
+    'fighter_production_amt',
     'grey_goo_collection',
     'grey_goo',
     'interceptor_missile_bounce', #impl
@@ -40,7 +41,7 @@ VALID_STAT_NAMES = [
     'ship_health_add',
     'ship_health_mul',
     'ship_missile_speed',
-    'ship_production_rate',
+    'ship_production',
     'ship_regenerate',
     'ship_speed_mul_targeting_planets', #impl
     'ship_take_damage_on_fire',

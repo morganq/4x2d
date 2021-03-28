@@ -79,6 +79,8 @@ def get_groups(line, inside_group=None):
         x += 1
     return groups
 
+HEIGHTS = {'small':12, 'big':18}
+
 def render_multiline(text, size, color, wrap_width=None, center=True):
     f = FONTS[size]
     if wrap_width is not None:
@@ -98,7 +100,7 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
     w = 0
     for line in lines:
         _,_,fw,fh = f.get_rect(line)
-        h += max(12, fh)
+        h += max(HEIGHTS[size], fh)
         w = max(w, fw)
     #h += (len(lines) - 1)
     text_surf = pygame.Surface((w,h), pygame.SRCALPHA)
@@ -106,6 +108,7 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
     is_in_color = None
     for line in lines:
         _,_,fw,fh = f.get_rect(line)
+        fh = HEIGHTS[size]
         groups = get_groups(line, is_in_color)
         running_x = 0
         for group in groups:            

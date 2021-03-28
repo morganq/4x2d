@@ -5,13 +5,14 @@ from collections import defaultdict
 UPGRADES = {
     'iron':defaultdict(list),
     'ice':defaultdict(list),
-    'gas':defaultdict(list)
+    'gas':defaultdict(list),
+    'alien':defaultdict(list),
 }
 
 UPGRADE_CATEGORY_COLORS = {
     'buildings':PICO_LIGHTGRAY,
     'ships':PICO_GREEN,
-    'tech':PICO_ORANGE
+    'tech':PICO_ORANGE,
 }
 
 class Upgrade:

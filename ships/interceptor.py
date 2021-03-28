@@ -12,8 +12,8 @@ from bullet import Bullet
 class Interceptor(Fighter): 
     BASE_HEALTH = 50
     BLAST_RADIUS = 7
-    FIRE_RATE = 0.4
-    BASE_DAMAGE = 3
+    FIRE_RATE = 1.0
+    BASE_DAMAGE = 5
 
     FIRE_RANGE = 20
     THREAT_RANGE_DEFAULT = 40
@@ -52,7 +52,7 @@ class Interceptor(Fighter):
         self.scene.game_group.add(b)
 
         #self.velocity += -towards * 2
-        self.pos += -towards * 2
+        self.pos += -towards * 1
         self.thrust_particle_time = THRUST_PARTICLE_RATE
 
         for i in range(10):
@@ -76,12 +76,12 @@ class Interceptor(Fighter):
         gt = self._timers['dogfight'] * rate
         t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
         if self._timers['gun'] >= 1 / rate:
-            if self._timers['gun'] - dt < 1 / rate: # If we JUST got to this number
-                if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
-                    self.bullets_chambered = 3
-                    self._timers['gun'] = self._timers['gun'] % (1 / rate)
+            if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
+                self.bullets_chambered = 3
+                self._timers['gun'] = self._timers['gun'] % (1 / rate)
 
-        if self.bullets_chambered > 0:
+        fire_tick = ((self._timers['gun'] * 6) % 1) < (((self._timers['gun'] - dt) * 6) % 1)
+        if self.bullets_chambered > 0 and fire_tick:
             nearby = all_nearby(self.pos, self.get_threats(), self.FIRE_RANGE * 1.5)
             if nearby:
                 self.fire(random.choice(nearby))

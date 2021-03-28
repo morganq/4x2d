@@ -82,9 +82,7 @@ class UpgradePanel(Panel):
                     pos = V2(self.width - 55, 0)
                     if len(row) > 1:
                         pos = V2(self.width - 75 + cy * 37, 0)
-                    icon = UpgradeIcon(pos + V2(self.x, self.y + 60 + rx * 50), upg.name, None, upg != button.upgrade)
-                    if upg == button.upgrade:
-                        icon.selectable = False
+                    icon = UpgradeIcon(pos + V2(self.x, self.y + 60 + rx * 50), upg.name, None, True)
                     game.Game.inst.scene.ui_group.add(icon)
                     self.tree_children.append(icon)
                     positions[upg.name] = icon.pos

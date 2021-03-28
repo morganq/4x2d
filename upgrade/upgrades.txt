@@ -7,6 +7,9 @@
  - Defensive: 1: nearby planets with this building form a matrix which hurts ships flying into
  - lowest resource mining rate
  - population growth
+ - Ships are better when traveling to this planet, when flying from this planet, 
+ - When you launch a colonist ship towards an enemy or neutral planet, gain some resources (Festival)
+ - When you launch a combat ship towards an enemy planet, gain something.
  - shield defense, weapon defense, buildings for making specific ships, improve overall ship production here, increase ally move speed in radius, buff ally in radius, higher max population (but not size)
 
 # Ship Prod

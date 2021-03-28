@@ -1,6 +1,7 @@
 finish notes on upgrades
 get MVP of upgrades implemented
 implement interceptor, bomber, battleship
+implement alien planetary defense
 implement a simple alien race
 implement level progression
 implement another alien race

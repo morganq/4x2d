@@ -9,7 +9,7 @@ class Mechanics1Upgrade(Upgrade):
     category = "tech"
     title = "Precise Assembly"
     description = "[Fighters] gain [^+33%] rate of fire"
-    icon = "tech_default"
+    icon = "preciseassembly"
     stats = Stats(fighter_fire_rate=0.33)
     family = {'tree':'t_mechanics', 'parents':[]}
     requires = None
@@ -21,7 +21,7 @@ class Mechanics2aUpgrade(Upgrade):
     category = "tech"
     title = "Decommission"
     description = "3 random [Fighters] you control are [!destroyed]. Gain [^4] population among 4 random planets."
-    icon = "tech_default"
+    icon = "decommission"
     stats = None
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
@@ -37,7 +37,7 @@ class Mechanics2bUpgrade(Upgrade):
     category = "tech"
     title = "Vanguard Boosters"
     description = "Ships fly [^+33%] faster when targeting enemy planets"
-    icon = "tech_default"
+    icon = "vanguardboosters"
     stats = Stats(ship_speed_mul_targeting_planets = 0.33)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
@@ -49,7 +49,7 @@ class Mechanics3Upgrade(Upgrade):
     category = "tech"
     title = "Vanguard Armor"
     description = "Ships gain a [^+10] health shield when far from a planet you control"
-    icon = "tech_default"
+    icon = "vanguardarmor"
     stats = Stats(ship_armor_far_from_home = 10)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics2a', 't_mechanics2b']}
     requires = lambda x: 't_mechanics1' in x and ('t_mechanics2a' in x or 't_mechanics2b' in x)
@@ -63,7 +63,7 @@ class Atomic1Upgrade(Upgrade):
     category = "tech"
     title = "Nuclear Battery"
     description = "[^+10%] mining rate. A random ship you control is [!destroyed] every minute"
-    icon = "tech_default"
+    icon = "nuclearbattery"
     stats = Stats(mining_rate=0.1, nuclear_instability=1)
     family = {'tree':'t_atomic', 'parents':[]}
     requires = None
@@ -75,7 +75,7 @@ class Atomic2aUpgrade(Upgrade):
     category = "tech"
     title = "Isotope Conversion"
     description = "Gain [100] <ice> and [50] <gas>. <iron> is [!frozen] for 20 seconds."
-    icon = "tech_default"
+    icon = "isotope"
     stats = None
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
     requires = ('t_atomic1',)
@@ -91,7 +91,7 @@ class Atomic2bUpgrade(Upgrade):
     category = "tech"
     title = "Atomic Assembler"
     description = "[^+15%] faster production of ships other than [Fighters]"
-    icon = "tech_default"
+    icon = "atomicassembler"
     stats = Stats(bomber_production=0.15, interceptor_production=0.15, battleship_production=0.15)
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
     requires = ('t_atomic1',)
@@ -103,7 +103,7 @@ class Atomic3Upgrade(Upgrade):
     category = "tech"
     title = "Unstable Reactor"
     description = "Mining rate on each planet slowly grows to [^+10%], but [!resets] if attacked or if a ship is launched"
-    icon = "tech_default"
+    icon = "unstablereactor"
     stats = Stats(unstable_reaction = 0.10)
     family = {'tree':'t_atomic', 'parents':['t_atomic2a', 't_atomic2b']}
     requires = lambda x: 't_atomic1' in x and ('t_atomic2a' in x or 't_atomic2b' in x)
@@ -117,7 +117,7 @@ class Crystal1Upgrade(Upgrade):
     category = "tech"
     title = "Resonance Reloader"
     description = "[Interceptors] fire [^+33%] faster in deep space"
-    icon = "tech_default"
+    icon = "resonancereloader"
     stats = Stats(interceptor_fire_rate_deep_space=0.33)
     family = {'tree':'t_crystal', 'parents':[]}
     requires = None
@@ -129,7 +129,7 @@ class Crystal2aUpgrade(Upgrade):
     category = "tech"
     title = "Phasing Lattice"
     description = "Ships near enemy planets have a [+15%] chance to dodge missile weapons"
-    icon = "tech_default"
+    icon = "phasinglattice"
     stats = Stats(ship_dodge_near_enemy_planets=0.15)
     family = {'tree':'t_crystal', 'parents':['t_crystal1']}
     requires = ('t_crystal1',)
@@ -141,7 +141,7 @@ class Crystal2bUpgrade(Upgrade):
     category = "tech"
     title = "Fragmentation Sequence"
     description = "If a [Worker] ship is destroyed, it explodes for [^20] damage. Radius is based on ship population"
-    icon = "tech_default"
+    icon = "fragmentationsequence"
     stats = Stats(atomic_bomb=1)
     family = {'tree':'t_crystal', 'parents':['t_crystal1']}
     requires = ('t_crystal1',)
@@ -153,7 +153,7 @@ class Crystal3Upgrade(Upgrade):
     category = "tech"
     title = "Crystal Repeater"
     description = "Interceptor missiles bounce to [^+1] nearby target"
-    icon = "tech_default"
+    icon = "crystalrepeater"
     stats = Stats(interceptor_missile_bounce=1)
     family = {'tree':'t_crystal', 'parents':['t_crystal2a', 't_crystal2b']}
     requires = lambda x: 't_crystal1' in x and ('t_crystal2a' in x or 't_crystal2b' in x)

@@ -44,7 +44,7 @@ class Ship(SpaceObject):
         # States
         self.states = {
             STATE_CRUISING:{'update':self.state_cruising},
-            STATE_WAITING:{'update':self.state_waiting},
+            STATE_WAITING:{'update':self.state_waiting, 'exit':self.exit_state_waiting},
             STATE_RETURNING:{'update':self.state_returning, 'enter':self.enter_state_returning},
         }
         self.state = None
@@ -61,6 +61,7 @@ class Ship(SpaceObject):
         self.fleet_minimum_forces = 0 # The magnitude of the fleet forces before we start caring
 
         # Other stuff
+        self.waiting_time = 0
         self._timers["movement_variation"] = random.random() * 6.2818
         self._timers['thrust_particle_time'] = 0
         self._timers['staged_booster'] = -self.get_stat("staged_booster_time")
@@ -235,8 +236,10 @@ class Ship(SpaceObject):
     def state_returning(self, dt):
         delta = self.effective_target.pos - self.pos
         self.target_velocity = delta.normalized() * self.get_cruise_speed()
+        
 
     def state_waiting(self, dt):
+        self.waiting_time += dt 
         _,a = (self.pos - self.effective_target.pos).to_polar()
         a += 0.2
         target_pt = self.effective_target.pos + V2.from_angle(a) * (ATMO_DISTANCE + self.effective_target.radius)
@@ -245,6 +248,9 @@ class Ship(SpaceObject):
         if isinstance(self.effective_target, planet.Planet):
             if self.can_land(self.effective_target):
                 self.set_state(STATE_CRUISING)
+
+    def exit_state_waiting(self):
+        self.waiting_time = 0
 
     def kill(self):
         if self.health <= 0:

@@ -17,7 +17,11 @@ HOVER_COLORS = {
 
 def generate_upgrade_image(upgrade):
     image = pygame.image.load(resource_path("assets/up-back-iron.png")).convert_alpha()
-    icon = pygame.image.load(resource_path("assets/upgrades/%s.png" % upgrade.icon)).convert_alpha()
+    try:
+        icon = pygame.image.load(resource_path("assets/upgrades/%s.png" % upgrade.icon)).convert_alpha()
+    except:
+        print(upgrade.icon)
+        raise
     category_icons = {'buildings':'i-up-building', 'tech':'i-up-tech', 'ships':'i-up-ship'}
     category_icon = pygame.image.load(resource_path("assets/%s.png" % category_icons[upgrade.category])).convert_alpha()
     image.blit(icon, (4,5))

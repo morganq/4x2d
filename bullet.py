@@ -7,7 +7,7 @@ import math
 import helper
 import random
 
-VEL = 80
+VEL = 50
 DEATH_TIME = 5
 DAMAGE = 2
 

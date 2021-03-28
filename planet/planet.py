@@ -8,6 +8,8 @@ import pygame
 import spritebase
 from colors import *
 from ships.fighter import Fighter
+from ships.bomber import Bomber
+from ships.interceptor import Interceptor
 from ships.colonist import Colonist
 from ships.alienbattleship import AlienBattleship
 from ships.ship import Ship
@@ -27,6 +29,8 @@ from spaceobject import SpaceObject
 EMIT_SHIPS_RATE = 0.125
 EMIT_CLASSES = {
     'fighter':Fighter,
+    'bomber':Bomber,
+    'interceptor':Interceptor,
     'alien-fighter':AlienFighter,
     'colonist':Colonist,
     'alien-colonist':AlienColonist,
@@ -36,7 +40,7 @@ EMIT_CLASSES = {
 RESOURCE_BASE_RATE = 1/220.0
 
 POPULATION_GROWTH_TIME = 30
-HP_PER_BUILDING = 5
+HP_PER_BUILDING = 10
 DEFENSE_RANGE = 30
 DESTROY_EXCESS_SHIPS_TIME = 7
 
@@ -164,7 +168,7 @@ class Planet(SpaceObject):
         return self.size + 8
 
     def get_max_health(self):
-        base = self.size * 20 + len(self.buildings) * HP_PER_BUILDING
+        base = 50 + self.size * 30 + len(self.buildings) * HP_PER_BUILDING
         max_hp = round(base * (1 + self.get_stat("planet_health_mul")))
         return max_hp
 
@@ -195,6 +199,7 @@ class Planet(SpaceObject):
                 s.velocity = off * 10
                 self.scene.game_group.add(s)
                 self.emit_ships_timer -= EMIT_SHIPS_RATE
+                self.needs_panel_update = True
 
         ### Resource production ###
         # Figure out which is the "top" resource
@@ -238,9 +243,9 @@ class Planet(SpaceObject):
 
         # Ship production
         for prod in self.production:
-            prod_rate = 1 + self.get_stat("ship_production_rate")
+            prod_rate = 1 + self.get_stat("ship_production")
             if prod.ship_type in ['fighter', 'interceptor', 'bomber', 'battleship']:
-                prod_rate *= 1 + self.get_stat("%s_production_rate" % prod.ship_type)
+                prod_rate *= 1 + self.get_stat("%s_production" % prod.ship_type)
             prod.update(self, dt * prod_rate)
         self.production = [p for p in self.production if not p.done]
 
@@ -355,8 +360,8 @@ class Planet(SpaceObject):
 
     def add_production(self, order):
         if order.ship_type == "fighter":
-            order.number = round(order.number * 1 + self.get_stat("fighter_production"))
-            order.number = round(order.number / (2 ** self.get_stat("fighter_production_halving")))
+            order.number = round(order.number * 1 + self.get_stat("fighter_production_amt"))
+            order.number = round(order.number / (2 ** self.get_stat("fighter_production_amt_halving")))
         self.production.append(order)
 
     def on_health_changed(self, old, new):

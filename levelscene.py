@@ -22,8 +22,9 @@ from economy import RESOURCES, Resources, RESOURCE_COLORS
 from planet.planet import Planet
 from resources import resource_path
 from ships.ship import Ship
+import fleet
 from v2 import V2
-from enemies import EnemyController
+from aliens.basicalien import BasicAlien
 from debug import debug_render
 
 
@@ -33,7 +34,7 @@ class LevelScene(scene.Scene):
         self.options = options
         self.animation_timer = 0
         self.my_civ = PlayerCiv(self)
-        self.enemy = EnemyController(self, Civ(self))
+        self.enemy = BasicAlien(self, Civ(self))
 
         self.paused = False
         self.game_speed = 1.0
@@ -77,6 +78,10 @@ class LevelScene(scene.Scene):
             
         return pos
 
+    def give_building(self, planet, building):
+        planet.add_building(building)
+        planet.owning_civ.researched_upgrade_names.add(building)
+
     def load(self):
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
@@ -97,6 +102,7 @@ class LevelScene(scene.Scene):
         p.change_owner(self.enemy.civ)
         p.population = 5
         p.ships['alien-fighter'] = 2
+        self.give_building(p, "alienhomedefense")
         self.game_group.add(p)
         num_planets = 2
 
@@ -228,8 +234,24 @@ class LevelScene(scene.Scene):
         if self.options == "score":
             homeworld.change_owner(self.enemy.civ)
 
+        if self.options == "rich":
+            self.my_civ.resources.set_resource("iron", 1150)
+            self.my_civ.resources.set_resource("ice", 1150)
+            self.my_civ.resources.set_resource("gas", 1150)    
+
+        if self.options == "hangars":
+            self.my_civ.researched_upgrade_names.add("hangar2a")
+            self.my_civ.researched_upgrade_names.add("hangar2b")
+            homeworld.add_building("hangar2a")
+            homeworld.add_building("hangar2b")
+            self.my_civ.resources.set_resource("ice", 1150)
+
         self.pathfinder = Pathfinder(self)
         self.pathfinder.generate_grid()
+        self.fleet_managers = {
+            'my':fleet.FleetManager(self, self.my_civ),
+            'enemy':fleet.FleetManager(self, self.enemy.civ)
+        }
 
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
@@ -297,6 +319,11 @@ class LevelScene(scene.Scene):
         if not self.get_civ_planets(self.my_civ):
             self.paused = True
             self.sm.transition(levelstates.GameOverState(self))
+        
+        # Detect victory
+        if not self.get_civ_planets(self.enemy.civ):
+            self.paused = True
+            self.sm.transition(levelstates.VictoryState(self))
 
         for sprite in self.game_group.sprites():
             sprite.update(dt)
@@ -333,12 +360,19 @@ class LevelScene(scene.Scene):
                 self.upgrade_texts[res_type].set_text("")
 
         self.enemy.update(dt)
+        
+        self.fleet_managers['my'].update(dt)
+        self.fleet_managers['enemy'].update(dt)
 
     def render(self):
         self.game.screen.fill(PICO_BLACK)
         self.update_layers()
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
+        if self.debug:
+            for k,v in self.fleet_managers.items():
+                for fleet in v.current_fleets:
+                    fleet.debug_render(self.game.screen)
         self.ui_group.draw(self.game.screen)        
         self.tutorial_group.draw(self.game.screen)
         if self.debug:
