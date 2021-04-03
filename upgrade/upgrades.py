@@ -6,7 +6,6 @@ UPGRADES = {
     'iron':defaultdict(list),
     'ice':defaultdict(list),
     'gas':defaultdict(list),
-    'alien':defaultdict(list),
 }
 
 UPGRADE_CATEGORY_COLORS = {
@@ -25,6 +24,7 @@ class Upgrade:
     requires = ()
     infinite = False
     family = None
+    alien = False
     def apply(self, to):
         pass
 

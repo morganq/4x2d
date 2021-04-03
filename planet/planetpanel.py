@@ -52,7 +52,7 @@ class PlanetPanel(Panel):
             color = PICO_YELLOW
         self.add(Text("%d/%d" %(planet.population, planet.get_max_pop()), "small", (0,0), color, False), V2(47,y+1))
 
-        if planet.ships and is_mine:
+        if planet.ships:# and is_mine:
             y += 14
             self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))
             y += 4
@@ -74,7 +74,7 @@ class PlanetPanel(Panel):
                 self.add(Text("%d" % planet.ships[ship], "small", (0,0), color, False), V2(88,y + 2))
                 y += 15
 
-        if planet.buildings and is_mine:
+        if planet.buildings:# and is_mine:
             
             self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))
             y += 5

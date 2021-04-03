@@ -29,12 +29,14 @@ from debug import debug_render
 
 
 class LevelScene(scene.Scene):
-    def __init__(self, game, options=None):
+    def __init__(self, game, levelfile, alienrace, difficulty, options=None):
         scene.Scene.__init__(self, game)
         self.options = options
         self.animation_timer = 0
         self.my_civ = PlayerCiv(self)
-        self.enemy = BasicAlien(self, Civ(self))
+        self.levelfile = levelfile
+        self.alienrace = alienrace
+        self.difficulty = difficulty
 
         self.paused = False
         self.game_speed = 1.0
@@ -89,6 +91,8 @@ class LevelScene(scene.Scene):
         self.tutorial_group = pygame.sprite.Group()
 
         self.background_group.add(Background(V2(0,0)))
+
+        self.enemy = BasicAlien(self, Civ(self))
 
         # Me
         homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
@@ -253,6 +257,8 @@ class LevelScene(scene.Scene):
             'enemy':fleet.FleetManager(self, self.enemy.civ)
         }
 
+        self.enemy.set_difficulty(self.difficulty)
+
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
 
@@ -260,10 +266,6 @@ class LevelScene(scene.Scene):
         self.sm.transition(levelstates.UpgradeState(self))
 
     def on_civ_resource_change(self, res_type, val):
-        while self.my_civ.resources.data[res_type] >= self.my_civ.upgrade_limits.data[res_type]:
-            self.my_civ.upgrades_stocked.append(res_type)
-            self.my_civ.resources.data[res_type] -= self.my_civ.upgrade_limits.data[res_type]
-            self.my_civ.upgrade_limits.data[res_type] += 25
         self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
         self.meters[res_type].value = self.my_civ.resources.data[res_type]
 
@@ -298,7 +300,7 @@ class LevelScene(scene.Scene):
         return levelstates.PlayState(self)
 
     def initialize_state(self):
-        self.sm = states.Machine(self.get_starting_state())        
+        self.sm = states.Machine(self.get_starting_state())
 
     def update_layers(self):
         pass
@@ -363,6 +365,9 @@ class LevelScene(scene.Scene):
         
         self.fleet_managers['my'].update(dt)
         self.fleet_managers['enemy'].update(dt)
+        
+        self.my_civ.update(dt)
+        self.enemy.civ.update(dt)
 
     def render(self):
         self.game.screen.fill(PICO_BLACK)

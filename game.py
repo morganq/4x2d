@@ -5,7 +5,7 @@ import sound
 import tilemap
 import states
 import levelscene
-import worldmapscene
+from starmap import starmapscene
 import introscene
 import buildingcreatorscene
 import leveleditorscene
@@ -17,6 +17,7 @@ import simplesprite
 import text
 from colors import *
 from v2 import V2
+import run
 
 DEV = True
 SCALE = 2
@@ -34,15 +35,19 @@ class Game:
         pygame.display.set_caption("Hostile Quadrant")
         #sound.init()
         self.screen = pygame.Surface(RES)
+        self.run_info = run.RunInfo()
         if len(sys.argv) > 1 and DEV:
             if sys.argv[1] == "draw":
                 self.scene = buildingcreatorscene.BuildingCreatorScene(self)
             elif sys.argv[1] == "editor":
                 self.scene = leveleditorscene.LevelEditorScene(self)
+            elif sys.argv[1] == "star":
+                self.scene = starmapscene.StarMapScene(self)
             else:
-                self.scene = levelscene.LevelScene(self, sys.argv[1])
+                self.scene = levelscene.LevelScene(self, None, None, 8, sys.argv[1])
         else:
-            self.scene = introscene.IntroScene(self)
+            self.scene = starmapscene.StarMapScene(self)
+            #self.scene = introscene.IntroScene(self)
         self.playing_level_index = None
 
         self.frame_time = 0
@@ -86,6 +91,7 @@ class Game:
 
                 if event.type == pygame.MOUSEMOTION:
                     event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    event.grel = V2(event.rel[0] / SCALE, event.rel[1] / SCALE)
                     if event.buttons[0]:
                         self.scene.take_input("mouse_drag", event)
                     else:

@@ -1,18 +1,8 @@
-finish notes on upgrades
-get MVP of upgrades implemented
-implement interceptor, bomber, battleship
-implement alien planetary defense
-implement a simple alien race
+implement a simple alien race - attacking
+figure out if a single level "works" from a game design standpoint
 implement level progression
 implement another alien race
 ~ level rewards and star map
-
-==
-
-New text class
-Many options, well organized.
-Full border. Shadow. Multiline. Render to surf instead of create obj. 
-Parse text and extract [] to make a different color for putting stats in
 
 ====
 

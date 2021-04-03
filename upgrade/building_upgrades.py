@@ -240,16 +240,3 @@ class ScarcestResourceUpgrade(AddBuildingUpgrade):
     family = {'tree':'scarcest', 'parents':[]}
     building = make_simple_stats_building("scarcest", stats=Stats(scarcest_mining_rate=0.25), shape="refinery")
     infinite=True
-
-@register_upgrade
-class AlienHomedDefenseUpgrade(AddBuildingUpgrade):
-    name = "alienhomedefense"
-    resource_type = "alien"
-    category = "buildings"
-    title = "Alien Home Defense"
-    description = "Planet fires missiles at nearby enemy ships"
-    icon = "mining"
-    cursor = "allied_planet"
-    family = {}
-    building = "alienhomedefense"
-    requires = None    

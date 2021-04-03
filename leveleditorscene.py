@@ -1,4 +1,3 @@
-from typing import Text
 import pygame
 from colors import *
 from scene import Scene
