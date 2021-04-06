@@ -1,7 +1,14 @@
+import random
+
+
 class RunInfo:
     def __init__(self, data = None):
         self.data = data or self.generate_run()
         self.path = [(0,0)]
+        self.saved_technologies = []
+        self.blueprints = []
+        self.bonus_population = 0
+        self.bonus_fighters = 0
 
     def choose_path(self, row, column):
         self.path.append((row, column))
@@ -26,9 +33,9 @@ class RunInfo:
                     from_links = [column, column + 1]
                 galaxy = {
                     'alien': 'basic',
-                    'rewards': ['memory_crystal'],
-                    'difficulty': row,
+                    'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
+                    'difficulty': (row - 1) * 2,
                     'links': from_links
                 } 
                 self.data[-1].append(galaxy)
-        return self.data                
+        return self.data                 

@@ -233,7 +233,8 @@ class Planet(SpaceObject):
             v = (self.resources.data[r] / 10.0) # if planet has 100% iron, you get 10 iron every 10 resource ticks.
             if self.resource_timers.data[r] > v:
                 self.resource_timers.data[r] -= v
-                self.owning_civ.resources.set_resource(r, self.owning_civ.resources.data[r] + v)
+                
+                self.owning_civ.earn_resource(r, v)
                 if self.owning_civ == self.scene.my_civ:
                     # Add to score!!
                     self.scene.score += v

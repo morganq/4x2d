@@ -1,5 +1,6 @@
 from upgrade.upgrades import register_upgrade, Upgrade
 from stats import Stats
+import random
 
 ### 1) Mechanics: Rush ###
 @register_upgrade
@@ -22,12 +23,24 @@ class Mechanics2aUpgrade(Upgrade):
     title = "Decommission"
     description = "3 random [Fighters] you control are [!destroyed]. Gain [^4] population among 4 random planets."
     icon = "decommission"
-    stats = None
+    stats = Stats()
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
 
     def apply(self, to):
-        # TODO: implement
+        all_fighters = to.get_all_fighters()
+        random.shuffle(all_fighters)
+        for f in all_fighters[:3]:
+            if f['type'] == 'ship':
+                f['object'].kill()
+            elif f['type'] == 'planet':
+                f['object'].ships['fighter'] -= 1
+                f['object'].needs_panel_update = True
+
+        my_planets = to.scene.get_civ_planets(to)
+        for i in range(4):
+            random.choice(my_planets).population += 1
+
         return super().apply(to)
 
 @register_upgrade
@@ -62,7 +75,7 @@ class Atomic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nuclear Battery"
-    description = "[^+10%] mining rate. A random ship you control is [!destroyed] every minute"
+    description = "[^+10%] mining rate. A random fighter you control is [!destroyed] every minute"
     icon = "nuclearbattery"
     stats = Stats(mining_rate=0.1, nuclear_instability=1)
     family = {'tree':'t_atomic', 'parents':[]}
@@ -74,14 +87,16 @@ class Atomic2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Isotope Conversion"
-    description = "Gain [100] <ice> and [50] <gas>. <iron> is [!frozen] for 20 seconds."
+    description = "Gain [100] ice and [50] gas. <iron> is [!frozen] for 20 seconds."
     icon = "isotope"
-    stats = None
+    stats = Stats()
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
     requires = ('t_atomic1',)
 
     def apply(self, to):
-        # TODO: implement
+        to.resources.ice += 100
+        to.resources.gas += 50
+        to.frozen.iron += 20
         return super().apply(to)
 
 @register_upgrade

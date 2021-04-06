@@ -20,7 +20,7 @@ for font in FONTS.values():
 
 class Text(spritebase.SpriteBase):
     type = None
-    def __init__(self, text, size, pos, color = PICO_WHITE, border=False, multiline_width = 80, center = True, shadow=False):
+    def __init__(self, text, size, pos, color = PICO_WHITE, border=False, multiline_width = 80, center = True, shadow=False, offset = None):
         spritebase.SpriteBase.__init__(self, pos)
         self._text = text
         self.size = size
@@ -29,6 +29,7 @@ class Text(spritebase.SpriteBase):
         self.shadow = shadow
         self.center = center
         self.multiline_width = multiline_width
+        self.offset = offset or (0,0)
         self.set_text(text)
         
     def set_text(self, text):
@@ -79,7 +80,7 @@ def get_groups(line, inside_group=None):
         x += 1
     return groups
 
-HEIGHTS = {'small':12, 'big':18}
+HEIGHTS = {'small':12, 'big':18, 'huge':26}
 
 def render_multiline(text, size, color, wrap_width=None, center=True):
     f = FONTS[size]

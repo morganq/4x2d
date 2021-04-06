@@ -1,10 +1,11 @@
 import levelstates
 from .galaxypanel import GalaxyPanel
 from selector import Selector
-from levelscene import LevelScene
+import levelscene
 from . import starmapscene
+import states
 
-class StarMapState(levelstates.UIEnabledState):
+class StarMapState(states.UIEnabledState):
     def enter(self):
         self.selector = None
         self.current_panel = None
@@ -43,7 +44,7 @@ class StarMapState(levelstates.UIEnabledState):
     def click_launch(self, galaxy):
         print(galaxy)
         self.scene.game.run_info.choose_path(*galaxy.coords)
-        self.scene.game.scene = LevelScene(self.scene.game, None, galaxy.alien, galaxy.difficulty)
+        self.scene.game.scene = levelscene.LevelScene(self.scene.game, None, galaxy.alien, galaxy.difficulty)
         # self.scene.game.scene = starmapscene.StarMapScene(self.scene.game)
         self.scene.game.scene.start()
 

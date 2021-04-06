@@ -6,3 +6,4 @@ env.sh
 save.json
 build
 *.spec
+.vscode

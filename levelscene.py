@@ -1,3 +1,4 @@
+from upgrade.upgrades import UPGRADE_CLASSES
 from pathfinder import Pathfinder
 from spaceobject import SpaceObject
 import simplesprite
@@ -189,6 +190,10 @@ class LevelScene(scene.Scene):
         self.help_button = Button(V2(2, 48), "Help", "small", self.on_click_help)
         self.ui_group.add(self.help_button)
 
+        if game.DEV:
+            self.ui_group.add(Button(V2(2, 68), 'Win', 'small', self.dev_win))
+
+
         self.score_label = Text("- Score -", "small", V2(game.RES[0] - 2, 2), PICO_BLUE)
         self.score_label.offset = (1, 0)
         self.score_label._recalc_rect()        
@@ -199,7 +204,20 @@ class LevelScene(scene.Scene):
         self.score_text._recalc_rect()
         self.ui_group.add(self.score_text)
 
-        self.my_civ.resources.set_resource("iron", 30)
+        # run unlocks
+        for tech in self.game.run_info.saved_technologies:
+            u = UPGRADE_CLASSES[tech]
+            self.my_civ.upgrades.append(u)
+            u().apply(self.my_civ)
+            self.my_civ.researched_upgrade_names.add(tech)
+
+        self.my_civ.blueprints = self.game.run_info.blueprints[::]
+        for tech in self.game.run_info.blueprints:
+            u = UPGRADE_CLASSES[tech]            
+            self.my_civ.researched_upgrade_names.add(tech)        
+
+
+        self.my_civ.resources.set_resource("iron", 200)
 
         if self.options == "iron":
             self.my_civ.resources.set_resource("iron", 1150)
@@ -264,6 +282,9 @@ class LevelScene(scene.Scene):
 
     def on_click_upgrade(self):
         self.sm.transition(levelstates.UpgradeState(self))
+
+    def dev_win(self):
+        self.sm.transition(levelstates.VictoryState(self))        
 
     def on_civ_resource_change(self, res_type, val):
         self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]

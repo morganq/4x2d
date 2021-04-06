@@ -68,5 +68,5 @@ class UpgradeIcon(SpriteBase):
 
     def on_mouse_down(self, pos):
         if self.onclick:
-            self.onclick()
+            self.onclick(self.upgrade)
         return super().on_mouse_down(pos)        

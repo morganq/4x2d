@@ -13,6 +13,8 @@ class Healthy:
         self.health_bar._recalc_rect()
         scene.ui_group.add(self.health_bar)
 
+        self._shield_damage = 0
+
     def set_health(self, health, show_healthbar=False):
         self.health = health
         self.health_bar.visible = show_healthbar
@@ -36,3 +38,20 @@ class Healthy:
 
     def get_max_health(self):
         return 1
+
+    def get_max_shield(self):
+        return 0
+
+    @property
+    def shield(self):
+        return max(self.get_max_shield() - self._shield_damage, 0)
+
+    @shield.setter
+    def shield(self, value):
+        self._shield_damage = min(max(self.get_max_shield() - value, 0), self.get_max_shield())
+
+    def take_damage(self, damage):
+        sa = min(damage, self.shield)
+        self.shield -= sa
+        damage -= sa
+        self.health -= damage

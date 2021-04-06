@@ -77,6 +77,9 @@ class Ship(SpaceObject):
             accel *= 3
         return accel
 
+    def is_target_enemy(self):
+        return self.effective_target and self.effective_target.owning_civ and self.effective_target.owning_civ != self.owning_civ
+
     def get_max_speed(self):
         speed = self.MAX_SPEED
         nearest, distsq = helper.get_nearest(self.pos, self.scene.get_hazards())
@@ -84,12 +87,22 @@ class Ship(SpaceObject):
             speed *= (1 + self.get_stat("deep_space_drive"))
         if self._timers['staged_booster'] < 0:
             speed *= 2
+        if self.is_target_enemy() and isinstance(self.effective_target, planet.Planet):
+            speed  *= (1 + self.get_stat('ship_speed_mul_targeting_planets'))
         return speed
 
     def get_cruise_speed(self): return self.get_max_speed() * 0.80
 
     def get_max_health(self):
         return self.BASE_HEALTH * (self.get_stat("ship_health_mul") + 1) + self.get_stat("ship_health_add")
+
+    def get_max_shield(self):
+        shield = 0
+        if self.get_stat('ship_armor_far_from_home') > 0:
+            near_dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))[1]
+            if near_dist > 100 ** 2:
+                shield += self.get_stat('ship_armor_far_from_home')
+        return shield
 
     def wants_to_land(self):
         return True

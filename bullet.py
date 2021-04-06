@@ -46,7 +46,7 @@ class Bullet(SpriteBase):
             objs_hit = helper.all_nearby(self.pos, self.shooter.scene.get_enemy_objects(self.owning_civ), self.mods.get("blast_radius"))
             
         for obj in objs_hit:
-            obj.health -= damage
+            obj.take_damage()
             if self.mods.get("grey_goo", False):
                 obj.add_effect(GreyGooEffect(other, self))
         self.kill()
