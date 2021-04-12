@@ -38,6 +38,7 @@ class PlayState(UIEnabledState):
             self.arrow.kill()
         if self.current_panel:
             self.current_panel.kill()
+        super().exit()
 
     def deselect(self):
         self.last_clicked_sprite = None
@@ -108,6 +109,25 @@ class PlayState(UIEnabledState):
         else:
             if self.arrow:
                 self.arrow.visible = False        
+        super().update(dt)
+
+    def keyboard_input(self, input, event):
+        if input == 'other' and event.key == pygame.K_RETURN:
+            if self.scene.upgrade_button.visible:
+                self.scene.upgrade_button.on_mouse_down(V2(0,0))
+
+        if self.dragging_from_sprite:
+            sel = self.key_picked_sprite.get_selection_info()
+            if sel and sel['type'] == 'planet' and self.key_picked_sprite != self.dragging_from_sprite:
+                if input == 'action':            
+                    self.release_drag()
+        else:
+            sel = self.key_picked_sprite.get_selection_info()
+            if sel and sel['type'] == 'planet' and self.key_picked_sprite.owning_civ == self.scene.my_civ:
+                if input == 'action':
+                    self.dragging_from_sprite = self.key_picked_sprite
+                    return
+        return super().keyboard_input(input, event)
 
 
 class HelpState(UIEnabledState):
@@ -126,13 +146,14 @@ class HelpState(UIEnabledState):
     def exit(self):
         self.panel.kill()
         self.scene.paused = False
+        super().exit()
 
-    def take_input(self, input, event):
+    def mouse_input(self, input, event):
         if input == "click":
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
             if not pr.collidepoint(event.gpos.tuple()):
                 self.scene.sm.transition(PlayState(self.scene))
-        return super().take_input(input, event)        
+        return super().mouse_input(input, event)        
 
 
 class OrderShipsState(UIEnabledState):
@@ -159,6 +180,7 @@ class OrderShipsState(UIEnabledState):
         self.hover_filter = lambda x: True
         self.panel.kill()
         self.arrow.kill()
+        super().exit()
 
     def on_order(self, values):
         for ship,num in values.items():
@@ -169,7 +191,7 @@ class OrderShipsState(UIEnabledState):
                     self.planet_from.emit_ship(ship, {"to":self.planet_to, "path":self.path})
         self.scene.sm.transition(PlayState(self.scene))
 
-    def take_input(self, input, event):
+    def mouse_input(self, input, event):
         if input == "click":
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
             if not pr.collidepoint(event.gpos.tuple()):
@@ -201,6 +223,7 @@ class UpgradeState(UIEnabledState):
             self.selection_info_text.kill()
         if self.cursor_icon:
             self.cursor_icon.kill()
+        super().exit()
 
     def finish(self, target=None, cancel = False):
         if not cancel:
@@ -230,8 +253,8 @@ class UpgradeState(UIEnabledState):
             self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
             self.scene.ui_group.add(self.selection_info_text)
 
-    def take_input(self, input, event):
-        super().take_input(input, event)
+    def mouse_input(self, input, event):
+        super().mouse_input(input, event)
         if self.cursor_icon:
             if input in ["mouse_move", "mouse_drag"]:
                 self.cursor_icon.pos = event.gpos + V2(10,10)
@@ -246,6 +269,19 @@ class UpgradeState(UIEnabledState):
                 pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
                 if not pr.collidepoint(event.gpos.tuple()):
                     self.finish(cancel = True)
+
+    def keyboard_input(self, input, event):
+        super().keyboard_input(input, event)
+        if self.cursor_icon:
+            if input == 'action' and self.hover_sprite:
+                sel = self.hover_sprite.get_selection_info()
+                if sel and sel['type'] == "planet" and self.hover_sprite.owning_civ == self.scene.my_civ:
+                    u = self.pending_upgrade().apply(self.hover_sprite)
+                    self.finish(target=self.hover_sprite)                
+        
+
+    def update(self, dt):
+        return super().update(dt)
 
 class GameOverState(State):
     def enter(self):

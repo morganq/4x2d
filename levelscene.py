@@ -334,6 +334,7 @@ class LevelScene(scene.Scene):
     def update(self, dt):
         dt *= self.game_speed
         if self.paused:
+            self.sm.state.paused_update(dt)
             return        
         self.time += dt
         scene.Scene.update(self, dt)

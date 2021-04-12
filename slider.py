@@ -13,6 +13,9 @@ class Slider(SpriteBase):
         self.selectable = True
         self._generate_image()
 
+    def get_selection_info(self):
+        return {'type':'slider'}
+
     def _generate_image(self):
         pad = 6
         w = self.meter_width + pad * 2
@@ -37,8 +40,11 @@ class Slider(SpriteBase):
     def update_value(self, pos):
         pos = pos - self.pos
         x = (pos.x - 4) / (self.meter_width - 8)
-        self.value = min(max(round(x * (self.max - self.min) + self.min), self.min), self.max)
-        self._generate_image()
+        self.set_value(round(x * (self.max - self.min) + self.min))
+
+    def set_value(self, value):
+        self.value = min(max(value, self.min), self.max)
+        self._generate_image()        
 
     def on_mouse_down(self, pos):
         self.update_value(pos)

@@ -16,14 +16,17 @@ class FrameSprite(SimpleSprite):
         else:
             self._sheet = sprite_sheet
         self._sheet_width = self._sheet.get_width()
+        self._height = self._sheet.get_height()
         
         self._frame_width = frame_width or 0
         if self._frame_width == 0:
             if self._sheet: # If no frame width, it should just be the image width.
                 self._frame_width = self._sheet.get_width()
+                
             else: # No image, this is invisible
                 self._frame_width = 1
         self._width = self._frame_width
+        
         self._recalc_rect()
         self._num_frames = self._sheet_width // self._frame_width
         try:

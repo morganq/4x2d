@@ -22,6 +22,9 @@ class OrderArrow(SpriteBase):
             end_offset = (end_planet.radius + 6)
         pt1 = start_planet.pos
         pt2 = end
+        if not end:
+            self.visible = False
+            return
         delta = pt2 - pt1
 
         if delta.sqr_magnitude() < 25 ** 2:

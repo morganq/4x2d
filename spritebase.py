@@ -31,6 +31,9 @@ class SpriteBase(pygame.sprite.DirtySprite):
             self._pos.y - self._height * self.offset[1],
             self._width, self._height)
 
+    def get_center(self):
+        return V2(self.rect[0] + self.rect[2] / 2, self.rect[1]+self.rect[3] / 2)
+
     @property
     def offset(self):
         return self._offset

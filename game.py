@@ -36,6 +36,7 @@ class Game:
         #sound.init()
         self.screen = pygame.Surface(RES)
         self.run_info = run.RunInfo()
+        self.input_mode = 'mouse'
         if len(sys.argv) > 1 and DEV:
             if sys.argv[1] == "draw":
                 self.scene = buildingcreatorscene.BuildingCreatorScene(self)
@@ -74,8 +75,6 @@ class Game:
                     elif event.key == pygame.K_SPACE: self.scene.take_input("action", event)
                     elif event.key == pygame.K_ESCAPE:
                         self.scene.take_input("back", event)
-                        self.scene = levelscene.LevelScene(self, sys.argv[1])
-                        self.scene.start()
                     else:
                         self.scene.take_input("other", event)
 

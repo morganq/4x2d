@@ -22,11 +22,11 @@ class StarMapScene(Scene):
         super().__init__(game)
 
     def start(self):
-        self.sm = states.Machine(StarMapState(self))
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         self.tutorial_group = pygame.sprite.Group()
+        self.sm = states.Machine(StarMapState(self))
 
         self.background_group.add(Background(V2(0,0), 10))        
         self.scroll_panel = ScrollPanel(V2(-game.RES[0] / 2,-650),(game.RES[0] * 2,1000))

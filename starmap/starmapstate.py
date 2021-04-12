@@ -40,6 +40,7 @@ class StarMapState(states.UIEnabledState):
         else:
             if self.selector:
                 self.selector.visible = 0
+        super().update(dt)
 
     def click_launch(self, galaxy):
         print(galaxy)
