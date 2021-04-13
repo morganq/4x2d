@@ -6,7 +6,11 @@ class SimpleSprite(spritebase.SpriteBase):
     def __init__(self, pos, img=None):
         spritebase.SpriteBase.__init__(self, pos)
         if isinstance(img, str):
-            self.image = pygame.image.load(resource_path(img)).convert_alpha()
+            try:
+                self.image = pygame.image.load(resource_path(img)).convert_alpha()
+            except:
+                print(img)
+                raise
         else:
             self.image = img
         self._width = 1

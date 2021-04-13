@@ -12,6 +12,13 @@ import random
 from upgrade import upgradeicon
 from spritebase import SpriteBase
 
+REWARDS = {
+    'jump_drive':{'title':'Jump Drive', 'description':'Begin with +1 fighter in future battles'},
+    'life_support':{'title':'Life Support', 'description': 'Begin with +1 population in future battles'},
+    'memory_crystal':{'title':'Memory Crystal', 'description': 'Pick a technology to carry on to future battles'},
+    'blueprint':{'title':'Blueprint', 'description': 'Pick a construct to carry on to future battles'},
+}
+
 class RewardSelector(SpriteBase):
     def __init__(self, pos, size, color, border=0):
         super().__init__(pos)
@@ -28,6 +35,7 @@ class RewardState(states.UIEnabledState):
         confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50), "Confirm", "big", self.on_confirm)
         confirm_button.offset = (0.5,0.5)
         self.scene.ui_group.add(confirm_button)
+        return super().enter()
 
     def exit(self):
         self.scene.ui_group.empty()
@@ -39,8 +47,8 @@ class RewardState(states.UIEnabledState):
 class JumpDriveRewardState(RewardState):
     def __init__(self, scene):
         RewardState.__init__(self, scene)
-        self.title = 'jump drive'
-        self.description = 'begin with +1 fighter in future battles'
+        self.title = REWARDS['jump_drive']['title']
+        self.description = REWARDS['jump_drive']['description']
 
     def on_confirm(self):
         self.scene.game.run_info.bonus_fighters += 1
@@ -49,8 +57,8 @@ class JumpDriveRewardState(RewardState):
 class LifeSupportRewardState(RewardState):
     def __init__(self, scene):
         RewardState.__init__(self, scene)
-        self.title = 'life support'
-        self.description = 'begin with +1 population in future battles'
+        self.title = REWARDS['life_support']['title']
+        self.description = REWARDS['life_support']['description']
 
     def on_confirm(self):
         self.scene.game.run_info.bonus_population += 1
@@ -61,8 +69,8 @@ class MemoryCrystalRewardState(RewardState):
         RewardState.__init__(self, scene)
         self.technologies = technologies
         self.selected = None
-        self.title = 'memory crystal'
-        self.description = 'Pick a technology to carry on to future battles'
+        self.title = REWARDS['memory_crystal']['title']
+        self.description = REWARDS['memory_crystal']['description']
 
     def enter(self):
         RewardState.enter(self)
@@ -89,6 +97,8 @@ class MemoryCrystalRewardState(RewardState):
         self.selected = upgrade
 
     def on_confirm(self):
+        if not self.technologies:
+            return super().on_confirm()
         if self.selected == None:
             return
         self.scene.game.run_info.saved_technologies.append(self.selected.name)
@@ -99,8 +109,8 @@ class BlueprintRewardState(RewardState):
         RewardState.__init__(self, scene)
         self.buildings = buildings
         self.selected = None
-        self.title = 'blueprint'
-        self.description = 'Pick a construct to carry on to future battles'
+        self.title = REWARDS['blueprint']['title']
+        self.description = REWARDS['blueprint']['description']
 
     def enter(self):
         RewardState.enter(self)
@@ -127,11 +137,12 @@ class BlueprintRewardState(RewardState):
         self.selected = upgrade
 
     def on_confirm(self):
+        if not self.buildings:
+            return super().on_confirm()
         if self.selected == None:
             return
         self.scene.game.run_info.blueprints.append(self.selected.name)
         return super().on_confirm()        
-
 
 class RewardScene(Scene):
     def __init__(self, game, technologies, buildings):

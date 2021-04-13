@@ -103,6 +103,9 @@ class PlayState(UIEnabledState):
                 dragging_to_sprite = None
                 if self.hover_sprite:
                     dragging_to_sprite = self.hover_sprite
+                    sel = dragging_to_sprite.get_selection_info()
+                    if not sel or sel['type'] not in ['planet', 'asteroid']:
+                        dragging_to_sprite = None
                 self.arrow.setup(self.dragging_from_sprite, self.dragging_to, dragging_to_sprite)
                 if self.arrow.visible:
                     self.deselect()
@@ -196,7 +199,7 @@ class OrderShipsState(UIEnabledState):
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
             if not pr.collidepoint(event.gpos.tuple()):
                 self.scene.sm.transition(PlayState(self.scene))
-        return super().take_input(input, event)
+        return super().mouse_input(input, event)
 
 
 class UpgradeState(UIEnabledState):
@@ -227,7 +230,6 @@ class UpgradeState(UIEnabledState):
 
     def finish(self, target=None, cancel = False):
         if not cancel:
-            self.scene.ui_group.add(FunNotification(self.pending_upgrade.title, target))
             self.scene.my_civ.upgrades_stocked.pop(0)
             self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
             self.scene.my_civ.clear_offers()
@@ -240,6 +242,7 @@ class UpgradeState(UIEnabledState):
             self.pending_upgrade = upgrade
             self.scene.my_civ.upgrades.append(upgrade)
             upgrade().apply(self.scene.my_civ)
+            self.scene.ui_group.add(FunNotification(self.pending_upgrade.title, None))
             self.finish()
         else:
             self.pending_upgrade = upgrade

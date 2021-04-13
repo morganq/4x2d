@@ -225,7 +225,7 @@ class GrowthUpgrade(AddBuildingUpgrade):
     icon = "refinery"
     cursor = "allied_planet"
     family = {'tree':'growth', 'parents':[]}
-    building = make_simple_stats_building("growth", stats=Stats(pop_growth_rate=0.33), shape="refinery")
+    building = make_simple_stats_building("growth1", stats=Stats(pop_growth_rate=0.33), shape="refinery")
     infinite=True
 
 @register_upgrade
@@ -238,5 +238,5 @@ class ScarcestResourceUpgrade(AddBuildingUpgrade):
     icon = "refinery"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':[]}
-    building = make_simple_stats_building("scarcest", stats=Stats(scarcest_mining_rate=0.25), shape="refinery")
+    building = make_simple_stats_building("scarcest1", stats=Stats(scarcest_mining_rate=0.25), shape="refinery")
     infinite=True

@@ -1,5 +1,6 @@
 import math
 import random
+from upgrade.upgrades import UPGRADE_CLASSES
 from ships.aliencolonist import AlienColonist
 from ships.alienfighter import AlienFighter
 
@@ -25,6 +26,7 @@ from .building import BUILDINGS
 from helper import clamp, get_nearest
 from .planetart import generate_planet_art
 from spaceobject import SpaceObject
+from funnotification import FunNotification
 
 EMIT_SHIPS_RATE = 0.125
 EMIT_CLASSES = {
@@ -357,6 +359,7 @@ class Planet(SpaceObject):
         self.needs_panel_update = True 
         mh_after = self.get_max_health()
         self._health += mh_after - mh_before 
+        self.scene.ui_group.add(FunNotification(UPGRADE_CLASSES[b.upgrade].title, self))
         return b
 
     def add_production(self, order):

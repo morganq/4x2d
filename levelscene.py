@@ -98,8 +98,8 @@ class LevelScene(scene.Scene):
         # Me
         homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
         homeworld.change_owner(self.my_civ)
-        homeworld.population = 4
-        homeworld.ships['fighter'] = 2
+        homeworld.population = 4 + self.game.run_info.bonus_population
+        homeworld.ships['fighter'] = 1 + self.game.run_info.bonus_fighters
         self.game_group.add(homeworld)
 
         # Alien
@@ -217,7 +217,7 @@ class LevelScene(scene.Scene):
             self.my_civ.researched_upgrade_names.add(tech)        
 
 
-        self.my_civ.resources.set_resource("iron", 200)
+        #self.my_civ.resources.set_resource("iron", 200)
 
         if self.options == "iron":
             self.my_civ.resources.set_resource("iron", 1150)

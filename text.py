@@ -80,7 +80,7 @@ def get_groups(line, inside_group=None):
         x += 1
     return groups
 
-HEIGHTS = {'small':12, 'big':18, 'huge':26}
+HEIGHTS = {'tiny':12, 'small':12, 'big':18, 'huge':26}
 
 def render_multiline(text, size, color, wrap_width=None, center=True):
     f = FONTS[size]

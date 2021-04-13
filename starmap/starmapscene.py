@@ -12,6 +12,7 @@ from .starpath import StarPath
 from scrollpanel import ScrollPanel
 from .starmapstate import StarMapState
 from animrotsprite import AnimRotSprite
+from simplesprite import SimpleSprite
 
 
 # click to pick which galaxy to go to next. galaxy panel shows reward and details. start button.
@@ -54,6 +55,11 @@ class StarMapScene(Scene):
                     path = StarPath(p1,p2,travelled, run_path[-1] == (r-1, j))
                     self.game_group.add(path)
                 self.game_group.add(g)
+
+                if len(run_path) <= r:
+                    reward_icon = SimpleSprite(V2(x, y), "assets/%s.png" % column['rewards'][0])
+                    self.game_group.add(reward_icon)
+
             y -= 90
 
         p = self.galaxies[run_path[-1][0]][run_path[-1][1]].pos + V2(3, -14)
