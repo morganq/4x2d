@@ -1,12 +1,16 @@
+from hazard import Hazard
+from helper import all_nearby, get_nearest
 from upgrade.upgrades import UPGRADE_CLASSES
-from pathfinder import Pathfinder
+from pathfinder import GRID_SIZE_PIXELS, Pathfinder
 from spaceobject import SpaceObject
 import simplesprite
 import sys
 import traceback
 import random
+import time
 
 import pygame
+import json
 
 import game
 import levelstates
@@ -85,6 +89,25 @@ class LevelScene(scene.Scene):
         planet.add_building(building)
         planet.owning_civ.researched_upgrade_names.add(building)
 
+    def load_level(self, levelfile):
+        data = json.load(open("levels/%s.json" % levelfile))
+        for obj in data:
+            t = None
+            owner = None
+            if obj['type'].endswith("planet"):
+                t = "planet"
+                if obj['type'] == "my_planet": owner = self.my_civ
+                elif obj['type'] == "enemy_planet": owner = self.enemy.civ
+            if t == "planet":
+                r = [v * 10 for v in obj['data']['resources']]
+                o = Planet(self, V2(*obj['pos']), obj['size'], Resources(*r))
+                if owner:
+                    o.change_owner(owner)
+                
+            elif obj['type'] == "hazard":
+                o = Hazard(self, V2(*obj['pos']), obj['size'])
+            self.game_group.add(o)
+
     def load(self):
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
@@ -95,24 +118,33 @@ class LevelScene(scene.Scene):
 
         self.enemy = BasicAlien(self, Civ(self))
 
+        if self.levelfile:
+            self.load_level(self.levelfile)
+
+        else:
+            homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
+            homeworld.change_owner(self.my_civ)       
+            self.game_group.add(homeworld)     
+            p = Planet(self, V2(420, 60), 5, Resources(70, 20, 10))
+            p.change_owner(self.enemy.civ)       
+            self.game_group.add(p)     
+
         # Me
-        homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
-        homeworld.change_owner(self.my_civ)
+        homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.my_civ))[0]
         homeworld.population = 4 + self.game.run_info.bonus_population
         homeworld.ships['fighter'] = 1 + self.game.run_info.bonus_fighters
-        self.game_group.add(homeworld)
+        
 
         # Alien
-        p = Planet(self, V2(420, 60), 5, Resources(70, 20, 10))
-        p.change_owner(self.enemy.civ)
+        p = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.enemy.civ))[0]
         p.population = 5
         p.ships['alien-fighter'] = 2
         self.give_building(p, "alienhomedefense")
-        self.game_group.add(p)
+        
         num_planets = 2
 
         # TODO: Planet resources more constrained
-        while num_planets < 15:
+        while num_planets < 10:
             pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
             
             near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
@@ -165,7 +197,7 @@ class LevelScene(scene.Scene):
                 self.game_group.add(Planet(self, pos, size, pr))
                 num_planets += 1
 
-        for i in range(20):
+        for i in range(random.randint(7,20)):
             pos = self.random_object_pos()
             self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))
 
@@ -299,6 +331,9 @@ class LevelScene(scene.Scene):
     def get_civ_planets(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet) and s.owning_civ == civ]
 
+    def get_enemy_planets(self, civ):
+        return [s for s in self.game_group.sprites() if isinstance(s,Planet) and s.owning_civ and s.owning_civ != civ]        
+
     def get_ships(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship)]
 
@@ -335,6 +370,8 @@ class LevelScene(scene.Scene):
         dt *= self.game_speed
         if self.paused:
             self.sm.state.paused_update(dt)
+            for sprite in self.ui_group.sprites():
+                sprite.update(dt)            
             return        
         self.time += dt
         scene.Scene.update(self, dt)
@@ -349,8 +386,10 @@ class LevelScene(scene.Scene):
             self.paused = True
             self.sm.transition(levelstates.VictoryState(self))
 
+        t = time.time()
         for sprite in self.game_group.sprites():
             sprite.update(dt)
+        #print("updates", time.time() - t)
 
         for sprite in self.ui_group.sprites():
             sprite.update(dt)
@@ -368,10 +407,10 @@ class LevelScene(scene.Scene):
             r = self.my_civ.upgrades_stocked[0]
             text = "UPGRADE - %s" % r.upper()
             if self.upgrade_button.visible == False or self.upgrade_button.text != text:
-                self.upgrade_button.visible = True
                 self.upgrade_button.text = text
                 self.upgrade_button.color = RESOURCE_COLORS[r]
                 self.upgrade_button._generate_image()
+                self.upgrade_button.fade_in(speed=2)
         else:
             if self.upgrade_button.visible:
                 self.upgrade_button.visible = False
@@ -387,11 +426,12 @@ class LevelScene(scene.Scene):
         
         self.fleet_managers['my'].update(dt)
         self.fleet_managers['enemy'].update(dt)
-        
+
         self.my_civ.update(dt)
         self.enemy.civ.update(dt)
 
     def render(self):
+        t = time.time()
         self.game.screen.fill(PICO_BLACK)
         self.update_layers()
         self.background_group.draw(self.game.screen)
@@ -400,11 +440,25 @@ class LevelScene(scene.Scene):
             for k,v in self.fleet_managers.items():
                 for fleet in v.current_fleets:
                     fleet.debug_render(self.game.screen)
+
+            for y,gr in enumerate(self.pathfinder._grid):
+                for x,gc in enumerate(gr):
+                    w = gc
+                    if w > 1:
+                        GSP = GRID_SIZE_PIXELS
+                        pygame.draw.rect(self.game.screen, (min(15 * w,255),0,0,0), (x * GSP, y * GSP, GSP, GSP))
+                    pass
+
+        for s in self.ui_group.sprites():
+            if s.image is None:
+                print(s)
         self.ui_group.draw(self.game.screen)        
         self.tutorial_group.draw(self.game.screen)
         if self.debug:
             self.enemy.render(self.game.screen)
             debug_render(self.game.screen, self)
+
+        #print("render", time.time() - t)
 
         #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))            
 

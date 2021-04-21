@@ -42,7 +42,7 @@ class StarMapScene(Scene):
                 x = game.RES[0] // 2 - 80 * (len(row) - 1) + 160 * i
                 x += game.RES[0] / 2
                 alien = ALIENS[column['alien']]
-                g = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], r == len(run_path))
+                g = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], r == len(run_path))
                 self.galaxies[-1].append(g)
                 for j in column['links']:
                     p2 = g.pos
@@ -54,7 +54,8 @@ class StarMapScene(Scene):
                     )
                     path = StarPath(p1,p2,travelled, run_path[-1] == (r-1, j))
                     self.game_group.add(path)
-                self.game_group.add(g)
+                if r > 0:
+                    self.game_group.add(g)
 
                 if len(run_path) <= r:
                     reward_icon = SimpleSprite(V2(x, y), "assets/%s.png" % column['rewards'][0])
@@ -71,6 +72,10 @@ class StarMapScene(Scene):
         self.colonist.angle += dt
         for s in self.game_group.sprites():
             s.update(dt)
+
+        for s in self.ui_group.sprites():
+            s.update(dt)
+
         super().update(dt)
 
     def render(self):

@@ -1,3 +1,4 @@
+from helper import clamp
 import pygame
 from resources import resource_path
 from v2 import V2
@@ -5,23 +6,26 @@ import random
 from colors import *
 
 def generate_color_art(radius, angle = None):
-    wavy = pygame.image.load(resource_path("assets/planetwavy.png")).convert_alpha()
+    wavy = pygame.image.load(resource_path("assets/planetwavy2.png")).convert_alpha()
+    ww, wh = wavy.get_size()
     w = radius * 2
     h = radius * 2
 
-    wavy_angle = angle or random.random() * 6.2818
+    wavy_angle = angle if angle is not None else random.random() * 6.2818
 
     def sphere_get(offset, planet_pos):
-        spherize = 0.25 + pow(planet_pos.magnitude(), 1.75) / 40.0
+        spherize = 0.25 + pow(planet_pos.magnitude(), 1.75) / 55.0
         dist,angle = planet_pos.to_polar()
         angle += wavy_angle
         p2 = offset + V2.from_angle(angle) * dist * spherize
+        p2.x = clamp(p2.x, 0, ww-1)
+        p2.y = clamp(p2.y, 0, wh-1)
         color = wavy.get_at((int(p2.x), int(p2.y)))
         return color
 
     color_image = pygame.Surface((w,h), pygame.SRCALPHA)
     center = V2(w / 2 - 0.5, h / 2 - 0.5)
-    wavy_offset = V2(random.randint(64, 1024 - 64), 64)
+    wavy_offset = V2(random.randint(128, 1024 - 128), 128)
     brightness_buckets = [0] * 256
     total_pixels = 0
     for x in range(w):
@@ -69,11 +73,15 @@ def get_min_max_from_buckets(buckets, rat):
             maxb = i       
     return (minb, maxb)
 
-def generate_planet_art(radius, white_pct, blue_pct, red_pct):
+def generate_planet_art(radius, white_pct, blue_pct, red_pct, seed=None, angle=None):
+    random_state = None
+    if seed:
+        random_state = random.getstate()
+        random.seed(seed)
     white_rat = white_pct / 200 # Even at 100%, it should only take up half the planet's space, so /200.
     blue_rat = blue_pct / 200
     red_rat = red_pct / 200
-    angle = random.random() * 6.2818
+    angle = angle or random.random() * 6.2818
     img, buckets = generate_color_art(radius, angle = angle)
     minb, maxb = get_min_max_from_buckets(buckets, white_rat)
     out_image = palettize(img, minb, maxb, PICO_GREYPURPLE, PICO_WHITE)
@@ -97,5 +105,8 @@ def generate_planet_art(radius, white_pct, blue_pct, red_pct):
                 c = out_image.get_at((x,y))
                 if c[3] > 128:
                     out_image.set_at((x,y), DARKEN_COLOR[c[0:3]])
+
+    if seed:
+        random.setstate(random_state)
 
     return out_image

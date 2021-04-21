@@ -6,6 +6,7 @@ from spritebase import SpriteBase
 import text
 from v2 import V2
 from helper import clamp
+import json
 
 class LEObject(SpriteBase):
     def __init__(self, pos, obj_type):
@@ -25,6 +26,7 @@ class LEObject(SpriteBase):
             self.desc.set_text(str(int(self.size)))
             self.radius = self.size + 8
         else:
+            self.size = clamp(rad - 8,1,10)
             self.radius = clamp(rad, 5, 25)
         self._generate_image()
 
@@ -66,6 +68,9 @@ class LevelEditorScene(Scene):
 
         self.background_group.add(Background(V2(0,0)))
 
+    def save(self):
+        pass
+
     def take_input(self, inp, event):
         if inp == "click":
             o = LEObject(event.gpos, self.current_object_type)
@@ -93,11 +98,27 @@ class LevelEditorScene(Scene):
                 if event.key == pygame.K_0: val = 10
                 self.current_object_resources[self.current_object_resources_index] = val
                 self.current_object_resources_index = (self.current_object_resources_index + 1) % 3
+            if event.key == pygame.K_MINUS:
+                self.current_object_resources[self.current_object_resources_index] = 0
+                self.current_object_resources_index = (self.current_object_resources_index + 1) % 3                
             if event.key == pygame.K_BACKSPACE:
                 try: self.game_group.sprites()[-1].kill()
                 except: pass
+            if event.key == pygame.K_s:
+                self.save(input("name> "))
 
         return super().take_input(inp, event)    
+
+    def save(self, filename):
+        data = []
+        for obj in self.game_group.sprites():
+            data.append({
+                'type':obj.obj_type,
+                'pos':obj.pos.tuple_int(),
+                'size':int(obj.size),
+                'data':obj.data
+            })
+        json.dump(data, open("levels/%s.json" % filename, "w"))
 
     def render(self):
         self.game.screen.fill(PICO_BLACK)
@@ -105,5 +126,8 @@ class LevelEditorScene(Scene):
         self.game_group.draw(self.game.screen)
         self.ui_group.draw(self.game.screen)
         text.render_multiline_to(self.game.screen, (3,3), self.current_object_type, "small", PICO_WHITE)
-        text.render_multiline_to(self.game.screen, (3,16), str(self.current_object_resources), "small", PICO_WHITE)
+        text.render_multiline_to(self.game.screen, (3,16), str(self.current_object_resources[0]), "small", PICO_WHITE)
+        text.render_multiline_to(self.game.screen, (18,16), str(self.current_object_resources[1]), "small", PICO_BLUE)
+        text.render_multiline_to(self.game.screen, (33,16), str(self.current_object_resources[2]), "small", PICO_PINK)
+        pygame.draw.rect(self.game.screen, PICO_LIGHTGRAY, (3 + self.current_object_resources_index * 15, 24,6,2))
         return super().render()

@@ -8,7 +8,7 @@ class Basic1Upgrade(Upgrade):
     category = "ships"
     title = "Standard Order"
     description = "[^4] [Fighters] Over 30 seconds"
-    icon = "fighters6"
+    icon = "standardorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':[]}
 
@@ -23,7 +23,7 @@ class Basic2Upgrade(Upgrade):
     category = "ships"
     title = "Expedited Order"
     description = "[^4] [Fighters] Over 25 seconds"
-    icon = "fighters6"
+    icon = "expeditedorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':['basicfighters1']}
     requires = ('basicfighters1',)
@@ -39,7 +39,7 @@ class Basic3Upgrade(Upgrade):
     category = "ships"
     title = "Rush Order"
     description = "[^4] [Fighters] Over 20 seconds"
-    icon = "fighters6"
+    icon = "rushorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':['basicfighters2']}
     requires = ('basicfighters1', 'basicfighters2')
@@ -56,7 +56,7 @@ class InstantFighters1Upgrade(Upgrade):
     category = "ships"
     title = "Emergency Reinforcements"
     description = "[^2] [Fighters] [^Instantly]"
-    icon = "fighters30"
+    icon = "emergencyreinforcements"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':[]}
 
@@ -71,7 +71,7 @@ class InstantFighters2aUpgrade(Upgrade):
     category = "ships"
     title = "Guard Deployment"
     description = "[^3] [Fighters] [^Instantly], [!-2] [Population]"
-    icon = "fighters30"
+    icon = "guarddeployment"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['instantfighters1']}
     requires = ('instantfighters1',)
@@ -88,7 +88,7 @@ class InstantFighters2bUpgrade(Upgrade):
     category = "ships"
     title = "War Manufacturing"
     description = "[^3] [Fighters] [^Instantly], Planet loses [!25] [Health]"
-    icon = "fighters30"
+    icon = "warmanufacturing"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['instantfighters1']}
     requires = ('instantfighters1',)
@@ -105,7 +105,7 @@ class InstantFighters3aUpgrade(Upgrade):
     category = "ships"
     title = "Guard Deployment II"
     description = "[^4] [Fighters] [^Instantly], [!-3] [Population]"
-    icon = "fighters30"
+    icon = "guarddeployment2"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['instantfighters2a']}
     requires = ('instantfighters1','instantfighters2a')
@@ -123,7 +123,7 @@ class InstantFighters3bUpgrade(Upgrade):
     category = "ships"
     title = "War Manufacturing II"
     description = "[^4] [Fighters] [^Instantly], Planet loses [!35] [Health]"
-    icon = "fighters30"
+    icon = "warmanufacturing2"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['instantfighters2b']}
     requires = ('instantfighters1','instantfighters2b')

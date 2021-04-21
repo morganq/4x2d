@@ -18,6 +18,7 @@ FLEET_PROXIMITY_POWER = 0.5
 ATMO_DISTANCE = 15
 WARP_PLANET_MIN_DIST = 15
 DEEP_SPACE_DIST = 40
+FAR_FROM_HOME_DIST = 100
 
 THRUST_PARTICLE_RATE = 0.25
 
@@ -71,6 +72,24 @@ class Ship(SpaceObject):
     def get_stat(self, stat):
         return self.owning_civ.get_stat(stat)
 
+    def take_damage(self, damage):
+        armor = 0
+        if self.get_stat("ship_armor_far_from_home"):
+            nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
+            if dist > FAR_FROM_HOME_DIST ** 2:
+                armor = self.get_stat("ship_armor_far_from_home")
+        if damage > 1 and armor > 0:
+            damage = max(damage - armor,1)
+        
+        return super().take_damage(damage)
+
+    def get_max_shield(self):
+        if self.get_stat("ship_shield_far_from_home"):
+            nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
+            if dist > FAR_FROM_HOME_DIST ** 2:        
+                return self.get_stat("ship_shield_far_from_home")
+        return 0
+
     def get_thrust_accel(self):
         accel = self.THRUST_ACCEL
         if self._timers['staged_booster'] < 0:
@@ -80,10 +99,13 @@ class Ship(SpaceObject):
     def is_target_enemy(self):
         return self.effective_target and self.effective_target.owning_civ and self.effective_target.owning_civ != self.owning_civ
 
+    def is_in_deep_space(self):
+        nearest, distsq = helper.get_nearest(self.pos, self.scene.get_hazards())
+        return distsq > DEEP_SPACE_DIST ** 2
+
     def get_max_speed(self):
         speed = self.MAX_SPEED
-        nearest, distsq = helper.get_nearest(self.pos, self.scene.get_hazards())
-        if distsq > DEEP_SPACE_DIST ** 2:
+        if self.get_stat("deep_space_drive") and self.is_in_deep_space():
             speed *= (1 + self.get_stat("deep_space_drive"))
         if self._timers['staged_booster'] < 0:
             speed *= 2
@@ -242,13 +264,26 @@ class Ship(SpaceObject):
             self.target_velocity = delta.normalized() * self.get_cruise_speed()
 
     def enter_state_returning(self):
+        if self.path:
+            return
         nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
-        if nearest:
+        if nearest:        
+            self.path = self.scene.pathfinder.find_path(self, nearest)
             self.effective_target = nearest
 
     def state_returning(self, dt):
-        delta = self.effective_target.pos - self.pos
-        self.target_velocity = delta.normalized() * self.get_cruise_speed()
+        if self.path:
+            delta = (self.path[0] - self.pos)
+            if delta.sqr_magnitude() < PATH_FOLLOW_CLOSENESS ** 2:
+                self.path.pop(0)
+
+        if self.path:
+            delta = (self.path[0] - self.pos)
+            self.target_velocity = delta.normalized() * self.get_cruise_speed()
+
+        else:
+            delta = self.effective_target.pos - self.pos
+            self.target_velocity = delta.normalized() * self.get_cruise_speed()
         
 
     def state_waiting(self, dt):

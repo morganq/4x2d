@@ -81,7 +81,7 @@ class Health2AUpgrade(AddBuildingUpgrade):
     description = "Planet Regenerates [^+1] [Health/Sec]"
     icon="planetregen"
     cursor = "allied_planet"
-    building = "regen"
+    building = "health2a"
     requires = ("health1",)
     family = {'tree':'planethealth', 'parents':['health1']}
 

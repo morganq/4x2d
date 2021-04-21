@@ -2,11 +2,12 @@ import pygame
 from colors import *
 from spritebase import SpriteBase
 import text
+from fadeinmixin import FadeInMixin
 
 SIZE_PADDING = {'tiny':4, 'small':7, 'medium':10, 'big':12, 'huge':18}
 HEIGHTS = {'tiny':5, 'small':7, 'medium':16, 'big':10, 'huge':15}
 
-class Button(SpriteBase):
+class Button(SpriteBase, FadeInMixin):
     def __init__(self, pos, text, size, onclick):
         SpriteBase.__init__(self, pos)
         self.color = PICO_WHITE

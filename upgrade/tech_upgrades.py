@@ -63,7 +63,7 @@ class Mechanics3Upgrade(Upgrade):
     title = "Vanguard Armor"
     description = "Ships gain a [^+10] health shield when far from a planet you control"
     icon = "vanguardarmor"
-    stats = Stats(ship_armor_far_from_home = 10)
+    stats = Stats(ship_shield_far_from_home = 10)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics2a', 't_mechanics2b']}
     requires = lambda x: 't_mechanics1' in x and ('t_mechanics2a' in x or 't_mechanics2b' in x)
     infinite = True

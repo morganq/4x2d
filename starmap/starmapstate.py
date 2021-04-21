@@ -29,6 +29,7 @@ class StarMapState(states.UIEnabledState):
                     self.current_panel = GalaxyPanel(self.last_clicked_sprite, self.click_launch)
                     self.current_panel.position_nicely(self.scene)
                     self.current_panel.add_all_to_group(self.scene.ui_group)
+                    self.current_panel.fade_in()
 
                 if self.selector:
                     self.selector.visible = 1
@@ -45,7 +46,7 @@ class StarMapState(states.UIEnabledState):
     def click_launch(self, galaxy):
         print(galaxy)
         self.scene.game.run_info.choose_path(*galaxy.coords)
-        self.scene.game.scene = levelscene.LevelScene(self.scene.game, None, galaxy.alien, galaxy.difficulty)
+        self.scene.game.scene = levelscene.LevelScene(self.scene.game, galaxy.level, galaxy.alien, galaxy.difficulty)
         # self.scene.game.scene = starmapscene.StarMapScene(self.scene.game)
         self.scene.game.scene.start()
 

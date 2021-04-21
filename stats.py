@@ -1,10 +1,12 @@
 from collections import defaultdict
 
 VALID_STAT_NAMES = [
-    'asteroid_yield_mul', #impl
+    'asteroid_yield_mul', #test
     'atomic_bomb',
     'battleship_production', 
+    'battleship_damage_mul',
     'bomber_production', 
+    'bomber_damage_mul',
     'deep_space_drive',
     'fighter_blast_radius',
     'fighter_damage_mul',
@@ -16,16 +18,17 @@ VALID_STAT_NAMES = [
     'fighter_production_amt',
     'grey_goo_collection',
     'grey_goo',
-    'interceptor_missile_bounce', #impl
+    'interceptor_missile_bounce',
     'interceptor_production', 
-    'interceptor_fire_rate_deep_space', #impl
+    'interceptor_fire_rate_deep_space', 
+    'interceptor_damage_mul',
     'mining_rate',
-    'nuclear_instability', #impl civ, lose a ship randomly
+    'nuclear_instability', #lose a ship randomly
     'overclock',
     'planet_health_aura',
     'planet_health_mul',
-    'planet_proximity_health_mul', #impl
-    'planet_temp_health_mul', #impl
+    'planet_proximity_health_mul',
+    'planet_temp_health_mul', 
     'planet_thorns',
     'pop_growth_min_reduction',
     'pop_growth_rate',
@@ -33,9 +36,10 @@ VALID_STAT_NAMES = [
     'pop_max_mul',
     'reactive_field',
     'scarcest_mining_rate',
-    'ship_armor_far_from_home', #impl
+    'ship_armor_far_from_home', #test
+    'ship_shield_far_from_home', #test
     'ship_death_heal',
-    'ship_dodge_near_enemy_planets', #impl
+    'ship_dodge_near_enemy_planets', #test
     'ship_dodge',
     'ship_fire_rate',
     'ship_health_add',
@@ -43,7 +47,7 @@ VALID_STAT_NAMES = [
     'ship_missile_speed',
     'ship_production',
     'ship_regenerate',
-    'ship_speed_mul_targeting_planets', #impl
+    'ship_speed_mul_targeting_planets', #test
     'ship_take_damage_on_fire',
     'ship_weapon_damage_speed',
     'ship_weapon_damage',

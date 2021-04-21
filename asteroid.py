@@ -42,9 +42,9 @@ class Asteroid(SpaceObject):
 
         offset = V2(w/2,h/2)
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_PURPLE, (pos + offset).tuple(), size + (2 if border else 1), 0) 
+            pygame.draw.circle(image, PICO_LIGHTGRAY, (pos + offset).tuple(), size + (2 if border else 1), 0) 
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_DARKGRAY, (pos + offset).tuple(), size, 0)
+            pygame.draw.circle(image, PICO_PURPLE, (pos + offset).tuple(), size, 0)
         for (pos, size) in self._circles:
             pygame.draw.circle(image, PICO_LIGHTGRAY, (pos + offset + V2(-1,-2)).tuple(), size - 3, 0)
 
@@ -85,8 +85,9 @@ class Asteroid(SpaceObject):
             for r,v in self.resources.data.items():
                 civ.resources.set_resource(r, civ.resources.data[r] + v)
                 if civ == self.scene.my_civ:
+                    yield_mul = civ.get_stat("asteroid_yield_mul") + 1
                     # Add to score!!
-                    self.scene.score += v
+                    self.scene.score += v * yield_mul
                     it = IconText(self.pos, None, "+%d" % v, economy.RESOURCE_COLORS[r])
                     it.pos = self.pos + V2(0, -self.radius - 5) - V2(it.width, it.height) * 0.5 + V2(0, -10 * {'iron':2,'ice':1,'gas':0}[r])
                     self.scene.ui_group.add(it)

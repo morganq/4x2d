@@ -50,7 +50,10 @@ class Fighter(Ship):
             if not all_nearby(self.pos, friendly, FLEET_RADIUS):
                 rate *= 1 + self.get_stat("overclock")
 
-        rate *= 1 + self.get_stat("%s_fire_rate" % self.SHIP_NAME)
+        try:
+            rate *= 1 + self.get_stat("%s_fire_rate" % self.SHIP_NAME)
+        except KeyError:
+            pass
         rate *= 1 + self.get_stat("ship_fire_rate")
             
         return rate
@@ -73,7 +76,10 @@ class Fighter(Ship):
         threat_range = self.THREAT_RANGE_DEFAULT
         if self.chosen_target.owning_civ == self.owning_civ:
             threat_range = self.THREAT_RANGE_DEFENSE
-        return [e for e in enemies if (e.pos - self.pos).sqr_magnitude() < threat_range ** 2]        
+        return [
+            e for e in enemies
+            if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.health > 0)
+        ]
 
     def find_target(self):
         threats = self.get_threats()
@@ -172,11 +178,12 @@ class Fighter(Ship):
             self.set_state(STATE_DOGFIGHT)
             return
 
-        if not self.effective_target or self.effective_target.health <= 0:
+        if not self.effective_target or self.effective_target.health <= 0 or self.effective_target.owning_civ == self.owning_civ:
             # If we just killed a planet, stay in waiting.
             if self.effective_target and isinstance(self.effective_target, planet.Planet):
                 self.set_state(STATE_WAITING)
             else:
+                self.path = None
                 self.set_state(STATE_RETURNING)
             return
 

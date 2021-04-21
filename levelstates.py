@@ -82,6 +82,7 @@ class PlayState(UIEnabledState):
                     self.current_panel = PlanetPanel(self.last_clicked_sprite)
                     self.current_panel.position_nicely(self.scene)
                     self.current_panel.add_all_to_group(self.scene.ui_group)
+                    self.current_panel.fade_in()
 
                 if self.selector:
                     self.selector.visible = 1
@@ -143,6 +144,7 @@ class HelpState(UIEnabledState):
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.pos = V2(game.RES[0] /2 - self.panel.width / 2, game.RES[1] / 2 - self.panel.height / 2)
         self.panel._reposition_children()
+        self.panel.fade_in()
         self.scene.paused = True
         
 
@@ -175,6 +177,7 @@ class OrderShipsState(UIEnabledState):
         self.panel = OrderPanel(V2(0,0), self.planet_from, self.planet_to, self.on_order)
         self.panel.position_nicely(self.scene)
         self.panel.add_all_to_group(self.scene.ui_group)
+        self.panel.fade_in()
         self.arrow = OrderArrow()
         self.scene.ui_group.add(self.arrow)
         self.arrow.setup(self.planet_from, None, self.planet_to)
@@ -216,6 +219,7 @@ class UpgradeState(UIEnabledState):
         self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
+        self.panel.fade_in(speed=10)
         self.hover_filter = self.filter_only_panel_ui
         super().enter()
 

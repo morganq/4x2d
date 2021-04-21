@@ -28,6 +28,12 @@ class Interceptor(Fighter):
         self.set_sprite_sheet("assets/interceptor.png", 12)
         self.bullets_chambered = 0
 
+    def get_fire_rate(self):
+        r = super().get_fire_rate()
+        if self.get_stat("interceptor_fire_rate_deep_space") and self.is_in_deep_space():
+            r *= 1 + self.get_stat("interceptor_fire_rate_deep_space")
+        return r 
+
     def fire(self, at):
         towards = (at.pos - self.pos).normalized()
 
@@ -47,7 +53,8 @@ class Interceptor(Fighter):
             'damage_add': damage_add,
             'blast_radius': blast_radius,
             'ship_missile_speed':self.get_stat("ship_missile_speed"),
-            'color':PICO_YELLOW
+            'bounces':self.get_stat("interceptor_missile_bounce"),
+            'color':PICO_YELLOW,
         })
         self.scene.game_group.add(b)
 

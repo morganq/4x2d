@@ -1,6 +1,7 @@
 from ships.ship import FLEET_RADIUS
 from button import Button
 import pygame
+import helper
 from v2 import V2
 
 FLEET_RADIUS = 20
@@ -27,7 +28,7 @@ class FleetManager:
             if self.civ == self.scene.my_civ:
                 if fleet.is_waiting() and first_ship not in self.fleet_order_buttons:
                     # replace with a graphic and a tooltip
-                    b = Button(first_ship.pos, 'Recall Fleet', 'small', onclick)
+                    b = Button(first_ship.pos, 'R', 'small', onclick)
                     self.scene.ui_group.add(b)
                     self.fleet_order_buttons[first_ship] = b
                 elif not fleet.is_waiting() and first_ship in self.fleet_order_buttons:
@@ -38,8 +39,13 @@ class FleetManager:
                     self.fleet_order_buttons[first_ship].pos = first_ship.pos
 
     def recall_fleet(self, fleet):
-        for ship in fleet.ships: 
-            ship.set_state('returning')
+        nearest, dist = helper.get_nearest(fleet.ships[0].pos, self.scene.get_civ_planets(fleet.ships[0].owning_civ))
+        if nearest:        
+            path = self.scene.pathfinder.find_path(fleet.ships[0], nearest)
+            for ship in fleet.ships: 
+                ship.path = path
+                ship.effective_target = nearest
+                ship.set_state('returning')
 
     def get_ship_fleet(self, ship):
         if ship in self.ship_fleets:

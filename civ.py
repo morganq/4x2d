@@ -2,6 +2,7 @@ import economy
 from upgrade import upgrades
 from colors import *
 from collections import defaultdict
+from stats import Stats
 import random
 
 class Civ:
@@ -11,10 +12,11 @@ class Civ:
         self.is_enemy = True        
         self.resources = economy.Resources()
         self.frozen = economy.Resources(0,0,0)
-        self.upgrade_limits = economy.Resources(50,50,50)
+        self.upgrade_limits = economy.Resources(30,30,30)
         self.upgrades_stocked = []
         self.upgrades = []
         self.researched_upgrade_names = set()
+        self.base_stats = Stats()
 
         self.offered_upgrades = {}
         
@@ -44,7 +46,7 @@ class Civ:
             while self.resources.data[res_type] >= self.upgrade_limits.data[res_type]:
                 self.upgrades_stocked.append(res_type)
                 self.resources.set_resource(res_type, self.resources.data[res_type] - self.upgrade_limits.data[res_type])
-                self.upgrade_limits.data[res_type] += 25
+                self.upgrade_limits.data[res_type] += 35
 
             # frozen
             self.frozen.data[res_type] = max(self.frozen.data[res_type] - dt,0)
@@ -69,7 +71,7 @@ class Civ:
 
 
     def get_stat(self, stat):
-        return sum([u.stats[stat] for u in self.upgrades])
+        return sum([u.stats[stat] for u in self.upgrades]) + self.base_stats[stat]
 
     def can_research(self, uname):
         u = upgrades.UPGRADE_CLASSES[uname]

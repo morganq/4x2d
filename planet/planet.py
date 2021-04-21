@@ -45,6 +45,7 @@ POPULATION_GROWTH_TIME = 30
 HP_PER_BUILDING = 10
 DEFENSE_RANGE = 30
 DESTROY_EXCESS_SHIPS_TIME = 7
+PLANET_PROXIMITY = 100
 
 class Planet(SpaceObject):
     HEALTHBAR_SIZE = (30,4)
@@ -55,7 +56,12 @@ class Planet(SpaceObject):
         self.scene = scene
         self.object_type = "planet"        
         self.resources = resources
-        self.art = generate_planet_art(self.get_radius(), self.resources.iron, self.resources.ice, self.resources.gas)
+        self.rotation = random.random() * 6.2818
+        self.rotation = 0
+        self.rotate_speed = random.random() * 0.5 + 0.125
+        self.art = generate_planet_art(
+                self.get_radius(),
+                self.resources.iron, self.resources.ice, self.resources.gas)
         self.resource_timers = economy.Resources(0,0,0)
         self.owning_civ = None
         self.buildings = []
@@ -82,7 +88,7 @@ class Planet(SpaceObject):
 
         self.needs_panel_update = False
 
-        self._generate_frames()
+        self._generate_base_frames()
         self.frame = 0        
 
         self.shipcounter = ShipCounter(self)
@@ -91,6 +97,7 @@ class Planet(SpaceObject):
 
         ### Upgrades ###
         self.unstable_reaction = 0
+        self.owned_time = 0
 
     @property
     def population(self): return self._population
@@ -104,6 +111,8 @@ class Planet(SpaceObject):
         self._population = min(self._population, 1)
         self.buildings = []
         self.ships = defaultdict(int)
+        self.owned_time = 0
+        self._generate_base_frames()
         self._generate_frames()
 
     def get_stat(self, stat):
@@ -120,11 +129,11 @@ class Planet(SpaceObject):
         self._height = radius * 2 + padding * 2
         frame = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
 
-        border_radius = 2 if border else 1
+        border_radius = 3 if border else 1
         color = self.owning_civ.color if self.owning_civ else PICO_YELLOW
 
         # Border
-        pygame.draw.circle(frame, color, (cx,cy), radius + border_radius)    
+        pygame.draw.circle(frame, color, (cx,cy), radius + border_radius)
 
         for building in self.buildings:
             offset = V2.from_angle(building['angle'] + self.base_angle) * radius + V2(cx, cy)
@@ -132,7 +141,8 @@ class Planet(SpaceObject):
 
         # Foreground
         #pygame.draw.circle(frame, PICO_GREYPURPLE, (cx,cy), radius)
-        rotated = pygame.transform.rotate(self.art, 0)
+        #rotated = pygame.transform.rotate(self.art, 0)
+        rotated = self.art
         frame.blit(rotated, (cx - rotated.get_width() // 2, cy - rotated.get_height() // 2))
 
         for building in self.buildings:
@@ -141,7 +151,7 @@ class Planet(SpaceObject):
 
         return frame
 
-    def _generate_frames(self):
+    def _generate_base_frames(self):
         inactive = self._generate_frame(False)
         hover = self._generate_frame(True)
         w = inactive.get_width()
@@ -154,6 +164,26 @@ class Planet(SpaceObject):
         self._frame_width = w
         self._recalc_rect()
         self._update_image()
+        self.art_inactive = inactive
+        self.art_hover = hover
+
+    def _generate_frames(self):
+        w = self.art_inactive.get_width()
+        h = self.art_inactive.get_height()        
+        rotated1 = pygame.transform.rotate(self.art_inactive, 0)
+        rotated2 = pygame.transform.rotate(self.art_hover, 0)
+        s1 = pygame.transform.scale(rotated1, (rotated1.get_width(), rotated1.get_height()))
+        s2 = pygame.transform.scale(rotated2, (rotated2.get_width(), rotated2.get_height()))
+        w = s1.get_width()
+        h = s1.get_height()
+        self._sheet = pygame.Surface((w * 2, h), pygame.SRCALPHA)
+        self._sheet.blit(s1, (0,0))
+        self._sheet.blit(s2, (w,0))
+        self._width = w
+        self._height = h
+        self._frame_width = w
+        self._recalc_rect()
+        self._update_image()        
 
     def on_mouse_enter(self, pos):
         self.frame = 1
@@ -171,8 +201,18 @@ class Planet(SpaceObject):
 
     def get_max_health(self):
         base = 50 + self.size * 30 + len(self.buildings) * HP_PER_BUILDING
-        max_hp = round(base * (1 + self.get_stat("planet_health_mul")))
-        return max_hp
+        max_hp = base * (1 + self.get_stat("planet_health_mul"))
+        if self.get_stat("planet_temp_health_mul"):
+            if self.owned_time < 60:
+                max_hp *= 1 + self.get_stat("planet_temp_health_mul")      
+
+        if self.get_stat("planet_proximity_health_mul"):
+            others = [p for p in self.scene.get_civ_planets(self.owning_civ) if p != self]
+            nearest, dist = get_nearest(self.pos, others)
+            if dist < PLANET_PROXIMITY ** 2:
+                max_hp *= 1 + self.get_stat("planet_proximity_health_mul")
+            
+        return round(max_hp)
 
     def get_pop_growth_time(self):
         return POPULATION_GROWTH_TIME / (1 + self.get_stat('pop_growth_rate'))
@@ -181,6 +221,7 @@ class Planet(SpaceObject):
         return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add")
 
     def update(self, dt):
+
         # Emit ships which are queued
         if self.emit_ships_queue:
             self.emit_ships_timer += dt
@@ -290,19 +331,29 @@ class Planet(SpaceObject):
             b['building'].update(self, dt)
 
         # Detect enemies
-        if self.get_threats():
+        threats = self.get_threats()
+        if threats:
             for i in range(self.ships[self.get_ship_name("fighter")]):
-                self.emit_ship(self.get_ship_name("fighter"), {"to":self})
+                self.emit_ship(self.get_ship_name("fighter"), {"to":random.choice(threats)})
+            for i in range(self.ships[self.get_ship_name("interceptor")]):
+                self.emit_ship(self.get_ship_name("interceptor"), {"to":random.choice(threats)})                
             for i in range(self.ships['alien-battleship']):
-                self.emit_ship('alien-battleship', {"to":self})
+                self.emit_ship('alien-battleship', {"to":random.choice(threats)})
+
+        
+        #self.rotation += self.rotate_speed * dt * 3
+        #self._generate_frames()
 
         self.upgrade_update(dt)
+        super().update(dt)
 
     def upgrade_update(self, dt):
         if self.get_stat("unstable_reaction") > 0:
             USR = 1 / 60
             # Slowly increase to 1
             self.unstable_reaction = clamp(self.unstable_reaction * (dt * self.get_stat("unstable_reaction") * USR), 0, self.get_stat("unstable_reaction"))
+
+        self.owned_time += dt
 
     def get_max_fighters(self):
         return self.size * 2
@@ -355,6 +406,7 @@ class Planet(SpaceObject):
             angle = random.random() * 6.2818
         b = BUILDINGS[upgrade]()
         self.buildings.append({"building":b, "angle":angle})
+        self._generate_base_frames()
         self._generate_frames()
         self.needs_panel_update = True 
         mh_after = self.get_max_health()

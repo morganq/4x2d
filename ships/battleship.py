@@ -25,7 +25,7 @@ class Bomber(Fighter):
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         
-        self.set_sprite_sheet("assets/bomber.png", 12)
+        self.set_sprite_sheet("assets/battleship.png", 12)
 
     def fire(self, at):
         towards = (at.pos - self.pos).normalized()

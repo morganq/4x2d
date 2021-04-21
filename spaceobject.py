@@ -7,6 +7,7 @@ class SpaceObject(AnimRotSprite, Healthy):
     SOID = 0
     def __init__(self, scene, pos):
         AnimRotSprite.__init__(self, pos)
+        self.offset = (0.5, 0.5)
         self.scene = scene
         self.status_effects = []
         self.radius = 1

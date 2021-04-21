@@ -10,6 +10,7 @@ import random
 VEL = 50
 DEATH_TIME = 5
 DAMAGE = 2
+NEAR_ENEMY_PLANETS_DIST = 60
 
 class Bullet(SpriteBase):
     def __init__(self, pos, target, shooter, vel=None, mods=None):
@@ -29,14 +30,22 @@ class Bullet(SpriteBase):
         self.time = 0
         self._generate_image()
 
+        # mod vars
+        self.bounces = self.mods.get("bounces", 0)
+
     def collide(self, other):
         if other.owning_civ == self.shooter.owning_civ: return
         if not getattr(other, "health", None): return
         if other.get_stat("ship_dodge") > 0:
             if random.random() <= other.get_stat("ship_dodge"):
-                print("dodge")
                 self.kill()
                 return
+
+        if other.get_stat("ship_dodge_near_enemy_planets"):
+            nearest, dist = helper.get_nearest(other.pos, other.scene.get_enemy_planets(other.owning_civ))
+            if dist < NEAR_ENEMY_PLANETS_DIST ** 2:     
+                if random.random() <= other.get_stat("ship_dodge_near_enemy_planets"):
+                    self.kill()                       
                 
         damage = self.mods.get("damage_base", 1)
         damage *= 1 + self.mods.get("damage_mul", 0)
@@ -49,7 +58,19 @@ class Bullet(SpriteBase):
             obj.take_damage(damage)
             if self.mods.get("grey_goo", False):
                 obj.add_effect(GreyGooEffect(other, self))
-        self.kill()
+
+        if self.bounces > 0:
+            self.bounces -= 1
+            targets = self.shooter.scene.get_enemy_objects(self.owning_civ)
+            nearby_targets = helper.all_nearby(self.pos, targets, 25)
+            if nearby_targets:
+                self.target = random.choice(nearby_targets)
+                (self.target.pos - self.pos).normalized() * self.vel.magnitude()
+            else:
+                self.kill()
+
+        else:
+            self.kill()
 
     def get_target_pos(self):
         # Get the target's 'pos' attribute, otherwise assume self.target already *is* a V2

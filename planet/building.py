@@ -37,7 +37,7 @@ class Building:
         for pt in shape:
             dist,ang = pt.to_polar()
             ang += angle
-            new_pt = V2.from_angle(ang) * dist + offset
+            new_pt = V2.from_angle(ang) * dist * 2 + offset
             if expand:
                 new_pt += (new_pt - center).normalized() * .75
             final_pts.append(new_pt)
@@ -69,7 +69,7 @@ def make_simple_stats_building(name, stats=None, shape=None):
 
 @building
 class RegenBuilding(Building):
-    upgrade = "regen"
+    upgrade = "health2a"
     def __init__(self):
         Building.__init__(self)
         self.load_shapes("repairbay")
@@ -108,6 +108,7 @@ class AlienHomeDefenseBuilding(Building):
     def __init__(self):
         Building.__init__(self)
         self.load_shapes("armory")
+        self.stats = Stats(planet_health_mul=1)
         self.fire_time = 0
         
     def update(self, planet, dt):

@@ -35,6 +35,7 @@ class RunInfo:
                     'alien': 'basic',
                     'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
                     'difficulty': (row - 1) * 2,
+                    'level':random.choice(['choke', 'neighbors', 'tunnel', 'bases']),
                     'links': from_links
                 } 
                 self.data[-1].append(galaxy)

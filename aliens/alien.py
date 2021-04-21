@@ -170,9 +170,11 @@ class Alien:
         return ['alien-fighter']
 
     def set_difficulty(self, difficulty):
+        self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 5
         extra_planets = difficulty // 3
         extra_pops = difficulty % 3
         my_planet = self.scene.get_civ_planets(self.civ)[0]
+        my_planet.set_health(my_planet.get_max_health(), False)
         my_planet.population += extra_pops
         near_planets = self.scene.get_planets()
         near_planets.sort(key=lambda x:(x.pos - my_planet.pos).sqr_magnitude())
@@ -180,7 +182,7 @@ class Alien:
         for i in range(extra_planets):
             near_unclaimed[i].change_owner(self.civ)
             near_unclaimed[i].population = extra_pops
-
+            near_unclaimed[i].set_health(near_unclaimed[i].get_max_health(), False)
 
     def update_expansion(self):
         for planet in self.scene.get_civ_planets(self.civ):

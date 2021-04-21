@@ -32,6 +32,9 @@ class State:
     def update(self, dt):
         pass
 
+    def paused_update(self, dt):
+        self.update(dt)
+
 class UIEnabledState(State):
     def __init__(self, scene):
         State.__init__(self, scene)

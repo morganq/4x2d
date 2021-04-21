@@ -6,8 +6,9 @@ import text
 import resources
 import game
 from helper import clamp
+from fadeinmixin import FadeInMixin
 
-class Panel(spritebase.SpriteBase):
+class Panel(spritebase.SpriteBase, FadeInMixin):
     def __init__(self, pos, panel_for):
         spritebase.SpriteBase.__init__(self, pos)
         self.panel_for = panel_for
@@ -93,3 +94,15 @@ class Panel(spritebase.SpriteBase):
 
         self._reposition_children()
         self._recalc_rect()
+
+    def fade_in(self, speed=10, fade_mode="noise"):
+        for ci in self._controls:
+            control = ci['control']
+            control.visible = False
+        return super().fade_in(speed=speed, fade_mode=fade_mode)
+
+    def _fade_complete(self):
+        for ci in self._controls:
+            control = ci['control']
+            if control.image:
+                control.visible = True

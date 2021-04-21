@@ -3,21 +3,19 @@ import game
 from spaceobject import SpaceObject
 from planet import planet
 from helper import get_nearest
-from pathfinding.core.diagonal_movement import DiagonalMovement
-from pathfinding.core.grid import Grid
-from pathfinding.finder.a_star import AStarFinder
+from astar import AStar
+import math
+import time
 
+GRID_SIZE_PIXELS = 20
+EXTRA = 10
 
-GRID_SIZE_PIXELS = 10
-EXTRA = 20
-
-# TODO: Optimize grid creation. (profile?) Can be done a lot quicker, rather than going cell by cell.
-
-
-class Pathfinder:
+class Pathfinder(AStar):
     def __init__(self, scene):
         self.scene = scene
         self._grid = None
+        self.width = 0
+        self.height = 0
 
     def generate_grid(self, exclude = None):
         exclude = exclude or []
@@ -27,6 +25,8 @@ class Pathfinder:
 
         w = game.RES[0] // GRID_SIZE_PIXELS
         h = game.RES[1] // GRID_SIZE_PIXELS
+        self.width = w
+        self.height = h
         grid = []
         for y in range(h):
             grid.append([])
@@ -35,13 +35,37 @@ class Pathfinder:
                 center = V2(x * GRID_SIZE_PIXELS + GRID_SIZE_PIXELS / 2, y * GRID_SIZE_PIXELS + GRID_SIZE_PIXELS / 2)
                 closest, dist = get_nearest(center, objects)
                 if closest:
-                    if (dist - closest.radius ** 2 - EXTRA ** 2) < (GRID_SIZE_PIXELS / 2) ** 2:
-                        cell = 2
+                    if (dist - (closest.radius + EXTRA) ** 2) < (GRID_SIZE_PIXELS / 2) ** 2:
+                        cell = (closest.radius + EXTRA) - math.sqrt(dist) + 5
                 grid[-1].append(cell)
 
-        self._grid = Grid(matrix=grid)
+        #self._grid = Grid(matrix=grid)
         #print(Grid(matrix=grid).grid_str())
+        self._grid = grid
         return grid
+
+    def heuristic_cost_estimate(self, n1, n2):
+        (x1, y1) = n1
+        (x2, y2) = n2
+        return abs(x2-x1) + abs(y2-y1)
+
+    def distance_between(self, n1, n2):
+        (x1, y1) = n1
+        (x2, y2) = n2
+        weight = self._grid[y2][x2]# - self._grid[y1][x1]
+        off = ((abs(x2 - x1) + abs(y2 - y1) - 1) * 0.414) + 1
+        return weight * off
+
+    def neighbors(self, node):
+        (x1, y1) = node
+        out = []
+        for x in range(x1 - 1, x1 + 2):
+            for y in range(y1 - 1, y1 + 2):
+                if x == x1 and y == y1:
+                    continue
+                if x >= 0 and x < self.width and y >= 0 and y < self.height:
+                    out.append((x,y))
+        return out
 
     def find_path(self, a, b):
         if isinstance(a, SpaceObject):
@@ -50,12 +74,12 @@ class Pathfinder:
         if isinstance(b, SpaceObject):
             b = b.pos         
 
-        grid = self._grid
-        start = grid.node(*(a / GRID_SIZE_PIXELS).tuple_int())
-        end = grid.node(*(b / GRID_SIZE_PIXELS).tuple_int())
-        finder = AStarFinder(diagonal_movement=DiagonalMovement.always)
-        path, runs = finder.find_path(start, end, grid)
+        start = (a / GRID_SIZE_PIXELS).tuple_int()
+        end = (b / GRID_SIZE_PIXELS).tuple_int()
+        t = time.time()
+        path = list(self.astar(start, end))
         path = [(V2(*p) + V2(0.5, 0.5)) * GRID_SIZE_PIXELS for p in path]
+        #print("pathfinding", time.time() - t)
         #print(grid.grid_str(path=path, start=start, end=end))
-        self._grid.cleanup()
+        #self._grid.cleanup()
         return path
