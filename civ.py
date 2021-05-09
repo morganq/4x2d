@@ -3,6 +3,8 @@ from upgrade import upgrades
 from colors import *
 from collections import defaultdict
 from stats import Stats
+from icontext import IconText
+from v2 import V2
 import random
 
 class Civ:
@@ -51,7 +53,7 @@ class Civ:
             # frozen
             self.frozen.data[res_type] = max(self.frozen.data[res_type] - dt,0)
 
-    def earn_resource(self, resource, value):
+    def earn_resource(self, resource, value, where = None):
         if self.frozen.data[resource] <= 0:
             self.resources.set_resource(resource, self.resources.data[resource] + value)
 
@@ -87,7 +89,6 @@ class Civ:
             return u.requires(self.researched_upgrade_names)
 
     def offer_upgrades(self, resource):
-
         if not self.offered_upgrades:
             for upgrade_type, ups in upgrades.UPGRADES[resource].items():
                 allowed_ups = [
@@ -110,3 +111,11 @@ class PlayerCiv(Civ):
         Civ.__init__(self, scene)
         self.color = PICO_GREEN
         self.is_enemy = False
+
+    def earn_resource(self, resource, value, where=None):
+        if where:
+            self.scene.score += value
+            it = IconText(self.pos, None, "+%d" % value, economy.RESOURCE_COLORS[resource])
+            it.pos = where.pos + V2(0, -where.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+            self.scene.ui_group.add(it)
+        return super().earn_resource(resource, value)

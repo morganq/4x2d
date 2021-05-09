@@ -1,4 +1,4 @@
-from colors import DARKEN_COLOR, PICO_BLACK, PICO_DARKGRAY, PICO_LIGHTGRAY, PICO_PINK, PICO_WHITE
+from colors import *
 from v2 import V2
 from spaceobject import SpaceObject
 from planet import planet
@@ -41,6 +41,7 @@ class Ship(SpaceObject):
         self.owning_civ = owning_civ
         self.offset = (0.5, 0.5)
         self.collidable = True
+        self.stationary = False
 
         # States
         self.states = {
@@ -72,7 +73,7 @@ class Ship(SpaceObject):
     def get_stat(self, stat):
         return self.owning_civ.get_stat(stat)
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, origin=None):
         armor = 0
         if self.get_stat("ship_armor_far_from_home"):
             nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
@@ -81,7 +82,7 @@ class Ship(SpaceObject):
         if damage > 1 and armor > 0:
             damage = max(damage - armor,1)
         
-        return super().take_damage(damage)
+        return super().take_damage(damage, origin=origin)
 
     def get_max_shield(self):
         if self.get_stat("ship_shield_far_from_home"):
@@ -100,17 +101,23 @@ class Ship(SpaceObject):
         return self.effective_target and self.effective_target.owning_civ and self.effective_target.owning_civ != self.owning_civ
 
     def is_in_deep_space(self):
-        nearest, distsq = helper.get_nearest(self.pos, self.scene.get_hazards())
+        nearest, distsq = helper.get_nearest(self.pos, self.scene.get_planets())
         return distsq > DEEP_SPACE_DIST ** 2
 
     def get_max_speed(self):
         speed = self.MAX_SPEED
         if self.get_stat("deep_space_drive") and self.is_in_deep_space():
             speed *= (1 + self.get_stat("deep_space_drive"))
+            if random.random() < 0.02:
+                p = particle.Particle([PICO_WHITE, PICO_GREEN, PICO_GREEN, PICO_DARKGREEN], 1, self.pos, 1.0, self.velocity * -1 + V2.random_angle() * 2)
+                self.scene.game_group.add(p)
         if self._timers['staged_booster'] < 0:
             speed *= 2
-        if self.is_target_enemy() and isinstance(self.effective_target, planet.Planet):
-            speed  *= (1 + self.get_stat('ship_speed_mul_targeting_planets'))
+        if self.get_stat('ship_speed_mul_targeting_planets') and self.is_target_enemy() and isinstance(self.effective_target, planet.Planet):
+            speed *= (1 + self.get_stat('ship_speed_mul_targeting_planets'))
+            if random.random() < 0.02:
+                p = particle.Particle([PICO_WHITE, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 1.5, self.velocity * -1 + V2.random_angle() * 1.25)
+                self.scene.game_group.add(p)            
         return speed
 
     def get_cruise_speed(self): return self.get_max_speed() * 0.80
@@ -120,10 +127,10 @@ class Ship(SpaceObject):
 
     def get_max_shield(self):
         shield = 0
-        if self.get_stat('ship_armor_far_from_home') > 0:
+        if self.get_stat('ship_shield_far_from_home') > 0:
             near_dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))[1]
             if near_dist > 100 ** 2:
-                shield += self.get_stat('ship_armor_far_from_home')
+                shield += self.get_stat('ship_shield_far_from_home')
         return shield
 
     def wants_to_land(self):

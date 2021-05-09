@@ -1,3 +1,4 @@
+from collections import defaultdict
 from hazard import Hazard
 from helper import all_nearby, get_nearest
 from upgrade.upgrades import UPGRADE_CLASSES
@@ -31,6 +32,7 @@ import fleet
 from v2 import V2
 from aliens.basicalien import BasicAlien
 from debug import debug_render
+import optimize
 
 
 class LevelScene(scene.Scene):
@@ -116,8 +118,13 @@ class LevelScene(scene.Scene):
 
         self.background_group.add(Background(V2(0,0)))
 
-        self.enemy = BasicAlien(self, Civ(self))
+        third = False
 
+        self.enemies = [BasicAlien(self, Civ(self))]
+        if third:
+            self.enemies.append(BasicAlien(self, Civ(self)))
+        self.enemy = self.enemies[0]
+        
         if self.levelfile:
             self.load_level(self.levelfile)
 
@@ -128,6 +135,11 @@ class LevelScene(scene.Scene):
             p = Planet(self, V2(420, 60), 5, Resources(70, 20, 10))
             p.change_owner(self.enemy.civ)       
             self.game_group.add(p)     
+
+        if third:
+            p = Planet(self, V2(60, 60), 5, Resources(70, 20, 10))
+            p.change_owner(self.enemies[1].civ)
+            self.game_group.add(p)
 
         # Me
         homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.my_civ))[0]
@@ -140,8 +152,17 @@ class LevelScene(scene.Scene):
         p.population = 5
         p.ships['alien-fighter'] = 2
         self.give_building(p, "alienhomedefense")
-        
+
         num_planets = 2
+        
+        if third:
+            # Alien 2
+            p = get_nearest(V2(0, 0), self.get_civ_planets(self.enemies[1].civ))[0]
+            p.population = 5
+            p.ships['alien-fighter'] = 2
+            self.give_building(p, "alienhomedefense")        
+            num_planets += 1
+        
 
         # TODO: Planet resources more constrained
         while num_planets < 10:
@@ -248,58 +269,6 @@ class LevelScene(scene.Scene):
             u = UPGRADE_CLASSES[tech]            
             self.my_civ.researched_upgrade_names.add(tech)        
 
-
-        #self.my_civ.resources.set_resource("iron", 200)
-
-        if self.options == "iron":
-            self.my_civ.resources.set_resource("iron", 1150)
-
-        if self.options == "ice":
-            self.my_civ.resources.set_resource("ice", 1150)
-
-        if self.options == "gas":
-            self.my_civ.resources.set_resource("gas", 1150)    
-
-        if self.options == "buildings":
-            homeworld.add_building("econ1")
-            homeworld.add_building("econ2a")
-            homeworld.add_building("econ2b")
-            homeworld.add_building("econ3")
-
-        if self.options == "surround":
-            for planet in self.get_civ_planets(None):
-                planet.change_owner(self.enemy.civ)
-                #planet.add_ship("alien-fighter")
-                #planet.add_ship("alien-fighter")
-                #self.my_civ.resources.set_resource("iron", 50)
-                #self.my_civ.resources.set_resource("ice", 50)
-                self.my_civ.resources.set_resource("gas", 50)
-
-        if self.options == "fighters":
-            for i in range(20):
-                homeworld.add_ship("fighter")
-
-        if self.options == "battleship":
-            from ships.alienbattleship import AlienBattleship
-            bs = AlienBattleship(self, V2(150, 250), self.enemy.civ)
-            bs.target = homeworld
-            self.game_group.add(bs)
-
-        if self.options == "score":
-            homeworld.change_owner(self.enemy.civ)
-
-        if self.options == "rich":
-            self.my_civ.resources.set_resource("iron", 1150)
-            self.my_civ.resources.set_resource("ice", 1150)
-            self.my_civ.resources.set_resource("gas", 1150)    
-
-        if self.options == "hangars":
-            self.my_civ.researched_upgrade_names.add("hangar2a")
-            self.my_civ.researched_upgrade_names.add("hangar2b")
-            homeworld.add_building("hangar2a")
-            homeworld.add_building("hangar2b")
-            self.my_civ.resources.set_resource("ice", 1150)
-
         self.pathfinder = Pathfinder(self)
         self.pathfinder.generate_grid()
         self.fleet_managers = {
@@ -308,6 +277,8 @@ class LevelScene(scene.Scene):
         }
 
         self.enemy.set_difficulty(self.difficulty)
+        if third:
+            self.enemies[1].set_difficulty(self.difficulty)
 
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
@@ -325,27 +296,35 @@ class LevelScene(scene.Scene):
     def get_objects(self):
         return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
 
+    @optimize.frame_memoize
     def get_planets(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet)]
 
+    @optimize.frame_memoize
     def get_civ_planets(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet) and s.owning_civ == civ]
 
+    @optimize.frame_memoize
     def get_enemy_planets(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet) and s.owning_civ and s.owning_civ != civ]        
 
+    @optimize.frame_memoize
     def get_ships(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship)]
-
-    def get_my_ships(self):
+    
+    @optimize.frame_memoize
+    def get_my_ships(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ == civ]
 
+    @optimize.frame_memoize
     def get_enemy_ships(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ != civ]
 
+    @optimize.frame_memoize
     def get_enemy_objects(self, civ):
         return [s for s in self.game_group.sprites() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ != civ]
 
+    @optimize.frame_memoize
     def get_civ_ships(self, civ):
         return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ == civ]        
 
@@ -367,6 +346,8 @@ class LevelScene(scene.Scene):
         #sound.play_music('game')  
 
     def update(self, dt):
+        ut = time.time()
+        self.update_times = defaultdict(lambda:0)
         dt *= self.game_speed
         if self.paused:
             self.sm.state.paused_update(dt)
@@ -386,22 +367,27 @@ class LevelScene(scene.Scene):
             self.paused = True
             self.sm.transition(levelstates.VictoryState(self))
 
+        
+        
+        for sprite in self.game_group.sprites() + self.ui_group.sprites():
+            t = time.time()
+            sprite.update(dt)
+            elapsed = time.time() - t
+            self.update_times[type(sprite)] += elapsed
+
         t = time.time()
-        for sprite in self.game_group.sprites():
-            sprite.update(dt)
-        #print("updates", time.time() - t)
-
-        for sprite in self.ui_group.sprites():
-            sprite.update(dt)
-
         colliders = [s for s in self.game_group.sprites() if s.collidable]
         lc = len(colliders)
         for i in range(lc):
             for j in range(i + 1, lc):
+                if colliders[i].stationary and colliders[j].stationary:
+                    continue
                 d = colliders[i].pos - colliders[j].pos
                 if d.sqr_magnitude() <= (colliders[i].collision_radius + colliders[j].collision_radius) ** 2:
                     colliders[i].collide(colliders[j])
                     colliders[j].collide(colliders[i])
+        elapsed = time.time() - t
+        self.update_times["collisions"] = elapsed
 
         if len(self.my_civ.upgrades_stocked) > 0:
             r = self.my_civ.upgrades_stocked[0]
@@ -422,13 +408,22 @@ class LevelScene(scene.Scene):
             else:
                 self.upgrade_texts[res_type].set_text("")
 
-        self.enemy.update(dt)
+        for enemy in self.enemies:
+            enemy.update(dt)
         
+        t = time.time()
         self.fleet_managers['my'].update(dt)
         self.fleet_managers['enemy'].update(dt)
+        self.update_times['fleets'] = time.time() - t
 
+        t = time.time()
         self.my_civ.update(dt)
-        self.enemy.civ.update(dt)
+        for enemy in self.enemies:
+            enemy.civ.update(dt)
+        self.update_times['civs'] = time.time() - t
+
+        self.update_times['update'] = time.time() - ut
+        
 
     def render(self):
         t = time.time()
@@ -451,16 +446,18 @@ class LevelScene(scene.Scene):
 
         for s in self.ui_group.sprites():
             if s.image is None:
-                print(s)
+                pass
+                #print(s)
         self.ui_group.draw(self.game.screen)        
         self.tutorial_group.draw(self.game.screen)
         if self.debug:
             self.enemy.render(self.game.screen)
             debug_render(self.game.screen, self)
 
-        #print("render", time.time() - t)
+        self.update_times['render'] = time.time() - t
 
-        #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))            
+        #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))
+        #print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))          
 
 
     def take_input(self, inp, event):

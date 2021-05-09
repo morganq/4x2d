@@ -18,6 +18,7 @@ import text
 from colors import *
 from v2 import V2
 import run
+import optimize
 
 DEV = True
 SCALE = 2
@@ -100,6 +101,9 @@ class Game:
 
             self.scene.update(dt)
             self.render()
+            #optimize.print_memos()
+            optimize.reset_frame_memos()
+                
 
     def render(self):
         self.scene.render()

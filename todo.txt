@@ -1,13 +1,3 @@
-implement a simple alien race - attacking
-figure out if a single level "works" from a game design standpoint
-implement level progression
-implement another alien race
-~ level rewards and star map
-
-====
-
-Make it possible to order ships. Maybe on a timer so you can't micro.
-
-=====
-
+make regen a stat
+fix double fire and fast movement bugs in ships (fighters?)
 Fix hover / mouse input in a holistic way

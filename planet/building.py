@@ -37,7 +37,7 @@ class Building:
         for pt in shape:
             dist,ang = pt.to_polar()
             ang += angle
-            new_pt = V2.from_angle(ang) * dist * 2 + offset
+            new_pt = V2.from_angle(ang) * dist * 1.25 + offset
             if expand:
                 new_pt += (new_pt - center).normalized() * .75
             final_pts.append(new_pt)
@@ -128,3 +128,21 @@ class AlienHomeDefenseBuilding(Building):
                 planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "color":PICO_RED},
                 )
             planet.scene.game_group.add(b)
+
+class DefenseMatrix(Building):
+    pass
+
+class DefenseMatrixAlpha(DefenseMatrix):
+    pass
+
+class DefenseMatrixOmega(DefenseMatrix):
+    pass
+
+class Portal(Building):
+    pass
+
+class ClockwisePortal(Portal):
+    pass
+
+class CounterClockwisePortal(Portal):
+    pass

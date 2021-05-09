@@ -58,7 +58,7 @@ class Colonist(Ship):
             enemy_objs = self.scene.get_enemy_objects(self.owning_civ)
             near_enemies = helper.all_nearby(self.pos, enemy_objs, ATOMIC_BOMB_RANGE * range_adjust)
             for enemy in near_enemies:
-                enemy.take_damage(50)
+                enemy.take_damage(50, self)
             # TODO: particles
             
         self.num_label.kill()

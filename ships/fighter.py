@@ -74,7 +74,7 @@ class Fighter(Ship):
     def get_threats(self):
         enemies = self.scene.get_enemy_ships(self.owning_civ)
         threat_range = self.THREAT_RANGE_DEFAULT
-        if self.chosen_target.owning_civ == self.owning_civ:
+        if self.chosen_target.owning_civ == self.owning_civ: # Target is our own planet (defense)
             threat_range = self.THREAT_RANGE_DEFENSE
         return [
             e for e in enemies
@@ -116,7 +116,7 @@ class Fighter(Ship):
         self.thrust_particle_time = THRUST_PARTICLE_RATE
 
         for i in range(10):
-            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
+            pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.game_group.add(p)        
 
@@ -130,7 +130,9 @@ class Fighter(Ship):
 
     def state_dogfight(self, dt):
         # If our target is dead or w/e, find a new one
-        if not self.effective_target or self.effective_target.health <= 0:
+        if (not self.effective_target or
+            self.effective_target.health <= 0 or
+            (self.effective_target.pos - self.pos).sqr_magnitude() > self.THREAT_RANGE_DEFENSE ** 2):
             self.find_target()
 
         if not self.effective_target: # Still no target? Go back to whatever we were doing.

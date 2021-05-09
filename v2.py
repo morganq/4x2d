@@ -1,4 +1,6 @@
 import math
+import random
+
 class V2:
     """A two-dimensional vector with Cartesian coordinates."""
 
@@ -97,4 +99,9 @@ class V2:
 
     @staticmethod
     def from_angle(angle):
+        return V2(math.cos(angle), math.sin(angle))
+
+    @staticmethod
+    def random_angle():
+        angle = random.random() * 6.2818
         return V2(math.cos(angle), math.sin(angle))

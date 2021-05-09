@@ -3,7 +3,7 @@ from productionorder import ProductionOrder
 
 @register_upgrade
 class Basic1Upgrade(Upgrade):
-    name = "basicfighters1"
+    name = "s_basicfighters1"
     resource_type = "iron"
     category = "ships"
     title = "Standard Order"
@@ -18,15 +18,15 @@ class Basic1Upgrade(Upgrade):
 
 @register_upgrade
 class Basic2Upgrade(Upgrade):
-    name = "basicfighters2"
+    name = "s_basicfighters2"
     resource_type = "iron"
     category = "ships"
     title = "Expedited Order"
     description = "[^4] [Fighters] Over 25 seconds"
     icon = "expeditedorder"
     cursor = "allied_planet"
-    family = {'tree':'basicfighters', 'parents':['basicfighters1']}
-    requires = ('basicfighters1',)
+    family = {'tree':'basicfighters', 'parents':['s_basicfighters1']}
+    requires = ('s_basicfighters1',)
 
     def apply(self, to):
         p = ProductionOrder("fighter", 4, 25)
@@ -34,7 +34,7 @@ class Basic2Upgrade(Upgrade):
 
 @register_upgrade
 class Basic3Upgrade(Upgrade):
-    name = "basicfighters3"
+    name = "s_basicfighters3"
     resource_type = "iron"
     category = "ships"
     title = "Rush Order"
@@ -42,7 +42,7 @@ class Basic3Upgrade(Upgrade):
     icon = "rushorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':['basicfighters2']}
-    requires = ('basicfighters1', 'basicfighters2')
+    requires = ('s_basicfighters1', 's_basicfighters2')
     infinite = True
 
     def apply(self, to):
@@ -51,7 +51,7 @@ class Basic3Upgrade(Upgrade):
 
 @register_upgrade
 class InstantFighters1Upgrade(Upgrade):
-    name = "instantfighters1"
+    name = "s_instantfighters1"
     resource_type = "iron"
     category = "ships"
     title = "Emergency Reinforcements"
@@ -66,15 +66,15 @@ class InstantFighters1Upgrade(Upgrade):
 
 @register_upgrade
 class InstantFighters2aUpgrade(Upgrade):
-    name = "instantfighters2a"
+    name = "s_instantfighters2a"
     resource_type = "iron"
     category = "ships"
     title = "Guard Deployment"
     description = "[^3] [Fighters] [^Instantly], [!-2] [Population]"
     icon = "guarddeployment"
     cursor = "allied_planet"
-    family = {'tree':'instantfighters', 'parents':['instantfighters1']}
-    requires = ('instantfighters1',)
+    family = {'tree':'instantfighters', 'parents':['s_instantfighters1']}
+    requires = ('s_instantfighters1',)
 
     def apply(self, to):
         p = ProductionOrder("fighter", 3, 0.25)
@@ -83,15 +83,15 @@ class InstantFighters2aUpgrade(Upgrade):
 
 @register_upgrade
 class InstantFighters2bUpgrade(Upgrade):
-    name = "instantfighters2b"
+    name = "s_instantfighters2b"
     resource_type = "iron"
     category = "ships"
     title = "War Manufacturing"
     description = "[^3] [Fighters] [^Instantly], Planet loses [!25] [Health]"
     icon = "warmanufacturing"
     cursor = "allied_planet"
-    family = {'tree':'instantfighters', 'parents':['instantfighters1']}
-    requires = ('instantfighters1',)
+    family = {'tree':'instantfighters', 'parents':['s_instantfighters1']}
+    requires = ('s_instantfighters1',)
 
     def apply(self, to):
         p = ProductionOrder("fighter", 3, 0.25)
@@ -100,15 +100,15 @@ class InstantFighters2bUpgrade(Upgrade):
 
 @register_upgrade
 class InstantFighters3aUpgrade(Upgrade):
-    name = "instantfighters3a"
+    name = "s_instantfighters3a"
     resource_type = "iron"
     category = "ships"
     title = "Guard Deployment II"
     description = "[^4] [Fighters] [^Instantly], [!-3] [Population]"
     icon = "guarddeployment2"
     cursor = "allied_planet"
-    family = {'tree':'instantfighters', 'parents':['instantfighters2a']}
-    requires = ('instantfighters1','instantfighters2a')
+    family = {'tree':'instantfighters', 'parents':['s_instantfighters2a']}
+    requires = ('s_instantfighters1','s_instantfighters2a')
     infinite = True
 
     def apply(self, to):
@@ -118,15 +118,15 @@ class InstantFighters3aUpgrade(Upgrade):
 
 @register_upgrade
 class InstantFighters3bUpgrade(Upgrade):
-    name = "instantfighters3b"
+    name = "s_instantfighters3b"
     resource_type = "iron"
     category = "ships"
     title = "War Manufacturing II"
     description = "[^4] [Fighters] [^Instantly], Planet loses [!35] [Health]"
     icon = "warmanufacturing2"
     cursor = "allied_planet"
-    family = {'tree':'instantfighters', 'parents':['instantfighters2b']}
-    requires = ('instantfighters1','instantfighters2b')
+    family = {'tree':'instantfighters', 'parents':['s_instantfighters2b']}
+    requires = ('s_instantfighters1','s_instantfighters2b')
     infinite = True
 
     def apply(self, to):
@@ -136,7 +136,7 @@ class InstantFighters3bUpgrade(Upgrade):
 
 @register_upgrade
 class LongFighters1Upgrade(Upgrade):
-    name = "longfighters1"
+    name = "s_longfighters1"
     resource_type = "iron"
     category = "ships"
     title = "Efficient Assembly"
@@ -152,15 +152,15 @@ class LongFighters1Upgrade(Upgrade):
 
 @register_upgrade
 class LongFighters2aUpgrade(Upgrade):
-    name = "longfighters2a"
+    name = "s_longfighters2a"
     resource_type = "iron"
     category = "ships"
     title = "Strategic Assembly"
     description = "[^5] [Fighters] Over 100 seconds"
     icon = "fighters3pop"
     cursor = "allied_planet"
-    family = {'tree':'longfighters', 'parents':['longfighters1']}
-    requires = ('longfighters1',)
+    family = {'tree':'longfighters', 'parents':['s_longfighters1']}
+    requires = ('s_longfighters1',)
 
     def apply(self, to):
         p = ProductionOrder("fighter", 5, 100)
@@ -168,15 +168,15 @@ class LongFighters2aUpgrade(Upgrade):
 
 @register_upgrade
 class LongFighters2bUpgrade(Upgrade):
-    name = "longfighters2b"
+    name = "s_longfighters2b"
     resource_type = "iron"
     category = "ships"
     title = "Efficient Assembly II"
     description = "[^4] [Fighters] Over 100 seconds, [^+100] [Iron]"
     icon = "fighters3pop"
     cursor = "allied_planet"
-    family = {'tree':'longfighters', 'parents':['longfighters1']}
-    requires = ('longfighters1',)
+    family = {'tree':'longfighters', 'parents':['s_longfighters1']}
+    requires = ('s_longfighters1',)
 
     def apply(self, to):
         p = ProductionOrder("fighter", 4, 100)
@@ -185,15 +185,15 @@ class LongFighters2bUpgrade(Upgrade):
 
 @register_upgrade
 class LongFighters3Upgrade(Upgrade):
-    name = "longfighters3"
+    name = "s_longfighters3"
     resource_type = "iron"
     category = "ships"
     title = "Recycled Armaments"
     description = "[^6] [Fighters] Over 120 seconds, [^+50] [Gas]"
     icon = "fighters3pop"
     cursor = "allied_planet"
-    family = {'tree':'longfighters', 'parents':['longfighters2a', 'longfighters2b']}
-    requires = lambda x:'longfighters1' in x and ('longfighters2a' in x or 'longfighters2b' in x)
+    family = {'tree':'longfighters', 'parents':['s_longfighters2a', 's_longfighters2b']}
+    requires = lambda x:'s_longfighters1' in x and ('s_longfighters2a' in x or 's_longfighters2b' in x)
     infinite = True
 
     def apply(self, to):
@@ -203,7 +203,7 @@ class LongFighters3Upgrade(Upgrade):
 
 @register_upgrade
 class InterceptorFighters1Upgrade(Upgrade):
-    name = "interceptorfighters1"
+    name = "s_interceptorfighters1"
     resource_type = "ice"
     category = "ships"
     title = "Interceptor Convoy"
@@ -224,7 +224,7 @@ class InterceptorFighters1Upgrade(Upgrade):
 
 @register_upgrade
 class Interceptors1Upgrade(Upgrade):
-    name = "basicinterceptors1"
+    name = "s_basicinterceptors1"
     resource_type = "ice"
     category = "ships"
     title = "Interceptors"
@@ -232,7 +232,7 @@ class Interceptors1Upgrade(Upgrade):
     icon = "fighters6"
     cursor = "allied_planet"
     family = {'tree':'basicinterceptors', 'parents':[]}
-    requires = ('hangar2a',)
+    requires = ('b_hangar2a',)
     infinite = True
 
     def apply(self, to):
@@ -241,7 +241,7 @@ class Interceptors1Upgrade(Upgrade):
 
 @register_upgrade
 class Bombers1Upgrade(Upgrade):
-    name = "basicbombers1"
+    name = "s_basicbombers1"
     resource_type = "ice"
     category = "ships"
     title = "Bombers"
@@ -249,7 +249,7 @@ class Bombers1Upgrade(Upgrade):
     icon = "fighters6"
     cursor = "allied_planet"
     family = {'tree':'basicbombers', 'parents':[]}
-    requires = ('hangar2b',)
+    requires = ('b_hangar2b',)
     infinite = True
 
     def apply(self, to):
@@ -258,7 +258,7 @@ class Bombers1Upgrade(Upgrade):
 
 @register_upgrade
 class BattleshipFighters1Upgrade(Upgrade):
-    name = "battleshipfighters1"
+    name = "s_battleshipfighters1"
     resource_type = "gas"
     category = "ships"
     title = "Battleship Convoy"
@@ -271,7 +271,7 @@ class BattleshipFighters1Upgrade(Upgrade):
     def apply(self, to):
         p = ProductionOrder("fighter", 3, 50)
         to.add_production(p)
-        if 'hangar3' in to.owning_civ.researched_upgrade_names:
+        if 'b_hangar3' in to.owning_civ.researched_upgrade_names:
             p = ProductionOrder("battleship", 1, 50)
             to.add_production(p)
         else:
@@ -279,7 +279,7 @@ class BattleshipFighters1Upgrade(Upgrade):
 
 @register_upgrade
 class Battleships1Upgrade(Upgrade):
-    name = "basicbattleships1"
+    name = "s_basicbattleships1"
     resource_type = "gas"
     category = "ships"
     title = "Battleships"
@@ -287,7 +287,7 @@ class Battleships1Upgrade(Upgrade):
     icon = "fighters6"
     cursor = "allied_planet"
     family = {'tree':'basicbattleships', 'parents':[]}
-    requires = ('hangar3',)
+    requires = ('b_hangar3',)
     infinite = True
 
     def apply(self, to):

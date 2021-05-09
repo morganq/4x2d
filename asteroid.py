@@ -10,6 +10,7 @@ from icontext import IconText
 import economy
 
 class Asteroid(SpaceObject):
+    HEALTHBAR_SIZE = (20, 2)
     def __init__(self, scene, pos, resources):
         super().__init__(scene, pos)
         self.resources = resources

@@ -8,7 +8,7 @@ import helper
 import random
 
 VEL = 50
-DEATH_TIME = 5
+DEATH_TIME = 1
 DAMAGE = 2
 NEAR_ENEMY_PLANETS_DIST = 60
 
@@ -19,7 +19,8 @@ class Bullet(SpriteBase):
         self.shooter = shooter
         self.owning_civ = self.shooter.owning_civ
         self.collidable = True
-        self.collision_radius = 2
+        self.stationary = False
+        self.collision_radius = 5
         self.mods = mods or {}
         speed = VEL * (1 + self.mods.get("ship_missile_speed", 0))
         if vel:
@@ -55,7 +56,7 @@ class Bullet(SpriteBase):
             objs_hit = helper.all_nearby(self.pos, self.shooter.scene.get_enemy_objects(self.owning_civ), self.mods.get("blast_radius"))
             
         for obj in objs_hit:
-            obj.take_damage(damage)
+            obj.take_damage(damage, self)
             if self.mods.get("grey_goo", False):
                 obj.add_effect(GreyGooEffect(other, self))
 

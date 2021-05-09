@@ -115,6 +115,22 @@ class PlayState(UIEnabledState):
                 self.arrow.visible = False        
         super().update(dt)
 
+    def take_input(self, inp, event):
+        if game.DEV:
+            if inp == "other" and event.key == pygame.K_u:
+                name = input("updgrade name> ")
+                upgrade = UPGRADE_CLASSES[name]
+                self.scene.my_civ.researched_upgrade_names.add(upgrade.name)
+                if upgrade.category == "tech":
+                    self.scene.my_civ.upgrades.append(upgrade)
+                    upgrade().apply(self.scene.my_civ)
+                    self.scene.ui_group.add(FunNotification(upgrade.title, None))
+                else:
+                    planet = self.scene.get_civ_planets(self.scene.my_civ)[0]
+                    upgrade().apply(planet)
+
+        return super().take_input(inp, event)
+
     def keyboard_input(self, input, event):
         if input == 'other' and event.key == pygame.K_RETURN:
             if self.scene.upgrade_button.visible:
@@ -216,7 +232,7 @@ class UpgradeState(UIEnabledState):
     def enter(self):
         self.scene.paused = True
         resource = self.scene.my_civ.upgrades_stocked[0]
-        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select)
+        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
@@ -240,6 +256,15 @@ class UpgradeState(UIEnabledState):
         if self.panel:
             self.panel.kill()
         self.scene.sm.transition(PlayState(self.scene))
+
+    def on_reroll(self):
+        self.scene.my_civ.clear_offers()
+        self.panel.kill()
+        resource = self.scene.my_civ.upgrades_stocked[0]
+        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
+        self.panel.add_all_to_group(self.scene.ui_group)
+        self.panel.position_nicely(self.scene)
+        self.panel.fade_in(speed=10)
 
     def on_select(self, upgrade):
         if upgrade.cursor == None:

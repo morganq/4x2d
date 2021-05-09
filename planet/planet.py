@@ -98,6 +98,7 @@ class Planet(SpaceObject):
         ### Upgrades ###
         self.unstable_reaction = 0
         self.owned_time = 0
+        self._timers['regen'] = 0
 
     @property
     def population(self): return self._population
@@ -228,6 +229,25 @@ class Planet(SpaceObject):
             if self.emit_ships_timer >= EMIT_SHIPS_RATE:
                 ship_type, data = self.emit_ships_queue.pop(0)
                 target = data['to']
+
+                if self.get_stat("launchpad_pop_chance"):
+                    if target.owning_civ != self.owning_civ and ship_type == "colonist":
+                        if random.random() < self.get_stat("launchpad_pop_chance"):
+                            self.add_population(1)
+
+                if self.get_stat("launchpad_fighter_chance"):
+                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type in ["bomber","interceptor"]:
+                        if random.random() < self.get_stat("launchpad_fighter_chance"):
+                            self.add_ship("fighter")
+
+                if self.get_stat("launchpad_battleship_health"):
+                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type == "battleship":
+                        self.health += self.get_stat("launchpad_battleship_health")
+
+                if self.get_stat("launchpad_battleship_pop"):
+                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type == "battleship":
+                        self.add_population(self.get_stat("launchpad_battleship_pop"))
+                
                 towards_angle = (target.pos - self.pos).to_polar()[1]
                 towards_angle += random.random() - 0.5
                 ship_class = EMIT_CLASSES[ship_type]                                
@@ -256,17 +276,17 @@ class Planet(SpaceObject):
 
             ### Resource Stats ###
 
-            # Top resource mining rate
             if top_resource == r:
                 rate_modifier += self.get_stat("top_mining_rate")
                 rate_modifier *= 1 + self.get_stat("top_mining_per_building") * len(self.buildings)
 
-            # Scarcest resource mining rate
             if bottom_resource == r:
                 rate_modifier += self.get_stat("scarcest_mining_rate")
 
-            # Unstable Reaction
             rate_modifier *= (1 + self.get_stat("mining_rate") + self.unstable_reaction)
+
+            if self._population >= self.size:
+                rate_modifier *= 1 + self.get_stat("mining_rate_at_max_pop")
 
             # Resources mined is based on num workers
             workers = min(self._population, self.size)
@@ -276,14 +296,11 @@ class Planet(SpaceObject):
             v = (self.resources.data[r] / 10.0) # if planet has 100% iron, you get 10 iron every 10 resource ticks.
             if self.resource_timers.data[r] > v:
                 self.resource_timers.data[r] -= v
-                
                 self.owning_civ.earn_resource(r, v)
-                if self.owning_civ == self.scene.my_civ:
-                    # Add to score!!
-                    self.scene.score += v
-                    it = IconText(self.pos, None, "+%d" % v, economy.RESOURCE_COLORS[r])
-                    it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
-                    self.scene.ui_group.add(it)
+                if self.get_stat("mining_ice_per_iron"):
+                    self.owning_civ.earn_resource("ice", v * self.get_stat("mining_ice_per_iron"))
+                if self.get_stat("mining_gas_per_iron"):
+                    self.owning_civ.earn_resource("gas", v * self.get_stat("mining_gas_per_iron"))
 
         # Ship production
         for prod in self.production:
@@ -315,12 +332,7 @@ class Planet(SpaceObject):
                 max_pop = self.get_max_pop()
                 if self.population_growth_timer >= self.get_pop_growth_time() and self._population < max_pop:
                     self.population_growth_timer = 0
-                    self._population += 1
-                    self.needs_panel_update = True
-                    if self.owning_civ == self.scene.my_civ:
-                        it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
-                        it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
-                        self.scene.ui_group.add(it)
+                    self.add_population(1)
 
         if self.health <= 0:
             self.buildings = []
@@ -353,7 +365,23 @@ class Planet(SpaceObject):
             # Slowly increase to 1
             self.unstable_reaction = clamp(self.unstable_reaction * (dt * self.get_stat("unstable_reaction") * USR), 0, self.get_stat("unstable_reaction"))
 
+        REGEN_TIMER = 5
+        if self._timers['regen'] > REGEN_TIMER:
+            self._timers['regen'] = 0
+            if self.get_stat("regen") > 0:
+                self.health += self.get_stat("regen") / REGEN_TIMER
+            if self.get_stat("deserted_regen") > 0 and self.population == 0:
+                self.health += self.get_stat("deserted_regen") / REGEN_TIMER
+
         self.owned_time += dt
+
+    def add_population(self, num):
+        self._population += num
+        self.needs_panel_update = True
+        if self.owning_civ == self.scene.my_civ:
+            it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
+            it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+            self.scene.ui_group.add(it)        
 
     def get_max_fighters(self):
         return self.size * 2
@@ -424,3 +452,8 @@ class Planet(SpaceObject):
         if new < old:
             self.unstable_reaction = 0
         return super().on_health_changed(old, new)
+
+    def take_damage(self, damage, origin):
+        if self.get_stat("damage_iron"):
+            self.owning_civ.earn_resource("iron", self.get_stat("damage_iron"), where=self)
+        return super().take_damage(damage, origin=origin)

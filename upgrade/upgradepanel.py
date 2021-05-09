@@ -1,3 +1,4 @@
+from framesprite import FrameSprite
 from spritebase import SpriteBase
 from button import Button
 from panel import Panel
@@ -13,7 +14,7 @@ from upgrade.upgradeicon import UpgradeIcon
 from v2 import V2
 
 class UpgradePanel(Panel):
-    def __init__(self, pos, offered_upgrades, resource, on_select):
+    def __init__(self, pos, offered_upgrades, resource, on_select, on_reroll):
         Panel.__init__(self, pos, None)
         self.resource = resource
         self.padding = 15
@@ -46,6 +47,8 @@ class UpgradePanel(Panel):
         box._width = 75
         box.visible = False
         self.add(box, V2(250,0))
+
+        self.add(Button(V2(0,0), "Reroll", "small", on_reroll), V2(0, y + 10))
 
         self.redraw()
 
@@ -99,6 +102,14 @@ class UpgradePanel(Panel):
                     pygame.draw.line(self.image, color, (pos + V2(14, 12) - self.pos).tuple(), (pp + V2(14,12) - self.pos).tuple(), 1)
                 if name == button.upgrade.name:
                     pygame.draw.rect(self.image, PICO_GREEN, (pos.x - self.pos.x - 1, pos.y - self.pos.y, 28, 28), 2)
+                if u.infinite:
+                    inf = FrameSprite(pos + V2(22,23), "assets/infinite.png", 8)
+                    if u.name in game.Game.inst.scene.my_civ.researched_upgrade_names:
+                        inf.frame = 1
+                    else:
+                        inf.frame = 0
+                    game.Game.inst.scene.ui_group.add(inf)
+                    self.tree_children.append(inf)
         else:
             self.redraw()
 

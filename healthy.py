@@ -1,6 +1,8 @@
 from meter import Meter
 from v2 import V2
 from colors import *
+from particle import Particle
+import random
 
 class Healthy:
     def __init__(self, scene, meter_size = (30,4)):
@@ -14,6 +16,15 @@ class Healthy:
         scene.ui_group.add(self.health_bar)
 
         self._shield_damage = 0
+        self.shield_bar = Meter(V2(self.x, self.y - self._height / 2 - 3), meter_size[0], 2, PICO_BLUE, 1)
+        self.shield_bar.value = 9999999
+        self.shield_bar.offset = (0.5,1)
+        self.shield_bar.stay = False
+        self.shield_bar.visible = 0
+        self.shield_bar._recalc_rect()
+        scene.ui_group.add(self.shield_bar)        
+
+        
 
     def set_health(self, health, show_healthbar=False):
         self.health = health
@@ -48,10 +59,34 @@ class Healthy:
 
     @shield.setter
     def shield(self, value):
+        old = self._shield_damage
         self._shield_damage = min(max(self.get_max_shield() - value, 0), self.get_max_shield())
+        if old != self._shield_damage:
+            self.shield_bar.value = self.shield
+            self.shield_bar.max_value = self.get_max_shield()
+            self.shield_bar.show()
+            self.health_bar.show()
 
-    def take_damage(self, damage):
+    def take_damage(self, damage, origin=None):
+        was_shield = False
         sa = min(damage, self.shield)
+        if self.shield > 0:
+            was_shield = True
         self.shield -= sa
         damage -= sa
         self.health -= damage
+        if origin:
+            delta = origin.pos - self.pos
+            dn = delta.normalized()
+            hitpos = self.pos + dn * self.radius
+            if was_shield:
+                for i in range(10):
+                    ang = dn.to_polar()[1]
+                    rad = max(self.radius, 8) + 2
+                    hp = self.pos + rad * V2.from_angle(ang + random.random() - 0.5)
+                    p = Particle([PICO_GREEN, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE], 1, hp, 0.25, dn)
+                    self.scene.game_group.add(p)
+            else:
+                for i in range(10):
+                    p = Particle([PICO_WHITE, PICO_YELLOW, PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY], 1, hitpos, 0.25, V2.random_angle() * 9)                
+                    self.scene.game_group.add(p)
