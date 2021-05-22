@@ -20,7 +20,7 @@ def generate_upgrade_image(upgrade):
     try:
         icon = pygame.image.load(resource_path("assets/upgrades/%s.png" % upgrade.icon)).convert_alpha()
     except:
-        print("UPGRADE ICON NOT FOUND:" % upgrade.icon)
+        print("UPGRADE ICON NOT FOUND:", upgrade.icon)
 
     category_icons = {'buildings':'i-up-building', 'tech':'i-up-tech', 'ships':'i-up-ship'}
     category_icon = pygame.image.load(resource_path("assets/%s.png" % category_icons[upgrade.category])).convert_alpha()

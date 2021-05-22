@@ -2,6 +2,7 @@ from meter import Meter
 from v2 import V2
 from colors import *
 from particle import Particle
+from explosion import Explosion
 import random
 
 class Healthy:
@@ -23,8 +24,6 @@ class Healthy:
         self.shield_bar.visible = 0
         self.shield_bar._recalc_rect()
         scene.ui_group.add(self.shield_bar)        
-
-        
 
     def set_health(self, health, show_healthbar=False):
         self.health = health
@@ -82,11 +81,16 @@ class Healthy:
             if was_shield:
                 for i in range(10):
                     ang = dn.to_polar()[1]
-                    rad = max(self.radius, 8) + 2
+                    rad = max(self.radius, 5) + 2
                     hp = self.pos + rad * V2.from_angle(ang + random.random() - 0.5)
-                    p = Particle([PICO_GREEN, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE], 1, hp, 0.25, dn)
+                    p = Particle([PICO_GREEN, PICO_WHITE, PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE], 1, hp, 0.65 + random.random() * 0.2, dn)
                     self.scene.game_group.add(p)
             else:
-                for i in range(10):
+                particles = 10
+                if self.radius > 6:
+                    particles = 4
+                    e = Explosion(hitpos, [PICO_WHITE, PICO_YELLOW, PICO_RED], 0.2, 5, "log", 2)
+                    self.scene.game_group.add(e)
+                for i in range(particles):
                     p = Particle([PICO_WHITE, PICO_YELLOW, PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY], 1, hitpos, 0.25, V2.random_angle() * 9)                
                     self.scene.game_group.add(p)

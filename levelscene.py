@@ -33,6 +33,7 @@ from v2 import V2
 from aliens.basicalien import BasicAlien
 from debug import debug_render
 import optimize
+from aliens import alien
 
 
 class LevelScene(scene.Scene):
@@ -58,7 +59,7 @@ class LevelScene(scene.Scene):
     @score.setter
     def score(self, value):
         self._score = value
-        self.score_text.set_text("%d" % value)
+        self.score_text.set_text("%d" % self.time)
 
     def random_object_pos(self):
         pos = None
@@ -87,9 +88,9 @@ class LevelScene(scene.Scene):
             
         return pos
 
-    def give_building(self, planet, building):
-        planet.add_building(building)
-        planet.owning_civ.researched_upgrade_names.add(building)
+    def give_building(self, planet, upgrade):
+        planet.add_building(upgrade)
+        planet.owning_civ.researched_upgrade_names.add(upgrade.name)
 
     def load_level(self, levelfile):
         data = json.load(open("levels/%s.json" % levelfile))
@@ -150,8 +151,7 @@ class LevelScene(scene.Scene):
         # Alien
         p = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.enemy.civ))[0]
         p.population = 5
-        p.ships['alien-fighter'] = 2
-        self.give_building(p, "alienhomedefense")
+        self.give_building(p, alien.AlienHomeDefenseUpgrade)
 
         num_planets = 2
         
@@ -159,13 +159,12 @@ class LevelScene(scene.Scene):
             # Alien 2
             p = get_nearest(V2(0, 0), self.get_civ_planets(self.enemies[1].civ))[0]
             p.population = 5
-            p.ships['alien-fighter'] = 2
-            self.give_building(p, "alienhomedefense")        
+            self.give_building(p, alien.AlienHomeDefenseUpgrade)        
             num_planets += 1
         
 
         # TODO: Planet resources more constrained
-        while num_planets < 10:
+        while num_planets < self.difficulty / 4 + 10:
             pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
             
             near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
@@ -280,6 +279,15 @@ class LevelScene(scene.Scene):
         if third:
             self.enemies[1].set_difficulty(self.difficulty)
 
+        if self.options == "surround":
+            for planet in self.get_civ_planets(None):
+                planet.change_owner(self.enemy.civ)
+
+        if self.options == "rich":
+            self.my_civ.resources.set_resource("iron", 1150)
+            self.my_civ.resources.set_resource("ice", 1150)
+            self.my_civ.resources.set_resource("gas", 1150)                            
+
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
 
@@ -322,7 +330,7 @@ class LevelScene(scene.Scene):
 
     @optimize.frame_memoize
     def get_enemy_objects(self, civ):
-        return [s for s in self.game_group.sprites() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ != civ]
+        return [s for s in self.game_group.sprites() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]
 
     @optimize.frame_memoize
     def get_civ_ships(self, civ):
@@ -376,6 +384,7 @@ class LevelScene(scene.Scene):
             self.update_times[type(sprite)] += elapsed
 
         t = time.time()
+        # Collisions
         colliders = [s for s in self.game_group.sprites() if s.collidable]
         lc = len(colliders)
         for i in range(lc):
@@ -408,8 +417,9 @@ class LevelScene(scene.Scene):
             else:
                 self.upgrade_texts[res_type].set_text("")
 
-        for enemy in self.enemies:
-            enemy.update(dt)
+        if self.options != "pacifist":
+            for enemy in self.enemies:
+                enemy.update(dt)
         
         t = time.time()
         self.fleet_managers['my'].update(dt)

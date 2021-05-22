@@ -8,8 +8,9 @@ import math
 import planet
 from helper import all_nearby, clamp
 from bullet import Bullet
+from laserparticle import LaserParticle
 
-class Bomber(Fighter): 
+class Battleship(Fighter): 
     BASE_HEALTH = 160
     BLAST_RADIUS = 0
     FIRE_RATE = 1.5
@@ -22,37 +23,54 @@ class Bomber(Fighter):
     BOMBS = True
     DOGFIGHTS = True
 
+    SHIP_NAME = "battleship"
+    SHIP_BONUS_NAME = "battleship"
+
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         
         self.set_sprite_sheet("assets/battleship.png", 12)
 
+    def get_max_health(self):
+        mh = super().get_max_health()
+        mh *= 1 + self.get_stat("battleship_health_mul")
+        return mh
+
+    def get_fire_rate(self):
+        fr = super().get_fire_rate()
+        if self.get_stat("battleship_laser"):
+            fr *= 1.25
+        return fr
+
+    def fire_laser(self, at):
+        lp = LaserParticle(self.pos, at.pos, PICO_PINK, 0.25)
+        self.scene.game_group.add(lp)
+        b = Bullet(at.pos, at, self, mods=self.prepare_bullet_mods())
+        self.scene.game_group.add(b)        
+        
+        enemies = self.scene.get_enemy_objects(self.owning_civ)
+        threat_range = self.THREAT_RANGE_DEFAULT
+        if self.chosen_target.owning_civ == self.owning_civ: # Target is our own planet (defense)
+            threat_range = self.THREAT_RANGE_DEFENSE
+        threats = [
+            e for e in enemies
+            if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.is_alive())
+        ]
+        if threats:
+            self.effective_target = random.choice(threats)
+
     def fire(self, at):
+        if self.get_stat("battleship_laser"):
+            self.fire_laser(at)
+            return
+
         towards = (at.pos - self.pos).normalized()
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
 
-        damage_add = 0
-        extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
-        damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
-        damage_add += self.get_stat("ship_weapon_damage")
-        damage_mul = self.get_stat("battleship_damage_mul")
-        blast_radius = self.BLAST_RADIUS + self.get_stat("battleship_blast_radius")
-        b = Bullet(self.pos, at, self, mods={
-            'grey_goo': self.get_stat('grey_goo'),
-            'damage_base': self.BASE_DAMAGE,
-            'damage_mul': damage_mul,
-            'damage_add': damage_add,
-            'blast_radius': blast_radius,
-            'ship_missile_speed':self.get_stat("ship_missile_speed"),
-            'color':PICO_LIGHTGRAY
-        })
+        b = Bullet(self.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)
-
-        #self.velocity += -towards * 2
-        self.pos += -towards * 2
-        self.thrust_particle_time = THRUST_PARTICLE_RATE
 
         for i in range(10):
             pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)

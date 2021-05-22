@@ -19,6 +19,8 @@ class Asteroid(SpaceObject):
         self.offset = (0.5, 0.5)
         self.selectable = True
         self.collidable = True
+        self.stationary = True
+        self.collision_radius = self.radius + 4
         self.set_health(self.get_max_health())
         self._circles = []
 
@@ -37,7 +39,7 @@ class Asteroid(SpaceObject):
         return self.total_resources * 0.75
 
     def _generate_frame(self, border=False):
-        w = self.radius * 2 + 10
+        w = self.radius * 2 + 16
         h = w
         image = pygame.Surface((w,h), pygame.SRCALPHA)
 

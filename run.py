@@ -9,6 +9,7 @@ class RunInfo:
         self.blueprints = []
         self.bonus_population = 0
         self.bonus_fighters = 0
+        self.rerolls = 3
 
     def choose_path(self, row, column):
         self.path.append((row, column))

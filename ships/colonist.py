@@ -7,6 +7,7 @@ import random
 import helper
 from v2 import V2
 from text import Text
+from icontext import IconText
 
 ATOMIC_BOMB_RANGE = 50
 
@@ -37,11 +38,25 @@ class Colonist(Ship):
             self.kill()
             if other.owning_civ != self.owning_civ:
                 other.change_owner(self.owning_civ)
+                if self.get_stat("colonize_random_building"):
+                    available_upgrades = [
+                        u for u in UPGRADE_CLASSES.values()
+                        if u.alien == False and
+                        len(u.family['parents']) == 0 and
+                        u.category == "buildings" and
+                        u.resource_type == "iron"
+                    ]
+                    u = random.choice(available_upgrades)
+                    u().apply(other)  
+                    self.owning_civ.researched_upgrade_names.add(u.name)       
+
             other.population += self.population
 
             if self.owning_civ.blueprints:
                 for upgrade in self.owning_civ.blueprints:
-                    UPGRADE_CLASSES[upgrade]().apply(other)
+                    u = UPGRADE_CLASSES[upgrade]
+                    u().apply(other)
+                    self.owning_civ.researched_upgrade_names.add(u.name)
                 self.owning_civ.blueprints = []
 
             other.needs_panel_update = True
@@ -51,9 +66,17 @@ class Colonist(Ship):
         super().update(dt)
         self.num_label.pos = self.pos + V2(7, -7)
 
+    def on_warp(self):
+        if random.random() < self.get_stat("warp_drive_pop_chance"):
+            self.population += 1
+            if self.owning_civ == self.scene.my_civ:
+                it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
+                it.pos = self.pos + V2(0, -10) - V2(it.width, it.height) * 0.5
+                self.scene.ui_group.add(it)            
+        return super().on_warp()
+
     def kill(self):
-        if self.get_stat("atomic_bomb"):
-            print("nuke")
+        if self.health <=0 and self.get_stat("atomic_bomb"):
             range_adjust = 0.75 + self.population * 0.25
             enemy_objs = self.scene.get_enemy_objects(self.owning_civ)
             near_enemies = helper.all_nearby(self.pos, enemy_objs, ATOMIC_BOMB_RANGE * range_adjust)

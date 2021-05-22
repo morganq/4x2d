@@ -52,11 +52,14 @@ class PlanetPanel(Panel):
             color = PICO_YELLOW
         self.add(Text("%d/%d" %(planet.population, planet.get_max_pop()), "small", (0,0), color, False), V2(47,y+1))
 
-        if planet.ships:# and is_mine:
+        if planet.ships and is_mine:
             y += 14
             self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))
             y += 4
             ships_alpha = sorted(planet.ships.keys())
+            maxxed = False
+            if sum(planet.ships.values()) > planet.get_max_ships():
+                maxxed = True
             for ship in ships_alpha:
                 if "alien" in ship:
                     continue
@@ -69,19 +72,19 @@ class PlanetPanel(Panel):
                     pass
                 self.add(Text("%ss" % ship.title(), "small", (0,0), PICO_WHITE, False), V2(15,y + 2))
                 color = PICO_WHITE
-                if planet.ships[ship] > planet.get_max_fighters():
+                if maxxed:
                     color = PICO_RED
                 self.add(Text("%d" % planet.ships[ship], "small", (0,0), color, False), V2(88,y + 2))
                 y += 15
 
-        if planet.buildings:# and is_mine:
+        if planet.buildings and is_mine:
             
             self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))
             y += 5
             for i, building in enumerate(planet.buildings):
                 x = (i % 3) * 33
                 if (i % 3) == 0 and i > 0: y += 27
-                s = UpgradeIcon(V2(0,0),building['building'].upgrade,None,True)
+                s = UpgradeIcon(V2(0,0),building['building'].upgrade.name,None,True)
                 self.add(s, V2(x + 3,y))
 
             y += 14

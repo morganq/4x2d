@@ -5,8 +5,11 @@ from spaceobject import SpaceObject
 class Hazard(SpaceObject):
     def __init__(self, scene, pos, size):
         self.size = size
+        self.collidable = True
+        self.stationary = True
         super().__init__(scene, pos)
         self.radius = self.get_radius()
+        self.collision_radius = self.radius
 
         self._generate_image()
 

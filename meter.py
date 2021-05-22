@@ -34,20 +34,21 @@ class Meter(SpriteBase):
 
     def _generate_image(self):
         self.image = pygame.Surface((self.meter_width, self.meter_height), pygame.SRCALPHA)
+        max_value = max(self.max_value, 1)
         if self.meter_height <= 2:
-            px = round((self.meter_width - 2) * (self._apparent_value / self.max_value))
+            px = round((self.meter_width - 2) * (self._apparent_value / max_value))
             pygame.draw.rect(self.image, DARKEN_COLOR[self.color], (1,self.meter_height - 1, self.meter_width-2, 1), 0)
             pygame.draw.rect(self.image, self.color, (1,self.meter_height - 1, px, 1), 0)
             pygame.draw.line(self.image, self.color, (0,0), (0,self.meter_height))
             pygame.draw.line(self.image, self.color, (self.meter_width-1,0), (self.meter_width-1,self.meter_height))            
         elif self.meter_height <= 4:
-            px = round((self.meter_width - 2) * (self._apparent_value / self.max_value))
+            px = round((self.meter_width - 2) * (self._apparent_value / max_value))
             pygame.draw.rect(self.image, DARKEN_COLOR[self.color], (1,1, self.meter_width-2, self.meter_height-2), 0)
             pygame.draw.rect(self.image, self.color, (1,1, px, self.meter_height - 2), 0)
             pygame.draw.line(self.image, self.color, (0,0), (0,self.meter_height))
             pygame.draw.line(self.image, self.color, (self.meter_width-1,0), (self.meter_width-1,self.meter_height))
         else:
-            px = round((self.meter_width - 4) * (self._apparent_value / self.max_value))
+            px = round((self.meter_width - 4) * (self._apparent_value / max_value))
             pygame.draw.rect(self.image, self.color, (0,0, self.meter_width, self.meter_height), 1)
             pygame.draw.rect(self.image, self.color, (2,2, px, self.meter_height - 4), 0)
 

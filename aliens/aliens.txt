@@ -8,7 +8,10 @@ alien ideas:
  - borg: ship that can convert your ships
  - klingon: cloaked ships
  - empire: space weapon / building that fires a laser at planets
- - ?: good against fighters
+ - ?: good against fighters (fast-recharging small shield)
  - indigenous: colonization starts off with some set of buildings
  - ?: shield blocks the first damage, with cooldown
- 
+
+
+ - Alien 1: Basic fighter ship, blast radius ship tethered to planet, battleship with slow warp
+ - Alien 2: Slow higher health fighter, Boarding/conversion ship, Mothership that is constructed in pieces

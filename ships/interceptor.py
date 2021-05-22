@@ -8,6 +8,7 @@ import math
 import planet
 from helper import all_nearby, clamp
 from bullet import Bullet
+from ships.bomber import Bomber
 
 class Interceptor(Fighter): 
     BASE_HEALTH = 50
@@ -22,6 +23,9 @@ class Interceptor(Fighter):
     BOMBS = False
     DOGFIGHTS = True
 
+    SHIP_NAME = "interceptor"
+    SHIP_BONUS_NAME = "interceptor"
+
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         
@@ -32,7 +36,20 @@ class Interceptor(Fighter):
         r = super().get_fire_rate()
         if self.get_stat("interceptor_fire_rate_deep_space") and self.is_in_deep_space():
             r *= 1 + self.get_stat("interceptor_fire_rate_deep_space")
+
+        if self.get_stat("interceptor_fire_rate_near_bombers") and self.fleet:
+            for ship in self.fleet.ships:
+                if isinstance(ship, Bomber):
+                    r *= 1 + self.get_stat("interceptor_fire_rate_near_bombers")
+                    break # Don't double count if there's more bombers!
+
         return r 
+
+    def prepare_bullet_mods(self):
+        mods = super().prepare_bullet_mods()
+        mods['bounces'] = self.get_stat("interceptor_missile_bounce")
+        mods['color'] = PICO_YELLOW
+        return mods
 
     def fire(self, at):
         towards = (at.pos - self.pos).normalized()
@@ -40,22 +57,7 @@ class Interceptor(Fighter):
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
 
-        damage_add = 0
-        extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
-        damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
-        damage_add += self.get_stat("ship_weapon_damage")
-        damage_mul = self.get_stat("interceptor_damage_mul")
-        blast_radius = self.BLAST_RADIUS + self.get_stat("interceptor_blast_radius")
-        b = Bullet(self.pos, at, self, mods={
-            'grey_goo': self.get_stat('grey_goo'),
-            'damage_base': self.BASE_DAMAGE,
-            'damage_mul': damage_mul,
-            'damage_add': damage_add,
-            'blast_radius': blast_radius,
-            'ship_missile_speed':self.get_stat("ship_missile_speed"),
-            'bounces':self.get_stat("interceptor_missile_bounce"),
-            'color':PICO_YELLOW,
-        })
+        b = Bullet(self.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)
 
         #self.velocity += -towards * 2
@@ -85,7 +87,7 @@ class Interceptor(Fighter):
         if self._timers['gun'] >= 1 / rate:
             if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
                 self.bullets_chambered = 3
-                self._timers['gun'] = self._timers['gun'] % (1 / rate)
+                self._timers['gun'] = 0
 
         fire_tick = ((self._timers['gun'] * 6) % 1) < (((self._timers['gun'] - dt) * 6) % 1)
         if self.bullets_chambered > 0 and fire_tick:

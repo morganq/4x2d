@@ -1,6 +1,7 @@
 from upgrade.upgrades import register_upgrade, Upgrade
 from stats import Stats
 import random
+import game
 
 ### 1) Mechanics: light grey ###
 @register_upgrade
@@ -21,7 +22,7 @@ class Mechanics2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Decommission"
-    description = "3 random [Fighters] you control are [!destroyed]. Gain [^4] population among 4 random planets."
+    description = "2 random [Fighters] you control are [!destroyed]. Gain [^4] population among 4 random planets."
     icon = "decommission"
     stats = Stats()
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
@@ -30,7 +31,7 @@ class Mechanics2aUpgrade(Upgrade):
     def apply(self, to):
         all_fighters = to.get_all_fighters()
         random.shuffle(all_fighters)
-        for f in all_fighters[:3]:
+        for f in all_fighters[:2]:
             if f['type'] == 'ship':
                 f['object'].kill()
             elif f['type'] == 'planet':
@@ -49,9 +50,9 @@ class Mechanics2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Vanguard Boosters"
-    description = "Ships fly [^+33%] faster when targeting enemy planets"
+    description = "Ships fly [^+50%] faster when targeting enemy planets"
     icon = "vanguardboosters"
-    stats = Stats(ship_speed_mul_targeting_planets = 0.33)
+    stats = Stats(ship_speed_mul_targeting_planets = 0.5)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
 
@@ -63,7 +64,7 @@ class Mechanics3Upgrade(Upgrade):
     title = "Vanguard Armor"
     description = "Ships gain a [^+10] health shield when far from a planet you control"
     icon = "vanguardarmor"
-    stats = Stats(ship_shield_far_from_home = 100)
+    stats = Stats(ship_shield_far_from_home = 10)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics2a', 't_mechanics2b']}
     requires = lambda x: 't_mechanics1' in x and ('t_mechanics2a' in x or 't_mechanics2b' in x)
     infinite = True
@@ -75,9 +76,9 @@ class Atomic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nuclear Battery"
-    description = "[^+10%] mining rate. A random fighter you control is [!destroyed] every minute"
+    description = "[^+30%] mining rate. A random fighter you control is [!destroyed] every minute"
     icon = "nuclearbattery"
-    stats = Stats(mining_rate=0.1, nuclear_instability=1)
+    stats = Stats(mining_rate=0.3, nuclear_instability=1)
     family = {'tree':'t_atomic', 'parents':[]}
     requires = None
 
@@ -87,7 +88,7 @@ class Atomic2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Isotope Conversion"
-    description = "Gain [100] ice and [50] gas. <iron> is [!frozen] for 20 seconds."
+    description = "Gain [100] ice and [100] gas. <iron> is [!frozen] for 20 seconds."
     icon = "isotope"
     stats = Stats()
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
@@ -95,7 +96,7 @@ class Atomic2aUpgrade(Upgrade):
 
     def apply(self, to):
         to.resources.ice += 100
-        to.resources.gas += 50
+        to.resources.gas += 100
         to.frozen.iron += 20
         return super().apply(to)
 
@@ -105,9 +106,9 @@ class Atomic2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Atomic Assembler"
-    description = "[^+15%] faster production of ships other than [Fighters]"
+    description = "[^+25%] faster production of ships other than [Fighters]"
     icon = "atomicassembler"
-    stats = Stats(bomber_production=0.15, interceptor_production=0.15, battleship_production=0.15)
+    stats = Stats(bomber_production=0.25, interceptor_production=0.25, battleship_production=0.25)
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
     requires = ('t_atomic1',)
 
@@ -117,9 +118,9 @@ class Atomic3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Unstable Reactor"
-    description = "Mining rate on each planet slowly grows to [^+10%], but [!resets] if attacked or if a ship is launched"
+    description = "Mining rate on each planet slowly grows to [^+30%], but [!resets] if attacked or if a ship is launched"
     icon = "unstablereactor"
-    stats = Stats(unstable_reaction = 0.10)
+    stats = Stats(unstable_reaction = 0.30)
     family = {'tree':'t_atomic', 'parents':['t_atomic2a', 't_atomic2b']}
     requires = lambda x: 't_atomic1' in x and ('t_atomic2a' in x or 't_atomic2b' in x)
     infinite = True
@@ -183,13 +184,14 @@ class Quantum1Upgrade(Upgrade):
     category = "tech"
     title = "Material Reconstruction"
     description = "Gain [^+25] ice for each planet you control"
-    icon = "preciseassembly"
+    icon = "matreconstruction"
     stats = Stats()
     family = {'tree':'t_quantum', 'parents':[]}
     requires = None
 
     def apply(self, to):
-        pass #impl
+        for planet in to.scene.get_civ_planets(to):
+            to.earn_resource("ice", 25, where=planet)
         return super().apply(to)
 
 @register_upgrade
@@ -199,7 +201,7 @@ class Quantum2aUpgrade(Upgrade):
     category = "tech"
     title = "Nanothread Plating"
     description = "Ships have [^+25%] health"
-    icon = "decommission"
+    icon = "nanothread"
     stats = Stats(ship_health_mul = 0.25)
     family = {'tree':'t_quantum', 'parents':['t_quantum1']}
     requires = ('t_quantum1',)
@@ -210,9 +212,9 @@ class Quantum2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Warp Drive"
-    description = "Ships gain warp drive, and can teleport forward [^+5] units in open space"
-    icon = "vanguardboosters"
-    stats = Stats(warp_drive = 5)
+    description = "Ships gain warp drive, and can teleport forward [^+3] units in open space"
+    icon = "warpdrive"
+    stats = Stats(warp_drive = 3)
     family = {'tree':'t_quantum', 'parents':['t_quantum1']}
     requires = ('t_quantum1',)
     infinite = True
@@ -224,8 +226,8 @@ class Quantum3Upgrade(Upgrade):
     category = "tech"
     title = "Quantum Weirdness"
     description = "A colonist ship that uses warp drive has a [50% chance] for [^+1] population"
-    icon = "vanguardarmor"
-    stats = Stats(planet_slow_aura=0.10)
+    icon = "quantumweirdness"
+    stats = Stats(warp_drive_pop_chance=0.50)
     family = {'tree':'t_quantum', 'parents':['t_quantum2b']}
     requires = ('t_quantum2b',)
     infinite = False
@@ -288,9 +290,9 @@ class AI1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Orbital Targeting Solution"
-    description = "Ships gain [^+100%] attack speed for 4 seconds after take-off"
-    icon = "resonancereloader"
-    stats = Stats(ship_fire_rate_after_takeoff=100)
+    description = "Ships gain [^+100%] attack speed for 10 seconds after take-off"
+    icon = "orbitaltargeting"
+    stats = Stats(ship_fire_rate_after_takeoff=1)
     family = {'tree':'t_ai', 'parents':[]}
     requires = None
 
@@ -300,9 +302,9 @@ class AI2aUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Artificial Intelligence"
-    description = "Population grows on planets even with 0 population"
-    icon = "phasinglattice"
-    stats = Stats(pop_growth_min_reduction=1)
+    description = "Population growth rate [^+25%] and population grows on planets even with 0 population"
+    icon = "ai"
+    stats = Stats(pop_growth_min_reduction=1, pop_growth_rate=0.25)
     family = {'tree':'t_ai', 'parents':['t_ai1']}
     requires = ('t_ai1',)
 
@@ -312,8 +314,8 @@ class AI2bUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Robotic Assembly"
-    description = "Whenever you gain control of a planet, add a random tier 1 building"
-    icon = "fragmentationsequence"
+    description = "Whenever you gain control of a planet, add a random tier 1 iron building"
+    icon = "roboticassembly"
     stats = Stats(colonize_random_building=1)
     family = {'tree':'t_ai', 'parents':['t_ai1']}
     requires = ('t_ai1',)
@@ -324,9 +326,9 @@ class AI3Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Coordination Protocol"
-    description = "Interceptors fire [^+20%] faster near bombers"
-    icon = "tech_default"
-    stats = Stats(interceptor_fire_rate_near_bombers=0.20)
+    description = "Interceptors fire [^+30%] faster near bombers"
+    icon = "coordination"
+    stats = Stats(interceptor_fire_rate_near_bombers=0.30)
     family = {'tree':'t_ai', 'parents':['t_ai2a', 't_ai2b']}
     requires = lambda x: 't_ai1' in x and ('t_ai2a' in x or 't_ai2b' in x)
     infinite = True
@@ -338,9 +340,9 @@ class Proximity1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Fire Bomb"
-    description = "Bombers have a 10% chance to destroy a random building on hit"
+    description = "Bombers have a 30% chance to destroy a random building on hit"
     icon = "resonancereloader"
-    stats = Stats(bomber_raze_chance=0.1)
+    stats = Stats(bomber_raze_chance=0.3)
     family = {'tree':'t_proximity', 'parents':[]}
     requires = None
 
@@ -350,9 +352,9 @@ class Proximity2aUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Proximity Alert"
-    description = "Planets you control that are near enemy planets produce ships [^+15%] faster"
+    description = "Planets you control that are near enemy planets produce ships [^+50%] faster"
     icon = "phasinglattice"
-    stats = Stats(ship_production_proximity=0.15)
+    stats = Stats(ship_production_proximity=0.50)
     family = {'tree':'t_proximity', 'parents':['t_proximity1']}
     requires = ('t_proximity1',)
 
@@ -362,9 +364,9 @@ class Proximity2bUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Unnamed"
-    description = "Planets you control that are near hazards gain [^+15%] mining rate"
+    description = "Planets you control that are near hazards gain [^+50%] mining rate"
     icon = "fragmentationsequence"
-    stats = Stats(mining_rate_proximity=0.15)
+    stats = Stats(mining_rate_proximity=0.5)
     family = {'tree':'t_proximity', 'parents':['t_proximity1']}
     requires = ('t_proximity1',)
 
@@ -423,8 +425,8 @@ class Optics3Upgrade(Upgrade):
     name = "t_optics3"
     resource_type = "ice"
     category = "tech"
-    title = "EM Enclosure"
-    description = "A group of 8 or more ships gains a [^20] damage shield"
+    title = "Refractor Shield"
+    description = "Ships in a fleet of 8 or more gain a [^20] damage shield"
     icon = "mining"
     stats = Stats(enclosure_shield=20)
     family = {'tree':'t_optics', 'parents':['t_optics2a', 't_optics2b']}
@@ -439,9 +441,9 @@ class Exotic1Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Supercritical Materials"
-    description = "Gain [^+50%] resources from asteroids"
+    description = "Gain [^300%] resources from asteroids"
     icon = "tech_default"
-    stats = Stats(asteroid_yield_mul=0.5)
+    stats = Stats(asteroid_yield_mul=2.0)
     family = {'tree':'t_exotic', 'parents':[]}
     requires = None
 
@@ -496,7 +498,7 @@ class Alien1Upgrade(Upgrade):
     requires = None
 
     def apply(self, to):
-        # impl
+        game.Game.inst.run_info.rerolls += 3
         return super().apply(to)
 
 @register_upgrade
@@ -517,9 +519,9 @@ class Alien2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Kinetic Sling"
-    description = "Ships deal bonus damage based on bonus speed"
+    description = "Ship weapons deal 50% of bonus speed as bonus damage"
     icon = "tech_default"
-    stats = Stats(damage_based_on_speed_bonus=0.5)
+    stats = Stats(ship_weapon_damage_speed=0.5)
     family = {'tree':'t_alien', 'parents':['t_alien1']}
     requires = ('t_alien1',)
 
@@ -529,9 +531,9 @@ class Alien3Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Alien Core Drill"
-    description = "Ice production is [^+10%] faster, gas production is [^+5%] faster"
+    description = "Ice production is [^+30%] faster, gas production is [^+15%] faster"
     icon = "tech_default"
-    stats = Stats(ice_mining_rate=0.1, gas_mining_rate=0.05)
+    stats = Stats(ice_mining_rate=0.3, gas_mining_rate=0.15)
     family = {'tree':'t_alien', 'parents':['t_alien2a', 't_alien2b']}
     requires = lambda x: 't_alien1' in x and ('t_alien2a' in x or 't_alien2b' in x)
     infinite = True

@@ -1,26 +1,60 @@
+from colors import PICO_DARKGREEN, PICO_GREEN
+from spaceobject import SpaceObject
 from ships.ship import FLEET_RADIUS
 from button import Button
 import pygame
 import helper
 from v2 import V2
 
-FLEET_RADIUS = 20
+FLEET_RADIUS = 30
+
+class FleetSelectable(SpaceObject):
+    def __init__(self, scene, pos, radius, owning_civ, fleet):
+        super().__init__(scene, pos)
+        self.layer = -1
+        self.selectable = True
+        self.radius = radius
+        self.collision_radius = radius
+        self.owning_civ = owning_civ
+        self.fleet = fleet
+        self._generate_image()
+
+    def get_selection_info(self):
+        return {'type':'fleet'}
+
+    def _generate_image(self):
+        self._width = self.radius * 2 + 8
+        self._height = self.radius * 2 + 8
+        center = V2(self.radius + 4, self.radius + 4)
+        self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, PICO_DARKGREEN, center.tuple(), self.radius, 0)
+        self._recalc_rect()
 
 class FleetManager:
     def __init__(self, scene, civ):
-
         self.scene = scene
         self.civ = civ
         self.current_fleets = []
         self.ship_fleets = {}
         self.fleet_order_buttons = {}
 
+    def generate_selectable_objects(self):
+        for fleet in self.current_fleets:
+            fleet.generate_selectable_object()
+
+    def destroy_selectable_objects(self):
+        for fleet in self.current_fleets:
+            fleet.selectable_object.kill()
+            fleet.selectable_object = None
+
     def update(self, dt):
         self.current_fleets = generate_fleets(self.scene, self.civ)
         self.ship_fleets = {}
         for fleet in self.current_fleets:
             for ship in fleet.ships:
+                ship.fleet = fleet
                 self.ship_fleets[ship] = fleet
+
             # record which fleets have buttons by looking at their first ships
             first_ship = fleet.ships[0]
             def onclick(*args):
@@ -56,6 +90,7 @@ class FleetManager:
 class Fleet:
     def __init__(self, ships):
         self.ships = ships
+        self.selectable_object = None
 
     def is_waiting(self):
         average_time = sum(s.waiting_time for s in self.ships) / len(self.ships)
@@ -63,7 +98,7 @@ class Fleet:
             return True
         return False
 
-    def debug_render(self, surface):
+    def get_size_info(self):
         average = V2(0,0)
         min_x, min_y = 999,999
         max_x, max_y = 0,0 
@@ -74,7 +109,20 @@ class Fleet:
             max_x = max(max_x, ship.pos.x)
             max_y = max(max_y, ship.pos.y)
         radius = max(max_x - average.x, average.x - min_x, max_y - average.y, average.y - min_y)
+        return (average, radius)
+
+    def debug_render(self, surface):
+        average, radius = self.get_size_info()
         pygame.draw.circle(surface, (255,0,0), average.tuple_int(), radius, 1)
+
+    def generate_selectable_object(self):
+        average, radius = self.get_size_info()
+        radius = max(radius, 8)
+        scene = self.ships[0].scene
+        self.selectable_object = FleetSelectable(scene, average, radius, self.ships[0].owning_civ, self)
+        scene.game_group.add(self.selectable_object)
+        print(self.selectable_object.pos, radius)
+        
 
     def __str__(self):
         return ', '.join([str(s.pos.tuple_int()) for s in self.ships])

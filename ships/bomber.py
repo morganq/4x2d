@@ -10,6 +10,8 @@ from helper import all_nearby, clamp
 from bullet import Bullet
 
 class Bomber(Fighter): 
+    SHIP_NAME = "bomber"
+    SHIP_BONUS_NAME = "bomber"
     BASE_HEALTH = 35
     BLAST_RADIUS = 0
     FIRE_RATE = 0.2
@@ -29,27 +31,19 @@ class Bomber(Fighter):
         
         self.set_sprite_sheet("assets/bomber.png", 12)
 
+    def prepare_bullet_mods(self):
+        mods = super().prepare_bullet_mods()
+        mods['raze_chance'] = self.get_stat("bomber_raze_chance")
+        mods['color'] = PICO_PINK
+        return mods
+
     def fire(self, at):
         towards = (at.pos - self.pos).normalized()
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
 
-        damage_add = 0
-        extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
-        damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
-        damage_add += self.get_stat("ship_weapon_damage")
-        damage_mul = self.get_stat("bomber_damage_mul")
-        blast_radius = self.BLAST_RADIUS + self.get_stat("bomber_blast_radius")
-        b = Bullet(self.pos, at, self, mods={
-            'grey_goo': self.get_stat('grey_goo'),
-            'damage_base': self.BASE_DAMAGE,
-            'damage_mul': damage_mul,
-            'damage_add': damage_add,
-            'blast_radius': blast_radius,
-            'ship_missile_speed':self.get_stat("ship_missile_speed"),
-            'color':PICO_PINK
-        })
+        b = Bullet(self.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)
 
         #self.velocity += -towards * 2

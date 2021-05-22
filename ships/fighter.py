@@ -1,5 +1,5 @@
 from helper import all_nearby, clamp, get_nearest
-from colors import PICO_BLUE, PICO_DARKBLUE, PICO_WHITE
+from colors import *
 from particle import Particle
 from .ship import FLEET_RADIUS, STATE_RETURNING, STATE_WAITING, Ship, THRUST_PARTICLE_RATE
 from bullet import Bullet
@@ -17,6 +17,7 @@ STATE_SIEGE = 'siege'
 class Fighter(Ship):
     HEALTHBAR_SIZE = (10,2)
     SHIP_NAME = "fighter"
+    SHIP_BONUS_NAME = "fighter"
     FIRE_RATE = 0.75
     BASE_DAMAGE = 5
 
@@ -41,21 +42,31 @@ class Fighter(Ship):
         }
         self._timers['gun'] = 0
         self._timers['dogfight'] = 0
+        self._timers['time'] = 0
 
     def get_fire_rate(self):
         rate = self.FIRE_RATE
+
+        if self.get_stat("fire_rate_over_time"):
+            rate *= 1 + (self.get_stat("fire_rate_over_time") * min(self._timers['time'] / 60, 1))
+
         if self.get_stat("overclock"):
             friendly = self.scene.get_my_ships(self.owning_civ)
             # None nearby?
             if not all_nearby(self.pos, friendly, FLEET_RADIUS):
                 rate *= 1 + self.get_stat("overclock")
 
+        if self.get_stat("ship_fire_rate_after_takeoff"):
+            if self._timers['time'] < 10:
+                rate *= 1 + self.get_stat("ship_fire_rate_after_takeoff")
+
         try:
-            rate *= 1 + self.get_stat("%s_fire_rate" % self.SHIP_NAME)
+            rate *= 1 + self.get_stat("%s_fire_rate" % self.SHIP_BONUS_NAME)
         except KeyError:
             pass
         rate *= 1 + self.get_stat("ship_fire_rate")
-            
+
+        rate *= (1 - self.slow_aura)
         return rate
 
     def get_max_health(self):
@@ -71,6 +82,20 @@ class Fighter(Ship):
     def wants_to_land(self):
         return self.state != STATE_DOGFIGHT
 
+    def prepare_bullet_mods(self):
+        damage_add = 0
+        extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
+        damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
+        damage_add += self.get_stat("ship_weapon_damage")
+        damage_mul = self.get_stat("%s_damage_mul" % self.SHIP_BONUS_NAME)
+        return {
+            'damage_base': self.BASE_DAMAGE,
+            'damage_mul': damage_mul,
+            'damage_add': damage_add,
+            'missile_speed':self.get_stat("ship_missile_speed"),
+            'color':PICO_LIGHTGRAY
+        }
+
     def get_threats(self):
         enemies = self.scene.get_enemy_ships(self.owning_civ)
         threat_range = self.THREAT_RANGE_DEFAULT
@@ -78,7 +103,7 @@ class Fighter(Ship):
             threat_range = self.THREAT_RANGE_DEFENSE
         return [
             e for e in enemies
-            if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.health > 0)
+            if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.is_alive())
         ]
 
     def find_target(self):
@@ -94,25 +119,11 @@ class Fighter(Ship):
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
 
-        damage_add = 0
-        extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
-        damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
-        damage_add += self.get_stat("ship_weapon_damage")
-        damage_mul = self.get_stat("fighter_damage_mul")
-        blast_radius = self.get_stat("fighter_blast_radius")
-        b = Bullet(self.pos, at, self, mods={
-            'grey_goo': self.get_stat('grey_goo'),
-            'damage_base': self.BASE_DAMAGE,
-            'damage_mul': damage_mul,
-            'damage_add': damage_add,
-            'homing': False,
-            'blast_radius': blast_radius,
-            'ship_missile_speed':self.get_stat("ship_missile_speed")
-        })
+        b = Bullet(self.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)
 
         #self.velocity += -towards * 2
-        self.pos += -towards * 2
+        self.pos += -towards * 1.25
         self.thrust_particle_time = THRUST_PARTICLE_RATE
 
         for i in range(10):
@@ -129,13 +140,16 @@ class Fighter(Ship):
         self._timers['gun'] = 0
 
     def state_dogfight(self, dt):
+        def invalid_target():
+            return (not self.effective_target or
+            not self.effective_target.is_alive() or
+            (self.effective_target.pos - self.pos).sqr_magnitude() > self.THREAT_RANGE_DEFENSE ** 2)
+            
         # If our target is dead or w/e, find a new one
-        if (not self.effective_target or
-            self.effective_target.health <= 0 or
-            (self.effective_target.pos - self.pos).sqr_magnitude() > self.THREAT_RANGE_DEFENSE ** 2):
+        if invalid_target():
             self.find_target()
 
-        if not self.effective_target: # Still no target? Go back to whatever we were doing.
+        if invalid_target(): # Still no target? Go back to whatever we were doing.
             self.set_state(self.post_dogfight_state)
             return
 
@@ -145,7 +159,7 @@ class Fighter(Ship):
         t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
         if self._timers['gun'] >= 1 / rate:
             if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
-                self._timers['gun'] = self._timers['gun'] % (1 / rate)
+                self._timers['gun'] = 0
                 self.fire(self.effective_target)
         t2 = math.cos(gt * 3.14159)
         
@@ -175,10 +189,11 @@ class Fighter(Ship):
 
     ### Siege ###
     def state_siege(self, dt):
-        threats = self.get_threats()
-        if threats:
-            self.set_state(STATE_DOGFIGHT)
-            return
+        if self.DOGFIGHTS:
+            threats = self.get_threats()
+            if threats:
+                self.set_state(STATE_DOGFIGHT)
+                return
 
         if not self.effective_target or self.effective_target.health <= 0 or self.effective_target.owning_civ == self.owning_civ:
             # If we just killed a planet, stay in waiting.
@@ -241,8 +256,20 @@ class Fighter(Ship):
 
     ### Waiting ###
     def state_waiting(self, dt):
-        threats = self.get_threats()
-        if threats:
-            self.set_state(STATE_DOGFIGHT)
-            return
+        if self.DOGFIGHTS:
+            threats = self.get_threats()
+            if threats:
+                self.set_state(STATE_DOGFIGHT)
+                return
+
+        # Fixing a bug where sometimes we could be put in waiting but need to get out of it
+        if self.BOMBS:
+            if isinstance(self.chosen_target, planet.Planet):
+                # if enemy planet
+                if self.chosen_target.owning_civ and self.chosen_target.owning_civ != self.owning_civ:
+                    if self.chosen_target.health > 0:
+                        self.effective_target = self.chosen_target
+                        self.set_state("cruising") # Cruising, in case we're not close. will go to siege next frame.
+
+
         return super().state_waiting(dt)

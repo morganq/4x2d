@@ -25,17 +25,24 @@ class ShipCounter(SpriteBase):
         self.image.blit(img, (-2, 0))
         s = str(int(self._num_ships))
         tr = text.FONTS['small'].get_rect(s)
-        text.FONTS['small'].render_to(self.image, (r - tr[2]/2 + 4, r - tr[3]/2), s, PICO_GREEN)
+        color = PICO_GREEN
+        if sum(self.planet.ships.values()) > self.planet.get_max_ships():
+            color = PICO_RED
+        text.FONTS['small'].render_to(self.image, (r - tr[2]/2 + 4, r - tr[3]/2), s, color)
         self._width = w
         self._height = h
         self._recalc_rect()
 
     def update(self, dt):
-        if self.planet.ships['fighter'] != self._num_ships:
-            self._num_ships = self.planet.ships['fighter']
-            self._generate_image()
-            if self._num_ships == 0:
-                self.visible = False
-            else:
-                self.visible = True
+        if self.planet.owning_civ != self.planet.scene.my_civ:
+            self.visible = False
+            return
+        self.visible = True
+        ships = sum(self.planet.ships.values())
+        self._num_ships = ships
+        self._generate_image()
+        if self._num_ships == 0:
+            self.visible = False
+        else:
+            self.visible = True
         return super().update(dt)

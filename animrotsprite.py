@@ -26,7 +26,7 @@ class AnimRotSprite(FrameSprite):
         midframe = (sw / self._frame_width) // 2
 
         sixteenth = 6.2818 / 16
-        rotation_number = int((self._angle - sixteenth) / 6.2818 * 8) % 8
+        rotation_number = int((self._angle + sixteenth) / 6.2818 * 8) % 8
         diagonal = (rotation_number % 2) == 1
 
         sheet_frame = self._frame + midframe if diagonal else self._frame

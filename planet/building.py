@@ -1,3 +1,5 @@
+from satellite import ReflectorShield, SpaceStation
+from rangeindicator import RangeIndicator
 from v2 import V2
 from colors import *
 import pygame
@@ -5,16 +7,10 @@ from bullet import Bullet
 import random
 from stats import Stats
 import json
-
-BUILDINGS = {
-
-}
-
-def building(cls):
-    BUILDINGS[cls.upgrade] = cls
-    return cls
+from helper import all_nearby
 
 class Building:
+    upgrade = None
     def __init__(self):
         self.shapes = []
         self.stats = Stats()
@@ -56,32 +52,20 @@ class Building:
             self.draw_shape(surface, points, color, offset + V2(0,-1), angle, expand)
             self.draw_shape(surface, points, color, offset + V2(0,+1), angle, expand)
 
-def make_simple_stats_building(name, stats=None, shape=None):
+    def kill(self):
+        pass
+
+def make_simple_stats_building(stats=None, shape=None):
     class AdHocBuilding(Building):
-        upgrade = name
         def __init__(self):
             super().__init__()
             self.load_shapes(shape)
             self.stats = stats
 
-    building(AdHocBuilding)
-    return name
+    return AdHocBuilding
 
-@building
-class RegenBuilding(Building):
-    upgrade = "health2a"
-    def __init__(self):
-        Building.__init__(self)
-        self.load_shapes("repairbay")
-        
-        
-    def update(self, planet, dt):
-        planet.health += 1 * dt
-
-@building
 class ArmoryBuilding(Building):
     FIRE_RATE = 5
-    upgrade = "pop2b"
     def __init__(self):
         Building.__init__(self)
         self.load_shapes("armory")
@@ -97,11 +81,114 @@ class ArmoryBuilding(Building):
                 b = Bullet(
                     planet.pos + V2.from_angle(angle) * planet.get_radius(),
                     random.choice(threats), 
-                    planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "damage_debuff":0.5}
+                    planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "damage_base":3 * planet.planet_weapon_mul, "color":PICO_WHITE, "life":5}
                     )
                 planet.scene.game_group.add(b)
 
-@building
+class SSMBatteryBuilding(Building):
+    FIRE_RATE = 2.5
+    def __init__(self):
+        Building.__init__(self)
+        self.load_shapes("armory")
+        self.fire_time = 0
+        
+    def update(self, planet, dt):
+        self.fire_time += dt
+        threats = planet.get_threats()
+        if self.fire_time > self.FIRE_RATE and threats:
+            t = random.choice(threats)
+            delta = t.pos - planet.pos
+            _, angle = delta.to_polar()
+            angle += random.random() * 1.5 - 0.75            
+            self.fire_time = 0
+            b = Bullet(
+                planet.pos + V2.from_angle(angle) * planet.get_radius(),
+                t, 
+                planet, vel=V2.from_angle(angle) * 20, mods={
+                        'homing':1, "damage_base":10 * planet.planet_weapon_mul, "blast_radius":10, "color":PICO_WHITE, "life":5, "missile_speed":0.5
+                    }
+                )
+            planet.scene.game_group.add(b)
+
+class InterplanetarySSMBatteryBuilding(Building):
+    FIRE_RATE = 2.5
+    def __init__(self):
+        Building.__init__(self)
+        self.load_shapes("armory")
+        self.fire_time = 0
+        
+    def update(self, planet, dt):
+        self.fire_time += dt
+        threats = [
+            o for o in planet.scene.get_enemy_objects(planet.owning_civ)
+            if (o.pos - planet.pos).sqr_magnitude() < 100 ** 2 and o.health > 0
+        ]
+        if self.fire_time > self.FIRE_RATE and threats:
+            self.fire_time = 0
+            t = random.choice(threats)
+            delta = t.pos - planet.pos
+            _, angle = delta.to_polar()
+            angle += random.random() * 1.5 - 0.75
+            b = Bullet(
+                planet.pos + V2.from_angle(angle) * planet.get_radius(),
+                t, 
+                planet, vel=V2.from_angle(angle) * 20, mods={
+                        'homing':1, "damage_base":10 * planet.planet_weapon_mul, "blast_radius":10, "color":PICO_WHITE, "life":5, "missile_speed":0.5
+                    }
+                )
+            planet.scene.game_group.add(b)              
+
+class EMGeneratorBuilding(Building):
+    def __init__(self):
+        Building.__init__(self)
+        self.load_shapes("armory")
+        self.stunned_ships = {}
+        self.indicator = None
+        
+    def update(self, planet, dt):
+        if not self.indicator:
+            self.indicator = RangeIndicator(planet.pos, planet.DEFENSE_RANGE + planet.get_radius(), PICO_BLUE, line_length=2, line_space=5)
+            planet.scene.game_group.add(self.indicator)
+        threats = planet.get_threats()
+        for ship in threats:
+            if ship not in self.stunned_ships:
+                ship.set_state("stunned")
+                self.stunned_ships[ship] = True
+
+    def kill(self):
+        if self.indicator:
+            self.indicator.kill()
+        Building.kill(self)
+
+class SatelliteBuilding(Building):
+    SATELLITE_CLASS = None
+    def __init__(self):
+        super().__init__()
+        self.load_shapes("armory")
+        self.satellite = None
+
+    def update(self, planet, dt):
+        if self.satellite is None:
+            self.satellite = self.SATELLITE_CLASS(planet.scene, planet)
+            planet.scene.game_group.add(self.satellite)
+        return super().update(planet, dt)
+
+    def kill(self):
+        self.satellite.kill()
+        super().kill()
+
+class SpaceStationBuilding(SatelliteBuilding):
+    SATELLITE_CLASS = SpaceStation
+    def __init__(self):
+        super().__init__()
+        self.stats = Stats(pop_max_add=4)
+
+class ReflectorShieldBuilding(SatelliteBuilding):
+    SATELLITE_CLASS = ReflectorShield
+
+
+# Laser - planet_weapon_mul
+
 class AlienHomeDefenseBuilding(Building):
     FIRE_RATE = 0.40
     upgrade = "alienhomedefense"
@@ -129,20 +216,64 @@ class AlienHomeDefenseBuilding(Building):
                 )
             planet.scene.game_group.add(b)
 
+class AuraBuilding(Building):
+    def __init__(self):
+        super().__init__()
+        self.targeting = "enemy"
+        self.applied_ships = set()
+
+    def update(self, planet, dt):
+        if self.targeting == "enemy":
+            ships = set(planet.scene.get_enemy_ships(planet.owning_civ))
+        elif self.targeting == "mine":
+            ships = set(planet.scene.get_my_ships(planet.owning_civ))
+        else:
+            ships = set([])
+        near = set(all_nearby(planet.pos, ships, 80))
+        far = ships - near
+        for ship in near:
+            if ship not in self.applied_ships:
+                self.apply(ship)
+                self.applied_ships.add(ship)
+
+        for ship in far:
+            if ship in self.applied_ships:
+                self.unapply(ship)
+                self.applied_ships.remove(ship)
+
+        return super().update(planet, dt)     
+
+    def apply(self, ship):
+        pass
+
+    def unapply(self, ship):
+        pass   
+
+class LowOrbitDefensesBuilding(AuraBuilding):
+    def __init__(self):
+        super().__init__()
+        self.targeting = "mine"
+
+    def apply(self, ship):
+        ship.bonus_max_health_aura += 10
+
+    def unapply(self, ship):
+        ship.bonus_max_health_aura -= 10
+
 class DefenseMatrix(Building):
-    pass
+    pass #impl
 
 class DefenseMatrixAlpha(DefenseMatrix):
-    pass
+    pass #impl
 
 class DefenseMatrixOmega(DefenseMatrix):
-    pass
+    pass #impl
 
 class Portal(Building):
-    pass
+    pass #impl
 
 class ClockwisePortal(Portal):
-    pass
+    pass #impl
 
 class CounterClockwisePortal(Portal):
-    pass
+    pass #impl

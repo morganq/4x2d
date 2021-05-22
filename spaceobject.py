@@ -17,6 +17,9 @@ class SpaceObject(AnimRotSprite, Healthy):
         SpaceObject.SOID += 1
         Healthy.__init__(self, scene, meter_size=self.HEALTHBAR_SIZE)
 
+    def is_alive(self):
+        return self.health > 0 and self.alive()
+
     def get_stat(self, stat):
         return 0
 

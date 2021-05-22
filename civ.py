@@ -7,20 +7,35 @@ from icontext import IconText
 from v2 import V2
 import random
 
+UPGRADE_INCREASE_AMT = {
+    'iron':15,
+    'ice':25,
+    'gas':40
+}
+
 class Civ:
+    name = None
     def __init__(self, scene):
         self.scene = scene
         self.color = PICO_RED
         self.is_enemy = True        
         self.resources = economy.Resources()
         self.frozen = economy.Resources(0,0,0)
-        self.upgrade_limits = economy.Resources(30,30,30)
+        self.upgrade_limits = economy.Resources(30,80,150)
         self.upgrades_stocked = []
         self.upgrades = []
         self.researched_upgrade_names = set()
         self.base_stats = Stats()
 
         self.offered_upgrades = {}
+
+        # Analytics
+        self.num_upgrades = 0
+        self.collection_rate_history = []
+        self.collected_this_cycle = 0
+        self.collection_cycle_time = 0
+        self.time = 0
+        self.upgrade_times = []
         
         ### Upgrades Stuff ###
         self.nuclear_instability_timer = 0
@@ -30,6 +45,7 @@ class Civ:
     def update(self, dt):
         self.resources_update(dt)
         self.upgrades_update(dt)
+        self.time += dt
 
     def get_all_fighters(self):
         all_fighters = []
@@ -48,14 +64,31 @@ class Civ:
             while self.resources.data[res_type] >= self.upgrade_limits.data[res_type]:
                 self.upgrades_stocked.append(res_type)
                 self.resources.set_resource(res_type, self.resources.data[res_type] - self.upgrade_limits.data[res_type])
-                self.upgrade_limits.data[res_type] += 35
+                self.upgrade_limits.data[res_type] = int(self.upgrade_limits.data[res_type] + UPGRADE_INCREASE_AMT[res_type])
+                self.num_upgrades += 1
+                if not self.is_enemy:
+                    #print(self.upgrade_limits.data[res_type], res_type)
+                    #print(self.num_upgrades, "upgrades so far")
+                    if res_type == 'iron':
+                        self.upgrade_times.append(self.time)
 
             # frozen
             self.frozen.data[res_type] = max(self.frozen.data[res_type] - dt,0)
 
+        if not self.is_enemy:
+            self.collection_cycle_time += dt
+            if self.collection_cycle_time > 15:
+                self.collection_cycle_time -= 15
+                self.collection_rate_history.append(self.collected_this_cycle)
+                self.collected_this_cycle = 0
+                #print(self.collection_rate_history)
+
     def earn_resource(self, resource, value, where = None):
         if self.frozen.data[resource] <= 0:
             self.resources.set_resource(resource, self.resources.data[resource] + value)
+        if not self.is_enemy:
+            if resource == "iron":
+                self.collected_this_cycle += value / self.upgrade_limits.iron
 
     def upgrades_update(self, dt):
         if self.get_stat("nuclear_instability"):
@@ -107,6 +140,7 @@ class Civ:
         self.offered_upgrades = {}
 
 class PlayerCiv(Civ):
+    name = "player"
     def __init__(self, scene):
         Civ.__init__(self, scene)
         self.color = PICO_GREEN
@@ -115,7 +149,7 @@ class PlayerCiv(Civ):
     def earn_resource(self, resource, value, where=None):
         if where:
             self.scene.score += value
-            it = IconText(self.pos, None, "+%d" % value, economy.RESOURCE_COLORS[resource])
+            it = IconText(where.pos, None, "+%d" % value, economy.RESOURCE_COLORS[resource])
             it.pos = where.pos + V2(0, -where.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)
         return super().earn_resource(resource, value)

@@ -32,4 +32,5 @@ class Line(SpriteBase):
         self._width = w
         self._height = h
 
+        self._offset = (0 if pt1.x < pt2.x else 1, 0 if pt1.y < pt2.y else 1)
         self._recalc_rect()

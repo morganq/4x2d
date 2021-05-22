@@ -9,7 +9,11 @@ class IconText(SpriteBase):
     def __init__(self, pos, icon, text, color):
         SpriteBase.__init__(self, pos)
         if icon:
-            self.icon = pygame.image.load(resource_path(icon)).convert_alpha()
+            try:
+                self.icon = pygame.image.load(resource_path(icon)).convert_alpha()
+            except:
+                print("BAD ICON: %s" % icon)
+                self.icon = None
         else:
             self.icon = None
         self.text = text

@@ -6,6 +6,8 @@ from v2 import V2
 def debug_render(screen, scene):
     surf = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
     for ship in scene.get_ships():
+        if ship.chosen_target:
+            pygame.draw.line(surf, (0,255,0, 120), (ship.pos + V2(1,1)).tuple(), (ship.chosen_target.pos + V2(1,1)).tuple())
         if ship.effective_target:
             pygame.draw.line(surf, (255,128,255, 120), ship.pos.tuple(), ship.effective_target.pos.tuple())
             if hasattr(ship, "state"):
@@ -13,17 +15,23 @@ def debug_render(screen, scene):
             if hasattr(ship, "current_dogfight_target") and ship.current_dogfight_target:
                 pygame.draw.line(surf, (255,0,0, 120), ship.pos.tuple(), ship.current_dogfight_target.pos.tuple())
         
-        velmag = (ship.velocity.magnitude() * 20) ** 0.75
-        pygame.draw.line(surf, (255,255,0, 120), ship.pos.tuple(), (ship.pos + ship.velocity.normalized() * velmag).tuple())
+        #velmag = (ship.velocity.magnitude() * 20) ** 0.75
+        #pygame.draw.line(surf, (255,255,0, 120), ship.pos.tuple(), (ship.pos + ship.velocity.normalized() * velmag).tuple())
 
-        velmag = (ship.target_velocity.magnitude() * 20) ** 0.75
-        pygame.draw.line(surf, (255,128,0, 120), ship.pos.tuple(), (ship.pos + ship.target_velocity.normalized() * velmag).tuple())
+        #velmag = (ship.target_velocity.magnitude() * 20) ** 0.75
+        #pygame.draw.line(surf, (255,128,0, 120), ship.pos.tuple(), (ship.pos + ship.target_velocity.normalized() * velmag).tuple())
 
-        velmag = (ship.fleet_forces.magnitude() * 20) ** 0.75
-        pygame.draw.line(surf, (128,128,255, 120), ship.pos.tuple(), (ship.pos + ship.fleet_forces.normalized() * velmag).tuple())        
+        #velmag = (ship.fleet_forces.magnitude() * 20) ** 0.75
+        #pygame.draw.line(surf, (128,128,255, 120), ship.pos.tuple(), (ship.pos + ship.fleet_forces.normalized() * velmag).tuple())        
+
+        if ship.path and len(ship.path) > 1:
+            for i,n2 in enumerate(ship.path[1:]):
+                n1 = ship.path[i]
+                pygame.draw.line(surf, (80,80,255,255), n1.tuple(), n2.tuple())
+                #pygame.draw.circle(surf, (80,80,255, 255), node.tuple(), 2, 1)
             
-    for planet in scene.get_civ_planets(scene.enemy.civ):
-        text.FONTS['tiny'].render_to(surf, (planet.pos + V2(-15,15)).tuple(), str(planet.ships['alien-fighter']) + " fighters", (255,128,255,120))
+    #for planet in scene.get_civ_planets(scene.enemy.civ):
+    #    text.FONTS['tiny'].render_to(surf, (planet.pos + V2(-15,15)).tuple(), str(planet.ships['alien-fighter']) + " fighters", (255,128,255,120))
             
 
     #surf.set_alpha(50)

@@ -75,7 +75,8 @@ Gas
 
 
 Iron: Normal, Instant, Long-term, Heal
-Ice: Interceptors/Bombers, Conversion, Warp
+Ice: Interceptors, Bombers, Warp
+  - 1. ship. 2a: more ship. 2b: convert ship, 3: ship+
 Gas: Fleet Emergency, Fighter per Planet, Battleship
 
  - 6 fighters now

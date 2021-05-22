@@ -4,11 +4,12 @@ from spaceobject import SpaceObject
 from planet import planet
 from helper import get_nearest
 from astar import AStar
+from hazard import Hazard
 import math
 import time
 
 GRID_SIZE_PIXELS = 20
-EXTRA = 10
+EXTRA = 0
 
 class Pathfinder(AStar):
     def __init__(self, scene):
@@ -35,8 +36,11 @@ class Pathfinder(AStar):
                 center = V2(x * GRID_SIZE_PIXELS + GRID_SIZE_PIXELS / 2, y * GRID_SIZE_PIXELS + GRID_SIZE_PIXELS / 2)
                 closest, dist = get_nearest(center, objects)
                 if closest:
-                    if (dist - (closest.radius + EXTRA) ** 2) < (GRID_SIZE_PIXELS / 2) ** 2:
-                        cell = (closest.radius + EXTRA) - math.sqrt(dist) + 5
+                    extra = EXTRA
+                    if isinstance(closest, Hazard):
+                        extra = 20
+                    if (dist - (closest.radius + extra) ** 2) < (GRID_SIZE_PIXELS / 2) ** 2:
+                        cell = (closest.radius + extra) - math.sqrt(dist) + 5
                 grid[-1].append(cell)
 
         #self._grid = Grid(matrix=grid)
@@ -79,7 +83,9 @@ class Pathfinder(AStar):
         t = time.time()
         path = list(self.astar(start, end))
         path = [(V2(*p) + V2(0.5, 0.5)) * GRID_SIZE_PIXELS for p in path]
+        if not path:
+            return None
         #print("pathfinding", time.time() - t)
         #print(grid.grid_str(path=path, start=start, end=end))
         #self._grid.cleanup()
-        return path
+        return path[2:-2]

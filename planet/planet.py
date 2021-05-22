@@ -1,8 +1,10 @@
+from aliens.alien1warpship import Alien1WarpShip
 import math
 import random
 from upgrade.upgrades import UPGRADE_CLASSES
-from ships.aliencolonist import AlienColonist
-from ships.alienfighter import AlienFighter
+from aliens.alien1colonist import Alien1Colonist
+from aliens.alien1fighter import Alien1Fighter
+from aliens.alien1battleship import Alien1Battleship
 
 import framesprite
 import pygame
@@ -12,7 +14,7 @@ from ships.fighter import Fighter
 from ships.bomber import Bomber
 from ships.interceptor import Interceptor
 from ships.colonist import Colonist
-from ships.alienbattleship import AlienBattleship
+from ships.battleship import Battleship
 from ships.ship import Ship
 from v2 import V2
 from meter import Meter
@@ -22,33 +24,38 @@ import text
 from planet.shipcounter import ShipCounter
 from icontext import IconText
 from collections import defaultdict
-from .building import BUILDINGS
-from helper import clamp, get_nearest
+from helper import all_nearby, clamp, get_nearest
 from .planetart import generate_planet_art
 from spaceobject import SpaceObject
 from funnotification import FunNotification
+import explosion
 
 EMIT_SHIPS_RATE = 0.125
 EMIT_CLASSES = {
     'fighter':Fighter,
     'bomber':Bomber,
     'interceptor':Interceptor,
-    'alien-fighter':AlienFighter,
+    'battleship':Battleship,
     'colonist':Colonist,
-    'alien-colonist':AlienColonist,
-    'alien-battleship':AlienBattleship
+    'alien1fighter':Alien1Fighter,
+    'alien1colonist':Alien1Colonist,
+    'alien1battleship':Alien1Battleship,
+    'alien1warpship':Alien1WarpShip
 }
 
 RESOURCE_BASE_RATE = 1/220.0
 
-POPULATION_GROWTH_TIME = 30
+POPULATION_GROWTH_TIME = 40
+POP_GROWTH_IMPROVEMENT_PER_POP = 5
+POPULATION_GROWTH_MIN_TIME = 20
 HP_PER_BUILDING = 10
-DEFENSE_RANGE = 30
 DESTROY_EXCESS_SHIPS_TIME = 7
 PLANET_PROXIMITY = 100
+HAZARD_PROXIMITY = 70
 
 class Planet(SpaceObject):
     HEALTHBAR_SIZE = (30,4)
+    DEFENSE_RANGE = 30
     def __init__(self, scene, pos, size, resources):
         SpaceObject.__init__(self, scene, pos)
         self.size = size
@@ -99,6 +106,8 @@ class Planet(SpaceObject):
         self.unstable_reaction = 0
         self.owned_time = 0
         self._timers['regen'] = 0
+        self.underground_buildings = {}
+        self.planet_weapon_mul = 1
 
     @property
     def population(self): return self._population
@@ -106,12 +115,20 @@ class Planet(SpaceObject):
     def population(self, value):
         self._population = clamp(value, 0, 999)
 
+    def is_alive(self):
+        return self.alive() # pygame alive
+
     def change_owner(self, civ):
+        self.lose_buildings()
         self.owning_civ = civ
+        if civ in self.underground_buildings:
+            for building in self.underground_buildings[civ]:
+                self.add_building(building.upgrade)
+            del self.underground_buildings[civ]
         self.health = max(self.health, self.get_max_health() / 4)
-        self._population = min(self._population, 1)
-        self.buildings = []
+        self._population = 0
         self.ships = defaultdict(int)
+        self.production = []
         self.owned_time = 0
         self._generate_base_frames()
         self._generate_frames()
@@ -200,8 +217,12 @@ class Planet(SpaceObject):
     def get_radius(self):
         return self.size + 8
 
+    def get_max_shield(self):
+        return self.get_stat("planet_shield")
+
     def get_max_health(self):
-        base = 50 + self.size * 30 + len(self.buildings) * HP_PER_BUILDING
+        hp_per_building = HP_PER_BUILDING * (1 + self.get_stat("planet_health_per_construct"))
+        base = 50 + self.size * 30 + len(self.buildings) * hp_per_building
         max_hp = base * (1 + self.get_stat("planet_health_mul"))
         if self.get_stat("planet_temp_health_mul"):
             if self.owned_time < 60:
@@ -216,7 +237,10 @@ class Planet(SpaceObject):
         return round(max_hp)
 
     def get_pop_growth_time(self):
-        return POPULATION_GROWTH_TIME / (1 + self.get_stat('pop_growth_rate'))
+        rate = 1 + self.get_stat('pop_growth_rate')
+        rate *= 1 + (self.get_stat("pop_growth_rate_per_docked_ship") * sum(self.ships.values()))
+        growth_time = max(POPULATION_GROWTH_TIME - POP_GROWTH_IMPROVEMENT_PER_POP * self.population, POPULATION_GROWTH_MIN_TIME)
+        return growth_time / rate
 
     def get_max_pop(self):
         return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add")
@@ -253,7 +277,7 @@ class Planet(SpaceObject):
                 ship_class = EMIT_CLASSES[ship_type]                                
                 off = V2.from_angle(towards_angle)
                 s = ship_class(self.scene, self.pos + off * self.get_radius(), self.owning_civ)
-                if ship_type in ["colonist", "alien-colonist"]:
+                if 'colonist' in ship_type:
                     s.set_pop(data['num'])
                 s.set_target(target)
                 if 'path' in data:
@@ -285,6 +309,17 @@ class Planet(SpaceObject):
 
             rate_modifier *= (1 + self.get_stat("mining_rate") + self.unstable_reaction)
 
+            if r == "ice" and self.get_stat("ice_mining_rate"):
+                rate_modifier *= 1 + self.get_stat("ice_mining_rate")
+
+            if r == "gas" and self.get_stat("gas_mining_rate"):
+                rate_modifier *= 1 + self.get_stat("gas_mining_rate")
+
+            if self.get_stat("mining_rate_proximity"):
+                _, distsq = get_nearest(self.pos,self.scene.get_hazards())
+                if distsq < HAZARD_PROXIMITY ** 2:
+                    rate_modifier *= 1 + self.get_stat("mining_rate_proximity")
+
             if self._population >= self.size:
                 rate_modifier *= 1 + self.get_stat("mining_rate_at_max_pop")
 
@@ -296,28 +331,51 @@ class Planet(SpaceObject):
             v = (self.resources.data[r] / 10.0) # if planet has 100% iron, you get 10 iron every 10 resource ticks.
             if self.resource_timers.data[r] > v:
                 self.resource_timers.data[r] -= v
-                self.owning_civ.earn_resource(r, v)
+                self.owning_civ.earn_resource(r, v, where=self)
                 if self.get_stat("mining_ice_per_iron"):
-                    self.owning_civ.earn_resource("ice", v * self.get_stat("mining_ice_per_iron"))
+                    self.owning_civ.earn_resource("ice", v * self.get_stat("mining_ice_per_iron"), where=self)
                 if self.get_stat("mining_gas_per_iron"):
-                    self.owning_civ.earn_resource("gas", v * self.get_stat("mining_gas_per_iron"))
+                    self.owning_civ.earn_resource("gas", v * self.get_stat("mining_gas_per_iron"), where=self)
 
         # Ship production
         for prod in self.production:
             prod_rate = 1 + self.get_stat("ship_production")
+
             if prod.ship_type in ['fighter', 'interceptor', 'bomber', 'battleship']:
                 prod_rate *= 1 + self.get_stat("%s_production" % prod.ship_type)
+
+            if self.get_stat("ship_production_proximity"):
+                enemy_planets = self.scene.get_enemy_planets(self.owning_civ)
+                if get_nearest(self.pos, enemy_planets)[1] < PLANET_PROXIMITY ** 2:
+                    prod_rate *= 1 + self.get_stat("ship_production_proximity")
+                    
             prod.update(self, dt * prod_rate)
         self.production = [p for p in self.production if not p.done]
 
         # Ship destruction
-        fighter_name =self.get_ship_name("fighter")
-        if self.ships[fighter_name] > self.get_max_fighters():
+        
+        if sum(self.ships.values()) > self.get_max_ships():
             self.destroy_excess_ships_timer += dt
             if self.destroy_excess_ships_timer >= DESTROY_EXCESS_SHIPS_TIME:
-                self.ships[fighter_name] -= 1
+                # First try to get rid of fighters, than any advanced ships, then battleships if nothing else existed
+                if self.ships['fighter'] > 0:
+                    self.ships['fighter'] -= 1
+                    destroyed_ship = "fighter"
+                else:
+                    for ship_name in self.ships.keys():
+                        if ship_name not in ['fighter', 'battleship']:
+                            if self.ships[ship_name] > 0:
+                                self.ships[ship_name] -= 1
+                                destroyed_ship = ship_name
+                                break
+
+                    else:
+                        if self.ships['battleship'] > 0:
+                            self.ships['battleship'] -= 1
+                            destroyed_ship = "battleship"
+
                 if self.owning_civ == self.scene.my_civ:
-                    it = IconText(self.pos, "assets/i-%s.png" % fighter_name, "-1", PICO_PINK)
+                    it = IconText(self.pos, "assets/i-%s.png" % destroyed_ship, "-1", PICO_PINK)
                     it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
                     self.scene.ui_group.add(it)          
                 self.destroy_excess_ships_timer = 0
@@ -335,8 +393,10 @@ class Planet(SpaceObject):
                     self.add_population(1)
 
         if self.health <= 0:
-            self.buildings = []
+            self.lose_buildings()
             self._population = 0
+            self._generate_base_frames()
+            self._generate_frames()            
 
         # Building stuff
         for b in self.buildings:
@@ -345,12 +405,10 @@ class Planet(SpaceObject):
         # Detect enemies
         threats = self.get_threats()
         if threats:
-            for i in range(self.ships[self.get_ship_name("fighter")]):
-                self.emit_ship(self.get_ship_name("fighter"), {"to":random.choice(threats)})
-            for i in range(self.ships[self.get_ship_name("interceptor")]):
-                self.emit_ship(self.get_ship_name("interceptor"), {"to":random.choice(threats)})                
-            for i in range(self.ships['alien-battleship']):
-                self.emit_ship('alien-battleship', {"to":random.choice(threats)})
+            for ship_name in self.ships.keys():
+                if ship_name not in ['bomber']:
+                    for i in range(self.ships[ship_name]):
+                        self.emit_ship(ship_name, {"to":random.choice(threats)})
 
         
         #self.rotation += self.rotate_speed * dt * 3
@@ -369,11 +427,28 @@ class Planet(SpaceObject):
         if self._timers['regen'] > REGEN_TIMER:
             self._timers['regen'] = 0
             if self.get_stat("regen") > 0:
-                self.health += self.get_stat("regen") / REGEN_TIMER
+                self.health += self.get_stat("regen") * REGEN_TIMER
             if self.get_stat("deserted_regen") > 0 and self.population == 0:
-                self.health += self.get_stat("deserted_regen") / REGEN_TIMER
+                self.health += self.get_stat("deserted_regen") * REGEN_TIMER
+            if self.get_stat("planet_regen_without_ships") and sum(self.ships.values()) == 0:
+                self.health += self.get_stat("planet_regen_without_ships") * REGEN_TIMER
 
         self.owned_time += dt
+
+        if self.population == 0:
+            self.planet_weapon_mul = (1 + self.get_stat("planet_weapon_boost_zero_pop"))
+        else:
+            self.planet_weapon_mul = 1
+
+        if self.get_stat("planet_slow_aura"):
+            enemy_ships = set(self.scene.get_enemy_ships(self.owning_civ))
+            near = set(all_nearby(self.pos, enemy_ships, 80))
+            far = enemy_ships - near
+            for ship in near:
+                ship.slow_aura = self.get_stat("planet_slow_aura")
+            for ship in far:
+                ship.slow_aura = 0
+
 
     def add_population(self, num):
         self._population += num
@@ -383,28 +458,23 @@ class Planet(SpaceObject):
             it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)        
 
-    def get_max_fighters(self):
-        return self.size * 2
+    def get_max_ships(self):
+        return self.get_max_pop()
 
     def get_threats(self):
         enemy_ships = self.scene.get_enemy_ships(self.owning_civ)
         ret = []
         for s in enemy_ships:
             dist = (s.pos - self.pos).sqr_magnitude()
-            if dist < (self.get_radius() + DEFENSE_RANGE) ** 2:        
+            if dist < (self.get_radius() + self.DEFENSE_RANGE) ** 2:        
                 ret.append(s)
         return ret
-
-    def get_ship_name(self, type):
-        if self.owning_civ == self.scene.enemy.civ:
-            return "alien-" + type
-        return type
 
     def get_workers(self):
         return min(self._population, self.size)
 
     def emit_ship(self, type, data):
-        if type in ['colonist', 'alien-colonist']:
+        if 'colonist' in type:
             self.emit_ships_queue.append((type, data))
             self._population -= data['num']
         elif self.ships[type] > 0:
@@ -432,14 +502,15 @@ class Planet(SpaceObject):
             self.building_slots[choice] = True
         else:
             angle = random.random() * 6.2818
-        b = BUILDINGS[upgrade]()
+        b = upgrade.building()
         self.buildings.append({"building":b, "angle":angle})
         self._generate_base_frames()
         self._generate_frames()
         self.needs_panel_update = True 
         mh_after = self.get_max_health()
         self._health += mh_after - mh_before 
-        self.scene.ui_group.add(FunNotification(UPGRADE_CLASSES[b.upgrade].title, self))
+        if self.owning_civ == self.scene.my_civ:
+            self.scene.ui_group.add(FunNotification(upgrade.title, self))
         return b
 
     def add_production(self, order):
@@ -457,3 +528,38 @@ class Planet(SpaceObject):
         if self.get_stat("damage_iron"):
             self.owning_civ.earn_resource("iron", self.get_stat("damage_iron"), where=self)
         return super().take_damage(damage, origin=origin)
+
+    def blow_up_buildings(self):
+        for building in self.buildings:
+            bp = V2.from_angle(building['angle'] + self.base_angle) * self.get_radius() + self.pos
+            e = explosion.Explosion(bp, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.25, 11, scale_fn="log", line_width=1)
+            self.scene.game_group.add(e)        
+            building['building'].kill()
+        self._generate_base_frames()
+        self._generate_frames()
+
+    def raze_building(self):
+        if not self.buildings:
+            return
+
+        bi = random.randint(0, len(self.buildings)-1)
+        b = self.buildings[bi]
+        b['building'].kill()
+        bp = V2.from_angle(b['angle'] + self.base_angle) * self.get_radius() + self.pos
+        e = explosion.Explosion(bp, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.25, 11, scale_fn="log", line_width=1)
+        self.scene.game_group.add(e)  
+        self.buildings.pop(bi)
+        self._generate_base_frames()
+        self._generate_frames()        
+
+    def lose_buildings(self):
+        if self.get_stat("underground"):
+            self.underground_buildings[self.owning_civ] = self.buildings
+            for building in self.buildings:
+                building['building'].kill()
+        else:
+            self.blow_up_buildings()
+
+        self.buildings = []
+        self._generate_base_frames()
+        self._generate_frames()        

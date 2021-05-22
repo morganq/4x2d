@@ -1,3 +1,4 @@
+import satellite
 from status_effect import GreyGooEffect
 from colors import *
 from v2 import V2
@@ -6,6 +7,8 @@ import pygame
 import math
 import helper
 import random
+import planet
+from explosion import Explosion
 
 VEL = 50
 DEATH_TIME = 1
@@ -22,11 +25,13 @@ class Bullet(SpriteBase):
         self.stationary = False
         self.collision_radius = 5
         self.mods = mods or {}
-        speed = VEL * (1 + self.mods.get("ship_missile_speed", 0))
+        speed = VEL * (1 + self.mods.get("missile_speed", 0))
         if vel:
             self.vel = vel.normalized() * speed
         else:
             self.vel = (self.get_target_pos() - self.pos).normalized() * speed
+
+        self.death_time = self.mods.get("life", None) or DEATH_TIME
         self.offset = (0.5, 0.5)
         self.time = 0
         self._generate_image()
@@ -37,6 +42,12 @@ class Bullet(SpriteBase):
     def collide(self, other):
         if other.owning_civ == self.shooter.owning_civ: return
         if not getattr(other, "health", None): return
+        reflect = False
+        if isinstance(other, satellite.ReflectorShieldObj):
+            if not other.bullet_hits(self):
+                return
+            else:
+                reflect = True
         if other.get_stat("ship_dodge") > 0:
             if random.random() <= other.get_stat("ship_dodge"):
                 self.kill()
@@ -53,12 +64,20 @@ class Bullet(SpriteBase):
         damage += self.mods.get("damage_add", 0)
         objs_hit = [other]
         if self.mods.get("blast_radius", False):
-            objs_hit = helper.all_nearby(self.pos, self.shooter.scene.get_enemy_objects(self.owning_civ), self.mods.get("blast_radius"))
+            objs_hit.extend(helper.all_nearby(self.pos, self.shooter.scene.get_enemy_objects(self.owning_civ), self.mods.get("blast_radius")))
+            color = self.mods.get("color", PICO_BLUE)
+            e = Explosion(self.pos, [PICO_WHITE, color, DARKEN_COLOR.get(color, PICO_DARKGRAY)], 0.25, self.mods.get("blast_radius"), "log", line_width=1)
+            self.shooter.scene.game_group.add(e)
             
         for obj in objs_hit:
             obj.take_damage(damage, self)
             if self.mods.get("grey_goo", False):
                 obj.add_effect(GreyGooEffect(other, self))
+            if self.mods.get("raze_chance", 0):
+                if isinstance(obj, planet.planet.Planet):
+                    if random.random() < self.mods.get("raze_chance"):
+                        obj.raze_building()
+
 
         if self.bounces > 0:
             self.bounces -= 1
@@ -71,7 +90,12 @@ class Bullet(SpriteBase):
                 self.kill()
 
         else:
-            self.kill()
+            if reflect:
+                self.target, self.shooter = self.shooter, self.target
+                self.vel = (self.get_target_pos() - self.pos).normalized() * self.vel.magnitude()
+                self._generate_image()
+            else:
+                self.kill()
 
     def get_target_pos(self):
         # Get the target's 'pos' attribute, otherwise assume self.target already *is* a V2
@@ -98,13 +122,13 @@ class Bullet(SpriteBase):
             ao = math.acos(facing.dot(towards))
         except ValueError:
             ao = 0
-        if ao < 0.25:
+        if ao < 0.25 * self.mods.get("homing"):
             angle = math.atan2(towards.y, towards.x)
         else:
             if cp > 0:
-                angle += 3 * dt
+                angle += 3 * dt * self.mods.get("homing")
             else:
-                angle -= 3 * dt
+                angle -= 3 * dt * self.mods.get("homing")
         self.vel = V2.from_angle(angle) * speed
         self._generate_image()
 
@@ -113,5 +137,5 @@ class Bullet(SpriteBase):
         if self.mods.get("homing", False) and self.target.health > 0:
             self.homing(dt)
         self.time += dt
-        if self.time > DEATH_TIME:
+        if self.time > self.death_time:
             self.kill()

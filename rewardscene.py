@@ -13,8 +13,8 @@ from upgrade import upgradeicon
 from spritebase import SpriteBase
 
 REWARDS = {
-    'jump_drive':{'title':'Jump Drive', 'description':'Begin with +1 fighter in future battles'},
-    'life_support':{'title':'Life Support', 'description': 'Begin with +1 population in future battles'},
+    'jump_drive':{'title':'Jump Drive', 'description':'Begin with +2 fighter in future battles'},
+    'life_support':{'title':'Life Support', 'description': 'Begin with +2 population in future battles'},
     'memory_crystal':{'title':'Memory Crystal', 'description': 'Pick a technology to carry on to future battles'},
     'blueprint':{'title':'Blueprint', 'description': 'Pick a construct to carry on to future battles'},
 }
@@ -51,7 +51,7 @@ class JumpDriveRewardState(RewardState):
         self.description = REWARDS['jump_drive']['description']
 
     def on_confirm(self):
-        self.scene.game.run_info.bonus_fighters += 1
+        self.scene.game.run_info.bonus_fighters += 2
         return super().on_confirm()
 
 class LifeSupportRewardState(RewardState):
@@ -61,7 +61,7 @@ class LifeSupportRewardState(RewardState):
         self.description = REWARDS['life_support']['description']
 
     def on_confirm(self):
-        self.scene.game.run_info.bonus_population += 1
+        self.scene.game.run_info.bonus_population += 2
         return super().on_confirm()
 
 class MemoryCrystalRewardState(RewardState):
