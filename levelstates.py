@@ -1,3 +1,5 @@
+from rangeindicator import RangeIndicator
+from typing import Iterable
 from upgrade.upgrades import UPGRADE_CLASSES
 import rewardscene
 from colors import *
@@ -127,7 +129,7 @@ class PlayState(UIEnabledState):
                 reg = re.compile(name)
                 for u in [u for u in UPGRADE_CLASSES.values() if u.alien == False and reg.match(u.name)]:
                     self.scene.my_civ.researched_upgrade_names.add(u.name)
-                    if u.category == "tech":
+                    if u.cursor == None:
                         self.scene.my_civ.upgrades.append(u)
                         u().apply(self.scene.my_civ)
                         self.scene.ui_group.add(FunNotification(u.title, None))
@@ -240,13 +242,14 @@ class OrderShipsState(UIEnabledState):
 
 
 class UpgradeState(UIEnabledState):
+    NEARBY_RANGE = 70
     def __init__(self, scene):
         UIEnabledState.__init__(self, scene)
         self.pending_upgrade = None
-        self.cursor_type = None
         self.cursor_icon = None
         self.selection_info_text = None
         self.back_button = None
+        self.current_cursor = None
 
     def enter(self):
         self.scene.paused = True
@@ -257,6 +260,8 @@ class UpgradeState(UIEnabledState):
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
         self.hover_filter = self.filter_only_panel_ui
+        self.selected_targets = []
+        self.extras = []
         super().enter()
 
     def filter_my_planets(self, x):
@@ -281,6 +286,9 @@ class UpgradeState(UIEnabledState):
         super().exit()
 
     def finish(self, target=None, cancel = False):
+        for extra in self.extras:
+            extra.kill()
+        self.extras = []        
         if not cancel:
             self.scene.my_civ.upgrades_stocked.pop(0)
             self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
@@ -298,18 +306,9 @@ class UpgradeState(UIEnabledState):
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
-        
 
-    def on_select(self, upgrade):
-        if upgrade.cursor == None:
-            self.pending_upgrade = upgrade
-            self.scene.my_civ.upgrades.append(upgrade)
-            upgrade().apply(self.scene.my_civ)
-            self.scene.ui_group.add(FunNotification(self.pending_upgrade.title, None))
-            self.finish()
-        elif upgrade.cursor == "allied_planet":
-            self.pending_upgrade = upgrade
-            self.cursor_type = upgrade.cursor
+    def setup_cursor_type(self, cursor):
+        if cursor == "allied_planet":
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-planet-cursor.png")
             self.cursor_icon.offset = (0.5, 0.5)
             self.cursor_icon._recalc_rect()
@@ -318,13 +317,8 @@ class UpgradeState(UIEnabledState):
             self.panel.kill()
             self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
             self.scene.ui_group.add(self.selection_info_text)
-            self.back_button = Button(self.scene.upgrade_button.pos, "Back", "small", self.on_back)
-            self.back_button.offset = (0.5, 1)            
-            self.scene.ui_group.add(self.back_button)
-        elif upgrade.cursor == "allied_fleet":
+        elif cursor == "allied_fleet":
             self.scene.fleet_managers['my'].generate_selectable_objects()
-            self.pending_upgrade = upgrade
-            self.cursor_type = upgrade.cursor
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-fleet-cursor.png")
             self.cursor_icon.offset = (0.5, 0.5)
             self.cursor_icon._recalc_rect()
@@ -333,26 +327,99 @@ class UpgradeState(UIEnabledState):
             self.panel.kill()
             self.selection_info_text = text.Text("Select one of your Fleets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
             self.scene.ui_group.add(self.selection_info_text)
+        elif cursor == "point":
+            self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
+            self.cursor_icon.offset = (0.5, 0.5)
+            self.cursor_icon._recalc_rect()
+            self.scene.ui_group.add(self.cursor_icon)
+            self.hover_filter = self.filter_only_ui
+            self.panel.kill()
+            self.selection_info_text = text.Text("Select a point", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+            self.scene.ui_group.add(self.selection_info_text)
+        elif cursor == "nearby":
+            self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
+            self.cursor_icon.offset = (0.5, 0.5)
+            self.cursor_icon._recalc_rect()
+            self.scene.ui_group.add(self.cursor_icon)
+            self.range = RangeIndicator(self.selected_targets[0].pos, self.NEARBY_RANGE, PICO_LIGHTGRAY)
+            self.scene.ui_group.add(self.range)
+            self.extras.append(self.range)
+            self.hover_filter = self.filter_only_ui
+            self.panel.kill()
+            self.selection_info_text = text.Text("Select a point nearby", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+            self.scene.ui_group.add(self.selection_info_text)                     
+
+    def on_select(self, upgrade):
+        if isinstance(upgrade.cursor, list):
+            self.cursors = upgrade.cursor[::]
+        else:
+            self.cursors = [upgrade.cursor]
+
+        self.current_cursor = self.cursors.pop(0)
+
+        if self.current_cursor == None:
+            self.pending_upgrade = upgrade
+            self.scene.my_civ.upgrades.append(upgrade)
+            upgrade().apply(self.scene.my_civ)
+            self.scene.ui_group.add(FunNotification(self.pending_upgrade.title, None))
+            self.finish()
+        else:
+            self.pending_upgrade = upgrade
+            self.setup_cursor_type(self.current_cursor)
             self.back_button = Button(self.scene.upgrade_button.pos, "Back", "small", self.on_back)
             self.back_button.offset = (0.5, 1)
             self.scene.ui_group.add(self.back_button)            
 
+    def next_selection_step(self):
+        for extra in self.extras:
+            extra.kill()
+        self.extras = []
+
+        if self.selection_info_text:
+            self.selection_info_text.kill()
+        if self.cursor_icon:
+            self.cursor_icon.kill()
+
+        if self.cursors:
+            self.current_cursor = self.cursors.pop(0)
+            self.setup_cursor_type(self.current_cursor)
+        else:
+            u = self.pending_upgrade().apply(*self.selected_targets)
+            self.finish(target=self.selected_targets[0])
+
     def mouse_input(self, input, event):
-        super().mouse_input(input, event)
+        handled = super().mouse_input(input, event)
+        if handled:
+            return
         if self.cursor_icon:
             if input in ["mouse_move", "mouse_drag"]:
                 self.cursor_icon.pos = event.gpos + V2(10,10)
 
+        if self.current_cursor:
             if input == "click" and self.hover_sprite:
                 sel = self.hover_sprite.get_selection_info()
                 if sel:
-                    if sel['type'] == "planet" and self.hover_sprite.owning_civ == self.scene.my_civ:
-                        u = self.pending_upgrade().apply(self.hover_sprite)
-                        self.finish(target=self.hover_sprite)
-                    if sel['type'] == "fleet":
-                        u = self.pending_upgrade().apply(self.hover_sprite.fleet)
-                        self.finish(target=self.hover_sprite)
+                    if self.current_cursor == "allied_planet" and sel['type'] == "planet" and self.hover_sprite.owning_civ == self.scene.my_civ:
+                        self.selected_targets.append(self.hover_sprite)
+                        self.next_selection_step()
+                        return
+
+                    if self.current_cursor == "allied_fleet" and sel['type'] == "fleet":
+                        self.selected_targets.append(self.hover_sprite)
                         self.scene.fleet_managers['my'].destroy_selectable_objects()
+                        self.next_selection_step()
+                        return
+
+            if input == "click" and self.current_cursor == "point":
+                self.selected_targets.append(event.gpos)
+                self.next_selection_step()
+                return
+
+            if input == "click" and self.current_cursor == "nearby":
+                if (event.gpos - self.selected_targets[0].pos).sqr_magnitude() < self.NEARBY_RANGE ** 2:
+                    self.selected_targets.append(event.gpos)
+                    self.next_selection_step()
+                    return                
 
         else:
             if input == "click":
@@ -385,6 +452,10 @@ class UpgradeState(UIEnabledState):
         self.back_button = None
         self.selection_info_text.kill()
         self.selection_info_text = None
+        self.selected_targets = []
+        for extra in self.extras:
+            extra.kill()
+        self.extras = []        
 
     def update(self, dt):
         return super().update(dt)
@@ -423,7 +494,7 @@ class VictoryState(State):
         self.scene.ui_group.empty()
         self.scene.ui_group.add(text.Text("Victory!", "big", V2(170, 60), PICO_BLUE, multiline_width=200))
 
-        if game.DEV:
+        if False and game.DEV:
             import plotly.graph_objects as go
             v = self.scene.my_civ.collection_rate_history
             t = [x * 15 for x in range(len(v))]

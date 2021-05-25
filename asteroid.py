@@ -80,11 +80,11 @@ class Asteroid(SpaceObject):
     def get_selection_info(self):
         return {"type":"asteroid","asteroid":self}        
 
-    def update(self, dt):
+    def take_damage(self, damage, origin):
+        super().take_damage(damage, origin=origin)
+
         if self.health <= 0:
-            ships = self.scene.get_ships()
-            nearest, dist = get_nearest(self.pos, ships)
-            civ =  nearest.owning_civ
+            civ = origin.owning_civ
             for r,v in self.resources.data.items():
                 civ.resources.set_resource(r, civ.resources.data[r] + v)
                 if civ == self.scene.my_civ:
@@ -95,4 +95,3 @@ class Asteroid(SpaceObject):
                     it.pos = self.pos + V2(0, -self.radius - 5) - V2(it.width, it.height) * 0.5 + V2(0, -10 * {'iron':2,'ice':1,'gas':0}[r])
                     self.scene.ui_group.add(it)
             self.kill()
-        return super().update(dt)

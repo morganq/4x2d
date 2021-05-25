@@ -74,10 +74,10 @@ Gas
  - Warp all ships in a fleet and give bonus attack speed
 
 
-Iron: Normal, Instant, Long-term, Heal
-Ice: Interceptors, Bombers, Warp
+Iron: Normal, Instant, Long-term, Heal, Warp
+Ice: Interceptors, Bombers, Hangar
   - 1. ship. 2a: more ship. 2b: convert ship, 3: ship+
-Gas: Fleet Emergency, Fighter per Planet, Battleship
+Gas: Add colonists to fleet, Fighter per Planet, Battleship
 
  - 6 fighters now
  - 50 fighters over 5 minutes

@@ -219,7 +219,7 @@ class Alien:
 
     def set_difficulty(self, difficulty):
         self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 5
-        self.civ.base_stats['mining_rate'] = 0.5 + ((difficulty - 1) / 5)
+        self.civ.base_stats['mining_rate'] = 0.35 + ((difficulty - 1) / 5)
         extra_planets = difficulty // 3
         extra_pops = difficulty % 3
         my_planet = self.scene.get_civ_planets(self.civ)[0]
@@ -228,7 +228,7 @@ class Alien:
 
         near_planets = self.scene.get_planets()
         near_planets.sort(key=lambda x:(x.pos - my_planet.pos).sqr_magnitude())
-        near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:3]
+        near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:extra_planets]
         for i in range(extra_planets):
             near_unclaimed[i].change_owner(self.civ)
             near_unclaimed[i].population = extra_pops

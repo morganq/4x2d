@@ -8,6 +8,9 @@ import particle
 import bullet
 import helper
 import explosion
+import pygame
+from resources import resource_path
+from laserparticle import LaserParticle
 
 ROTATE_SPEED = 6.2818
 FLEET_RADIUS = 25
@@ -76,11 +79,16 @@ class Ship(SpaceObject):
 
         # Upgrades
         self.bonus_max_health_aura = 0
+        self.bonus_attack_speed_time = 0
         self.slow_aura = 0
 
         # Stuff that has to come at the end
         self.set_health(self.get_max_health())
         self.set_state(STATE_CRUISING)
+
+        # opt
+        self._timers['opt_time'] = random.random()
+        self.opt_fleet_forces = V2(0,0)
 
     def get_stat(self, stat):
         return self.owning_civ.get_stat(stat)
@@ -193,6 +201,7 @@ class Ship(SpaceObject):
             self.scene.game_group.add(e)
             self.kill()
             return
+
         self.states[self.state]['update'](dt)
 
         # Factor in fleet forces
@@ -252,8 +261,7 @@ class Ship(SpaceObject):
         # Regenerate
         self.health += self.get_stat("ship_regenerate") * dt
 
-        # Strafe
-        # TODO: implement
+        self.bonus_attack_speed_time -= dt
 
     def collide(self, other):
         if self.can_land(other) and self.wants_to_land():
@@ -267,17 +275,25 @@ class Ship(SpaceObject):
             self.pos += -delta
 
     def get_fleet_forces(self, dt):
+        # OPT - only calc fleet forces every so often
+        if self._timers['opt_time'] > 0.2:
+            self._timers['opt_time'] -= 0.2
+        else:
+            return self.opt_fleet_forces
+
         forces = V2(0,0)
 
         # Get the fleet
-        our_ships = self.scene.get_civ_ships(self.owning_civ)
+        if self.fleet is None:
+            return forces
+        our_ships = self.fleet.ships #self.scene.get_civ_ships(self.owning_civ)
         fleet_ships = [s for s in our_ships if (s.pos - self.pos).sqr_magnitude() <= FLEET_RADIUS ** 2]
         fleet_ships.remove(self)
 
         # Separation
         for ship in fleet_ships:
             delta = ship.pos - self.pos
-            sm = delta.sqr_magnitude()
+            sm = max(delta.sqr_magnitude(),1)
             if sm < FLEET_SEPARATION_MAX ** 2:
                 forces -= (delta.normalized() * (FLEET_SEPARATION_DEGRADE / sm)) * FLEET_SEPARATION_POWER
 
@@ -290,6 +306,7 @@ class Ship(SpaceObject):
             delta = center - self.pos
             forces += delta.max(1) * FLEET_PROXIMITY_POWER
 
+        self.opt_fleet_forces = forces.copy()
         return forces        
 
     def enter_state_cruising(self):
@@ -318,19 +335,27 @@ class Ship(SpaceObject):
             if self._timers['warp_drive'] > 0:
                 _,distsq = helper.get_nearest(self.pos, self.scene.get_planets())
                 if distsq > 30 ** 2:
-                    end = self.effective_target.pos
-                    offset_dist = self.effective_target.radius + 10
-                    if len(self.path) > 5:
-                        end = self.path[5]
-                        offset_dist = 0
-                    delta = (end - self.pos)
-                    md = delta.magnitude() - offset_dist
-                    delta = delta.normalized()
-                    self.pos += delta * min((self.get_stat("warp_drive") * 10 + 20), md)
-
-                    self.fix_path()
+                    self.warp(self.get_stat("warp_drive") * 10 + 20)
                     self._timers['warp_drive'] = -20
-                    self.on_warp()
+
+    def warp(self, warp_dist):
+        end = self.effective_target.pos
+        offset_dist = self.effective_target.radius + 10
+        pl = int(warp_dist / 20)
+        if self.path and len(self.path) > pl:
+            end = self.path[pl]
+            offset_dist = 0
+        delta = (end - self.pos)
+        md = delta.magnitude() - offset_dist
+        delta = delta.normalized()
+        target_pos = self.pos + delta * min(warp_dist, md)
+        for color in [PICO_BLUE, PICO_WHITE, PICO_DARKBLUE]:
+            p = LaserParticle(self.pos + V2.random_angle() * 3, target_pos + V2.random_angle() * 3, color, random.random() / 2)
+            self.scene.game_group.add(p)
+        self.pos = target_pos
+        self.fix_path()
+        self.on_warp()
+
 
     def on_warp(self):
         pass
@@ -415,3 +440,7 @@ class Ship(SpaceObject):
 
     def exit_state_stunned(self):
         self.target_heading = None
+
+    def command_warp(self):
+        self.warp(9999)
+        self.bonus_attack_speed_time = 6

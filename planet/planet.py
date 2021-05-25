@@ -108,6 +108,10 @@ class Planet(SpaceObject):
         self._timers['regen'] = 0
         self.underground_buildings = {}
         self.planet_weapon_mul = 1
+        self.in_comm_range = False
+
+        # opt
+        self._timers['opt_time'] = random.random()
 
     @property
     def population(self): return self._population
@@ -246,6 +250,13 @@ class Planet(SpaceObject):
         return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add")
 
     def update(self, dt):
+        real_dt = dt
+        if self._timers['opt_time'] > 0.25:
+            self._timers['opt_time'] -= 0.25
+            dt = 0.25
+        else:
+            return super().update(real_dt)
+
 
         # Emit ships which are queued
         if self.emit_ships_queue:
@@ -415,7 +426,7 @@ class Planet(SpaceObject):
         #self._generate_frames()
 
         self.upgrade_update(dt)
-        super().update(dt)
+        super().update(real_dt)
 
     def upgrade_update(self, dt):
         if self.get_stat("unstable_reaction") > 0:

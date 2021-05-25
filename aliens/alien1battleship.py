@@ -48,13 +48,13 @@ class WarpLine(SpriteBase):
         delta = self.obj_b.pos - self.obj_a.pos
         w = max(abs(delta.x),1)
         h = max(abs(delta.y),1)
-        pt1 = V2(0, 0 if delta.y > 0 else -delta.y)
-        pt2 = V2(w, delta.y if delta.y > 0 else 0)
+        pt1 = V2(0 if delta.x > 0 else w, 0 if delta.y > 0 else h)
+        pt2 = V2(w if delta.x > 0 else 0, h if delta.y > 0 else 0)
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
 
-        dist = delta.magnitude()
-        dn = delta.normalized()
+        dist = (pt2-pt1).magnitude()
+        dn = (pt2-pt1).normalized()
         lp1 = pt1 + (dn * ((self._timers['off'] * 16) % 10 + 5))
         for i in range(int(dist / 10)):
             pygame.draw.line(self.image, PICO_ORANGE, lp1.tuple(), (lp1 + dn * 3).tuple(), 1)
@@ -64,7 +64,7 @@ class WarpLine(SpriteBase):
         self._width = w
         self._height = h
 
-        self._offset = (0 if pt1.x < pt2.x else 1, 0 if pt1.y < pt2.y else 1)
+        self._offset = (0 if delta.x > 0 else 1, 0 if delta.y > 0 else 1)
         self._recalc_rect()
 
     def update(self, dt):
@@ -101,6 +101,7 @@ class Alien1Battleship(Battleship):
             delta = target.pos - self.pos
             dn = delta.normalized()
             p = target.pos - dn * (target.radius + 15)
+            self.fix_path()
             self.warp_target = WarpWarning(self.scene, p, self)
             self.scene.game_group.add(self.warp_target)
             self.warp_line = WarpLine(self, self.warp_target)
@@ -115,7 +116,8 @@ class Alien1Battleship(Battleship):
 
     def prepare_bullet_mods(self):
         mods = super().prepare_bullet_mods()
-        mods['homing'] = 1
+        mods['homing'] = 3
+        mods['life'] = 3
         return mods
 
     def fire(self, at):
@@ -124,7 +126,7 @@ class Alien1Battleship(Battleship):
 
         for j in range(5):
             towards = (self.effective_target.pos - self.pos).normalized()
-            b = Bullet(self.pos, self.effective_target, self, mods=self.prepare_bullet_mods())
+            b = Bullet(self.pos, self.effective_target, self, vel=V2.random_angle() * 10, mods=self.prepare_bullet_mods())
             self.scene.game_group.add(b)
 
             for i in range(3):

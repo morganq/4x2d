@@ -157,7 +157,7 @@ class RewardScene(Scene):
         self.tutorial_group = pygame.sprite.Group()
         self.sm = states.Machine(None)
 
-        self.rewards = self.game.run_info.get_path_galaxy()['rewards']
+        self.rewards = self.game.run_info.get_path_galaxy()['rewards'][::]
         self.setup_next_reward()
 
     def setup_next_reward(self):

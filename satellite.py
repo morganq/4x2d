@@ -1,3 +1,4 @@
+from laserparticle import LaserParticle
 from bullet import Bullet
 from colors import PICO_BLUE, PICO_PINK
 from spritebase import SpriteBase
@@ -6,6 +7,7 @@ from spaceobject import SpaceObject
 import game
 from v2 import V2
 import math
+from asteroid import Asteroid
 import helper
 
 class Satellite(SpaceObject):
@@ -13,6 +15,7 @@ class Satellite(SpaceObject):
     def __init__(self, scene, planet):
         self.planet = planet
         super().__init__(scene, V2(-50,-50))
+        self.owning_civ = planet.owning_civ
 
     def set_pos(self):
         self.angle = self.scene.time / (self.planet.radius + 10) * 3 + self.ANGLE_OFFSET
@@ -90,3 +93,50 @@ class ReflectorShield(Satellite):
     def kill(self):
         self.shield_obj.kill()
         return super().kill()
+
+class OffWorldMining(Satellite):
+    ANGLE_OFFSET = math.pi
+    def __init__(self, scene, planet):
+        super().__init__(scene, planet)
+        self.set_sprite_sheet("assets/offworldmining.png", 13)
+
+class OrbitalLaser(Satellite):
+    ANGLE_OFFSET = math.pi * 3 / 2
+    def __init__(self, scene, planet):
+        super().__init__(scene, planet)
+        self.set_sprite_sheet("assets/orbitallaser.png", 13)
+        self.new_target_timer = 0
+        self.target = None
+
+    def find_new_target(self):
+        def is_valid(t):
+            return isinstance(t, Asteroid) or (t.owning_civ and t.owning_civ != self.planet.owning_civ and t.health > 0)
+        d = V2.from_angle(self.angle) * 5
+        steps = 0
+        p = self.pos
+        self.target = None
+        while (p.x > 0 and p.x < game.RES[0]) and (p.y > 0 and p.y < game.RES[1]):
+            p += d
+            steps += 1
+            possible = [o for o in self.scene.get_objects_in_range(p, 25) if not isinstance(o, Bullet)]
+            nearest, dsq = helper.get_nearest(p, possible)
+            if not nearest:
+                continue
+            if dsq < (nearest.radius) ** 2:
+                if is_valid(nearest):
+                    self.target = nearest
+                break
+            elif dsq < (nearest.radius + steps * 2) ** 2 and is_valid(nearest):
+                self.target = nearest
+
+    def update(self, dt):
+        self.new_target_timer += dt
+        if self.new_target_timer > 0.2:
+            self.new_target_timer = 0
+            self.find_new_target()
+            if self.target:
+                lp = LaserParticle(self.pos, self.target.pos, PICO_PINK, 0.25)
+                self.scene.game_group.add(lp)
+                b = Bullet(self.target.pos, self.target, self, mods={'damage_base':3})
+                self.scene.game_group.add(b)
+        return super().update(dt)

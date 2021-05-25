@@ -1,4 +1,5 @@
 from collections import defaultdict
+from objgrid import ObjGrid
 from hazard import Hazard
 from helper import all_nearby, get_nearest
 from upgrade.upgrades import UPGRADE_CLASSES
@@ -9,6 +10,7 @@ import sys
 import traceback
 import random
 import time
+import funnotification
 
 import pygame
 import json
@@ -77,7 +79,7 @@ class LevelScene(scene.Scene):
                 continue
 
             dist = 999999
-            for obj in self.get_objects():
+            for obj in self.get_objects_initial():
                 delta = (obj.pos - pos).sqr_magnitude()
                 if delta < dist:
                     dist = delta
@@ -112,6 +114,7 @@ class LevelScene(scene.Scene):
             self.game_group.add(o)
 
     def load(self):
+        self.objgrid = ObjGrid(game.RES[0], game.RES[1], 50)
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
@@ -119,11 +122,7 @@ class LevelScene(scene.Scene):
 
         self.background_group.add(Background(V2(0,0)))
 
-        third = False
-
         self.enemies = [BasicAlien(self, Civ(self))]
-        if third:
-            self.enemies.append(BasicAlien(self, Civ(self)))
         self.enemy = self.enemies[0]
         
         if self.levelfile:
@@ -137,14 +136,11 @@ class LevelScene(scene.Scene):
             p.change_owner(self.enemy.civ)       
             self.game_group.add(p)     
 
-        if third:
-            p = Planet(self, V2(60, 60), 5, Resources(70, 20, 10))
-            p.change_owner(self.enemies[1].civ)
-            self.game_group.add(p)
+        self.objgrid.generate_grid(self.get_objects_initial())
 
         # Me
         homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.my_civ))[0]
-        homeworld.population = 4 + self.game.run_info.bonus_population
+        homeworld.population = 3 + self.game.run_info.bonus_population
         homeworld.ships['fighter'] = 1 + self.game.run_info.bonus_fighters
         
 
@@ -153,19 +149,24 @@ class LevelScene(scene.Scene):
         p.population = 5
         self.give_building(p, alien.AlienHomeDefenseUpgrade)
 
-        num_planets = 2
+        num_planets = len(self.get_planets())
         
-        if third:
-            # Alien 2
-            p = get_nearest(V2(0, 0), self.get_civ_planets(self.enemies[1].civ))[0]
-            p.population = 5
-            self.give_building(p, alien.AlienHomeDefenseUpgrade)        
-            num_planets += 1
-        
+        #avg_pos = sum([p.pos for p in self.get_planets()], V2(0,0)) / num_planets
 
+        max_planets = min(int(self.difficulty / 1.5 + 7), 16)
+
+        separation = 70
         # TODO: Planet resources more constrained
-        while num_planets < self.difficulty / 4 + 10:
+        while num_planets < max_planets:
+            avg_pos = sum([p.pos for p in self.get_planets()], V2(0,0)) / num_planets
             pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
+
+            # If we're most of the way through creating planets, and we're on the wrong side of the avg, flip it.
+            if num_planets >= max_planets * 1 / 3:
+                if ((avg_pos.x < game.RES[0] / 2 and pos.x < game.RES[0] /2) or
+                    (avg_pos.x > game.RES[0] / 2 and pos.x > game.RES[0] /2)):
+                    print("flip from", pos, "avg", avg_pos)
+                    pos = V2(game.RES[0] - pos.x, pos.y)
             
             near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
             if near_button.collidepoint(*pos.tuple()):
@@ -176,11 +177,11 @@ class LevelScene(scene.Scene):
                 continue            
             
             dist = 999999
-            for obj in self.get_objects():
+            for obj in self.get_objects_initial():
                 delta = (obj.pos - pos).sqr_magnitude()
                 if delta < dist:
                     dist = delta
-            if dist > 70 ** 2:
+            if dist > separation ** 2:
                 if pos.x /2 + (game.RES[1] - pos.y) < game.RES[1] - 100:
                     size = random.randint(4,7)
                     if random.random() > 0.5:
@@ -190,7 +191,7 @@ class LevelScene(scene.Scene):
                         iron = random.randint(7,10)
                         pr = Resources(iron * 10, (10 - iron) * 10, 0)
                 else:
-                    size = random.randint(3, 7)
+                    size = random.randint(2, 5)
                     resources = {'a':0, 'b':0, 'c':0}
                     # One resource
                     ra = random.random()
@@ -216,8 +217,10 @@ class LevelScene(scene.Scene):
                         size -= 1
                 self.game_group.add(Planet(self, pos, size, pr))
                 num_planets += 1
+            else:
+                separation -= 1
 
-        for i in range(random.randint(7,20)):
+        for i in range(random.randint(15,20) - int(self.difficulty / 3)):
             pos = self.random_object_pos()
             self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))
 
@@ -276,8 +279,6 @@ class LevelScene(scene.Scene):
         }
 
         self.enemy.set_difficulty(self.difficulty)
-        if third:
-            self.enemies[1].set_difficulty(self.difficulty)
 
         if self.options == "surround":
             for planet in self.get_civ_planets(None):
@@ -286,7 +287,14 @@ class LevelScene(scene.Scene):
         if self.options == "rich":
             self.my_civ.resources.set_resource("iron", 1150)
             self.my_civ.resources.set_resource("ice", 1150)
-            self.my_civ.resources.set_resource("gas", 1150)                            
+            self.my_civ.resources.set_resource("gas", 1150) 
+
+        if self.options == "gas":
+            self.my_civ.resources.set_resource("gas", 1150)                                        
+
+        if self.options == "fighters":
+            for i in range(20):
+                homeworld.add_ship("fighter")    
 
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
@@ -301,40 +309,42 @@ class LevelScene(scene.Scene):
         self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
         self.meters[res_type].value = self.my_civ.resources.data[res_type]
 
-    def get_objects(self):
+    def get_objects_initial(self):
         return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
 
-    @optimize.frame_memoize
+    def get_objects(self):
+        return self.objgrid.all_objects
+        #return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
+
+    def get_objects_in_range(self, pos, range):
+        return self.objgrid.get_objects_near(pos, range)
+
     def get_planets(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet)]
 
-    @optimize.frame_memoize
     def get_civ_planets(self, civ):
-        return [s for s in self.game_group.sprites() if isinstance(s,Planet) and s.owning_civ == civ]
+        return [s for s in self.get_objects() if isinstance(s,Planet) and s.owning_civ == civ]
 
-    @optimize.frame_memoize
     def get_enemy_planets(self, civ):
-        return [s for s in self.game_group.sprites() if isinstance(s,Planet) and s.owning_civ and s.owning_civ != civ]        
+        return [s for s in self.get_objects() if isinstance(s,Planet) and s.owning_civ and s.owning_civ != civ]        
 
-    @optimize.frame_memoize
     def get_ships(self):
-        return [s for s in self.game_group.sprites() if isinstance(s,Ship)]
+        return [s for s in self.get_objects() if isinstance(s,Ship)]
     
-    @optimize.frame_memoize
     def get_my_ships(self, civ):
-        return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ == civ]
+        return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ == civ]
 
-    @optimize.frame_memoize
     def get_enemy_ships(self, civ):
-        return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ != civ]
+        return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ != civ]
 
-    @optimize.frame_memoize
+    def get_enemy_ships_in_range(self, civ, pos, range):
+        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ != civ]        
+
     def get_enemy_objects(self, civ):
-        return [s for s in self.game_group.sprites() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]
+        return [s for s in self.get_objects() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]
 
-    @optimize.frame_memoize
     def get_civ_ships(self, civ):
-        return [s for s in self.game_group.sprites() if isinstance(s,Ship) and s.owning_civ == civ]        
+        return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ == civ]        
 
     def get_hazards(self):
         return self.get_planets()
@@ -363,7 +373,20 @@ class LevelScene(scene.Scene):
                 sprite.update(dt)            
             return        
         self.time += dt
+
+        if self.time > 240 and not self.my_civ.scarcity:
+            self.my_civ.enable_scarcity()
+            self.enemy.civ.enable_scarcity()
+            fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
+            self.ui_group.add(fn)
+            
+
         scene.Scene.update(self, dt)
+
+        # update object grid
+        t = time.time()
+        self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
+        self.update_times["objgrid"] = time.time() - t
 
         # Detect defeat
         if not self.get_civ_planets(self.my_civ):
@@ -374,8 +397,6 @@ class LevelScene(scene.Scene):
         if not self.get_civ_planets(self.enemy.civ):
             self.paused = True
             self.sm.transition(levelstates.VictoryState(self))
-
-        
         
         for sprite in self.game_group.sprites() + self.ui_group.sprites():
             t = time.time()
@@ -385,16 +406,26 @@ class LevelScene(scene.Scene):
 
         t = time.time()
         # Collisions
-        colliders = [s for s in self.game_group.sprites() if s.collidable]
+        colliders = [s for s in self.get_objects() if s.collidable]
         lc = len(colliders)
-        for i in range(lc):
-            for j in range(i + 1, lc):
-                if colliders[i].stationary and colliders[j].stationary:
+        #print(lc, "colliders")
+        checked = set()
+        for first in colliders:
+            near = self.objgrid.get_objects_near(first.pos, 50) # 50 is arbitrary...
+            for second in near:
+                if second in checked: # Don't double collide
                     continue
-                d = colliders[i].pos - colliders[j].pos
-                if d.sqr_magnitude() <= (colliders[i].collision_radius + colliders[j].collision_radius) ** 2:
-                    colliders[i].collide(colliders[j])
-                    colliders[j].collide(colliders[i])
+                if second == first:
+                    continue
+                if first.stationary and second.stationary:
+                    continue
+                d = first.pos - second.pos
+                if d.sqr_magnitude() <= (first.collision_radius + second.collision_radius) ** 2:
+                    first.collide(second)
+                    second.collide(first)
+
+            checked.add(first)
+
         elapsed = time.time() - t
         self.update_times["collisions"] = elapsed
 
@@ -446,13 +477,25 @@ class LevelScene(scene.Scene):
                 for fleet in v.current_fleets:
                     fleet.debug_render(self.game.screen)
 
+            gi = pygame.Surface(self.game.screen.get_size(), pygame.SRCALPHA)
+            gi.fill((0,0,0,0))
             for y,gr in enumerate(self.pathfinder._grid):
                 for x,gc in enumerate(gr):
                     w = gc
                     if w > 1:
                         GSP = GRID_SIZE_PIXELS
-                        pygame.draw.rect(self.game.screen, (min(15 * w,255),0,0,0), (x * GSP, y * GSP, GSP, GSP))
+                        pygame.draw.rect(gi, (min(35 * w,255),0,0,150), (x * GSP, y * GSP, GSP, GSP))
                     pass
+            
+
+            for y in range(len(self.objgrid.grid)):
+                for x in range(len(self.objgrid.grid[0])):
+                    x1 = x * self.objgrid.grid_size
+                    y1 = y * self.objgrid.grid_size
+                    pygame.draw.rect(gi, (0,255,0,150), (x1,y1,self.objgrid.grid_size+1, self.objgrid.grid_size+1), 1)
+                    FONTS['tiny'].render_to(gi, (x1 + 2, y1 + 2), "%d" % len(self.objgrid.grid[y][x]), (128,255,128,180))
+
+            self.game.screen.blit(gi, (0,0))
 
         for s in self.ui_group.sprites():
             if s.image is None:
@@ -467,7 +510,8 @@ class LevelScene(scene.Scene):
         self.update_times['render'] = time.time() - t
 
         #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))
-        #print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))          
+        if self.debug:
+            print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))          
 
 
     def take_input(self, inp, event):

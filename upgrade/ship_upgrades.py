@@ -1,5 +1,6 @@
 from upgrade.upgrades import register_upgrade, Upgrade
 from productionorder import ProductionOrder
+import ships
 
 @register_upgrade
 class Basic1Upgrade(Upgrade):
@@ -207,14 +208,29 @@ class Heal1Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Fleet Heal"
-    description = "Every ship in the fleet instantly recovers [^10] health"
+    description = "Every ship instantly recovers [^10] health"
     icon = "fighters3pop"
-    cursor = "allied_fleet"
+    cursor = None
     family = {'tree':'heal', 'parents':[]}
 
     def apply(self, to):
-        for ship in to.ships:
+        for ship in to.scene.get_civ_ships(to):
             ship.health += 10
+
+@register_upgrade
+class Warp1Upgrade(Upgrade):
+    name = "s_warp1"
+    resource_type = "iron"
+    category = "ships"
+    title = "Fleet Warp"
+    description = "Every ship warps towards its target and gains [^+67%] attack speed for 6 seconds"
+    icon = "fighters3pop"
+    cursor = None
+    family = {'tree':'warp', 'parents':[]}
+
+    def apply(self, to):
+        for ship in to.scene.get_civ_ships(to):
+            ship.command_warp()
 
 #### ICE ####
 
@@ -269,6 +285,33 @@ class Bombers1Upgrade(Upgrade):
         to.add_production(p)       
 
 @register_upgrade
+class HangarProduction1Upgrade(Upgrade):
+    name = "s_hangarprod1"
+    resource_type = "ice"
+    category = "ships"
+    title = "Specialized Manufacturing"
+    description = "[^1] Ship instantly at each hangar"
+    icon = "fighters6"
+    cursor = None
+    family = {'tree':'hangarprod', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        for planet in to.scene.get_civ_planets(to):
+            for building in planet.buildings:
+                if building['building'].upgrade.name == "b_hangar1":
+                    planet.add_ship("fighter")
+                elif building['building'].upgrade.name == "b_hangar2a":
+                    planet.add_ship("interceptor")
+                elif building['building'].upgrade.name == "b_hangar2b":
+                    planet.add_ship("bomber")                    
+                elif building['building'].upgrade.name == "b_hangar3":
+                    planet.add_ship("battleship")
+
+
+### GAS ####
+
+@register_upgrade
 class Battleships1Upgrade(Upgrade):
     name = "s_basicbattleships1"
     resource_type = "gas"
@@ -283,3 +326,39 @@ class Battleships1Upgrade(Upgrade):
     def apply(self, to):
         p = ProductionOrder("battleship", 1, 30)
         to.add_production(p)         
+
+@register_upgrade
+class PerPlanetProduction1Upgrade(Upgrade):
+    name = "s_perplanet1"
+    resource_type = "gas"
+    category = "ships"
+    title = "Planetary Guard"
+    description = "[^1] [Fighter] over 20 seconds at each planet"
+    icon = "fighters6"
+    cursor = None
+    family = {'tree':'perplanet', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        for planet in to.scene.get_civ_planets(to):
+            planet.add_production(ProductionOrder("fighter", 1, 20))
+
+@register_upgrade
+class AddColonistProduction1Upgrade(Upgrade):
+    name = "s_addcolonist1"
+    resource_type = "gas"
+    category = "ships"
+    title = "Civilian Convoy"
+    description = "Add a [^1] Population [Colonist] ship to up to 3 random fleets"
+    icon = "fighters6"
+    cursor = None
+    family = {'tree':'perplanet', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        for fleet in to.scene.fleet_managers['my'].current_fleets[0:3]:
+            pos, rad = fleet.get_size_info()
+            s = ships.colonist.Colonist(to.scene, pos, to)
+            s.set_pop(1)
+            s.set_target(fleet.ships[0].chosen_target)
+            to.scene.game_group.add(s)

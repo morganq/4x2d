@@ -57,7 +57,7 @@ class Meter(SpriteBase):
         self._recalc_rect()
 
     def update(self, dt):
-        if self._apparent_value < self._value:
+        if self._apparent_value < min(self._value, self.max_value):
             self._apparent_value = min(self._apparent_value + self.max_value * dt * 2, self._value)
             self._generate_image()
         elif self._apparent_value > self._value:
@@ -65,6 +65,6 @@ class Meter(SpriteBase):
             self._generate_image()
 
         self.stay_time -= dt
-        if self.stay_time <= 0 and not self.stay:
+        if self.stay_time <= 0 and not self.stay and self.visible:
             self.visible = 0
         return super().update(dt)

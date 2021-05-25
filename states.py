@@ -102,6 +102,7 @@ class UIEnabledState(State):
             self.keyboard_input(input, event)
 
     def mouse_input(self, input, event):
+        handled = False
         all_sprites = self.scene.game_group.sprites()[::]
         all_sprites.extend(self.scene.ui_group.sprites()[::])
         selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]
@@ -143,7 +144,7 @@ class UIEnabledState(State):
 
             if input == "click":
                 if self.hover_sprite:
-                    self.hover_sprite.on_mouse_down(event.gpos)
+                    handled = self.hover_sprite.on_mouse_down(event.gpos)
                     self.clicking_sprite = self.hover_sprite
                     self.last_clicked_sprite = self.clicking_sprite
                 else:
@@ -157,6 +158,8 @@ class UIEnabledState(State):
                     self.release_drag()
                 self.dragging_from_sprite = None
                 self.dragging_to = None
+
+        return handled
 
     def update_key_targets(self):
         self.key_targets = {'left':None, 'right':None, 'up':None, 'down':None}

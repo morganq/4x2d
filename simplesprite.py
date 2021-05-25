@@ -9,6 +9,7 @@ class SimpleSprite(spritebase.SpriteBase):
             try:
                 self.image = pygame.image.load(resource_path(img)).convert_alpha()
             except:
+                self.image = pygame.Surface((1,1))
                 print("BAD IMAGE: %s" % img)
         else:
             self.image = img

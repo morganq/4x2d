@@ -1,4 +1,3 @@
-from ships.ship import STATE_RETURNING
 from colors import PICO_LIGHTGRAY, PICO_RED
 from ships.fighter import Fighter
 from helper import get_nearest
@@ -12,7 +11,7 @@ class Alien1WarpShip(Fighter):
     BASE_DAMAGE = 4
     FIRE_RANGE = 10
     TETHER_LENGTH = 80
-    BASE_HEALTH = 100
+    BASE_HEALTH = 65
 
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
@@ -47,7 +46,7 @@ class Alien1WarpShip(Fighter):
         self.update_lines()
         if (self.tethered_to.pos - self.pos).sqr_magnitude() > self.TETHER_LENGTH ** 2:
             self.path = None
-            self.set_state(STATE_RETURNING)
+            self.set_state("returning")
         return super().update(dt)
 
     def kill(self):

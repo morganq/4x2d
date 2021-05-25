@@ -2,6 +2,8 @@ from upgrade.upgrades import register_upgrade, Upgrade
 from planet import building
 from planet.building import *
 from stats import Stats
+import defensematrix
+import portal
 from planet import building as buildings
 
 class AddBuildingUpgrade(Upgrade):
@@ -394,58 +396,72 @@ class Scarcest3Upgrade(AddBuildingUpgrade):
 #### GAS ####
 #############
 
-# Ultra - Purple
+# Ultra - Purple;
+# defense matrix, portal (farthest?), 
 
 @register_upgrade
 class Ultra1Upgrade(AddBuildingUpgrade):
     name = "b_ultra1"
     resource_type = "gas"
     category = "buildings"
-    title = "Defense Matrix Alpha"
-    description = "When constructed on a different planet from Defense Matrix Omega, produces an inter-planetary field that damages enemy ships"
+    title = "Defense Matrix"
+    description = "Produces a field that deals [^10%] of maximum health every second to enemy ships"
     icon = "defensematrixalpha"
-    cursor = "allied_planet"
+    cursor = ["allied_planet", "nearby"]
     family = {'tree':'ultra', 'parents':[]}
-    building = building.DefenseMatrixAlpha
+    building = building.DefenseMatrix
+
+    def apply(self, to, pt):
+        super().apply(to)
+        dm = defensematrix.DefenseMatrix(to.scene, pt, to.owning_civ)
+        to.scene.game_group.add(dm)
+        b = [b for b in to.buildings if b['building'].upgrade == type(self)][0]
+        b['building'].obj = dm
 
 @register_upgrade
 class Ultra2Upgrade(AddBuildingUpgrade):
     name = "b_ultra2"
     resource_type = "gas"
     category = "buildings"
-    title = "Defense Matrix Omega"
-    description = "When constructed on a different planet from Defense Matrix Alpha, produces an inter-planetary field that damages enemy ships"
-    icon = "defensematrixomega"
-    cursor = "allied_planet"
+    title = "Portal"
+    description = "Portal allows teleportation between two allied planets"
+    icon = "clockwiseportal"
+    cursor = ["allied_planet", "allied_planet"]
     family = {'tree':'ultra', 'parents':['b_ultra1']}
     requires = ('b_ultra1',)
-    building = building.DefenseMatrixOmega
+    building = building.Portal
+
+    def apply(self, to, second):
+        if to == second:
+            return
+        delta = (second.pos - to.pos).normalized()
+        pos1 = to.pos + delta * (to.radius + 15)
+        pos2 = second.pos - delta * (second.radius + 15)
+        p1 = portal.Portal(to.scene, pos1, second, to.owning_civ)
+        p2 = portal.Portal(to.scene, pos2, to, to.owning_civ)
+        p1.other_portal = p2
+        p2.other_portal = p1
+        to.scene.game_group.add(p1)
+        to.scene.game_group.add(p2)
+        return super().apply(to)
 
 @register_upgrade
-class Ultra3aUpgrade(AddBuildingUpgrade):
-    name = "b_ultra3a"
+class Ultra3Upgrade(AddBuildingUpgrade):
+    name = "b_ultra3"
     resource_type = "gas"
     category = "buildings"
-    title = "Clockwise Portal"
-    description = "When constructed on a different planet from Counter-Clockwise Portal, produces a portal that allows instantaneous travel"
+    title = "Comm Station"
+    description = "Enemy planets near the comm station reveal their ships and population when selected"
     icon = "clockwiseportal"
-    cursor = "allied_planet"
+    cursor = ["allied_planet", "nearby"]
     family = {'tree':'ultra', 'parents':['b_ultra2']}
-    building = building.ClockwisePortal
+    building = building.CommStation
     requires = ('b_ultra1', 'b_ultra2')
 
-@register_upgrade
-class Ultra3bUpgrade(AddBuildingUpgrade):
-    name = "b_ultra3b"
-    resource_type = "gas"
-    category = "buildings"
-    title = "Counter-Clockwise Portal"
-    description = "When constructed on a different planet from Clockwise Portal, produces a portal that allows instantaneous travel"
-    icon = "counterclockwiseportal"
-    cursor = "allied_planet"
-    family = {'tree':'ultra', 'parents':['b_ultra2']}
-    building = building.ClockwisePortal
-    requires = ('b_ultra1', 'b_ultra2') 
+    def apply(self, to, pt):
+        cso = CommStationObject(to.scene, pt)
+        to.scene.game_group.add(cso)
+        super().apply(to)
 
 # Deserted - Orange
 
@@ -470,7 +486,7 @@ class Deserted2aUpgrade(AddBuildingUpgrade):
     description = "If there are no allied ships on or near the planet, gain [^+2] health per second"
     icon = "mining"
     cursor = "allied_planet"
-    family = {'tree':'hangar', 'parents':['b_deserted2']}
+    family = {'tree':'deserted', 'parents':['b_deserted2']}
     building = make_simple_stats_building(stats=Stats(deserted_regen=2), shape="lifesupport")
     requires = ('b_deserted1',)
 
@@ -524,7 +540,7 @@ class Satellite2aUpgrade(AddBuildingUpgrade):
     description = "Covers half the planet with a 50-health reflector shield; shield health regenerates at [^+1] health per second"
     icon = "mining"
     cursor = "allied_planet"
-    family = {'tree':'hangar', 'parents':['b_satellite2']}
+    family = {'tree':'satellite', 'parents':['b_satellite2']}
     building = ReflectorShieldBuilding
     requires = ('b_satellite1',)
 
@@ -535,11 +551,11 @@ class Satellite2bUpgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Off-World Mining"
-    description = "Gain [^+5] [Iron], [^+5] [Ice], and [^+5] [Gas] every 10 seconds."
+    description = "Gain [^+5] [Iron], [^+5] [Ice], and [^+5] [Gas] every 5 seconds."
     icon = "mining"
     cursor = "allied_planet"
     family = {'tree':'satellite', 'parents':['b_satellite1']}
-    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
+    building = OffWorldMiningBuilding
     requires = ('b_satellite1',)   
 
 @register_upgrade
@@ -552,6 +568,6 @@ class Satellite3Upgrade(AddBuildingUpgrade):
     icon = "mining"
     cursor = "allied_planet"
     family = {'tree':'satellite', 'parents':['b_satellite2a', 'b_satellite2b']}
-    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
+    building = OrbitalLaserBuilding
     requires = lambda x:'b_satellite1' in x and ('b_satellite2a' in x or 'b_satellite2b' in x)
     infinite = True         

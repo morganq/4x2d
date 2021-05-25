@@ -9,6 +9,9 @@ class ProductionOrder:
 
     def update(self, planet, dt):
         self.time += dt
+        if self.number == 0:
+            self.done = True
+            return
         next_prod_time = self.period / self.number
         if self.time > next_prod_time:
             self.time -= next_prod_time

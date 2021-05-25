@@ -49,4 +49,5 @@ class Button(SpriteBase, FadeInMixin):
     def on_mouse_down(self, pos):
         self.onclick()
         self._generate_image(False)
-        return super().on_mouse_down(pos)
+        super().on_mouse_down(pos)
+        return True

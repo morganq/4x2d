@@ -1,3 +1,4 @@
+from optimize import frame_memoize
 import economy
 from upgrade import upgrades
 from colors import *
@@ -6,12 +7,6 @@ from stats import Stats
 from icontext import IconText
 from v2 import V2
 import random
-
-UPGRADE_INCREASE_AMT = {
-    'iron':15,
-    'ice':25,
-    'gas':40
-}
 
 class Civ:
     name = None
@@ -26,8 +21,11 @@ class Civ:
         self.upgrades = []
         self.researched_upgrade_names = set()
         self.base_stats = Stats()
+        self.frame_stats = {}
 
         self.offered_upgrades = {}
+
+        self.scarcity = False
 
         # Analytics
         self.num_upgrades = 0
@@ -42,7 +40,28 @@ class Civ:
 
         self.blueprints = []
 
+    def get_upgrade_increase_amts(self):
+        if self.scarcity:
+            return {
+                'iron':25 * 4,
+                'ice':35 * 4,
+                'gas':50 * 4
+            }            
+        else:
+            return {
+                'iron':25,
+                'ice':35,
+                'gas':50
+            }        
+
+    def enable_scarcity(self):
+        self.upgrade_limits.iron += 200
+        self.upgrade_limits.ice += 200
+        self.upgrade_limits.gas += 200
+        self.scarcity = True
+
     def update(self, dt):
+        self.frame_stats = {}
         self.resources_update(dt)
         self.upgrades_update(dt)
         self.time += dt
@@ -64,7 +83,7 @@ class Civ:
             while self.resources.data[res_type] >= self.upgrade_limits.data[res_type]:
                 self.upgrades_stocked.append(res_type)
                 self.resources.set_resource(res_type, self.resources.data[res_type] - self.upgrade_limits.data[res_type])
-                self.upgrade_limits.data[res_type] = int(self.upgrade_limits.data[res_type] + UPGRADE_INCREASE_AMT[res_type])
+                self.upgrade_limits.data[res_type] = int(self.upgrade_limits.data[res_type] + self.get_upgrade_increase_amts()[res_type])
                 self.num_upgrades += 1
                 if not self.is_enemy:
                     #print(self.upgrade_limits.data[res_type], res_type)
@@ -104,9 +123,13 @@ class Civ:
                         f['object'].ships['fighter'] -= 1
                         f['object'].needs_panel_update = True
 
-
     def get_stat(self, stat):
-        return sum([u.stats[stat] for u in self.upgrades]) + self.base_stats[stat]
+        if stat in self.frame_stats:
+            return self.frame_stats[stat]
+        else:
+            value = sum([u.stats[stat] for u in self.upgrades]) + self.base_stats[stat]
+            self.frame_stats[stat] = value
+            return value
 
     def can_research(self, uname):
         u = upgrades.UPGRADE_CLASSES[uname]
@@ -148,8 +171,12 @@ class PlayerCiv(Civ):
 
     def earn_resource(self, resource, value, where=None):
         if where:
+            if isinstance(where, V2):
+                pos = where
+            else:
+                pos = where.pos + V2(0, -where.get_radius() - 5)
             self.scene.score += value
-            it = IconText(where.pos, None, "+%d" % value, economy.RESOURCE_COLORS[resource])
-            it.pos = where.pos + V2(0, -where.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+            it = IconText(pos, None, "+%d" % value, economy.RESOURCE_COLORS[resource])
+            it.pos = pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)
         return super().earn_resource(resource, value)

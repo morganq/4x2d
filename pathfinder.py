@@ -8,8 +8,8 @@ from hazard import Hazard
 import math
 import time
 
-GRID_SIZE_PIXELS = 20
-EXTRA = 0
+GRID_SIZE_PIXELS = 10
+EXTRA = 3
 
 class Pathfinder(AStar):
     def __init__(self, scene):
@@ -20,7 +20,7 @@ class Pathfinder(AStar):
 
     def generate_grid(self, exclude = None):
         exclude = exclude or []
-        objects = self.scene.get_objects()
+        objects = [o for o in self.scene.get_objects_initial() if o.collidable and o.stationary]
         for obj in exclude:
             objects.remove(obj)
 
@@ -38,9 +38,10 @@ class Pathfinder(AStar):
                 if closest:
                     extra = EXTRA
                     if isinstance(closest, Hazard):
-                        extra = 20
-                    if (dist - (closest.radius + extra) ** 2) < (GRID_SIZE_PIXELS / 2) ** 2:
-                        cell = (closest.radius + extra) - math.sqrt(dist) + 5
+                        extra = 10
+                    #if (dist - (closest.radius + extra) ** 2) < (GRID_SIZE_PIXELS / 2) ** 2:
+                    if dist < (closest.radius + extra) ** 2:
+                        cell = 10
                 grid[-1].append(cell)
 
         #self._grid = Grid(matrix=grid)
@@ -88,4 +89,4 @@ class Pathfinder(AStar):
         #print("pathfinding", time.time() - t)
         #print(grid.grid_str(path=path, start=start, end=end))
         #self._grid.cleanup()
-        return path[2:-2]
+        return path[3:-3]

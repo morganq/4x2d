@@ -1,4 +1,5 @@
-from satellite import ReflectorShield, SpaceStation
+from spaceobject import SpaceObject
+from satellite import OffWorldMining, OrbitalLaser, ReflectorShield, SpaceStation
 from rangeindicator import RangeIndicator
 from v2 import V2
 from colors import *
@@ -7,6 +8,7 @@ from bullet import Bullet
 import random
 from stats import Stats
 import json
+import planet
 from helper import all_nearby
 
 class Building:
@@ -186,6 +188,24 @@ class SpaceStationBuilding(SatelliteBuilding):
 class ReflectorShieldBuilding(SatelliteBuilding):
     SATELLITE_CLASS = ReflectorShield
 
+class OffWorldMiningBuilding(SatelliteBuilding):
+    SATELLITE_CLASS = OffWorldMining
+    def __init__(self):
+        super().__init__()
+        self.timer = 0
+
+    def update(self, planet, dt):
+        self.timer += dt
+        if self.timer >= 5:
+            self.timer = self.timer % 5
+            planet.owning_civ.earn_resource("iron", 5, where=self.satellite.pos)
+            planet.owning_civ.earn_resource("ice", 5, where=self.satellite.pos)
+            planet.owning_civ.earn_resource("gas", 5, where=self.satellite.pos)
+        return super().update(planet, dt)
+
+
+class OrbitalLaserBuilding(SatelliteBuilding):
+    SATELLITE_CLASS = OrbitalLaser
 
 # Laser - planet_weapon_mul
 
@@ -260,20 +280,32 @@ class LowOrbitDefensesBuilding(AuraBuilding):
     def unapply(self, ship):
         ship.bonus_max_health_aura -= 10
 
-class DefenseMatrix(Building):
-    pass #impl
+class UltraBuilding(Building):
+    def __init__(self):
+        super().__init__()
+        self.obj = None
 
-class DefenseMatrixAlpha(DefenseMatrix):
-    pass #impl
+    def kill(self):
+        if self.obj:
+            self.obj.kill()
+        return super().kill()
 
-class DefenseMatrixOmega(DefenseMatrix):
-    pass #impl
+class DefenseMatrix(UltraBuilding):
+    pass
 
 class Portal(Building):
-    pass #impl
+    pass
 
-class ClockwisePortal(Portal):
-    pass #impl
+class CommStationObject(SpaceObject):
+    def __init__(self, scene, pos):
+        super().__init__(scene, pos)
+        self.set_sprite_sheet("assets/commstation.png", 19)
+        for obj in all_nearby(self.pos, scene.get_objects_in_range(self.pos, 130), 130):
+            if isinstance(obj, planet.planet.Planet):
+                obj.in_comm_range = True
 
-class CounterClockwisePortal(Portal):
-    pass #impl
+    def update(self, dt):
+        return super().update(dt)
+
+class CommStation(UltraBuilding):
+    pass

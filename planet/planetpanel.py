@@ -50,10 +50,13 @@ class PlanetPanel(Panel):
         color = PICO_WHITE
         if planet.population == 0 or planet.population >= planet.get_max_pop():
             color = PICO_YELLOW
-        self.add(Text("%d/%d" %(planet.population, planet.get_max_pop()), "small", (0,0), color, False), V2(47,y+1))
+        if planet.owning_civ == None or is_mine or planet.in_comm_range:
+            self.add(Text("%d/%d" %(planet.population, planet.get_max_pop()), "small", (0,0), color, False), V2(47,y+1))
+        else:
+            self.add(Text("?/%d" %planet.get_max_pop(), "small", (0,0), color, False), V2(47,y+1))
 
-        if planet.ships and is_mine:
-            y += 14
+        y += 14
+        if sum(planet.ships.values()) and (is_mine or planet.in_comm_range):
             self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))
             y += 4
             ships_alpha = sorted(planet.ships.keys())
@@ -61,8 +64,6 @@ class PlanetPanel(Panel):
             if sum(planet.ships.values()) > planet.get_max_ships():
                 maxxed = True
             for ship in ships_alpha:
-                if "alien" in ship:
-                    continue
                 if planet.ships[ship] <= 0:
                     continue
                 try:

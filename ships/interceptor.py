@@ -84,12 +84,12 @@ class Interceptor(Fighter):
         rate = self.get_fire_rate()
         gt = self._timers['dogfight'] * rate
         t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
-        if self._timers['gun'] >= 1 / rate:
+        if self.fire_timer >= 1:
             if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
                 self.bullets_chambered = 3
-                self._timers['gun'] = 0
+                self.fire_timer = self.fire_timer % 1
 
-        fire_tick = ((self._timers['gun'] * 6) % 1) < (((self._timers['gun'] - dt) * 6) % 1)
+        fire_tick = ((self.fire_timer * 6) % 1) < (((self.fire_timer - dt) * 6) % 1)
         if self.bullets_chambered > 0 and fire_tick:
             nearby = all_nearby(self.pos, self.get_threats(), self.FIRE_RANGE * 1.5)
             if nearby:

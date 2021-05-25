@@ -9,8 +9,6 @@ import random
 import math
 from v2 import V2
 
-
-
 STATE_DOGFIGHT = 'dogfight'
 STATE_SIEGE = 'siege'
 
@@ -40,9 +38,11 @@ class Fighter(Ship):
             'update':self.state_siege,
             'exit':self.exit_stage_siege
         }
-        self._timers['gun'] = 0
+        self.fire_timer = 0
         self._timers['dogfight'] = 0
         self._timers['time'] = 0
+        self._timers['opt_threats'] = 0
+        self.opt_threats = []
 
     def get_fire_rate(self):
         rate = self.FIRE_RATE
@@ -67,6 +67,9 @@ class Fighter(Ship):
         rate *= 1 + self.get_stat("ship_fire_rate")
 
         rate *= (1 - self.slow_aura)
+
+        if self.bonus_attack_speed_time > 0:
+            rate *= 1.67
         return rate
 
     def get_max_health(self):
@@ -97,14 +100,19 @@ class Fighter(Ship):
         }
 
     def get_threats(self):
-        enemies = self.scene.get_enemy_ships(self.owning_civ)
+        # OPT - cache results
+        if self._timers['opt_threats'] > 0.5:
+            self._timers['opt_threats'] = 0
+        else:
+            return self.opt_threats
+
+        enemies = self.scene.get_enemy_ships_in_range(self.owning_civ, self.pos, self.THREAT_RANGE_DEFAULT * 2)
         threat_range = self.THREAT_RANGE_DEFAULT
-        if self.chosen_target.owning_civ == self.owning_civ: # Target is our own planet (defense)
-            threat_range = self.THREAT_RANGE_DEFENSE
-        return [
+        self.opt_threats = [
             e for e in enemies
             if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.is_alive())
         ]
+        return self.opt_threats
 
     def find_target(self):
         threats = self.get_threats()
@@ -137,7 +145,6 @@ class Fighter(Ship):
         self.post_dogfight_target = self.effective_target or self.chosen_target
         self.dogfight_initial_pos = self.pos.copy()
         self.find_target()
-        self._timers['gun'] = 0
 
     def state_dogfight(self, dt):
         def invalid_target():
@@ -157,9 +164,9 @@ class Fighter(Ship):
         rate = self.get_fire_rate()
         gt = self._timers['dogfight'] * rate
         t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
-        if self._timers['gun'] >= 1 / rate:
+        if self.fire_timer > 1:
             if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
-                self._timers['gun'] = 0
+                self.fire_timer = self.fire_timer % 1
                 self.fire(self.effective_target)
         t2 = math.cos(gt * 3.14159)
         
@@ -206,10 +213,9 @@ class Fighter(Ship):
 
         delta = self.effective_target.pos - self.pos
         # In range?
-        if delta.magnitude() - self.effective_target.radius <= self.get_weapon_range():
-            rate = self.get_fire_rate()
-            if self._timers['gun'] >= 1 / rate:
-                self._timers['gun'] = self._timers['gun'] % (1 / rate)
+        if delta.sqr_magnitude() - self.effective_target.radius ** 2 <= (self.get_weapon_range() + 5) ** 2:
+            if self.fire_timer >= 1:
+                self.fire_timer = self.fire_timer % 1
                 self.fire(self.effective_target)
             self.target_heading = delta.to_polar()[1]
         else: # Out of range? head towards.
@@ -235,7 +241,7 @@ class Fighter(Ship):
 
         delta = self.effective_target.pos - self.pos
         if isinstance(self.effective_target, planet.Planet) or isinstance(self.effective_target, asteroid.Asteroid):
-            if (delta.magnitude() - self.effective_target.radius - self.get_weapon_range()) <= 0:
+            if (delta.sqr_magnitude() - self.effective_target.radius ** 2 - self.get_weapon_range() ** 2) <= 0:
                 if self.BOMBS: # If we can attack planets, figure out what to do
                     if isinstance(self.effective_target, asteroid.Asteroid):
                         self.set_state(STATE_SIEGE)
@@ -273,3 +279,7 @@ class Fighter(Ship):
 
 
         return super().state_waiting(dt)
+
+    def update(self, dt):
+        self.fire_timer += self.get_fire_rate() * dt
+        return super().update(dt)
