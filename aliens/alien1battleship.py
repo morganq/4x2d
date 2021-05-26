@@ -82,7 +82,7 @@ class Alien1Battleship(Battleship):
 
     def __init__(self, scene, pos, owning_civ):
         Battleship.__init__(self, scene, pos, owning_civ)
-        self.set_sprite_sheet("assets/alien-battleship.png", 12)
+        self.set_sprite_sheet("assets/alien-battleship.png", 14)
 
         self.is_warping = False
         self.warp_target = None

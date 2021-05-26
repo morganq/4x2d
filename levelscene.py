@@ -3,7 +3,6 @@ from objgrid import ObjGrid
 from hazard import Hazard
 from helper import all_nearby, get_nearest
 from upgrade.upgrades import UPGRADE_CLASSES
-from pathfinder import GRID_SIZE_PIXELS, Pathfinder
 from spaceobject import SpaceObject
 import simplesprite
 import sys
@@ -274,8 +273,6 @@ class LevelScene(scene.Scene):
 
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
 
-        self.pathfinder = Pathfinder(self)
-        self.pathfinder.generate_grid()
         self.fleet_managers = {
             'my':fleet.FleetManager(self, self.my_civ),
             'enemy':fleet.FleetManager(self, self.enemy.civ)

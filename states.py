@@ -103,10 +103,14 @@ class UIEnabledState(State):
 
     def mouse_input(self, input, event):
         handled = False
-        all_sprites = self.scene.game_group.sprites()[::]
-        all_sprites.extend(self.scene.ui_group.sprites()[::])
+        all_sprites = []
+        all_sprites.extend(
+            sorted(self.scene.ui_group.sprites()[::], key=lambda x:x.layer, reverse=True)
+        )        
+        all_sprites.extend(
+            sorted(self.scene.game_group.sprites()[::], key=lambda x:x.layer, reverse=True)
+        )
         selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]
-        selectable_sprites.sort(key=lambda x:x.layer, reverse=True) 
         is_mouse_event = False
         if input in ["mouse_move", "mouse_drag", "click", "unclick"]:
             is_mouse_event = True

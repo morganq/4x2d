@@ -62,7 +62,8 @@ class FleetManager:
             if self.civ == self.scene.my_civ:
                 if fleet.is_waiting() and first_ship not in self.fleet_order_buttons:
                     # replace with a graphic and a tooltip
-                    b = Button(first_ship.pos, 'R', 'small', onclick)
+                    b = Button(first_ship.pos, '', 'small', onclick, image_path="assets/recall.png")
+                    b.offset = (-0.15, 1.25)
                     self.scene.ui_group.add(b)
                     self.fleet_order_buttons[first_ship] = b
                 elif not fleet.is_waiting() and first_ship in self.fleet_order_buttons:

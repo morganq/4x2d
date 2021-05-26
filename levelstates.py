@@ -11,7 +11,6 @@ import text
 import csv
 import math
 import pygame
-import pathfinder
 import sound
 from button import Button
 import save
