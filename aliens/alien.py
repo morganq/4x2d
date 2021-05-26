@@ -249,8 +249,7 @@ class Alien:
                 # Figure out how many pop to send
                 pop = random.randint(1, planet.population - 1)
                 # Emit a colonist
-                path = self.scene.pathfinder.find_path(planet, target)
-                planet.emit_ship(self.COLONIST, {'to':target, 'path':path, 'num':pop})
+                planet.emit_ship(self.COLONIST, {'to':target, 'num':pop})
                 # Figure out if we want to send other ships
                 # TODO
     
@@ -264,13 +263,12 @@ class Alien:
                 return
             target = random.choice(near_enemy)
             if random.random() < self.get_attack_chance(planet, target):
-                path = self.scene.pathfinder.find_path(planet, target)
                 for ship_type in self.get_attacking_ships():
                     if ship_type in planet.ships and planet.ships[ship_type] > 0:
                         for i in range(random.randint(1,planet.ships[ship_type])):
-                            planet.emit_ship(ship_type, {'to':target, 'path':path})
+                            planet.emit_ship(ship_type, {'to':target})
                 if random.random() < 0.66 and planet.population > 1:
-                    planet.emit_ship("alien1colonist", {'to':target, 'path':path, 'num':random.randint(1, planet.population-1)})
+                    planet.emit_ship("alien1colonist", {'to':target, 'num':random.randint(1, planet.population-1)})
 
     def update_defend(self):
         for planet in self.scene.get_civ_planets(self.civ):
@@ -282,11 +280,10 @@ class Alien:
                 return
             target = random.choice(near_ally)
             if random.random() < self.get_defend_chance(planet, target):
-                path = self.scene.pathfinder.find_path(planet, target)
                 for ship_type in self.get_attacking_ships():
                     if ship_type in planet.ships and planet.ships[ship_type] > 0:
                         for i in range(random.randint(1,planet.ships[ship_type])):
-                            planet.emit_ship(ship_type, {'to':target, 'path':path})
+                            planet.emit_ship(ship_type, {'to':target})
 
         
     def update_resource_priority(self, dt):

@@ -24,11 +24,6 @@ def debug_render(screen, scene):
         #velmag = (ship.fleet_forces.magnitude() * 20) ** 0.75
         #pygame.draw.line(surf, (128,128,255, 120), ship.pos.tuple(), (ship.pos + ship.fleet_forces.normalized() * velmag).tuple())        
 
-        if ship.path and len(ship.path) > 1:
-            for i,n2 in enumerate(ship.path[1:]):
-                n1 = ship.path[i]
-                pygame.draw.line(surf, (80,80,255,255), n1.tuple(), n2.tuple())
-                #pygame.draw.circle(surf, (80,80,255, 255), node.tuple(), 2, 1)
             
     #for planet in scene.get_civ_planets(scene.enemy.civ):
     #    text.FONTS['tiny'].render_to(surf, (planet.pos + V2(-15,15)).tuple(), str(planet.ships['alien-fighter']) + " fighters", (255,128,255,120))

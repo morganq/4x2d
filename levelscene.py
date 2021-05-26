@@ -11,6 +11,7 @@ import traceback
 import random
 import time
 import funnotification
+import flowfield
 
 import pygame
 import json
@@ -271,12 +272,18 @@ class LevelScene(scene.Scene):
             u = UPGRADE_CLASSES[tech]            
             self.my_civ.researched_upgrade_names.add(tech)        
 
+        self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
+
         self.pathfinder = Pathfinder(self)
         self.pathfinder.generate_grid()
         self.fleet_managers = {
             'my':fleet.FleetManager(self, self.my_civ),
             'enemy':fleet.FleetManager(self, self.enemy.civ)
         }
+
+        self.flowfield = flowfield.FlowFieldMap()
+        self.flowfield.generate(self)
+        self.flowfielddebug = 0
 
         self.enemy.set_difficulty(self.difficulty)
 
@@ -479,13 +486,15 @@ class LevelScene(scene.Scene):
 
             gi = pygame.Surface(self.game.screen.get_size(), pygame.SRCALPHA)
             gi.fill((0,0,0,0))
-            for y,gr in enumerate(self.pathfinder._grid):
+            print(len(self.flowfield.fields))
+            ff = list(self.flowfield.fields.values())[self.flowfielddebug]
+            for y,gr in enumerate(ff.grid):
                 for x,gc in enumerate(gr):
-                    w = gc
-                    if w > 1:
-                        GSP = GRID_SIZE_PIXELS
-                        pygame.draw.rect(gi, (min(35 * w,255),0,0,150), (x * GSP, y * GSP, GSP, GSP))
-                    pass
+                    if gc:
+                        p1 = V2((x + 0.5) * flowfield.GRIDSIZE, (y + 0.5) * flowfield.GRIDSIZE)
+                        p2 = p1 + gc * flowfield.GRIDSIZE * 0.75
+                        pygame.draw.line(gi, (0,0,255), p1.tuple(),p2.tuple())
+                        pygame.draw.circle(gi, (0,0,255), p1.tuple(), 1)
             
 
             for y in range(len(self.objgrid.grid)):
@@ -522,4 +531,6 @@ class LevelScene(scene.Scene):
                 self.game_speed = 1.0
             if event.key == pygame.K_0:
                 self.game_speed = 10.0
+            if event.key == pygame.K_f:
+                self.flowfielddebug = (self.flowfielddebug + 1) % len(self.flowfield.fields)
         return super().take_input(inp, event)

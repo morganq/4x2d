@@ -101,7 +101,6 @@ class Alien1Battleship(Battleship):
             delta = target.pos - self.pos
             dn = delta.normalized()
             p = target.pos - dn * (target.radius + 15)
-            self.fix_path()
             self.warp_target = WarpWarning(self.scene, p, self)
             self.scene.game_group.add(self.warp_target)
             self.warp_line = WarpLine(self, self.warp_target)

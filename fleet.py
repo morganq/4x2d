@@ -75,9 +75,8 @@ class FleetManager:
     def recall_fleet(self, fleet):
         nearest, dist = helper.get_nearest(fleet.ships[0].pos, self.scene.get_civ_planets(fleet.ships[0].owning_civ))
         if nearest:        
-            path = self.scene.pathfinder.find_path(fleet.ships[0], nearest)
             for ship in fleet.ships: 
-                ship.path = path
+                ship.chosen_target = nearest
                 ship.effective_target = nearest
                 ship.set_state('returning')
 

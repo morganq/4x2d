@@ -60,7 +60,6 @@ class Ship(SpaceObject):
         self.state = None
 
         # Movement vars
-        self.path = None
         self.chosen_target = None
         self.effective_target = None
         self.velocity = V2(0,0)
@@ -150,20 +149,7 @@ class Ship(SpaceObject):
             _, near_dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
             if near_dist > FAR_FROM_HOME_DIST ** 2:
                 shield += self.get_stat('ship_shield_far_from_home')
-        return shield
-
-    def fix_path(self):
-        if not self.path:
-            return
-        closest_path_dist = 9999999
-        closest_i = 0
-        for i,pt in enumerate(self.path):
-            d = (pt - self.pos).sqr_magnitude()
-            if d < closest_path_dist:
-                closest_path_dist = d
-                closest_i = i
-        self.path = self.path[closest_i + 1:]        
-
+        return shield 
 
     def wants_to_land(self):
         return True
@@ -171,9 +157,6 @@ class Ship(SpaceObject):
     def set_target(self, target):
         self.chosen_target = target
         self.effective_target = target
-
-    def set_path(self, path):
-        self.path = path
 
     def can_land(self, target):
         return (
@@ -310,28 +293,21 @@ class Ship(SpaceObject):
         return forces        
 
     def enter_state_cruising(self):
-        self.fix_path()
+        pass
 
     def state_cruising(self, dt):
         if not self.chosen_target.is_alive():
             self.set_state(STATE_RETURNING)
             return
-            
-        if self.path:
-            delta = (self.path[0] - self.pos)
-            if delta.sqr_magnitude() < PATH_FOLLOW_CLOSENESS ** 2:
-                self.path.pop(0)
 
-        if self.path:
-            delta = (self.path[0] - self.pos)
-            self.target_velocity = delta.normalized() * self.get_cruise_speed()
-
+        if self.scene.flowfield.has_field(self.effective_target):
+            self.target_velocity = self.scene.flowfield.get_vector(self.pos, self.effective_target, 10) * self.get_cruise_speed()
         else:
             delta = self.effective_target.pos - self.pos
-            self.target_velocity = delta.normalized() * self.get_cruise_speed()
+            self.target_velocity = delta.normalized() * self.get_cruise_speed()            
 
         # Warp
-        if self.get_stat("warp_drive") and self.path:
+        if self.get_stat("warp_drive"):
             if self._timers['warp_drive'] > 0:
                 _,distsq = helper.get_nearest(self.pos, self.scene.get_planets())
                 if distsq > 30 ** 2:
@@ -342,9 +318,6 @@ class Ship(SpaceObject):
         end = self.effective_target.pos
         offset_dist = self.effective_target.radius + 10
         pl = int(warp_dist / 20)
-        if self.path and len(self.path) > pl:
-            end = self.path[pl]
-            offset_dist = 0
         delta = (end - self.pos)
         md = delta.magnitude() - offset_dist
         delta = delta.normalized()
@@ -353,35 +326,18 @@ class Ship(SpaceObject):
             p = LaserParticle(self.pos + V2.random_angle() * 3, target_pos + V2.random_angle() * 3, color, random.random() / 2)
             self.scene.game_group.add(p)
         self.pos = target_pos
-        self.fix_path()
         self.on_warp()
-
 
     def on_warp(self):
         pass
 
     def enter_state_returning(self):
-        if self.path:
-            return
         nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
         if nearest:        
-            self.path = self.scene.pathfinder.find_path(self, nearest)
             self.effective_target = nearest
 
     def state_returning(self, dt):
-        if self.path:
-            delta = (self.path[0] - self.pos)
-            if delta.sqr_magnitude() < PATH_FOLLOW_CLOSENESS ** 2:
-                self.path.pop(0)
-
-        if self.path:
-            delta = (self.path[0] - self.pos)
-            self.target_velocity = delta.normalized() * self.get_cruise_speed()
-
-        else:
-            delta = self.effective_target.pos - self.pos
-            self.target_velocity = delta.normalized() * self.get_cruise_speed()
-        
+        self.target_velocity = self.scene.flowfield.get_vector(self.pos, self.effective_target, 10) * self.get_cruise_speed()
 
     def state_waiting(self, dt):
         self.waiting_time += dt 

@@ -207,7 +207,6 @@ class Fighter(Ship):
             if self.effective_target and isinstance(self.effective_target, planet.Planet):
                 self.set_state(STATE_WAITING)
             else:
-                self.path = None
                 self.set_state(STATE_RETURNING)
             return
 

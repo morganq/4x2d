@@ -291,8 +291,6 @@ class Planet(SpaceObject):
                 if 'colonist' in ship_type:
                     s.set_pop(data['num'])
                 s.set_target(target)
-                if 'path' in data:
-                    s.set_path(data['path'])
                 s.angle = math.atan2(off.y, off.x)
                 s.velocity = off * 10
                 self.scene.game_group.add(s)

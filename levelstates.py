@@ -57,15 +57,11 @@ class PlayState(UIEnabledState):
             if self.hover_sprite and self.dragging_from_sprite != self.hover_sprite:
                 target_selection = self.hover_sprite.get_selection_info()
                 if target_selection:
-                    if target_selection['type'] == 'planet' and self.dragging_from_sprite.owning_civ == self.scene.my_civ:
-                        path = self.scene.pathfinder.find_path(self.dragging_from_sprite, self.hover_sprite)
-                        if path is not None:
-                            self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite, path=path))
+                    if target_selection['type'] == 'planet':
+                        self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite))
 
                     if target_selection['type'] == 'asteroid':
-                        path = self.scene.pathfinder.find_path(self.dragging_from_sprite, self.hover_sprite)
-                        if path is not None:
-                            self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite, path=path))
+                        self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite))
             
 
     def update(self, dt):
