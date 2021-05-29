@@ -1,4 +1,8 @@
+from aliens.alien2colonist import Alien2Colonist
+from aliens.alien2controlship import Alien2ControlShip
+from aliens.alien2fighter import Alien2Fighter
 from aliens.alien1warpship import Alien1WarpShip
+from aliens.alien2battleship import Alien2Battleship
 import math
 import random
 from upgrade.upgrades import UPGRADE_CLASSES
@@ -40,7 +44,11 @@ EMIT_CLASSES = {
     'alien1fighter':Alien1Fighter,
     'alien1colonist':Alien1Colonist,
     'alien1battleship':Alien1Battleship,
-    'alien1warpship':Alien1WarpShip
+    'alien1warpship':Alien1WarpShip,
+    'alien2fighter':Alien2Fighter,
+    'alien2controlship':Alien2ControlShip,
+    'alien2colonist':Alien2Colonist,
+    'alien2battleship':Alien2Battleship
 }
 
 RESOURCE_BASE_RATE = 1/220.0
@@ -109,15 +117,25 @@ class Planet(SpaceObject):
         self.underground_buildings = {}
         self.planet_weapon_mul = 1
         self.in_comm_range = False
+        self._timers['last_launchpad_pop'] = 20
 
         # opt
         self._timers['opt_time'] = random.random()
+
+    def __str__(self) -> str:
+        return "<Planet %s>" % str(self.pos)
 
     @property
     def population(self): return self._population
     @population.setter
     def population(self, value):
         self._population = clamp(value, 0, 999)
+
+    def regenerate_art(self):
+        self.art = generate_planet_art(
+                self.get_radius(),
+                self.resources.iron, self.resources.ice, self.resources.gas)
+        self._generate_base_frames()
 
     def is_alive(self):
         return self.alive() # pygame alive
@@ -267,7 +285,8 @@ class Planet(SpaceObject):
 
                 if self.get_stat("launchpad_pop_chance"):
                     if target.owning_civ != self.owning_civ and ship_type == "colonist":
-                        if random.random() < self.get_stat("launchpad_pop_chance"):
+                        if self._timers['last_launchpad_pop'] >= 20 and random.random() < self.get_stat("launchpad_pop_chance"):
+                            self._timers['last_launchpad_pop'] = 0
                             self.add_population(1)
 
                 if self.get_stat("launchpad_fighter_chance"):
@@ -338,7 +357,7 @@ class Planet(SpaceObject):
             # Add to the timers based on the mining rate
             self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * rate_modifier
             v = (self.resources.data[r] / 10.0) # if planet has 100% iron, you get 10 iron every 10 resource ticks.
-            if self.resource_timers.data[r] > v:
+            if self.resources.data[r] > 0 and self.resource_timers.data[r] > v:
                 self.resource_timers.data[r] -= v
                 self.owning_civ.earn_resource(r, v, where=self)
                 if self.get_stat("mining_ice_per_iron"):

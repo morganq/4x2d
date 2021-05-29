@@ -133,7 +133,15 @@ class FlowField:
                 min = None
                 min_dist = 0 #??
                 for n in self._get_8_neighbors(x,y):
-                    dist = dgrid[n[1]][n[0]] - dgrid[y][x]
+                    nval = dgrid[n[1]][n[0]]
+                    if nval is None:
+                        nval = inf
+                        print("Weird neighbor issue:", n)
+                    mval = dgrid[y][x]
+                    if mval is None:
+                        mval = inf
+                        print("Weird neighbor issue:", n)
+                    dist = nval - mval
                     if dist < min_dist:
                         min = n
                         min_dist = dist

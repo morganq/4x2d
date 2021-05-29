@@ -45,11 +45,14 @@ class Asteroid(SpaceObject):
 
         offset = V2(w/2,h/2)
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_LIGHTGRAY, (pos + offset).tuple(), size + (2 if border else 1), 0) 
+            pygame.draw.circle(image, PICO_YELLOW, (pos + offset).tuple(), size + (2 if border else 1), 0) 
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_PURPLE, (pos + offset).tuple(), size, 0)
+            pygame.draw.circle(image, PICO_RED, (pos + offset).tuple(), size, 0)
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_LIGHTGRAY, (pos + offset + V2(-1,-2)).tuple(), size - 3, 0)
+            pygame.draw.circle(image, PICO_ORANGE, (pos + offset + V2(-1,-1)).tuple(), size-1, 0)            
+        for (pos, size) in self._circles:
+            if size > 3:
+                pygame.draw.circle(image, PICO_YELLOW, (pos + offset + V2(-1,-3)).tuple(), size - 3, 0)            
 
         #pygame.draw.circle(image, PICO_WHITE, V2(w/2,h/2).tuple(), self.radius, 1)
 

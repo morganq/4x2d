@@ -174,6 +174,8 @@ class RewardScene(Scene):
             else:
                 print(reward)
         else:
+            # Give rerolls also
+            self.game.run_info.rerolls += 2
             self.game.scene = starmap.starmapscene.StarMapScene(self.game)
             self.game.scene.start()
 

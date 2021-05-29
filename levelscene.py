@@ -32,7 +32,6 @@ from resources import resource_path
 from ships.ship import Ship
 import fleet
 from v2 import V2
-from aliens.basicalien import BasicAlien
 from debug import debug_render
 import optimize
 from aliens import alien
@@ -95,7 +94,7 @@ class LevelScene(scene.Scene):
         planet.owning_civ.researched_upgrade_names.add(upgrade.name)
 
     def load_level(self, levelfile):
-        data = json.load(open("levels/%s.json" % levelfile))
+        data = json.load(open(resource_path("levels/%s.json" % levelfile)))
         for obj in data:
             t = None
             owner = None
@@ -122,11 +121,14 @@ class LevelScene(scene.Scene):
 
         self.background_group.add(Background(V2(0,0)))
 
-        self.enemies = [BasicAlien(self, Civ(self))]
+        AlienClass = alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
+        self.enemies = [AlienClass(self, Civ(self))]
         self.enemy = self.enemies[0]
         
         if self.levelfile:
             self.load_level(self.levelfile)
+        elif True:
+            self.load_level("bases")
 
         else:
             homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
@@ -147,7 +149,6 @@ class LevelScene(scene.Scene):
         # Alien
         p = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.enemy.civ))[0]
         p.population = 5
-        self.give_building(p, alien.AlienHomeDefenseUpgrade)
 
         num_planets = len(self.get_planets())
         
@@ -287,6 +288,7 @@ class LevelScene(scene.Scene):
         if self.options == "surround":
             for planet in self.get_civ_planets(None):
                 planet.change_owner(self.enemy.civ)
+            self.enemy.civ.resources.set_resource("gas", 220)
 
         if self.options == "rich":
             self.my_civ.resources.set_resource("iron", 1150)
@@ -364,7 +366,7 @@ class LevelScene(scene.Scene):
 
     def start(self):
         self.load()
-        self.initialize_state()      
+        self.initialize_state()
         #sound.play_music('game')  
 
     def update(self, dt):
@@ -402,7 +404,7 @@ class LevelScene(scene.Scene):
             self.paused = True
             self.sm.transition(levelstates.VictoryState(self))
         
-        for sprite in self.game_group.sprites() + self.ui_group.sprites():
+        for sprite in self.game_group.sprites() + self.ui_group.sprites() + self.background_group.sprites():
             t = time.time()
             sprite.update(dt)
             elapsed = time.time() - t

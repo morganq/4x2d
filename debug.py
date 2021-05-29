@@ -24,9 +24,11 @@ def debug_render(screen, scene):
         #velmag = (ship.fleet_forces.magnitude() * 20) ** 0.75
         #pygame.draw.line(surf, (128,128,255, 120), ship.pos.tuple(), (ship.pos + ship.fleet_forces.normalized() * velmag).tuple())        
 
+    for i, up in enumerate(scene.enemy.civ.upgrades):
+        text.FONTS['tiny'].render_to(surf, (300,i * 8), up.name, (255,128,255,120))
             
-    #for planet in scene.get_civ_planets(scene.enemy.civ):
-    #    text.FONTS['tiny'].render_to(surf, (planet.pos + V2(-15,15)).tuple(), str(planet.ships['alien-fighter']) + " fighters", (255,128,255,120))
+    for planet in scene.get_civ_planets(scene.enemy.civ):
+        text.FONTS['tiny'].render_to(surf, (planet.pos + V2(-15,15)).tuple(), "%s" % sum(planet.ships.values()), (255,128,255,120))
             
 
     #surf.set_alpha(50)

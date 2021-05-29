@@ -10,6 +10,7 @@ from stats import Stats
 import json
 import planet
 from helper import all_nearby
+from resources import resource_path
 
 class Building:
     upgrade = None
@@ -18,7 +19,7 @@ class Building:
         self.stats = Stats()
 
     def load_shapes(self, name):
-        data = json.load(open("assets/buildings/%s.json" % name))
+        data = json.load(open(resource_path("assets/buildings/%s.json" % name)))
         self.shapes = [
             ([V2(*pt) for pt in shape[0]], shape[1]) for shape in data
         ]

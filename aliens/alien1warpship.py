@@ -44,6 +44,9 @@ class Alien1WarpShip(Fighter):
 
     def update(self, dt):
         self.update_lines()
+        if (self.tethered_to.owning_civ != self.owning_civ):
+            self.kill()
+            
         if (self.tethered_to.pos - self.pos).sqr_magnitude() > self.TETHER_LENGTH ** 2:
             self.path = None
             self.set_state("returning")

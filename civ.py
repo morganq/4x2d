@@ -144,13 +144,15 @@ class Civ:
         else:
             return u.requires(self.researched_upgrade_names)
 
-    def offer_upgrades(self, resource):
+    def offer_upgrades(self, resource, extra_check=None):
+        extra_check = extra_check or (lambda u:True)
         if not self.offered_upgrades:
             for upgrade_type, ups in upgrades.UPGRADES[resource].items():
                 allowed_ups = [
                     u for u in ups
                     if self.can_research(u) and
-                    upgrades.UPGRADE_CLASSES[u].alien == self.is_enemy
+                    upgrades.UPGRADE_CLASSES[u].alien == self.is_enemy and
+                    extra_check(upgrades.UPGRADE_CLASSES[u])
                 ]
                 if allowed_ups:
                     uname = random.choice(allowed_ups)

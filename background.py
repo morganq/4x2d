@@ -6,35 +6,41 @@ import random
 import math
 
 class Background(SpriteBase):
-    def __init__(self, pos, gridsize=20):
+    def __init__(self, pos, gridsize=20, size=None):
         SpriteBase.__init__(self, pos)
         self.gridsize = gridsize
+        self.time = 0
+        self.stars = []
+        self.size = size or game.RES
+        for i in range(90):
+            self.stars.append((random.randint(0, game.RES[0]),random.randint(0, game.RES[1])))
         self._generate_image()
 
     def _generate_image(self):
-        self.image = pygame.Surface(game.RES, pygame.SRCALPHA)
+        self.image = pygame.Surface(self.size, pygame.SRCALPHA)
 
-        for i in range(90):
-            self.image.set_at((random.randint(0, game.RES[0]),random.randint(0, game.RES[1])), PICO_LIGHTGRAY)        
+        for star in self.stars:
+            self.image.set_at(star, PICO_LIGHTGRAY)        
 
         GS = self.gridsize
         ss = GS / 20
-        ix = game.RES[0] // GS
-        iy = game.RES[1] // GS
+        ix = self.size[0] // GS
+        iy = self.size[1] // GS
         for i in range(ix):
             for j in range(iy):
                 x = int(i * GS + GS / 2)
                 y = int(j * GS + GS / 2)
+                xt = x + self.time * 10
                 colors = [PICO_DARKGRAY, PICO_DARKBLUE, PICO_PURPLE]
-                colorf = math.sin(pow(x / 175 * ss, 1.8) + y / 30) * 1.25 + 1.5
+                colorf = math.sin(pow(xt / 175 * ss, 1.8) + y / 30) * 1.25 + 1.5
                 #colorf = y / game.RES[1] * 3
                 color = colors[int(colorf)]
-                linelenf = math.sin(-x / 31 * ss + pow(y/80,2)) * 0.65 + 1.75
+                linelenf = math.sin(-xt / 31 * ss + pow(y/80,2)) * 0.65 + 1.75
                 linelenf *= ss
                 lineleni = min(int(linelenf),2)
                 pygame.draw.line(self.image, color, (x - lineleni, y), (x + lineleni, y), 1)
                 pygame.draw.line(self.image, color, (x, y - lineleni), (x, y + lineleni), 1)
-                if random.random() > 0.9:
+                if math.sin(xt / 90 * ss + pow(-y/10,2)) > 0.9:
                     off = ss * 8
                     pygame.draw.line(self.image, color, (x + off, y), (x + GS - off, y), 1)
                     pygame.draw.line(self.image, color, (x - off, y), (x - GS + off, y), 1)
@@ -44,3 +50,9 @@ class Background(SpriteBase):
         self._width = game.RES[0]
         self._height = game.RES[1]
         self._recalc_rect()
+
+    def update(self, dt):
+        #self.time += dt
+        #if (self.time + dt) % 3 < self.time % 3:
+        #    self._generate_image()
+        return super().update(dt)

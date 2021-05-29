@@ -29,18 +29,17 @@ class StarMapScene(Scene):
         self.tutorial_group = pygame.sprite.Group()
         self.sm = states.Machine(StarMapState(self))
 
-        self.background_group.add(Background(V2(0,0), 10))        
-        self.scroll_panel = ScrollPanel(V2(-game.RES[0] / 2,-650),(game.RES[0] * 2,1000))
+        self.background_group.add(Background(V2(0,0), 10, size=(950,1500)))        
+        self.scroll_panel = ScrollPanel(V2(0,0),(800,800))
 
         run_path = self.game.run_info.path
         
         self.galaxies = []
-        y = 960
+        y = 760
         for r,row in enumerate(self.game.run_info.data):
             self.galaxies.append([])
             for i,column in enumerate(row):
-                x = game.RES[0] // 2 - 80 * (len(row) - 1) + 160 * i
-                x += game.RES[0] / 2
+                x = 400 - 80 * (len(row) - 1) + 160 * i
                 alien = ALIENS[column['alien']]
                 g = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], r == len(run_path))
                 self.galaxies[-1].append(g)
@@ -68,6 +67,8 @@ class StarMapScene(Scene):
         self.colonist.offset = (0.5,0.5)
         self.game_group.add(self.colonist)
 
+        self.scroll_panel.scroll(-self.colonist.pos + V2(game.RES[0] / 2, game.RES[1] - 50))
+
     def update(self, dt):
         self.colonist.angle += dt
         for s in self.game_group.sprites():
@@ -81,7 +82,7 @@ class StarMapScene(Scene):
     def render(self):
         self.game.screen.fill(PICO_BLACK)
         self.scroll_panel.image.fill((0,0,0,0))
-        self.background_group.draw(self.game.screen)
+        self.background_group.draw(self.scroll_panel.image)
         self.game_group.draw(self.scroll_panel.image)
         self.ui_group.draw(self.scroll_panel.image)
         self.game.screen.blit(self.scroll_panel.image, self.scroll_panel.pos.tuple_int())

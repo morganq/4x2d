@@ -25,6 +25,7 @@ class Upgrade:
     infinite = False
     family = None
     alien = False
+    alien_name = None
     def apply(self, to):
         pass
 

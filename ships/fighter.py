@@ -148,9 +148,12 @@ class Fighter(Ship):
 
     def state_dogfight(self, dt):
         def invalid_target():
-            return (not self.effective_target or
-            not self.effective_target.is_alive() or
-            (self.effective_target.pos - self.pos).sqr_magnitude() > self.THREAT_RANGE_DEFENSE ** 2)
+            return (
+                not self.effective_target or
+                not self.effective_target.is_alive() or
+                (self.effective_target.pos - self.pos).sqr_magnitude() > self.THREAT_RANGE_DEFENSE ** 2 or
+                self.effective_target.owning_civ == self.owning_civ
+            )
             
         # If our target is dead or w/e, find a new one
         if invalid_target():

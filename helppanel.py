@@ -21,7 +21,7 @@ class HelpPanel(Panel):
 
         add_text("To order your units around, click and drag from your planet to a target planet. Workers can take control of neutral or heavily damaged planets.")
         add_text("Planets you control generate resources every few seconds based on how many workers are on the planet (population) and which resources are available there. Population also grows over time.")
-        add_text("Larger planets have a higher maximum population. Adding workers above that number doesn't help. Click on a planet to see its stats.")
+        add_text("Larger planets have a higher maximum population (and maximum ships). Adding workers above that number doesn't help. Click on a planet to see its stats.")
         add_text("Your resources: Iron, Ice, and Gas, accumulate in the meters in the top left. When a resource meter is full, you can UPGRADE!")
         add_text("Each resource provides its own unique upgrades, but upgrades come in three types: BASE CONSTRUCTION, SHIP PRODUCTION, and TECHNOLOGY.")
         add_text("The aliens have started colonizing planets, and will only get more powerful over time. Good luck!")

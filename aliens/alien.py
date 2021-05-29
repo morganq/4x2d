@@ -1,139 +1,16 @@
 import random
-from upgrade.upgrades import register_upgrade, Upgrade, UPGRADE_CLASSES
-from upgrade.building_upgrades import AddBuildingUpgrade, make_simple_stats_building
-from productionorder import ProductionOrder
-from stats import Stats
-from planet import building as buildings
+from upgrade.upgrades import UPGRADE_CLASSES
 
 ALIENS = {}
 
-@register_upgrade
-class AlienHomeDefenseUpgrade(AddBuildingUpgrade):
-    name = "alienhomedefense"
-    resource_type = "iron"
-    category = "buildings"
-    title = "Alien Home Defense"
-    description = "Planet fires missiles at nearby enemy ships"
-    icon = "mining"
-    family = {}
-    building = buildings.AlienHomeDefenseBuilding
-    requires = None
-    alien = True
-
-@register_upgrade
-class AlienFighterProductionUpgrade(Upgrade):
-    name = "alienfighters"
-    resource_type = "iron"
-    category = "ships"
-    title = "Alien Fighter Production"
-    description = "[^3] [Fighters] Over 10 seconds"
-    icon = "fighters6"
-    requires = None
-    alien = True
-    infinite = True
-
-    def apply(self, to):
-        p = ProductionOrder("alien1fighter", 3, 10)
-        to.add_production(p)
-
-@register_upgrade
-class AlienFighterProductionUpgradeIce(AlienFighterProductionUpgrade):
-    name = "alienwarpship"
-    resource_type = "ice"
-    category = "ships"
-    title = "Alien Warpship Production"
-    description = "[^1] [Warpship] Over 10 seconds"
-    icon = "fighters6"
-    requires = None
-    alien = True
-    infinite = True
-
-    def apply(self, to):
-        p = ProductionOrder("alien1warpship", 3, 10)
-        to.add_production(p)
-
-@register_upgrade
-class AlienFighterProductionUpgrade(Upgrade):
-    name = "alienbattleship"
-    resource_type = "gas"
-    category = "ships"
-    title = "Alien Battleship Production"
-    description = "[^1] [Battleship] Over 60 seconds"
-    icon = "fighters6"
-    requires = None
-    alien = True
-    infinite = True
-
-    def apply(self, to):
-        p = ProductionOrder("alien1battleship", 1, 60)
-        to.add_production(p)
-
-@register_upgrade
-class AlienTech1Upgrade(Upgrade):
-    name = "alientechrof"
-    resource_type = "iron"
-    category = "tech"
-    title = "Alien Tech"
-    description = "[Alien Fighters] gain [^+15%] rate of fire"
-    icon = "preciseassembly"
-    stats = Stats(ship_fire_rate=0.15)
-    requires = None
-    alien = True
-    infinite = True
-
-@register_upgrade
-class AlienTech2Upgrade(Upgrade):
-    name = "alientechwarp"
-    resource_type = "ice"
-    category = "tech"
-    title = "Alien Tech 2"
-    description = "[Alien Fighters] gain [^+2] warp drive"
-    icon = "preciseassembly"
-    stats = Stats(warp_drive=2)
-    requires = None
-    alien = True
-    infinite = True
-
-@register_upgrade
-class AlienTechUpgradeGas(AlienTech1Upgrade):
-    resource_type = "gas"    
-
-@register_upgrade
-class AlienEconUpgrade(AddBuildingUpgrade):
-    name = "alieneconrate"
-    resource_type = "iron"
-    category = "buildings"
-    title = "Refinery"
-    description = "[^+15%] [Mining Rate] for [Primary Resource]"
-    icon = "refinery"
-    requires = None
-    alien = True
-    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.15), shape="refinery")
-    infinite = True
-
-@register_upgrade
-class AlienEconUpgradeIce(AddBuildingUpgrade):
-    name = "alieneconpop"
-    resource_type = "ice"
-    category = "buildings"
-    title = "Refinery"
-    description = "[^+2] max pop"
-    icon = "refinery"
-    requires = None
-    alien = True
-    building = make_simple_stats_building(stats=Stats(pop_max_add=2), shape="modulardwellings")
-    infinite = True
-
-@register_upgrade
-class AlienEconUpgradeGas(AlienEconUpgradeIce):   
-    resource_type = "gas"         
-
 class Alien:
     EXPAND_DURATION = 10
+    EXPAND_NUM_NEAREST = 2
     ATTACK_DURATION = 20
     DEFEND_DURATION = 17
-    COLONIST = 'alien1colonist'
     name = ""
+    title = ""
+    tips = []
 
     def __init__(self, scene, civ):
         self.scene = scene
@@ -177,7 +54,7 @@ class Alien:
         self._last_time = self.time
         self.time += dt
         if self.civ.upgrades_stocked:
-            offered = self.civ.offer_upgrades(self.civ.upgrades_stocked[0])
+            offered = self.civ.offer_upgrades(self.civ.upgrades_stocked[0], lambda x:x.alien_name == self.name)
             choice = {
                 'grow':'buildings',
                 'produce':'ships',
@@ -194,6 +71,7 @@ class Alien:
             
             self.civ.upgrades_stocked.pop(0)
             self.civ.researched_upgrade_names.add(up.name)
+            self.civ.upgrades.append(up)
             self.civ.clear_offers()            
             self.resource_priority = None
         self.update_resource_priority(dt)
@@ -203,6 +81,11 @@ class Alien:
             self.update_attack()
         if self.duration_edge(self.DEFEND_DURATION):
             self.update_defend()
+
+        if self.duration_edge(10):
+            for fleet in self.scene.fleet_managers['enemy'].current_fleets:
+                if fleet.is_waiting():
+                    self.scene.fleet_managers['enemy'].recall_fleet(fleet)
 
 
     def get_expand_chance(self, planet):
@@ -215,7 +98,7 @@ class Alien:
         return 0.25
 
     def get_attacking_ships(self):
-        return ['alien1fighter', 'alien1battleship']
+        return []
 
     def set_difficulty(self, difficulty):
         self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 5
@@ -242,14 +125,17 @@ class Alien:
                 # Find the neutral planets nearest to this planet
                 near_planets = self.scene.get_planets()
                 near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
-                near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:4] # 4 nearest
+                near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:self.EXPAND_NUM_NEAREST]
                 if not near_unclaimed:
                     return
                 target = random.choice(near_unclaimed)
                 # Figure out how many pop to send
-                pop = random.randint(1, planet.population - 1)
+                if random.random() < 0.33:
+                    pop = random.randint(1, planet.population // 2)
+                else:
+                    pop = 1
                 # Emit a colonist
-                planet.emit_ship(self.COLONIST, {'to':target, 'num':pop})
+                planet.emit_ship(self.get_colonist(), {'to':target, 'num':pop})
                 # Figure out if we want to send other ships
                 # TODO
     
@@ -258,31 +144,36 @@ class Alien:
             # Find the enemy planets nearest to this planet
             near_planets = self.scene.get_planets()
             near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
-            near_enemy = [p for p in near_planets if p.owning_civ and p.owning_civ != self.civ][0:4] # 4 nearest
+            near_enemy = [p for p in near_planets if p.owning_civ and p.owning_civ != self.civ][0:2] # 2 nearest
             if not near_enemy:
                 return
             target = random.choice(near_enemy)
             if random.random() < self.get_attack_chance(planet, target):
+                sent = False
                 for ship_type in self.get_attacking_ships():
                     if ship_type in planet.ships and planet.ships[ship_type] > 0:
-                        for i in range(random.randint(1,planet.ships[ship_type])):
+                        for i in range(planet.ships[ship_type]):
                             planet.emit_ship(ship_type, {'to':target})
-                if random.random() < 0.66 and planet.population > 1:
-                    planet.emit_ship("alien1colonist", {'to':target, 'num':random.randint(1, planet.population-1)})
+                            sent = True
+                if sent and random.random() < 0.5 and planet.population > 1:
+                    planet.emit_ship(self.get_colonist(), {'to':target, 'num':random.randint(1, planet.population-1)})
+
+    def get_colonist(self):
+        return ""
 
     def update_defend(self):
         for planet in self.scene.get_civ_planets(self.civ):
             # Find the enemy planets nearest to this planet
             near_planets = self.scene.get_planets()
             near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
-            near_ally = [p for p in near_planets if p.owning_civ == self.civ and p is not planet][0:4] # 4 nearest
+            near_ally = [p for p in near_planets if p.owning_civ == self.civ and p is not planet]
             if not near_ally:
                 return
             target = random.choice(near_ally)
             if random.random() < self.get_defend_chance(planet, target):
                 for ship_type in self.get_attacking_ships():
                     if ship_type in planet.ships and planet.ships[ship_type] > 0:
-                        for i in range(random.randint(1,planet.ships[ship_type])):
+                        for i in range(planet.ships[ship_type]):
                             planet.emit_ship(ship_type, {'to':target})
 
         

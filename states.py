@@ -67,6 +67,7 @@ class UIEnabledState(State):
         self.key_crosshair.frame = 4
         self.scene.ui_group.add(self.key_crosshair)
         self.scene.ui_group.change_layer(self.key_crosshair,3)
+        self.key_crosshair.visible = False
 
 
     def deselect(self):

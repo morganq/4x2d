@@ -3,6 +3,7 @@ from .galaxypanel import GalaxyPanel
 from selector import Selector
 import levelscene
 from . import starmapscene
+from loadingscene import LoadingScene
 import states
 
 class StarMapState(states.UIEnabledState):
@@ -46,8 +47,7 @@ class StarMapState(states.UIEnabledState):
     def click_launch(self, galaxy):
         print(galaxy)
         self.scene.game.run_info.choose_path(*galaxy.coords)
-        self.scene.game.scene = levelscene.LevelScene(self.scene.game, galaxy.level, galaxy.alien, galaxy.difficulty)
-        # self.scene.game.scene = starmapscene.StarMapScene(self.scene.game)
+        self.scene.game.scene = LoadingScene(self.scene.game,galaxy)
         self.scene.game.scene.start()
 
     def take_input(self, input, event):
@@ -58,6 +58,5 @@ class StarMapState(states.UIEnabledState):
             if input == 'click':
                 self.drag_start = event.gpos
             if input == 'mouse_drag':
-                
-                self.scene.scroll_panel.pos += event.grel
+                self.scene.scroll_panel.scroll(self.scene.scroll_panel.pos + event.grel)
                 

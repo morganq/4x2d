@@ -225,9 +225,9 @@ class Quantum3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Quantum Weirdness"
-    description = "A colonist ship that uses warp drive has a [50% chance] for [^+1] population"
+    description = "A colonist ship that uses warp drive has a [33% chance] for [^+1] population"
     icon = "quantumweirdness"
-    stats = Stats(warp_drive_pop_chance=0.50)
+    stats = Stats(warp_drive_pop_chance=0.33)
     family = {'tree':'t_quantum', 'parents':['t_quantum2b']}
     requires = ('t_quantum2b',)
     infinite = False

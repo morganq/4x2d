@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 VALID_STAT_NAMES = [
+    'alien_control_mul',
     'asteroid_yield_mul', #test
     'atomic_bomb',
     'battleship_damage_mul',

@@ -366,7 +366,7 @@ class Scarcest2bUpgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Terraform"
-    description = "Permanently invert planetary resources"
+    description = "Permanently flip iron and gas resource values on a planet"
     icon = "mining"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':['b_scarcest1']}
@@ -374,7 +374,8 @@ class Scarcest2bUpgrade(AddBuildingUpgrade):
     requires = ('b_scarcest1',)
 
     def apply(self, to):
-        # Invert resources impl
+        to.resources.gas, to.resources.iron = to.resources.iron, to.resources.gas
+        to.regenerate_art()    
         return super().apply(to)
 
 @register_upgrade
@@ -483,11 +484,11 @@ class Deserted2aUpgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Organic Regeneration II"
-    description = "If there are no allied ships on or near the planet, gain [^+2] health per second"
+    description = "If there are no allied ships on or near the planet, gain [^+4] health per second"
     icon = "mining"
     cursor = "allied_planet"
     family = {'tree':'deserted', 'parents':['b_deserted2']}
-    building = make_simple_stats_building(stats=Stats(deserted_regen=2), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(deserted_regen=4), shape="lifesupport")
     requires = ('b_deserted1',)
 
 @register_upgrade

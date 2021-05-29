@@ -38,6 +38,8 @@ class GalaxyPanel(Panel):
         x = self.panel_for.x - self._width / 2
         y = self.panel_for.y - self._height / 2
         x = self.panel_for.x + self.panel_for._width / 2 + 10
+        if x > 500:
+            x -= self.width * 1.5 + 0
         
         self.pos = V2(x,y)
         self._reposition_children()

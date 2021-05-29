@@ -81,6 +81,9 @@ class Ship(SpaceObject):
         self.bonus_attack_speed_time = 0
         self.slow_aura = 0
 
+        # Alien stuff
+        self.tether_target = False
+
         # Stuff that has to come at the end
         self.set_health(self.get_max_health())
         self.set_state(STATE_CRUISING)
@@ -219,11 +222,8 @@ class Ship(SpaceObject):
 
         if self.velocity.sqr_magnitude() > 0:
             if self._timers['thrust_particle_time'] > THRUST_PARTICLE_RATE:
-                pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
-                pvel += -self.velocity / 2
-                p = particle.Particle("assets/thrustparticle.png",1,self.pos + -self.velocity.normalized() * self.radius,1,pvel)
-                self.scene.game_group.add(p)
-                self._timers['thrust_particle_time'] = 0
+                self.emit_thrust_particles()
+                self._timers['thrust_particle_time'] = 0   
 
         # Nearest hazard
         nearest,dsq = helper.get_nearest(self.pos, [o for o in self.scene.get_objects() if o.collidable and o.stationary])
@@ -239,6 +239,13 @@ class Ship(SpaceObject):
         self.special_stat_update(dt)
 
         super().update(dt)
+
+    def emit_thrust_particles(self):
+        pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
+        pvel += -self.velocity / 2
+        p = particle.Particle("assets/thrustparticle.png", 1, self.pos + -self.velocity.normalized() * self.radius, 1, pvel)
+        self.scene.game_group.add(p)
+             
 
     def special_stat_update(self, dt):
         # Regenerate
@@ -316,12 +323,12 @@ class Ship(SpaceObject):
 
     def warp(self, warp_dist):
         end = self.effective_target.pos
-        offset_dist = self.effective_target.radius + 10
+        offset_dist = self.effective_target.radius + 20
         pl = int(warp_dist / 20)
         delta = (end - self.pos)
-        md = delta.magnitude() - offset_dist
+        maxdist = delta.magnitude() - offset_dist
         delta = delta.normalized()
-        target_pos = self.pos + delta * min(warp_dist, md)
+        target_pos = self.pos + delta * min(warp_dist, maxdist)
         for color in [PICO_BLUE, PICO_WHITE, PICO_DARKBLUE]:
             p = LaserParticle(self.pos + V2.random_angle() * 3, target_pos + V2.random_angle() * 3, color, random.random() / 2)
             self.scene.game_group.add(p)
@@ -359,7 +366,7 @@ class Ship(SpaceObject):
             for x in range(self._width):
                 for y in range(self._height):
                     color = tuple(self.image.get_at((x,y)))
-                    if color[3] >= 128:
+                    if color[3] >= 128 and color[0:3] != PICO_BLACK:
                         _,a = (V2(x,y) - V2(5.5,5.5)).to_polar()
                         if abs(helper.get_angle_delta(a, base_angle)) > 3.14159/2:
                             a = base_angle + 3.14159
@@ -400,3 +407,18 @@ class Ship(SpaceObject):
     def command_warp(self):
         self.warp(9999)
         self.bonus_attack_speed_time = 6
+
+    def change_owner(self, owner, target):
+        self.owning_civ = owner
+        self.chosen_target = target
+        self.effective_target = target
+        self.set_state(STATE_CRUISING)
+
+        new_color = PICO_GREEN if owner == self.scene.my_civ else PICO_RED
+
+        for x in range(self._sheet.get_width()):
+            for y in range(self._sheet.get_height()):
+                color = tuple(self._sheet.get_at((x,y)))
+                if color[3] >= 128 and color[0:3] != PICO_BLACK:
+                    self._sheet.set_at((x,y), new_color)
+        self._update_image()

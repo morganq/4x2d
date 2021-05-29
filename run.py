@@ -33,7 +33,7 @@ class RunInfo:
                 else:
                     from_links = [column, column + 1]
                 galaxy = {
-                    'alien': 'basic',
+                    'alien': random.choice(['alien1', 'alien2']),
                     'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
                     'difficulty': (row - 1) * 2,
                     'level':random.choice(['choke', 'neighbors', 'tunnel', 'bases']),

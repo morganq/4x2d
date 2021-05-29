@@ -24,8 +24,8 @@ class Line(SpriteBase):
         delta = self.pt2 - self.pt1
         w = max(abs(delta.x),1)
         h = max(abs(delta.y),1)
-        pt1 = V2(0, 0 if delta.y > 0 else -delta.y)
-        pt2 = V2(w, delta.y if delta.y > 0 else 0)
+        pt1 = V2(0 if delta.x > 0 else w, 0 if delta.y > 0 else h)
+        pt2 = V2(w if delta.x > 0 else 0, h if delta.y > 0 else 0)
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
         pygame.draw.line(self.image, self.color, pt1.tuple(), pt2.tuple(), 1)
