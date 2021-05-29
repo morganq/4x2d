@@ -20,7 +20,7 @@ from v2 import V2
 import run
 import optimize
 
-DEV = False
+DEV = True
 SCALE = 2
 RES = (500,360)
 OBJ = {
