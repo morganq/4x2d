@@ -29,7 +29,7 @@ class Alien2FighterProductionUpgrade1(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Alien Fighter Production"
-    description = "[^2] [Fighters] Over 60 seconds"
+    description = "[^2] [Fighters] Over 10 seconds"
     icon = "fighters6"
     requires = None
     alien = True
@@ -37,7 +37,7 @@ class Alien2FighterProductionUpgrade1(Upgrade):
     infinite = True
 
     def apply(self, to):
-        p = ProductionOrder("alien2fighter", 2, 60)
+        p = ProductionOrder("alien2fighter", 2, 10)
         to.add_production(p)
 
 @register_upgrade
@@ -164,6 +164,8 @@ class Alien2(alien.Alien):
         self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
 
     def get_resource_priority_odds(self):
+        if self.time < 180 and self.fear_attack:
+            return {'produce':0.95, 'grow':0.05,'tech':0}
         if self.time < 180:
             return {
                 'grow':0.3,

@@ -24,6 +24,7 @@ class Alien:
 
         self._last_time = 0
         self.time = 0
+        self.fear_attack = False
 
     # Returns True if, on this frame, (self.time % duration) just looped over to 0
     def duration_edge(self, duration, offset = 0):
@@ -50,10 +51,31 @@ class Alien:
     def pick_upgrade_target(self, up):
         return random.choice([p for p in self.scene.get_civ_planets(self.civ)])                
 
+    def count_ships(self, civ):
+        ships = 0
+        for planet in self.scene.get_civ_planets(civ):
+            ships += sum(planet.ships.values())
+        for s in self.scene.get_civ_ships(civ):
+            if s.SHIP_BONUS_NAME != "colonist":
+                ships += 1
+        return ships
+
+    def check_fear_attack(self):
+        mine = self.count_ships(self.civ)
+        enemys = self.count_ships(self.scene.my_civ)
+        if enemys > mine * 1.33:
+            print("in fear", mine, enemys)
+            self.fear_attack = True
+        else:
+            print("feelin safe", mine, enemys)
+            self.fear_attack = False
+
     def update(self, dt):
         self._last_time = self.time
         self.time += dt
         if self.civ.upgrades_stocked:
+            self.resource_priority = None
+            self.update_resource_priority(dt)
             offered = self.civ.offer_upgrades(self.civ.upgrades_stocked[0], lambda x:x.alien_name == self.name)
             choice = {
                 'grow':'buildings',
@@ -73,8 +95,6 @@ class Alien:
             self.civ.researched_upgrade_names.add(up.name)
             self.civ.upgrades.append(up)
             self.civ.clear_offers()            
-            self.resource_priority = None
-        self.update_resource_priority(dt)
         if self.duration_edge(self.EXPAND_DURATION):
             self.update_expansion()
         if self.duration_edge(self.ATTACK_DURATION):
@@ -87,6 +107,8 @@ class Alien:
                 if fleet.is_waiting():
                     self.scene.fleet_managers['enemy'].recall_fleet(fleet)
 
+        if self.duration_edge(5):
+            self.check_fear_attack()
 
     def get_expand_chance(self, planet):
         return 0.05 * planet.population

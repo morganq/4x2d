@@ -157,6 +157,8 @@ class Alien1(alien.Alien):
         my_planet.add_building(Alien1HomeDefenseUpgrade)
 
     def get_resource_priority_odds(self):
+        if self.time < 180 and self.fear_attack:
+            return {'produce':0.85, 'grow':0.05,'tech':0.1}
         if self.time < 180:
             return {
                 'grow':0.5,
