@@ -145,9 +145,11 @@ class Planet(SpaceObject):
         self.owning_civ = civ
         if civ in self.underground_buildings:
             for building in self.underground_buildings[civ]:
-                self.add_building(building.upgrade)
+                self.add_building(building['building'].upgrade)
             del self.underground_buildings[civ]
-        self.health = max(self.health, self.get_max_health() / 4)
+
+        if civ is not None:
+            self.health = max(self.health, self.get_max_health() / 4)
         self._population = 0
         self.ships = defaultdict(int)
         self.production = []
@@ -160,6 +162,10 @@ class Planet(SpaceObject):
         if self.owning_civ:
             owning_civ_stat += self.owning_civ.get_stat(stat)
         return sum([b['building'].stats[stat] for b in self.buildings]) + owning_civ_stat
+
+    def get_base_regen(self):
+        regen = self.get_max_health() / 120
+        return regen
 
     def _generate_frame(self, border = False):
         radius = self.size + 8
@@ -343,16 +349,19 @@ class Planet(SpaceObject):
             if r == "gas" and self.get_stat("gas_mining_rate"):
                 rate_modifier *= 1 + self.get_stat("gas_mining_rate")
 
+            if self.get_stat("mining_rate_first_60") and self.owned_time < 60:
+                rate_modifier *= self.get_stat("mining_rate_first_60")
+
             if self.get_stat("mining_rate_proximity"):
                 _, distsq = get_nearest(self.pos,self.scene.get_hazards())
                 if distsq < HAZARD_PROXIMITY ** 2:
                     rate_modifier *= 1 + self.get_stat("mining_rate_proximity")
 
-            if self._population >= self.size:
+            if self._population >= self.get_max_pop():
                 rate_modifier *= 1 + self.get_stat("mining_rate_at_max_pop")
 
             # Resources mined is based on num workers
-            workers = min(self._population, self.size)
+            workers = min(self._population, self.get_max_pop())
 
             # Add to the timers based on the mining rate
             self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * rate_modifier
@@ -368,7 +377,14 @@ class Planet(SpaceObject):
         # Ship production
         for prod in self.production:
             prod_rate = 1 + self.get_stat("ship_production")
+            prod_amt_mul = 1
 
+            prod_amt_mul += self.get_stat("ship_production_per_pop") * self.population
+
+            if prod.ship_type == "fighter":
+                prod_amt_mul += self.get_stat("fighter_production_amt")
+                prod_amt_mul /= (2 ** self.get_stat("fighter_production_amt_halving"))
+            
             if prod.ship_type in ['fighter', 'interceptor', 'bomber', 'battleship']:
                 prod_rate *= 1 + self.get_stat("%s_production" % prod.ship_type)
 
@@ -377,6 +393,8 @@ class Planet(SpaceObject):
                 if get_nearest(self.pos, enemy_planets)[1] < PLANET_PROXIMITY ** 2:
                     prod_rate *= 1 + self.get_stat("ship_production_proximity")
                     
+
+            prod.number_mul = prod_amt_mul
             prod.update(self, dt * prod_rate)
         self.production = [p for p in self.production if not p.done]
 
@@ -420,12 +438,6 @@ class Planet(SpaceObject):
                     self.population_growth_timer = 0
                     self.add_population(1)
 
-        if self.health <= 0:
-            self.lose_buildings()
-            self._population = 0
-            self._generate_base_frames()
-            self._generate_frames()            
-
         # Building stuff
         for b in self.buildings:
             b['building'].update(self, dt)
@@ -454,6 +466,7 @@ class Planet(SpaceObject):
         REGEN_TIMER = 5
         if self._timers['regen'] > REGEN_TIMER:
             self._timers['regen'] = 0
+            self.health += self.get_base_regen() * REGEN_TIMER
             if self.get_stat("regen") > 0:
                 self.health += self.get_stat("regen") * REGEN_TIMER
             if self.get_stat("deserted_regen") > 0 and self.population == 0:
@@ -461,12 +474,21 @@ class Planet(SpaceObject):
             if self.get_stat("planet_regen_without_ships") and sum(self.ships.values()) == 0:
                 self.health += self.get_stat("planet_regen_without_ships") * REGEN_TIMER
 
+        
+            # o2 degeneration
+            if self.scene.game.run_info.o2 <= 0 and self.owning_civ == self.scene.my_civ:
+                self.health -= self.get_base_regen() * REGEN_TIMER
+                self.health -= 1 * REGEN_TIMER
+
         self.owned_time += dt
 
+        self.planet_weapon_mul = 1
         if self.population == 0:
-            self.planet_weapon_mul = (1 + self.get_stat("planet_weapon_boost_zero_pop"))
-        else:
-            self.planet_weapon_mul = 1
+            self.planet_weapon_mul += self.get_stat("planet_weapon_boost_zero_pop")
+            
+
+        if sum(self.ships.values()) == 0:
+            self.planet_weapon_mul += self.get_stat("planet_weapon_boost_zero_ships")
 
         if self.get_stat("planet_slow_aura"):
             enemy_ships = set(self.scene.get_enemy_ships(self.owning_civ))
@@ -476,6 +498,20 @@ class Planet(SpaceObject):
                 ship.slow_aura = self.get_stat("planet_slow_aura")
             for ship in far:
                 ship.slow_aura = 0
+
+    def get_primary_resource(self):
+        resource_order = [(a,b) for (a,b) in self.resources.data.items() if b > 0]
+        resource_order.sort(key=lambda x:x[1])
+        return resource_order[0][0]        
+
+    def on_die(self):  
+        if self.get_stat("underground"):
+            for ship in all_nearby(self.pos, self.scene.get_enemy_ships(self.owning_civ), 60):
+                ship.take_damage(20 * self.get_stat("underground"), self)
+                e = explosion.Explosion(self.pos, [PICO_WHITE], 1, 60)
+                self.scene.game_group.add(e)
+        self.change_owner(None)
+        
 
 
     def add_population(self, num):
@@ -499,7 +535,7 @@ class Planet(SpaceObject):
         return ret
 
     def get_workers(self):
-        return min(self._population, self.size)
+        return min(self._population, self.get_max_pop())
 
     def emit_ship(self, type, data):
         if 'colonist' in type:
@@ -542,9 +578,6 @@ class Planet(SpaceObject):
         return b
 
     def add_production(self, order):
-        if order.ship_type == "fighter":
-            order.number = round(order.number * 1 + self.get_stat("fighter_production_amt"))
-            order.number = round(order.number / (2 ** self.get_stat("fighter_production_amt_halving")))
         self.production.append(order)
 
     def on_health_changed(self, old, new):
@@ -555,7 +588,9 @@ class Planet(SpaceObject):
     def take_damage(self, damage, origin):
         if self.get_stat("damage_iron"):
             self.owning_civ.earn_resource("iron", self.get_stat("damage_iron"), where=self)
-        return super().take_damage(damage, origin=origin)
+        pre_health = self.health
+        return_val = super().take_damage(damage, origin=origin)
+        return return_val
 
     def blow_up_buildings(self):
         for building in self.buildings:

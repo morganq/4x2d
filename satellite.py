@@ -76,7 +76,7 @@ class ReflectorShieldObj(SpaceObject):
     def update(self, dt):
         self.health_bar.pos = self.pos + V2(0,-self.sat.planet.radius - 10)
         if self._timers['regen'] > 5:
-            self.health += 5
+            self.health += 10
             self._timers['regen'] = 0
         self._generate_image()
         return super().update(dt)
@@ -137,6 +137,6 @@ class OrbitalLaser(Satellite):
             if self.target:
                 lp = LaserParticle(self.pos, self.target.pos, PICO_PINK, 0.25)
                 self.scene.game_group.add(lp)
-                b = Bullet(self.target.pos, self.target, self, mods={'damage_base':3})
+                b = Bullet(self.target.pos, self.target, self, mods={'damage_base':6 * self.planet.planet_weapon_mul})
                 self.scene.game_group.add(b)
         return super().update(dt)

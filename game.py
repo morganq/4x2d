@@ -9,6 +9,7 @@ from starmap import starmapscene
 import introscene
 import buildingcreatorscene
 import leveleditorscene
+import allupgradesscene
 from resources import resource_path
 import sys
 import menuscene
@@ -45,8 +46,10 @@ class Game:
                 self.scene = leveleditorscene.LevelEditorScene(self)
             elif sys.argv[1] == "star":
                 self.scene = starmapscene.StarMapScene(self)
+            elif sys.argv[1] == "upgrades":
+                self.scene = allupgradesscene.AllUpgradesScene(self)
             else:
-                self.scene = levelscene.LevelScene(self, None, None, 8, sys.argv[1])
+                self.scene = levelscene.LevelScene(self, None, None, 1, sys.argv[1])
         else:
             self.scene = starmapscene.StarMapScene(self)
             #self.scene = introscene.IntroScene(self)

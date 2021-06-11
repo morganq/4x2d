@@ -27,6 +27,7 @@ from upgrade.upgradepanel import UpgradePanel
 from v2 import V2
 import explosion
 import re
+from anyupgradepanel import AnyUpgradePanel
 
 class PlayState(UIEnabledState):
     def enter(self):
@@ -119,18 +120,20 @@ class PlayState(UIEnabledState):
     def take_input(self, inp, event):
         if game.DEV:
             if inp == "other" and event.key == pygame.K_u:
-                name = input("updgrade name> ")
-                # Get all applicable upgrades
-                reg = re.compile(name)
-                for u in [u for u in UPGRADE_CLASSES.values() if u.alien == False and reg.match(u.name)]:
-                    self.scene.my_civ.researched_upgrade_names.add(u.name)
-                    if u.cursor == None:
-                        self.scene.my_civ.upgrades.append(u)
-                        u().apply(self.scene.my_civ)
-                        self.scene.ui_group.add(FunNotification(u.title, None))
-                    elif u.cursor == "allied_planet":
-                        planet = self.scene.get_civ_planets(self.scene.my_civ)[0]
-                        u().apply(planet)
+                self.scene.sm.transition(DevAnyUpgradeState(self.scene))
+                
+                # name = input("updgrade name> ")
+                # # Get all applicable upgrades
+                # reg = re.compile(name)
+                # for u in [u for u in UPGRADE_CLASSES.values() if u.alien == False and reg.match(u.name)]:
+                #     self.scene.my_civ.researched_upgrade_names.add(u.name)
+                #     if u.cursor == None:
+                #         self.scene.my_civ.upgrades.append(u)
+                #         u().apply(self.scene.my_civ)
+                #         self.scene.ui_group.add(FunNotification(u.title, None))
+                #     elif u.cursor == "allied_planet":
+                #         planet = self.scene.get_civ_planets(self.scene.my_civ)[0]
+                #         u().apply(planet)
 
             if inp == "other" and event.key == pygame.K_p:
                 self.scene.paused = not self.scene.paused
@@ -204,6 +207,7 @@ class OrderShipsState(UIEnabledState):
 
     def enter(self):
         UIEnabledState.enter(self)
+        self.scene.paused = True
         self.hover_filter = self.filter_only_panel_ui
         self.panel = OrderPanel(V2(0,0), self.planet_from, self.planet_to, self.on_order)
         self.panel.position_nicely(self.scene)
@@ -217,6 +221,7 @@ class OrderShipsState(UIEnabledState):
         self.hover_filter = lambda x: True
         self.panel.kill()
         self.arrow.kill()
+        self.scene.paused = False
         super().exit()
 
     def on_order(self, values):
@@ -234,7 +239,6 @@ class OrderShipsState(UIEnabledState):
             if not pr.collidepoint(event.gpos.tuple()):
                 self.scene.sm.transition(PlayState(self.scene))
         return super().mouse_input(input, event)
-
 
 class UpgradeState(UIEnabledState):
     NEARBY_RANGE = 70
@@ -454,6 +458,34 @@ class UpgradeState(UIEnabledState):
 
     def update(self, dt):
         return super().update(dt)
+
+
+class DevAnyUpgradeState(UpgradeState):
+    def __init__(self, scene):
+        super().__init__(scene)
+
+    def enter(self):
+        self.scene.paused = True
+        self.selected_targets = []
+        self.extras = []
+        self.panel = AnyUpgradePanel(V2(0,0), self.on_select)
+        self.panel.add_all_to_group(self.scene.ui_group)
+        self.panel.position_nicely(self.scene)
+        self.hover_filter = self.filter_only_panel_ui
+        return UIEnabledState.enter(self)
+
+    def finish(self, target=None, cancel = False):
+        for extra in self.extras:
+            extra.kill()
+        self.extras = []        
+        if not cancel:
+            self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+        if self.panel:
+            self.panel.kill()
+        self.scene.sm.transition(PlayState(self.scene))        
+
+    def on_back(self):
+        return
 
 class GameOverState(State):
     def enter(self):

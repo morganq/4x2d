@@ -12,10 +12,10 @@ from bullet import Bullet
 class Bomber(Fighter): 
     SHIP_NAME = "bomber"
     SHIP_BONUS_NAME = "bomber"
-    BASE_HEALTH = 35
+    BASE_HEALTH = 55
     BLAST_RADIUS = 0
-    FIRE_RATE = 0.2
-    BASE_DAMAGE = 35
+    FIRE_RATE = 0.4
+    BASE_DAMAGE = 30
 
     FIRE_RANGE = 35
     THREAT_RANGE_DEFAULT = 40
@@ -34,6 +34,7 @@ class Bomber(Fighter):
     def prepare_bullet_mods(self):
         mods = super().prepare_bullet_mods()
         mods['raze_chance'] = self.get_stat("bomber_raze_chance")
+        mods['raze_make_colonist'] = self.get_stat('bomber_colonist')
         mods['color'] = PICO_PINK
         return mods
 

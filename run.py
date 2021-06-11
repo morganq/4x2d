@@ -10,6 +10,7 @@ class RunInfo:
         self.bonus_population = 0
         self.bonus_fighters = 0
         self.rerolls = 3
+        self.o2 = 3600
 
     def choose_path(self, row, column):
         self.path.append((row, column))
@@ -35,8 +36,8 @@ class RunInfo:
                 galaxy = {
                     'alien': random.choice(['alien1', 'alien2']),
                     'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
-                    'difficulty': (row - 1) * 2,
-                    'level':random.choice(['choke', 'neighbors', 'tunnel', 'bases', 'cross']),
+                    'difficulty': row,
+                    'level':random.choice(['belt', 'scatter', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']),
                     'links': from_links
                 } 
                 self.data[-1].append(galaxy)

@@ -8,7 +8,7 @@ class Basic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Standard Order"
-    description = "[^3] [Fighters] Over 30 seconds"
+    description = "Train [^3] [Fighters] Over [30 seconds]"
     icon = "standardorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':[]}
@@ -23,7 +23,7 @@ class Basic2Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Expedited Order"
-    description = "[^3] [Fighters] Over 25 seconds"
+    description = "Train [^3] [Fighters] Over [25 seconds]"
     icon = "expeditedorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':['s_basicfighters1']}
@@ -39,7 +39,7 @@ class Basic3Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Rush Order"
-    description = "[^3] [Fighters] Over 20 seconds"
+    description = "Train [^3] [Fighters] Over [20 seconds]"
     icon = "rushorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':['basicfighters2']}
@@ -56,7 +56,7 @@ class InstantFighters1Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Emergency Reinforcements"
-    description = "[^1] [Fighter] [^Instantly]"
+    description = "Train [^1] [Fighter] [^Instantly]"
     icon = "emergencyreinforcements"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':[]}
@@ -71,7 +71,7 @@ class InstantFighters2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Guard Deployment"
-    description = "[^2] [Fighters] [^Instantly], [!-2] [Population]"
+    description = "Train [^2] [Fighters] [^Instantly], [!-2] population"
     icon = "guarddeployment"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['s_instantfighters1']}
@@ -88,7 +88,7 @@ class InstantFighters2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "War Manufacturing"
-    description = "[^2] [Fighters] [^Instantly], Planet loses [!25] [Health]"
+    description = "Train [^2] [Fighters] [^Instantly], Planet loses [!25] health"
     icon = "warmanufacturing"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['s_instantfighters1']}
@@ -105,7 +105,7 @@ class InstantFighters3aUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Guard Deployment II"
-    description = "[^3] [Fighters] [^Instantly], [!-3] [Population]"
+    description = "Train [^3] [Fighters] [^Instantly], [!-3] population"
     icon = "guarddeployment2"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['s_instantfighters2a']}
@@ -123,7 +123,7 @@ class InstantFighters3bUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "War Manufacturing II"
-    description = "[^3] [Fighters] [^Instantly], Planet loses [!35] [Health]"
+    description = "Train [^3] [Fighters] [^Instantly], Planet loses [!35] health"
     icon = "warmanufacturing2"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['s_instantfighters2b']}
@@ -141,8 +141,8 @@ class LongFighters1Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Efficient Assembly"
-    description = "[^4] [Fighters] Over 120 seconds, [^+50] [Iron]"
-    icon = "fighters3pop"
+    description = "Train [^4] [Fighters] Over [120 seconds], [^+50] Iron"
+    icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':[]}
 
@@ -157,8 +157,8 @@ class LongFighters2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Strategic Assembly"
-    description = "[^5] [Fighters] Over 120 seconds"
-    icon = "fighters3pop"
+    description = "Train [^5] [Fighters] Over [120 seconds]"
+    icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':['s_longfighters1']}
     requires = ('s_longfighters1',)
@@ -173,8 +173,8 @@ class LongFighters2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Efficient Assembly II"
-    description = "[^4] [Fighters] Over 120 seconds, [^+100] [Iron]"
-    icon = "fighters3pop"
+    description = "Train [^4] [Fighters] Over [120 seconds], [^+100] Iron"
+    icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':['s_longfighters1']}
     requires = ('s_longfighters1',)
@@ -190,8 +190,8 @@ class LongFighters3Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Recycled Armaments"
-    description = "[^5] [Fighters] Over 120 seconds, [^+50] [Gas]"
-    icon = "fighters3pop"
+    description = "Train [^5] [Fighters] Over [120 seconds], [^+50] Gas"
+    icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':['s_longfighters2a', 's_longfighters2b']}
     requires = lambda x:'s_longfighters1' in x and ('s_longfighters2a' in x or 's_longfighters2b' in x)
@@ -203,28 +203,13 @@ class LongFighters3Upgrade(Upgrade):
         to.owning_civ.resources.gas += 50
 
 @register_upgrade
-class Heal1Upgrade(Upgrade):
-    name = "s_heal1"
-    resource_type = "iron"
-    category = "ships"
-    title = "Fleet Heal"
-    description = "Every ship instantly recovers [^10] health"
-    icon = "fighters3pop"
-    cursor = None
-    family = {'tree':'heal', 'parents':[]}
-
-    def apply(self, to):
-        for ship in to.scene.get_civ_ships(to):
-            ship.health += 10
-
-@register_upgrade
 class Warp1Upgrade(Upgrade):
     name = "s_warp1"
     resource_type = "iron"
     category = "ships"
     title = "Fleet Warp"
-    description = "Every ship warps towards its target and gains [^+67%] attack speed for 6 seconds"
-    icon = "fighters3pop"
+    description = "Every ship warps towards its target and gains [^+67%] attack speed for [6 seconds]"
+    icon = "ship_default"
     cursor = None
     family = {'tree':'warp', 'parents':[]}
 
@@ -235,31 +220,13 @@ class Warp1Upgrade(Upgrade):
 #### ICE ####
 
 @register_upgrade
-class InterceptorFighters1Upgrade(Upgrade):
-    name = "s_interceptorfighters1"
-    resource_type = "ice"
-    category = "ships"
-    title = "Interceptor Convoy"
-    description = "[^1] [Fighter] and [^1] [Interceptor] Over 30 seconds"
-    icon = "fighters6"
-    cursor = "allied_planet"
-    family = {'tree':'interceptorfighters', 'parents':[]}
-    infinite = True
-
-    def apply(self, to):
-        p = ProductionOrder("fighter", 1, 30)
-        to.add_production(p)
-        p = ProductionOrder("interceptor", 1, 30)
-        to.add_production(p)
-
-@register_upgrade
 class Interceptors1Upgrade(Upgrade):
     name = "s_basicinterceptors1"
     resource_type = "ice"
     category = "ships"
     title = "Interceptors"
-    description = "[^2] [Interceptors] Over 45 seconds"
-    icon = "fighters6"
+    description = "Train [^2] [Interceptors] Over [45 seconds]"
+    icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'basicinterceptors', 'parents':[]}
     infinite = True
@@ -274,8 +241,8 @@ class Bombers1Upgrade(Upgrade):
     resource_type = "ice"
     category = "ships"
     title = "Bombers"
-    description = "[^2] [Bombers] Over 45 seconds"
-    icon = "fighters6"
+    description = "Train [^2] [Bombers] Over [45 seconds]"
+    icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'basicbombers', 'parents':[]}
     infinite = True
@@ -290,8 +257,8 @@ class HangarProduction1Upgrade(Upgrade):
     resource_type = "ice"
     category = "ships"
     title = "Specialized Manufacturing"
-    description = "[^1] Ship instantly at each hangar"
-    icon = "fighters6"
+    description = "Train [^1] ship [^instantly] at each hangar"
+    icon = "ship_default"
     cursor = None
     family = {'tree':'hangarprod', 'parents':[]}
     infinite = True
@@ -317,8 +284,8 @@ class Battleships1Upgrade(Upgrade):
     resource_type = "gas"
     category = "ships"
     title = "Battleships"
-    description = "[^1] [Battleship] Over 30 seconds"
-    icon = "fighters6"
+    description = "Train [^1] [Battleship] Over [30 seconds]"
+    icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'basicbattleships', 'parents':[]}
     infinite = True
@@ -333,8 +300,8 @@ class PerPlanetProduction1Upgrade(Upgrade):
     resource_type = "gas"
     category = "ships"
     title = "Planetary Guard"
-    description = "[^1] [Fighter] over 20 seconds at each planet"
-    icon = "fighters6"
+    description = "Train [^1] [Fighter] over [20 seconds] at each planet"
+    icon = "ship_default"
     cursor = None
     family = {'tree':'perplanet', 'parents':[]}
     infinite = True
@@ -349,10 +316,10 @@ class AddColonistProduction1Upgrade(Upgrade):
     resource_type = "gas"
     category = "ships"
     title = "Civilian Convoy"
-    description = "Add a [^1] Population [Colonist] ship to up to 3 random fleets"
-    icon = "fighters6"
+    description = "Add a [^1] population [Worker] ship to up to 3 random fleets"
+    icon = "ship_default"
     cursor = None
-    family = {'tree':'perplanet', 'parents':[]}
+    family = {'tree':'addcolonist', 'parents':[]}
     infinite = True
 
     def apply(self, to):
@@ -362,3 +329,40 @@ class AddColonistProduction1Upgrade(Upgrade):
             s.set_pop(1)
             s.set_target(fleet.ships[0].chosen_target)
             to.scene.game_group.add(s)
+
+
+
+##########
+# UNUSED #
+##########
+
+class Heal1Upgrade(Upgrade):
+    name = "s_heal1"
+    resource_type = "iron"
+    category = "ships"
+    title = "Fleet Heal"
+    description = "Every ship instantly recovers [^10] health"
+    icon = "ship_default"
+    cursor = None
+    family = {'tree':'heal', 'parents':[]}
+
+    def apply(self, to):
+        for ship in to.scene.get_civ_ships(to):
+            ship.health += 10
+
+class InterceptorFighters1Upgrade(Upgrade):
+    name = "s_interceptorfighters1"
+    resource_type = "ice"
+    category = "ships"
+    title = "Interceptor Convoy"
+    description = "Train [^1] [Fighter] and [^1] [Interceptor] Over [30 seconds]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'interceptorfighters', 'parents':[]}
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("fighter", 1, 30)
+        to.add_production(p)
+        p = ProductionOrder("interceptor", 1, 30)
+        to.add_production(p)            

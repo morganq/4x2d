@@ -146,3 +146,16 @@ gas:
  - ships move fifteen percent faster
  - ships deal bonus damage based on bonus speed
  - ice production is ten percent faster, and gas production is five percent faster
+
+
+
+=======
+
+Most basic planet upgrades: Mining rate, Max Pop, Defense (reflect shield, health, pop missiles, ), Hangar
+Basic technologies: Fire Rate, Ship Health, Each planet generates +x iron/sec but lose a fighter every minute, 
+
+
+precise assembly, metabolic, mat reconstruction, overgrowth
+nuclear battery, isotope, assembler, reactor
+vanguard boosters, vanguard armor, warp drive, quantum weirdness
+gain iron for fighter damage dealt, proximity alert, nanothread, root

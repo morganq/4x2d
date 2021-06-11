@@ -7,8 +7,10 @@ import pygame
 import math
 import helper
 import random
+import ships
 import planet
 from explosion import Explosion
+from planet import building
 
 VEL = 50
 DEATH_TIME = 1
@@ -48,6 +50,12 @@ class Bullet(SpriteBase):
                 return
             else:
                 reflect = True
+        if isinstance(other, building.ReflectorShieldCircleObj):
+            if not other.bullet_hits(self):
+                return
+            else:
+                reflect = True
+
         if other.get_stat("ship_dodge") > 0:
             if random.random() <= other.get_stat("ship_dodge"):
                 self.kill()
@@ -70,7 +78,25 @@ class Bullet(SpriteBase):
             self.shooter.scene.game_group.add(e)
             
         for obj in objs_hit:
+            pre_health = obj.health
             obj.take_damage(damage, self)
+            post_health = obj.health
+
+            if isinstance(obj, planet.planet.Planet):
+                if pre_health > 0 and post_health <= 0:
+                    if self.mods.get("raze_upgrade"):                    
+                        civ = self.shooter.owning_civ
+                        r = obj.get_primary_resource()
+                        civ.earn_resource(r, civ.upgrade_limits.data[r], obj)
+                    if self.mods.get("raze_make_colonist"):
+                        s = ships.colonist.Colonist(self.shooter.scene, self.shooter.pos, self.shooter.owning_civ)
+                        s.set_pop(1)
+                        s.set_target(obj)
+                        self.shooter.scene.game_group.add(s)
+
+            if self.mods.get("iron_on_hit"):
+                if isinstance(obj, ships.ship.Ship):
+                    self.shooter.owning_civ.earn_resource("iron", self.mods.get("iron_on_hit"), where=self.pos)
             if self.mods.get("grey_goo", False):
                 obj.add_effect(GreyGooEffect(other, self))
             if self.mods.get("raze_chance", 0):

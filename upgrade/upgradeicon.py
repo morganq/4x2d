@@ -70,3 +70,8 @@ class UpgradeIcon(SpriteBase):
         if self.onclick:
             self.onclick(self.upgrade)
         return super().on_mouse_down(pos)        
+
+    def kill(self):
+        if self._tooltip_panel:
+            self._tooltip_panel.kill()
+        super().kill()

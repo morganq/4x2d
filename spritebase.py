@@ -1,5 +1,4 @@
 import pygame
-import game
 from v2 import V2
 
 class SpriteBase(pygame.sprite.DirtySprite):

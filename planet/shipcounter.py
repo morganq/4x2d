@@ -34,7 +34,7 @@ class ShipCounter(SpriteBase):
         self._recalc_rect()
 
     def update(self, dt):
-        if self.planet.owning_civ != self.planet.scene.my_civ:
+        if self.planet.owning_civ != self.planet.scene.my_civ and not self.planet.in_comm_range:
             self.visible = False
             return
         self.visible = True

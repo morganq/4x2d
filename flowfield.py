@@ -51,6 +51,9 @@ class FlowFieldMap:
     def get_vector(self, pos, target, radius):
         return self.fields[target].get_vector(pos, radius)
 
+    def walk_field(self, pos, target, dist):
+        return self.fields[target].walk_field(pos, dist)
+
     def has_field(self, target):
         return target in self.fields
 
@@ -162,3 +165,12 @@ class FlowField:
                     out += v.normalized() # instead of here?
 
         return out.normalized()
+
+
+    def walk_field(self, pos, distance):
+        walked = 0
+        p = pos.copy()
+        while walked < distance:
+            p += self.get_vector(p, 10) * GRIDSIZE
+            walked += GRIDSIZE
+        return p

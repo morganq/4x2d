@@ -72,11 +72,6 @@ class Fighter(Ship):
             rate *= 1.67
         return rate
 
-    def get_max_health(self):
-        return self.BASE_HEALTH * (
-            self.get_stat("ship_health_mul") + self.get_stat("fighter_health_mul") + 1
-        ) + self.get_stat("ship_health_add") + self.get_stat("fighter_health_add")
-
     def get_weapon_range(self):
         range = self.FIRE_RANGE
         range *= (1 + self.get_stat("ship_weapon_range"))
@@ -91,13 +86,18 @@ class Fighter(Ship):
         damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
         damage_add += self.get_stat("ship_weapon_damage")
         damage_mul = self.get_stat("%s_damage_mul" % self.SHIP_BONUS_NAME)
-        return {
+        mods =  {
             'damage_base': self.BASE_DAMAGE,
             'damage_mul': damage_mul,
             'damage_add': damage_add,
             'missile_speed':self.get_stat("ship_missile_speed"),
+            'raze_upgrade': self.get_stat("raze_upgrade"),
             'color':PICO_LIGHTGRAY
         }
+        if self.SHIP_BONUS_NAME == "fighter":
+            mods['iron_on_hit'] = self.get_stat("fighter_damage_iron")
+
+        return mods        
 
     def get_threats(self):
         # OPT - cache results

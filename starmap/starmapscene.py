@@ -30,12 +30,12 @@ class StarMapScene(Scene):
         self.sm = states.Machine(StarMapState(self))
 
         self.background_group.add(Background(V2(0,0), 10, size=(950,1500)))        
-        self.scroll_panel = ScrollPanel(V2(0,0),(800,800))
+        self.scroll_panel = ScrollPanel(V2(0,0),(800,850))
 
         run_path = self.game.run_info.path
         
         self.galaxies = []
-        y = 760
+        y = 790
         for r,row in enumerate(self.game.run_info.data):
             self.galaxies.append([])
             for i,column in enumerate(row):

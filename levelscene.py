@@ -1,4 +1,5 @@
 from collections import defaultdict
+import o2meter
 from objgrid import ObjGrid
 from hazard import Hazard
 from helper import all_nearby, get_nearest
@@ -128,7 +129,7 @@ class LevelScene(scene.Scene):
         if self.levelfile:
             self.load_level(self.levelfile)
         elif True:
-            self.load_level("bases")
+            self.load_level("choke")
 
         else:
             homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
@@ -166,7 +167,6 @@ class LevelScene(scene.Scene):
             if num_planets >= max_planets * 1 / 3:
                 if ((avg_pos.x < game.RES[0] / 2 and pos.x < game.RES[0] /2) or
                     (avg_pos.x > game.RES[0] / 2 and pos.x > game.RES[0] /2)):
-                    print("flip from", pos, "avg", avg_pos)
                     pos = V2(game.RES[0] - pos.x, pos.y)
             
             near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
@@ -249,16 +249,25 @@ class LevelScene(scene.Scene):
         if game.DEV:
             self.ui_group.add(Button(V2(2, 68), 'Win', 'small', self.dev_win))
 
+        self.o2_meter = o2meter.O2Meter(V2(game.RES[0] - 68, 2))
+        
+        if self.options == "oxygen":
+            self.game.run_info.o2 = 0
+
+        self.o2_meter.o2 = self.game.run_info.o2
+        self.o2_meter._generate_image()
+        self.ui_group.add(self.o2_meter)
+
 
         self.score_label = Text("- Score -", "small", V2(game.RES[0] - 2, 2), PICO_BLUE)
         self.score_label.offset = (1, 0)
         self.score_label._recalc_rect()        
-        self.ui_group.add(self.score_label)
+        #self.ui_group.add(self.score_label)
 
         self.score_text = Text("0", "small", V2(game.RES[0] - 2, 12), PICO_BLUE)
         self.score_text.offset = (1, 0)
         self.score_text._recalc_rect()
-        self.ui_group.add(self.score_text)
+        #self.ui_group.add(self.score_text)
 
         # run unlocks
         for tech in self.game.run_info.saved_technologies:
@@ -353,7 +362,7 @@ class LevelScene(scene.Scene):
         return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ == civ]        
 
     def get_hazards(self):
-        return self.get_planets()
+        return [s for s in self.get_objects() if isinstance(s, Hazard)]
 
     def get_starting_state(self):
         return levelstates.PlayState(self)
@@ -386,6 +395,10 @@ class LevelScene(scene.Scene):
             fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
             self.ui_group.add(fn)
             
+        self.game.run_info.o2 -= dt
+        if self.time % 1 < (self.time - dt) % 1:
+            self.o2_meter.o2 = self.game.run_info.o2
+            self.o2_meter._generate_image()
 
         scene.Scene.update(self, dt)
 

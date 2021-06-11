@@ -208,8 +208,6 @@ class OffWorldMiningBuilding(SatelliteBuilding):
 class OrbitalLaserBuilding(SatelliteBuilding):
     SATELLITE_CLASS = OrbitalLaser
 
-# Laser - planet_weapon_mul
-
 class AlienHomeDefenseBuilding(Building):
     FIRE_RATE = 0.40
     upgrade = "alienhomedefense"
@@ -250,7 +248,7 @@ class AuraBuilding(Building):
             ships = set(planet.scene.get_my_ships(planet.owning_civ))
         else:
             ships = set([])
-        near = set(all_nearby(planet.pos, ships, 80))
+        near = set(all_nearby(planet.pos, ships, 60))
         far = ships - near
         for ship in near:
             if ship not in self.applied_ships:
@@ -270,16 +268,23 @@ class AuraBuilding(Building):
     def unapply(self, ship):
         pass   
 
+    def kill(self):
+        for ship in self.applied_ships:
+            self.unapply(ship)
+        return super().kill()
+
 class LowOrbitDefensesBuilding(AuraBuilding):
     def __init__(self):
         super().__init__()
         self.targeting = "mine"
 
     def apply(self, ship):
-        ship.bonus_max_health_aura += 10
+        ship.bonus_max_health_aura += 20
+        ship.health += 20
 
     def unapply(self, ship):
-        ship.bonus_max_health_aura -= 10
+        ship.bonus_max_health_aura -= 20
+        ship.health = min(ship.health, ship.get_max_health())
 
 class UltraBuilding(Building):
     def __init__(self):
@@ -310,3 +315,53 @@ class CommStationObject(SpaceObject):
 
 class CommStation(UltraBuilding):
     pass
+
+
+class ReflectorShieldCircleObj(SpaceObject):
+    def __init__(self, scene, planet):
+        super().__init__(scene, planet.pos)
+        self.collidable = True
+        self.stationary = False
+        self.radius = planet.radius + 7
+        self.collision_radius = self.radius
+        self._offset = (0.5, 0.5)
+        self._generate_image()
+        self.health = 50
+        self.health_bar.pos = self.pos + V2(0, -planet.radius - 10)
+
+    def bullet_hits(self, bullet):
+        return bullet.owning_civ != self.owning_civ
+
+    def get_max_health(self):
+        return 50
+
+    def on_die(self):
+        self.kill()
+        return super().on_die()
+
+    def _generate_image(self):
+        r = self.radius + 8
+        self._width = r * 2 + 8
+        self._height = r * 2 + 8
+        self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
+        center = V2(r + 4, r + 4)
+        pygame.draw.circle(self.image, PICO_PINK, center.tuple(), self.radius, 1)
+
+        self._recalc_rect()
+
+
+class ReflectorBuilding(Building):
+    def __init__(self):
+        super().__init__()
+        self.shield = None
+
+    def update(self, planet, dt):
+        if not self.shield:
+            self.shield = ReflectorShieldCircleObj(planet.scene, planet)
+            planet.scene.game_group.add(self.shield)
+        return super().update(planet, dt)
+
+    def kill(self):
+        if self.shield and self.shield.is_alive():
+            self.shield.kill()
+        return super().kill()

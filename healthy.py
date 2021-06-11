@@ -42,6 +42,11 @@ class Healthy:
             self.health_bar.max_value = self.get_max_health()
             self.health_bar.show()
             self.on_health_changed(old, self._health)
+            if old > 0 and self._health <= 0:
+                self.on_die()
+
+    def on_die(self):
+        pass
 
     def on_health_changed(self, old, new):
         pass

@@ -1,7 +1,8 @@
+from satellite import ReflectorShieldObj
 from colors import *
 from v2 import V2
 from spaceobject import SpaceObject
-from planet import planet
+from planet import planet, building
 import random
 import math
 import particle
@@ -142,7 +143,8 @@ class Ship(SpaceObject):
     def get_cruise_speed(self): return self.get_max_speed() * 0.80
 
     def get_max_health(self):
-        return self.BASE_HEALTH * (self.get_stat("ship_health_mul") + 1) + self.get_stat("ship_health_add") + self.bonus_max_health_aura
+        mhp = self.BASE_HEALTH * (self.get_stat("ship_health_mul") + 1) + self.get_stat("ship_health_add") + self.bonus_max_health_aura
+        return mhp
 
     def get_max_shield(self):
         shield = 0
@@ -238,6 +240,9 @@ class Ship(SpaceObject):
 
         self.special_stat_update(dt)
 
+        if self.scene.game.run_info.o2 <= 0 and self.owning_civ == self.scene.my_civ:
+            self.health -= self.get_max_health() / 60 * dt
+
         super().update(dt)
 
     def emit_thrust_particles(self):
@@ -260,6 +265,8 @@ class Ship(SpaceObject):
             other.needs_panel_update = True
         else:
             if isinstance(other, bullet.Bullet):
+                return
+            if isinstance(other, ReflectorShieldObj) or isinstance(other, building.ReflectorShieldCircleObj):
                 return
             delta=(other.pos-self.pos).normalized()
             self.pos += -delta
@@ -324,11 +331,14 @@ class Ship(SpaceObject):
     def warp(self, warp_dist):
         end = self.effective_target.pos
         offset_dist = self.effective_target.radius + 20
-        pl = int(warp_dist / 20)
         delta = (end - self.pos)
-        maxdist = delta.magnitude() - offset_dist
-        delta = delta.normalized()
-        target_pos = self.pos + delta * min(warp_dist, maxdist)
+        if warp_dist ** 2 >= delta.sqr_magnitude() or not self.scene.flowfield.has_field(self.effective_target):
+            maxdist = delta.magnitude() - offset_dist
+            delta = delta.normalized()
+            target_pos = self.pos + delta * min(warp_dist, maxdist)
+        else:
+            target_pos = self.scene.flowfield.walk_field(self.pos, self.effective_target, warp_dist)
+
         for color in [PICO_BLUE, PICO_WHITE, PICO_DARKBLUE]:
             p = LaserParticle(self.pos + V2.random_angle() * 3, target_pos + V2.random_angle() * 3, color, random.random() / 2)
             self.scene.game_group.add(p)

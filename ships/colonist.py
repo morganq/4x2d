@@ -30,7 +30,7 @@ class Colonist(Ship):
         return (
             other == self.effective_target and
             isinstance(other, planet. Planet) and
-            (other.owning_civ == None or other.owning_civ == self.owning_civ or other.health < other.get_max_health() / 4)
+            (other.owning_civ == None or other.owning_civ == self.owning_civ)
         )
 
     def collide(self, other):

@@ -11,6 +11,19 @@ from economy import RESOURCES, RESOURCE_COLORS
 from button import Button
 import rewardscene
 
+DIFFICULTY_NAMES = {
+    1:"minor",
+    2:"minor",
+    3:"major",
+    4:"major",
+    5:"warning",
+    6:"warning",
+    7:"do not enter!",
+    8:"do not enter!",
+    9:"impossible!",
+    10:"impossible!",
+}
+
 class GalaxyPanel(Panel):
     def __init__(self, galaxy, onclick):
         Panel.__init__(self, (5,5), galaxy)
@@ -19,7 +32,7 @@ class GalaxyPanel(Panel):
         self.tab = {'text':"Sector %d" % galaxy.coords[0], 'color':PICO_PINK}
         
         self.add(Text("- THREAT -", "tiny", (0,0), PICO_WHITE, False, multiline_width=100), V2(29,-2)) 
-        self.add(Text("[!Unknown]", "small", (0,0), PICO_WHITE, False, multiline_width=100), V2(0,16))
+        self.add(Text("UNKNOWN (LEVEL %d)" % (galaxy.difficulty,), "small", (0,0), PICO_WHITE, False, multiline_width=100), V2(0,16))
 
         self.add(Line(V2(0,0), V2(100,0), PICO_WHITE), (V2(0,30)))
 

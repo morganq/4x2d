@@ -34,6 +34,7 @@ class Asteroid(SpaceObject):
             
             self._circles.append((pos, size))
         self._generate_frames()
+        self.health_bar.pos = self.pos + V2(0, -7)
 
     def get_max_health(self):
         return self.total_resources * 0.75
@@ -89,12 +90,7 @@ class Asteroid(SpaceObject):
         if self.health <= 0:
             civ = origin.owning_civ
             for r,v in self.resources.data.items():
-                civ.resources.set_resource(r, civ.resources.data[r] + v)
-                if civ == self.scene.my_civ:
-                    yield_mul = civ.get_stat("asteroid_yield_mul") + 1
-                    # Add to score!!
-                    self.scene.score += v * yield_mul
-                    it = IconText(self.pos, None, "+%d" % v, economy.RESOURCE_COLORS[r])
-                    it.pos = self.pos + V2(0, -self.radius - 5) - V2(it.width, it.height) * 0.5 + V2(0, -10 * {'iron':2,'ice':1,'gas':0}[r])
-                    self.scene.ui_group.add(it)
+                yield_mul = civ.get_stat("asteroid_yield_mul") + 1
+                v *= yield_mul
+                civ.earn_resource(r, v, where=self.pos)
             self.kill()
