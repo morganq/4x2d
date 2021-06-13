@@ -7,6 +7,7 @@ from planet import planet
 import asteroid
 import random
 import math
+import sound
 from v2 import V2
 
 STATE_DOGFIGHT = 'dogfight'
@@ -133,6 +134,8 @@ class Fighter(Ship):
         #self.velocity += -towards * 2
         self.pos += -towards * 1.25
         self.thrust_particle_time = THRUST_PARTICLE_RATE
+
+        sound.play(random.choice(['laser1', 'laser2', 'laser3']))
 
         for i in range(10):
             pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalized() * 30 * (random.random() + 0.25)

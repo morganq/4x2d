@@ -57,12 +57,14 @@ class FleetManager:
 
             # record which fleets have buttons by looking at their first ships
             first_ship = fleet.ships[0]
-            def onclick(*args):
-                self.recall_fleet(fleet)
+            def make_onclick(fleet):
+                def onclick(*args):
+                    self.recall_fleet(fleet)
+                return onclick
             if self.civ == self.scene.my_civ:
                 if fleet.is_waiting() and first_ship not in self.fleet_order_buttons:
                     # replace with a graphic and a tooltip
-                    b = Button(first_ship.pos, '', 'small', onclick, image_path="assets/recall.png")
+                    b = Button(first_ship.pos, '', 'small', make_onclick(fleet), image_path="assets/recall.png")
                     b.offset = (-0.15, 1.25)
                     self.scene.ui_group.add(b)
                     self.fleet_order_buttons[first_ship] = b

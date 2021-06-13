@@ -33,6 +33,7 @@ from .planetart import generate_planet_art
 from spaceobject import SpaceObject
 from funnotification import FunNotification
 import explosion
+import sound
 
 EMIT_SHIPS_RATE = 0.125
 EMIT_CLASSES = {
@@ -321,6 +322,7 @@ class Planet(SpaceObject):
                 self.scene.game_group.add(s)
                 self.emit_ships_timer -= EMIT_SHIPS_RATE
                 self.needs_panel_update = True
+                sound.play("launch")
 
         ### Resource production ###
         # Figure out which is the "top" resource
@@ -505,6 +507,7 @@ class Planet(SpaceObject):
         return resource_order[0][0]        
 
     def on_die(self):  
+        sound.play("explosion2")
         if self.get_stat("underground"):
             for ship in all_nearby(self.pos, self.scene.get_enemy_ships(self.owning_civ), 60):
                 ship.take_damage(20 * self.get_stat("underground"), self)

@@ -4,6 +4,7 @@ from colors import *
 from particle import Particle
 from explosion import Explosion
 import random
+import sound
 
 class Healthy:
     def __init__(self, scene, meter_size = (30,4)):
@@ -84,6 +85,7 @@ class Healthy:
             dn = delta.normalized()
             hitpos = self.pos + dn * self.radius
             if was_shield:
+                sound.play("shield")
                 for i in range(10):
                     ang = dn.to_polar()[1]
                     rad = max(self.radius, 5) + 2
@@ -91,6 +93,7 @@ class Healthy:
                     p = Particle([PICO_GREEN, PICO_WHITE, PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE], 1, hp, 0.65 + random.random() * 0.2, dn)
                     self.scene.game_group.add(p)
             else:
+                sound.play("hit")
                 particles = 10
                 if self.radius > 6:
                     particles = 4

@@ -4,11 +4,13 @@ from v2 import V2
 from line import ptmax, ptmin
 import pygame
 import game
+import sound
 
 class OrderArrow(SpriteBase):
     def __init__(self):
         SpriteBase.__init__(self, V2(0,0))
         self._layer = -1
+        self.last_end = None
 
     def setup(self, start_planet, end, end_planet=None):
         thickness = 6
@@ -60,3 +62,13 @@ class OrderArrow(SpriteBase):
 
         self.pos = V2(0,0)
         self._recalc_rect()
+
+        if self.last_end is None:
+            self.last_end = end
+
+        if (end - self.last_end).sqr_magnitude() > 10 ** 2:
+            if end_planet:
+                sound.play("short2")
+            else:
+                sound.play("short1")
+            self.last_end = end        

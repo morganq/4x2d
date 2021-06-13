@@ -17,6 +17,7 @@ import save
 from resources import resource_path
 from funnotification import FunNotification
 from planet.planetpanel import PlanetPanel
+
 from orderpanel import OrderPanel
 from helppanel import HelpPanel
 from selector import Selector
@@ -84,6 +85,7 @@ class PlayState(UIEnabledState):
                     self.current_panel.position_nicely(self.scene)
                     self.current_panel.add_all_to_group(self.scene.ui_group)
                     if not just_update:
+                        sound.play("panel")
                         self.current_panel.fade_in()
 
                 if self.selector:
@@ -216,12 +218,14 @@ class OrderShipsState(UIEnabledState):
         self.arrow = OrderArrow()
         self.scene.ui_group.add(self.arrow)
         self.arrow.setup(self.planet_from, None, self.planet_to)
+        sound.play("attackpanel")
 
     def exit(self):
         self.hover_filter = lambda x: True
         self.panel.kill()
         self.arrow.kill()
         self.scene.paused = False
+        sound.play("click1")
         super().exit()
 
     def on_order(self, values):
@@ -251,6 +255,7 @@ class UpgradeState(UIEnabledState):
         self.current_cursor = None
 
     def enter(self):
+        sound.play("panel")
         self.scene.paused = True
         self.scene.upgrade_button.visible = False
         resource = self.scene.my_civ.upgrades_stocked[0]
@@ -292,6 +297,7 @@ class UpgradeState(UIEnabledState):
             self.scene.my_civ.upgrades_stocked.pop(0)
             self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
             self.scene.my_civ.clear_offers()
+            sound.play("upgrade2")
         if self.panel:
             self.panel.kill()
         self.scene.sm.transition(PlayState(self.scene))
@@ -370,6 +376,7 @@ class UpgradeState(UIEnabledState):
             self.scene.ui_group.add(self.back_button)            
 
     def next_selection_step(self):
+        sound.play("click1")
         for extra in self.extras:
             extra.kill()
         self.extras = []

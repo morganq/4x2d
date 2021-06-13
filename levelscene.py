@@ -15,6 +15,7 @@ import flowfield
 
 import pygame
 import json
+import sound
 
 import game
 import levelstates
@@ -316,6 +317,7 @@ class LevelScene(scene.Scene):
 
     def on_click_upgrade(self):
         self.sm.transition(levelstates.UpgradeState(self))
+        sound.play("click1")
 
     def dev_win(self):
         self.sm.transition(levelstates.VictoryState(self))        
@@ -456,6 +458,7 @@ class LevelScene(scene.Scene):
                 self.upgrade_button.color = RESOURCE_COLORS[r]
                 self.upgrade_button._generate_image()
                 self.upgrade_button.fade_in(speed=2)
+                sound.play("upgrade")
         else:
             if self.upgrade_button.visible:
                 self.upgrade_button.visible = False

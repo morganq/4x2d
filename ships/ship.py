@@ -10,6 +10,7 @@ import bullet
 import helper
 import explosion
 import pygame
+import sound
 from resources import resource_path
 from laserparticle import LaserParticle
 
@@ -372,6 +373,7 @@ class Ship(SpaceObject):
 
     def kill(self):
         if self.health <= 0:
+            sound.play("explosion1")
             base_angle = random.random() * 6.2818
             for x in range(self._width):
                 for y in range(self._height):

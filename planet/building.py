@@ -320,6 +320,7 @@ class CommStation(UltraBuilding):
 class ReflectorShieldCircleObj(SpaceObject):
     def __init__(self, scene, planet):
         super().__init__(scene, planet.pos)
+        self.planet = planet
         self.collidable = True
         self.stationary = False
         self.radius = planet.radius + 7
@@ -330,7 +331,7 @@ class ReflectorShieldCircleObj(SpaceObject):
         self.health_bar.pos = self.pos + V2(0, -planet.radius - 10)
 
     def bullet_hits(self, bullet):
-        return bullet.owning_civ != self.owning_civ
+        return bullet.owning_civ != self.planet.owning_civ
 
     def get_max_health(self):
         return 50

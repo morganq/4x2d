@@ -35,7 +35,8 @@ class Game:
         self.save = save
         self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
         pygame.display.set_caption("Hostile Quadrant")
-        #sound.init()
+        sound.init()
+        #sound.play_music("game")
         self.screen = pygame.Surface(RES)
         self.run_info = run.RunInfo()
         self.input_mode = 'mouse'

@@ -9,6 +9,7 @@ import planet
 from helper import all_nearby, clamp
 from bullet import Bullet
 from ships.bomber import Bomber
+import sound
 
 class Interceptor(Fighter): 
     BASE_HEALTH = 50
@@ -59,6 +60,8 @@ class Interceptor(Fighter):
 
         b = Bullet(self.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)
+
+        sound.play(random.choice(['laser1', 'laser2', 'laser3']))
 
         #self.velocity += -towards * 2
         self.pos += -towards * 1

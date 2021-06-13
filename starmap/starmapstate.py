@@ -5,6 +5,7 @@ import levelscene
 from . import starmapscene
 from loadingscene import LoadingScene
 import states
+import sound
 
 class StarMapState(states.UIEnabledState):
     def enter(self):
@@ -28,6 +29,7 @@ class StarMapState(states.UIEnabledState):
 
                 if not self.current_panel:
                     self.current_panel = GalaxyPanel(self.last_clicked_sprite, self.click_launch)
+                    sound.play("panel")
                     self.current_panel.position_nicely(self.scene)
                     self.current_panel.add_all_to_group(self.scene.ui_group)
                     self.current_panel.fade_in()
@@ -45,7 +47,7 @@ class StarMapState(states.UIEnabledState):
         super().update(dt)
 
     def click_launch(self, galaxy):
-        print(galaxy)
+        sound.play("click1")
         self.scene.game.run_info.choose_path(*galaxy.coords)
         self.scene.game.scene = LoadingScene(self.scene.game,galaxy)
         self.scene.game.scene.start()

@@ -3,6 +3,7 @@ from ships.fighter import Fighter
 from ships.ship import Ship
 from line import Line
 from v2 import V2
+import sound
 
 class Alien2ControlShip(Fighter):
     SHIP_NAME = "alien2controlship"
@@ -31,6 +32,8 @@ class Alien2ControlShip(Fighter):
 
         if at.tether_target:
             return
+
+        sound.play("control")
 
         at.tether_target = True
         self.tethered = at

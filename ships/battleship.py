@@ -8,6 +8,7 @@ import math
 import planet
 from helper import all_nearby, clamp
 from bullet import Bullet
+import sound
 from laserparticle import LaserParticle
 
 class Battleship(Fighter): 
@@ -56,6 +57,9 @@ class Battleship(Fighter):
             e for e in enemies
             if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.is_alive())
         ]
+
+        sound.play(random.choice(['laser1', 'laser2', 'laser3']))
+
         if threats:
             self.effective_target = random.choice(threats)
 

@@ -8,6 +8,7 @@ from colors import *
 from line import Line
 from v2 import V2
 from economy import RESOURCES, RESOURCE_COLORS
+import game
 from button import Button
 import rewardscene
 
@@ -42,7 +43,7 @@ class GalaxyPanel(Panel):
         description = Text(rewardscene.REWARDS[galaxy.rewards[0]]['description'], "small", (0,0), PICO_WHITE, False, multiline_width=110, center=False)
         self.add(description, V2(0,69))
 
-        if galaxy.playable:
+        if galaxy.playable or game.DEV:
             self.add(Button(V2(0,0), 'LAUNCH', 'small', lambda:onclick(galaxy)), V2(0, description.height + 72))
 
         self.redraw()
