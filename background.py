@@ -52,7 +52,7 @@ class Background(SpriteBase):
         self._recalc_rect()
 
     def update(self, dt):
-        #self.time += dt
+        self.time += dt
         #if (self.time + dt) % 3 < self.time % 3:
-        #    self._generate_image()
+        self._generate_image()
         return super().update(dt)

@@ -20,6 +20,8 @@ from colors import *
 from v2 import V2
 import run
 import optimize
+import xbrz
+import io
 
 DEV = True
 SCALE = 2
@@ -37,7 +39,7 @@ class Game:
         pygame.display.set_caption("Hostile Quadrant")
         sound.init()
         #sound.play_music("game")
-        self.screen = pygame.Surface(RES)
+        self.screen = pygame.Surface(RES, pygame.SRCALPHA)
         self.run_info = run.RunInfo()
         self.input_mode = 'mouse'
         if len(sys.argv) > 1 and DEV:
@@ -110,8 +112,16 @@ class Game:
                 
 
     def render(self):
+        self.scaled_screen.fill((128,128,128,255))
         self.scene.render()
-        pygame.transform.scale(self.screen, self.scaled_screen.get_size(), self.scaled_screen)
+        #pygame.transform.scale(self.screen, self.scaled_screen.get_size(), self.scaled_screen)
+        sc = pygame.Surface(self.screen.get_size(), depth=32)
+        sc.fill((126,127,128))
+        factor = SCALE
+        buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, RES[0], RES[1], xbrz.ColorFormat.RGB)
+        surf = pygame.image.frombuffer(buf2, (RES[0] * factor, RES[1] * factor), "RGBX")
+        #print(surf.get_at((100,100)))
+        self.scaled_screen.blit(surf, (0,0))
         t = pygame.time.get_ticks() - self.frame_time
         self.frame_time = pygame.time.get_ticks()
         text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))

@@ -6,6 +6,45 @@ import pygame
 import game
 import sound
 
+class Arrow(SpriteBase):
+    def __init__(self, pt1, pt2, color):
+        super().__init__(pt1)
+        self.pt1 = pt1
+        self.pt2 = pt2
+        self.color = color
+        self._generate_image()
+
+    def _generate_image(self):
+        thickness = 6
+        ht = thickness / 2
+        color = self.color
+        delta = self.pt2 - self.pt1
+        pt1 = self.pt1.copy()
+        pt2 = self.pt2.copy()
+
+        w = game.RES[0] #TODO: wat. 
+        h = game.RES[1]
+
+        forward = delta.normalized()
+        side = V2(forward.y, -forward.x)
+        points = []
+        points.append(pt1 + side * -ht)
+        points.append(pt1 + side * ht)
+        points.append(pt2 + side * ht + forward * -15)
+        points.append(pt2 + side * 15 + forward * -15)
+        points.append(pt2)
+        points.append(pt2 + side * -15 + forward * -15)
+        points.append(pt2 + side * -ht + forward * -15)
+        points = [p.tuple() for p in points]
+
+        self.image = pygame.Surface((w,h), pygame.SRCALPHA)
+        pygame.draw.polygon(self.image, color, points, 0)
+        self._width = w
+        self._height = h
+
+        self.pos = V2(0,0)
+        self._recalc_rect()
+
 class OrderArrow(SpriteBase):
     def __init__(self):
         SpriteBase.__init__(self, V2(0,0))
