@@ -26,12 +26,12 @@ class UpgradeButton(SpriteBase):
     def _generate_image(self, hover=False):
         w = 240
         h = 31
-        pad = 4
+        pad = 6
         resource_color = RESOURCE_COLORS[self.upgrade.resource_type]
         upgrade_color = UPGRADE_CATEGORY_COLORS[self.upgrade.category]
 
         desc_rect = text.render_multiline(self.upgrade.description, "small", PICO_WHITE, 200, False).get_rect()
-        h = desc_rect[3] + 19
+        h = desc_rect[3] + 23
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
         if hover:
@@ -44,7 +44,7 @@ class UpgradeButton(SpriteBase):
         icon = upgradeicon.generate_upgrade_image(self.upgrade)
         self.image.blit(icon, (pad - 2, pad - 3))
         
-        text.FONTS["small"].render_to(self.image, (31 + pad, pad + 1), self.upgrade.title, text_color)
+        text.FONTS["small"].render_to(self.image, (31 + pad, pad + 1), self.upgrade.title, upgrade_color)
         text.render_multiline_to(self.image, (31 + pad, pad + 14), self.upgrade.description, "small", text_color, 200, False)
 
         self._width = w

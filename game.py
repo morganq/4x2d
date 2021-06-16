@@ -109,19 +109,23 @@ class Game:
             self.render()
             #optimize.print_memos()
             optimize.reset_frame_memos()
-                
+
+
+    def scale_xbr(self):
+        sc = pygame.Surface(self.screen.get_size(), depth=32)
+        factor = SCALE
+        buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, RES[0], RES[1], xbrz.ColorFormat.RGB)
+        surf = pygame.image.frombuffer(buf2, (RES[0] * factor, RES[1] * factor), "RGBX")
+        self.scaled_screen.blit(surf, (0,0))
+
+    def scale_normal(self):
+        pygame.transform.scale(self.screen, self.scaled_screen.get_size(), self.scaled_screen)
 
     def render(self):
         self.scaled_screen.fill((128,128,128,255))
         self.scene.render()
-        #pygame.transform.scale(self.screen, self.scaled_screen.get_size(), self.scaled_screen)
-        sc = pygame.Surface(self.screen.get_size(), depth=32)
-        sc.fill((126,127,128))
-        factor = SCALE
-        buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, RES[0], RES[1], xbrz.ColorFormat.RGB)
-        surf = pygame.image.frombuffer(buf2, (RES[0] * factor, RES[1] * factor), "RGBX")
-        #print(surf.get_at((100,100)))
-        self.scaled_screen.blit(surf, (0,0))
+        #self.scale_normal()
+        self.scale_xbr()
         t = pygame.time.get_ticks() - self.frame_time
         self.frame_time = pygame.time.get_ticks()
         text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))

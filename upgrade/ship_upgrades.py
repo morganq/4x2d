@@ -212,6 +212,7 @@ class Warp1Upgrade(Upgrade):
     icon = "ship_default"
     cursor = None
     family = {'tree':'warp', 'parents':[]}
+    infinite = True
 
     def apply(self, to):
         for ship in to.scene.get_civ_ships(to):

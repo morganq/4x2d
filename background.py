@@ -4,6 +4,7 @@ import pygame
 import game
 import random
 import math
+from helper import clamp
 
 class Background(SpriteBase):
     def __init__(self, pos, gridsize=20, size=None):
@@ -30,18 +31,18 @@ class Background(SpriteBase):
             for j in range(iy):
                 x = int(i * GS + GS / 2)
                 y = int(j * GS + GS / 2)
-                xt = x + self.time * 10
+                xt = x + self.time * 30
                 colors = [PICO_DARKGRAY, PICO_DARKBLUE, PICO_PURPLE]
                 colorf = math.sin(pow(xt / 175 * ss, 1.8) + y / 30) * 1.25 + 1.5
                 #colorf = y / game.RES[1] * 3
                 color = colors[int(colorf)]
                 linelenf = math.sin(-xt / 31 * ss + pow(y/80,2)) * 0.65 + 1.75
                 linelenf *= ss
-                lineleni = min(int(linelenf),2)
+                lineleni = min(int(linelenf),4)
                 pygame.draw.line(self.image, color, (x - lineleni, y), (x + lineleni, y), 1)
                 pygame.draw.line(self.image, color, (x, y - lineleni), (x, y + lineleni), 1)
-                if math.sin(xt / 90 * ss + pow(-y/10,2)) > 0.9:
-                    off = ss * 8
+                off = clamp(math.sin(xt / 90 * ss + pow(-y/10,2)) * 6 + 12,0, 10)
+                if off < 10:
                     pygame.draw.line(self.image, color, (x + off, y), (x + GS - off, y), 1)
                     pygame.draw.line(self.image, color, (x - off, y), (x - GS + off, y), 1)
                     pygame.draw.line(self.image, color, (x, y + off), (x, y + GS - off), 1)
@@ -52,7 +53,7 @@ class Background(SpriteBase):
         self._recalc_rect()
 
     def update(self, dt):
-        self.time += dt
+        #self.time += dt
         #if (self.time + dt) % 3 < self.time % 3:
-        self._generate_image()
+        #self._generate_image()
         return super().update(dt)

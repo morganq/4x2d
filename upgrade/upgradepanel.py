@@ -1,10 +1,11 @@
+from pygame import font
 from framesprite import FrameSprite
 from spritebase import SpriteBase
 from button import Button
 from panel import Panel
 import pygame
 from colors import *
-from text import Text
+from text import FONTS, Text
 from upgrade.upgradebutton import UpgradeButton
 import economy
 import game
@@ -18,10 +19,10 @@ class UpgradePanel(Panel):
         Panel.__init__(self, pos, None)
         self.resource = resource
         self.padding = 15
-        self.tab = {"text":"Upgrade: %s" % self.resource.title(), "color":economy.RESOURCE_COLORS[self.resource], "icon":"assets/i-upgrade.png"}
+        self.tab = {"text":"Asset: %s" % self.resource.title(), "color":economy.RESOURCE_COLORS[self.resource], "icon":"assets/i-upgrade.png"}
         self.tree_children = []
 
-        self.add(Text("Pick Your Upgrade", "big", V2(0,0), multiline_width=250), V2(0,0))
+        self.add(Text("Pick Your Asset", "big", V2(0,0), multiline_width=250), V2(0,0))
         self.header_ys = []
 
         y = 30
@@ -49,7 +50,7 @@ class UpgradePanel(Panel):
         self.add(box, V2(250,0))
 
         if game.Game.inst.run_info.rerolls > 0 or game.DEV:
-            self.add(Button(V2(0,0), "Reroll (%d left)" % game.Game.inst.run_info.rerolls, "small", on_reroll), V2(0, y + 10))
+            self.add(Button(V2(0,0), "%d left" % game.Game.inst.run_info.rerolls, "small", on_reroll, icon="assets/die.png", label="REROLL"), V2(0, y + 10))
 
         self.redraw()
 
@@ -72,11 +73,13 @@ class UpgradePanel(Panel):
             rows = []
             for i in range(3):
                 rows.append([])
-                for u in same_fam:
+                for u in same_fam[::]:
                     if not u.family['parents'] and not cur_parents:
                         rows[-1].append(u)
+                        same_fam.remove(u)
                     elif u.family['parents'] and set(u.family['parents']).issubset(set(cur_parents)):
                         rows[-1].append(u)
+                        same_fam.remove(u)
                 cur_parents = [u.name for u in rows[-1]]
                 
             positions = {}
@@ -86,7 +89,7 @@ class UpgradePanel(Panel):
                     pos = V2(self.width - 55, 0)
                     if len(row) > 1:
                         pos = V2(self.width - 75 + cy * 37, 0)
-                    icon = UpgradeIcon(pos + V2(self.x, self.y + 60 + rx * 50), upg.name, None, True)
+                    icon = UpgradeIcon(pos + V2(self.x - 4, self.y + 50 + rx * 50), upg.name, None, True)
                     game.Game.inst.scene.ui_group.add(icon)
                     self.tree_children.append(icon)
                     positions[upg.name] = icon.pos
@@ -134,7 +137,8 @@ class UpgradePanel(Panel):
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + 68, y0 + y3), (x0 + 254 - self.padding, y0 + y3))
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + 254 - self.padding, y0 + y3), (x0 + 254 - self.padding, y0 + y3+5))
 
-        pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 85, 15, 84, self.height - 16))
+        pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 85, 32, 78, 160))
+        FONTS['tiny'].render_to(self.image, (self.width - 83, 24), "TECHNOLOGY TREE", PICO_WHITE)
 
     def kill(self):
         for child in self.tree_children:

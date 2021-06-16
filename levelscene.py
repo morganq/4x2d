@@ -452,10 +452,12 @@ class LevelScene(scene.Scene):
 
         if len(self.my_civ.upgrades_stocked) > 0:
             r = self.my_civ.upgrades_stocked[0]
-            text = "UPGRADE - %s" % r.upper()
+            text = "%s" % r.upper()
             if self.upgrade_button.visible == False or self.upgrade_button.text != text:
                 self.upgrade_button.text = text
-                self.upgrade_button.color = RESOURCE_COLORS[r]
+                self.upgrade_button.label = "ASSET"
+                self.upgrade_button.icon = "assets/i-%s.png" % r
+                self.upgrade_button.color = PICO_RED
                 self.upgrade_button._generate_image()
                 self.upgrade_button.fade_in(speed=2)
                 sound.play("upgrade")

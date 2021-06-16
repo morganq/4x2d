@@ -13,7 +13,7 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
         spritebase.SpriteBase.__init__(self, pos)
         self.panel_for = panel_for
         self._controls = []
-        self.padding = 6
+        self.padding = 9
         self._background_offset = V2(0,0)
 
         self.tab = None
@@ -54,6 +54,7 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
 
     def redraw(self):
         xmin, xmax, ymin, ymax = 0,0,0,0
+        outerpad = 3
         for ci in self._controls:
             control = ci['control']
             pos = ci['pos']
@@ -77,20 +78,26 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
         if self.tab:
             tab_offset = 14
 
+        total_height = box_height + tab_offset
         self.image = pygame.Surface((box_width, box_height + tab_offset), pygame.SRCALPHA)
-        pygame.draw.rect(self.image, PICO_DARKBLUE, (0,tab_offset, box_width, box_height), 0)
+        pygame.draw.rect(self.image, PICO_DARKBLUE, (outerpad,outerpad + tab_offset, box_width - outerpad * 2, box_height - outerpad * 2), 0)
         self._width = box_width
         self._height = box_height + tab_offset
-        pygame.draw.rect(self.image, PICO_WHITE, (0, tab_offset, box_width, box_height), 1)
+#        pygame.draw.rect(self.image, PICO_WHITE, (0, tab_offset, 1, box_height), 1)
 
         if self.tab:        
-            pygame.draw.rect(self.image, self.tab['color'], (0, 0, tab_width, tab_offset + 1), 0)
-            pygame.draw.rect(self.image, PICO_WHITE, (0, 0, tab_width, tab_offset + 1), 1)
+            pygame.draw.rect(self.image, self.tab['color'], (outerpad, outerpad, tab_width, tab_offset), 0)
+ #           pygame.draw.rect(self.image, PICO_WHITE, (0, 0, 1, tab_offset + 1), 1)
             if 'icon' in self.tab:
-                self.image.blit(icon, (4,4))
-            self.image.blit(tab_text, (4 + icon_offset, 4))
+                self.image.blit(icon, (4 + outerpad,4 + outerpad))
+            self.image.blit(tab_text, (4 + icon_offset + outerpad, 4 + outerpad))
 
         self._background_offset = V2(self.padding, self.padding + tab_offset)
+
+        pygame.draw.line(self.image, PICO_WHITE, (0,0), (4,0))
+        pygame.draw.line(self.image, PICO_WHITE, (0,0), (0,4))
+        pygame.draw.line(self.image, PICO_WHITE, (box_width - 4, total_height-1), (box_width, total_height-1))
+        pygame.draw.line(self.image, PICO_WHITE, (box_width - 1, total_height-4), (box_width - 1, total_height))
 
         self._reposition_children()
         self._recalc_rect()

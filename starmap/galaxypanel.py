@@ -44,7 +44,7 @@ class GalaxyPanel(Panel):
         self.add(description, V2(0,69))
 
         if galaxy.playable or game.DEV:
-            self.add(Button(V2(0,0), 'LAUNCH', 'small', lambda:onclick(galaxy)), V2(0, description.height + 72))
+            self.add(Button(V2(0,0), 'LAUNCH', 'small', lambda:onclick(galaxy), icon="assets/i-colonist.png", color=PICO_PINK), V2(0, description.height + 72))
 
         self.redraw()
 
