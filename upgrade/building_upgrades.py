@@ -103,7 +103,7 @@ class Pop2bUpgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "University"
     description = "Ship production is [^+5%] faster for each population"
-    icon = "building_default"
+    icon = "university"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop1']}
     building = make_simple_stats_building(stats=Stats(ship_production_per_pop=0.05), shape="lifesupport")
@@ -133,7 +133,7 @@ class Hangar1Upgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "Fighter Hangar"
     description = "[^+50%] [Fighter] Production Quantity"
-    icon = "building_default"
+    icon = "fighterhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':[]}
     building = make_simple_stats_building(stats=Stats(fighter_production_amt=0.5), shape="modulardwellings")
@@ -145,7 +145,7 @@ class Hangar2aUpgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "Interceptor Hangar"
     description = "[^+100%] [Interceptor] Production Quantity"
-    icon = "building_default"
+    icon = "interceptorhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':['b_hangar1']}
     building = make_simple_stats_building(stats=Stats(interceptor_production=1), shape="lifesupport")
@@ -158,7 +158,7 @@ class Hangar2bUpgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "Bomber Hangar"
     description = "[^+100%] [Bomber] Production Quantity"
-    icon = "building_default"
+    icon = "bomberhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':['b_hangar1']}
     building = make_simple_stats_building(stats=Stats(bomber_production=1), shape="lifesupport")
@@ -171,7 +171,7 @@ class Hangar3Upgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "Battleship Hangar"
     description = "[^+150%] [Battleship] Production Speed"
-    icon = "building_default"
+    icon = "battleshiphangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':['b_hangar2a', 'b_hangar2b']}
     building = make_simple_stats_building(stats=Stats(battleship_production=1.5), shape="lifesupport")
@@ -189,7 +189,7 @@ class Defense1Upgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "Reflector"
     description = "Gain a [^50] health reflector shield (does not regenerate)"
-    icon = "building_default"
+    icon = "reflectorshield"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':[]}
     building = ReflectorBuilding
@@ -201,7 +201,7 @@ class Defense2aUpgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "Resilient Ecosystem"
     description = "[^+100%] health and [^+2] health regeneration per second"
-    icon = "building_default"
+    icon = "resilientecosystem"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
     building = make_simple_stats_building(stats=Stats(planet_health_mul=1, regen=2), shape="lifesupport")
@@ -214,7 +214,7 @@ class Defense2bUpgrade(AddBuildingUpgrade):
     category = "buildings"
     title = "Armory"
     description = "Fire [1 missile per population] at nearby enemy ships"
-    icon = "building_default"
+    icon = "armory"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
     building = ArmoryBuilding

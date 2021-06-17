@@ -383,11 +383,12 @@ class LevelScene(scene.Scene):
     def update(self, dt):
         ut = time.time()
         self.update_times = defaultdict(lambda:0)
+        base_dt = dt
         dt *= self.game_speed
         if self.paused:
             self.sm.state.paused_update(dt)
             for sprite in self.ui_group.sprites():
-                sprite.update(dt)            
+                sprite.update(base_dt)
             return        
         self.time += dt
 
@@ -460,7 +461,6 @@ class LevelScene(scene.Scene):
                 self.upgrade_button.color = PICO_RED
                 self.upgrade_button._generate_image()
                 self.upgrade_button.fade_in(speed=2)
-                sound.play("upgrade")
         else:
             if self.upgrade_button.visible:
                 self.upgrade_button.visible = False

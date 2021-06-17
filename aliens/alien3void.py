@@ -1,0 +1,58 @@
+from particle import Particle
+from colors import PICO_BLACK, PICO_DARKGRAY, PICO_LIGHTGRAY, PICO_PURPLE
+from spaceobject import SpaceObject
+import pygame
+from v2 import V2
+import random
+from rangeindicator import RangeIndicator
+
+class Alien3Void(SpaceObject):
+    def __init__(self, scene, pos, radius):
+        super().__init__(scene, pos)
+        self.radius = radius
+        self._layer = -1
+        self._generate_image()
+        self.offset = (0.5,0.5)
+        self.target_radius = self.radius
+        self.ring = RangeIndicator(self.pos, self.radius + 1.5, PICO_PURPLE, 2, 5)
+        self.ring._layer = -2
+        self.scene.game_group.add(self.ring)
+
+    def _generate_image(self):
+        r = int(self.radius)
+        self._width = r * 2
+        self._height = r * 2
+        self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, PICO_BLACK, (r,r), r, 0)
+        num = r
+        #for i in range(num):
+        #    theta = i / (num-1) * 6.2818
+        #    p = V2.from_angle(theta) * r
+        #    self.image.set_at((p + V2(r, r)).tuple_int(), PICO_LIGHTGRAY)
+
+        self._recalc_rect()
+
+    def grow(self):
+        if self.radius < 50:
+            self.target_radius = self.radius + 10
+        elif self.radius < 80:
+            self.target_radius = self.radius + 5
+
+    def update(self, dt):
+        if self.radius < self.target_radius:
+            self.radius += 1 * dt
+            self._generate_image()
+            self.ring.radius = self.radius + 1.5
+            self.ring._generate_image()
+        
+        if random.random() > 0.93:
+            pos = V2.random_angle() * random.random() * self.radius + self.pos
+            p = Particle([PICO_LIGHTGRAY, PICO_DARKGRAY], 1, pos, 0.25, V2.random_angle() * 3)
+            p._layer = -1
+            self.scene.game_group.add(p)
+
+        return super().update(dt)
+
+    def kill(self):
+        self.ring.kill()
+        return super().kill()

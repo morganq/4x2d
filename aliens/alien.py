@@ -15,6 +15,7 @@ class Alien:
     def __init__(self, scene, civ):
         self.scene = scene
         self.civ = civ
+        self.civ.alien = self
         self.resource_priority = 'grow'
         self.resource_priority_funs = {
             'grow':self.priority_grow,

@@ -7,6 +7,7 @@ from stats import Stats
 from icontext import IconText
 from v2 import V2
 import random
+import sound
 
 class Civ:
     name = None
@@ -86,8 +87,7 @@ class Civ:
                 self.upgrade_limits.data[res_type] = int(self.upgrade_limits.data[res_type] + self.get_upgrade_increase_amts()[res_type])
                 self.num_upgrades += 1
                 if not self.is_enemy:
-                    #print(self.upgrade_limits.data[res_type], res_type)
-                    #print(self.num_upgrades, "upgrades so far")
+                    sound.play("upgrade")
                     if res_type == 'iron':
                         self.upgrade_times.append(self.time)
 

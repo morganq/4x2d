@@ -58,6 +58,7 @@ class UpgradeIcon(SpriteBase):
                 self._tooltip_panel.pos = self.pos + V2(30,0)
             self._tooltip_panel._reposition_children()
             self._tooltip_panel.add_all_to_group(self.scene.ui_group)
+            self.scene.ui_group.add(self._tooltip_panel)
         return super().on_mouse_enter(pos)
 
     def on_mouse_exit(self, pos):

@@ -1,3 +1,4 @@
+from aliens.alien3fighter import Alien3Fighter
 from aliens.alien2colonist import Alien2Colonist
 from aliens.alien2controlship import Alien2ControlShip
 from aliens.alien2fighter import Alien2Fighter
@@ -9,6 +10,7 @@ from upgrade.upgrades import UPGRADE_CLASSES
 from aliens.alien1colonist import Alien1Colonist
 from aliens.alien1fighter import Alien1Fighter
 from aliens.alien1battleship import Alien1Battleship
+from aliens.alien3colonist import Alien3Colonist
 
 import framesprite
 import pygame
@@ -49,7 +51,9 @@ EMIT_CLASSES = {
     'alien2fighter':Alien2Fighter,
     'alien2controlship':Alien2ControlShip,
     'alien2colonist':Alien2Colonist,
-    'alien2battleship':Alien2Battleship
+    'alien2battleship':Alien2Battleship,
+    'alien3colonist':Alien3Colonist,
+    'alien3fighter':Alien3Fighter
 }
 
 RESOURCE_BASE_RATE = 1/220.0
