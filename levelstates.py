@@ -60,9 +60,15 @@ class PlayState(UIEnabledState):
                 if target_selection:
                     if target_selection['type'] == 'planet':
                         self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite))
+                        self.hover_sprite.on_mouse_exit(V2(0,0))
+                        self.hover_sprite = None
+                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
                     if target_selection['type'] == 'asteroid':
                         self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite))
+                        self.hover_sprite.on_mouse_exit(V2(0,0))
+                        self.hover_sprite = None
+                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)                        
             
 
     def update(self, dt):
@@ -270,7 +276,10 @@ class UpgradeState(UIEnabledState):
 
     def filter_my_planets(self, x):
         return (
-            x.get_selection_info() and x.get_selection_info()['type'] == 'planet' and x.owning_civ == self.scene.my_civ
+            x.get_selection_info() and
+            x.get_selection_info()['type'] == 'planet' and
+            x.owning_civ == self.scene.my_civ and 
+            x.upgradeable
         ) or x == self.back_button
 
     def filter_my_fleets(self, x):

@@ -142,16 +142,17 @@ class Alien3(alien.Alien):
         self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
 
     def update(self, dt):
-        for planet in self.scene.get_civ_planets(self.civ):
-            if planet not in self.planet_void:
-                void = Alien3Void(self.scene, planet.pos, planet.get_radius() + 10)
-                self.planet_void[planet] = void
-                self.scene.game_group.add(void)
+        if self.difficulty > 1:
+            for planet in self.scene.get_civ_planets(self.civ):
+                if planet not in self.planet_void:
+                    void = Alien3Void(self.scene, planet.pos, planet.get_radius() + 10)
+                    self.planet_void[planet] = void
+                    self.scene.game_group.add(void)
 
-        for planet in list(self.planet_void.keys()):
-            if planet.owning_civ != self.civ:
-                self.planet_void[planet].kill()
-                del self.planet_void[planet]
+            for planet in list(self.planet_void.keys()):
+                if planet.owning_civ != self.civ:
+                    self.planet_void[planet].kill()
+                    del self.planet_void[planet]
 
         return super().update(dt)
 

@@ -86,7 +86,9 @@ class Planet(SpaceObject):
         self.owning_civ = None
         self.buildings = []
         self.building_slots = [False] * 12
-        self.production = []    
+        self.production = []
+
+        self.upgradeable = True
 
         self.base_angle = 0
 

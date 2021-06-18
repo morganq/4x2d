@@ -52,6 +52,8 @@ class Ship(SpaceObject):
         self.stationary = False
         self.fleet = None
 
+        self._layer = 1
+
         # States
         self.states = {
             STATE_CRUISING:{'update':self.state_cruising, 'enter':self.enter_state_cruising},

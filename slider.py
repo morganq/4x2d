@@ -28,7 +28,21 @@ class Slider(SpriteBase):
         t = ((self.value - self.min) / self.max - self.min)
         x = int((w-(pad * 2)) * t + pad)
         pts = [(x, 4), (x + 3, 10), (x - 3, 10)]
+        if self.value > self.min:
+            pygame.draw.rect(self.image, PICO_BLUE, (pad + 1,1,x - pad - 1,3), 0)
         pygame.draw.polygon(self.image, PICO_WHITE, pts,0)
+
+        for i in range(self.max - self.min):
+            it = ((i - self.min) / self.max - self.min)
+            ix = int((w-(pad * 2)) * it + pad)
+            self.image.set_at((ix, 4), PICO_WHITE)
+
+        if self.value != self.min:
+            mtw = text.FONTS['small'].get_rect(str(self.min))[2]
+            text.FONTS['small'].render_to(self.image, (pad - mtw / 2 + 1,13), str(self.min), PICO_BLUE)
+        if self.value != self.max:
+            mtw = text.FONTS['small'].get_rect(str(self.max))[2]
+            text.FONTS['small'].render_to(self.image, (w - pad - mtw / 2 + 1,13), str(self.max), PICO_BLUE)            
 
         tw = text.FONTS['small'].get_rect(str(self.value))[2]
         text.FONTS['small'].render_to(self.image, (x - tw / 2 + 1,13), str(self.value), PICO_WHITE)

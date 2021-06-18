@@ -1,3 +1,8 @@
-make regen a stat
 fix double fire and fast movement bugs in ships (fighters?)
 Fix hover / mouse input in a holistic way
+
+shop:
+ - blueprint x3,
+ - memory x3,
+ - o2 +10% (always), 
+ - +1 random planet, 

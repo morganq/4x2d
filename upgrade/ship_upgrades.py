@@ -189,7 +189,7 @@ class LongFighters3Upgrade(Upgrade):
     name = "s_longfighters3"
     resource_type = "iron"
     category = "ships"
-    title = "Recycled Armaments"
+    title = "Efficient Assembly III"
     description = "Train [^5] [Fighters] Over [120 seconds], [^+50] Gas"
     icon = "ship_default"
     cursor = "allied_planet"

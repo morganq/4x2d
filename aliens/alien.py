@@ -22,8 +22,10 @@ class Alien:
             'produce':self.priority_produce,
             'tech':self.priority_tech
         }
+        self.difficulty = 0
 
         self._last_time = 0
+        self.last_attack_time = 0
         self.time = 0
         self.fear_attack = False
 
@@ -124,6 +126,7 @@ class Alien:
         return []
 
     def set_difficulty(self, difficulty):
+        self.difficulty = difficulty
         self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 5
         self.civ.base_stats['mining_rate'] = 0.35 + ((difficulty - 1) / 5)
         extra_planets = difficulty // 3
@@ -146,9 +149,7 @@ class Alien:
             # Randomly, decide to expand
             if random.random() < self.get_expand_chance(planet):
                 # Find the neutral planets nearest to this planet
-                near_planets = self.scene.get_planets()
-                near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
-                near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:self.EXPAND_NUM_NEAREST]
+                near_unclaimed = self._get_possible_expand_targets(planet)
                 if not near_unclaimed:
                     return
                 target = random.choice(near_unclaimed)
@@ -162,12 +163,23 @@ class Alien:
                 # Figure out if we want to send other ships
                 # TODO
     
+    def _get_possible_expand_targets(self, planet):
+        near_planets = self.scene.get_planets()
+        near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
+        near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:self.EXPAND_NUM_NEAREST]
+
+        return near_unclaimed
+
+    def _get_possible_attack_targets(self, planet):
+        near_planets = self.scene.get_planets()
+        near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
+        near_enemy = [p for p in near_planets if p.owning_civ and p.owning_civ != self.civ][0:2] # 2 nearest        
+
     def update_attack(self):
         for planet in self.scene.get_civ_planets(self.civ):
             # Find the enemy planets nearest to this planet
-            near_planets = self.scene.get_planets()
-            near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
-            near_enemy = [p for p in near_planets if p.owning_civ and p.owning_civ != self.civ][0:2] # 2 nearest
+            self.near_e
+            near_enemy = self._get_possible_attack_targets(planet)
             if not near_enemy:
                 return
             target = random.choice(near_enemy)
@@ -178,6 +190,7 @@ class Alien:
                         for i in range(planet.ships[ship_type]):
                             planet.emit_ship(ship_type, {'to':target})
                             sent = True
+                            self.last_attack_time = self.time
                 if sent and random.random() < 0.5 and planet.population > 1:
                     planet.emit_ship(self.get_colonist(), {'to':target, 'num':random.randint(1, planet.population-1)})
 

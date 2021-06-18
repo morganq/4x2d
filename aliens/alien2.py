@@ -1,3 +1,5 @@
+from resources import resource_path
+from spritebase import SpriteBase
 from aliens import alien
 from helper import clamp
 from upgrade.building_upgrades import AddBuildingUpgrade, make_simple_stats_building
@@ -8,6 +10,8 @@ from upgrade.upgrades import register_upgrade, Upgrade
 from aliens.alien2battleship import Alien2Battleship
 import random
 from v2 import V2
+import pygame
+from colors import *
 
 @register_upgrade
 class Alien2HomeDefenseUpgrade(AddBuildingUpgrade):
@@ -133,6 +137,35 @@ class Alien2EconUpgrade3(Alien2EconUpgrade):
     name = "alien2econpop3"
     resource_type = "gas"    
 
+
+class Alien2CurseIndicator(SpriteBase):
+    def __init__(self, planet):
+        super().__init__(planet.pos)
+        self.planet = planet
+        self._offset = (0.5, 0.5)
+        self._generate_image()
+
+    def _generate_image(self):
+        d = 10
+        self._width = (self.planet.radius + d + 6) * 2
+        self._height = self._width
+        cancel = pygame.image.load(resource_path("assets/cancel.png")).convert_alpha()
+        self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
+        c = V2(self._width // 2, self._height // 2)
+        for i in range(8):
+            theta = i * 3.14159 / 4
+            p1 = V2.from_angle(theta) * (self.planet.radius + d)
+            p2 = V2.from_angle(theta + 0.05) * (self.planet.radius + d + 5)
+            p3 = V2.from_angle(theta) * (self.planet.radius + d + 4)
+            p4 = V2.from_angle(theta - 0.05) * (self.planet.radius + d + 5)
+            pts = [(p + c).tuple() for p in [p1,p2,p3,p4]]
+            pygame.draw.polygon(self.image, PICO_RED, pts, 0)
+
+        self.image.blit(cancel, (c - V2(4,4)).tuple())
+
+        self._recalc_rect()
+
+
 class Alien2(alien.Alien):
     name = "alien2"
     title = "ALIEN CIV 2"
@@ -151,12 +184,27 @@ class Alien2(alien.Alien):
         self.attack_from = None
         self.attack_to = None
         self.pick_new_target_time = 0
+        self.curse = None
 
     def update(self, dt):
         self.pick_new_target_time += dt
         if self.duration_edge(60):
+            if self.attack_to:
+                self.attack_to.upgradeable = True
             self.attack_from = random.choice(self.scene.get_civ_planets(self.civ))
             self.attack_to = random.choice(self.scene.get_civ_planets(self.scene.my_civ))
+
+            # Don't do the curse too early or at beginning difficulty
+            if self.difficulty > 1 and self.time > 60:
+                if not self.curse:
+                    self.curse = Alien2CurseIndicator(self.attack_to)
+                    self.scene.game_group.add(self.curse)
+                else:
+                    self.curse.planet = self.attack_to
+                    self.curse.pos = self.attack_to.pos.copy()
+                    self.curse._generate_image()
+                self.attack_to.upgradeable = False
+                
         return super().update(dt)
 
     def set_difficulty(self, difficulty):
@@ -190,10 +238,17 @@ class Alien2(alien.Alien):
             for ship in self.scene.get_civ_ships(self.civ):
                 if ship.chosen_target == target:
                     return 1
+            if self.time > self.last_attack_time + 120:
+                return 1
             return 0.15
         if target.health <= 0:
             return 1
-        return 0.05
+        return 0
+
+    def _get_possible_attack_targets(self, planet):
+        if self.attack_to:
+            return [self.attack_to]
+        return []
 
     def get_expand_chance(self, planet):    
         if len(self.scene.get_civ_planets(self.civ)) < 3:

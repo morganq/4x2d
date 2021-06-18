@@ -156,6 +156,8 @@ class Alien1(alien.Alien):
         my_planet.add_ship("alien1warpship")
         my_planet.add_building(Alien1HomeDefenseUpgrade)
 
+        self.starting_num_planets = len(self.scene.get_civ_planets(self.civ))
+
     def get_resource_priority_odds(self):
         if self.time < 180 and self.fear_attack:
             return {'produce':0.85, 'grow':0.05,'tech':0.1}
@@ -177,6 +179,18 @@ class Alien1(alien.Alien):
 
     def get_colonist(self):
         return "alien1colonist"
+
+    def _get_possible_expand_targets(self, planet):
+        near_planets = self.scene.get_planets()
+        near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
+
+        num_planets = len(self.scene.get_civ_planets(self.civ))
+        if num_planets > self.starting_num_planets:
+            near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:3]
+        else:
+            near_unclaimed = [p for p in near_planets if p.owning_civ == None][-4:]
+
+        return near_unclaimed
 
     def get_expand_chance(self, planet):    
         num_planets = len(self.scene.get_civ_planets(self.civ))
