@@ -39,6 +39,11 @@ class Fighter(Ship):
             'update':self.state_siege,
             'exit':self.exit_stage_siege
         }
+
+        self.post_dogfight_state = None
+        self.post_dogfight_target = None
+        self.combat_dodge_direction = random.randint(-1,1)
+
         self.fire_timer = 0
         self._timers['dogfight'] = 0
         self._timers['time'] = 0
@@ -144,8 +149,9 @@ class Fighter(Ship):
 
     ### Dogfight ###
     def enter_state_dogfight(self):
-        self.post_dogfight_state = self.state
-        self.post_dogfight_target = self.effective_target or self.chosen_target
+        if not self.post_dogfight_state:
+            self.post_dogfight_state = self.state
+            self.post_dogfight_target = self.effective_target or self.chosen_target
         self.dogfight_initial_pos = self.pos.copy()
         self.find_target()
 
@@ -166,30 +172,26 @@ class Fighter(Ship):
             self.set_state(self.post_dogfight_state)
             return
 
-        # Swoop towards and away
-        rate = self.get_fire_rate()
-        gt = self._timers['dogfight'] * rate
-        t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
+        # Fire if reloaded (and close enough)
         if self.fire_timer > 1:
             if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
-                self.fire_timer = self.fire_timer % 1
+                self.fire_timer = 0
                 self.fire(self.effective_target)
-        t2 = math.cos(gt * 3.14159)
-        
-        vtowards = (self.effective_target.pos - self.pos).normalized()
-        vside = (V2(vtowards.y, -vtowards.x) * t2).normalized()
 
-        if t > 0.5:
-            dir = vtowards
-            self.target_heading = vtowards.to_polar()[1]
+        # Need to get close to the enemy
+        delta = self.effective_target.pos - self.pos
+        if delta.sqr_magnitude() > self.get_weapon_range() ** 2:
+            dir = delta.normalized()
+        elif self.fire_timer > 0.65: # If we're close and about to fire
+            dir = delta.normalized()
+            self.target_heading = dir.to_polar()[1]
         else:
-            dir = vside
-        #dir = vtowards * t + vside * (1-t)
-        # Hacky stufffff
-        if (self.effective_target.pos - self.pos).sqr_magnitude() < 10 ** 2:
-            dir = -vtowards
+            _, a = (-delta).to_polar()
+            a += self.combat_dodge_direction * 3.14159 / 2
+            dir = V2.from_angle(a)           
+            self.target_heading = None
 
-        # dist to starting spot
+        # Need to stay close to starting spot
         delta = self.dogfight_initial_pos - self.pos
         if delta.sqr_magnitude() > 30 ** 2:
             dir = delta.normalized()
@@ -199,6 +201,8 @@ class Fighter(Ship):
     def exit_state_dogfight(self):
         self.effective_target = self.post_dogfight_target
         self.target_heading = None
+        self.post_dogfight_state = None
+        self.post_dogfight_target = None
 
     ### Siege ###
     def state_siege(self, dt):
@@ -216,22 +220,36 @@ class Fighter(Ship):
                 self.set_state(STATE_RETURNING)
             return
 
-        delta = self.effective_target.pos - self.pos
-        # In range?
-        if delta.sqr_magnitude() - self.effective_target.radius ** 2 <= (self.get_weapon_range() + 5) ** 2:
-            if self.fire_timer >= 1:
-                self.fire_timer = self.fire_timer % 1
-                self.fire(self.effective_target)
-            self.target_heading = delta.to_polar()[1]
-        else: # Out of range? head towards.
-            self.target_heading = None
-        
-        tp = (self.pos - self.effective_target.pos).normalized() * (self.effective_target.radius + self.get_weapon_range() * 0.5) + self.effective_target.pos
+        tp = self.effective_target.pos + (self.pos - self.effective_target.pos).normalized() * self.effective_target.radius
         delta = tp - self.pos
-        if delta.sqr_magnitude() > 5 ** 2:
-            self.target_velocity = delta.normalized() * self.get_cruise_speed()
+
+        def in_range():
+            return delta.sqr_magnitude() <= self.get_weapon_range() ** 2
+
+        # Time to fire and in range?
+        if self.fire_timer >= 1:
+            if in_range():
+                self.fire_timer = 0
+                self.fire(self.effective_target)
+                if random.random() < 0.33:
+                    self.combat_dodge_direction = random.randint(-1,1)
+        
+        dir = V2(0,0)
+        if not in_range():
+            dir = delta.normalized()
+            self.target_heading = None
+        elif self.fire_timer > 0.65:
+            dir = delta.normalized()
+            self.target_heading = dir.to_polar()[1]
         else:
-            self.target_velocity = V2(0,0)
+            _, a = (-delta).to_polar()
+            a += self.combat_dodge_direction * 3.14159 / 2
+            dir = V2.from_angle(a)
+            if self.combat_dodge_direction == 0:
+                dir = V2(0,0)             
+            self.target_heading = None
+
+        self.target_velocity = dir * self.get_cruise_speed()
 
     def exit_stage_siege(self):
         self.target_heading = None

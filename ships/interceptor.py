@@ -32,6 +32,8 @@ class Interceptor(Fighter):
         
         self.set_sprite_sheet("assets/interceptor.png", 12)
         self.bullets_chambered = 0
+        self.fast_fire_timer = 0
+        self.firing_target = None
 
     def get_fire_rate(self):
         r = super().get_fire_rate()
@@ -52,7 +54,7 @@ class Interceptor(Fighter):
         mods['color'] = PICO_YELLOW
         return mods
 
-    def fire(self, at):
+    def special_fire(self, at):
         towards = (at.pos - self.pos).normalized()
 
         if self.get_stat("ship_take_damage_on_fire"):
@@ -74,48 +76,15 @@ class Interceptor(Fighter):
 
         self.bullets_chambered -= 1
 
-    def state_dogfight(self, dt):
-        # If our target is dead or w/e, find a new one
-        if not self.effective_target or self.effective_target.health <= 0:
-            self.find_target()
+    def fire(self, at):
+        self.bullets_chambered = 3
+        self.firing_target = at
+        self.special_fire(at)
 
-        if not self.effective_target: # Still no target? Go back to whatever we were doing.
-            self.set_state(self.post_dogfight_state)
-            return
-
-        # Swoop towards and away
-        rate = self.get_fire_rate()
-        gt = self._timers['dogfight'] * rate
-        t = math.cos(gt * 6.2818 + 3.14159) * -0.5 + 0.5
-        if self.fire_timer >= 1:
-            if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
-                self.bullets_chambered = 3
-                self.fire_timer = self.fire_timer % 1
-
-        fire_tick = ((self.fire_timer * 6) % 1) < (((self.fire_timer - dt) * 6) % 1)
-        if self.bullets_chambered > 0 and fire_tick:
-            nearby = all_nearby(self.pos, self.get_threats(), self.FIRE_RANGE * 1.5)
-            if nearby:
-                self.fire(random.choice(nearby))
-
-        t2 = math.cos(gt * 3.14159)
-        
-        vtowards = (self.effective_target.pos - self.pos).normalized()
-        vside = (V2(vtowards.y, -vtowards.x) * t2).normalized()
-
-        if t > 0.5:
-            dir = vtowards
-            self.target_heading = vtowards.to_polar()[1]
-        else:
-            dir = vside
-        #dir = vtowards * t + vside * (1-t)
-        # Hacky stufffff
-        if (self.effective_target.pos - self.pos).sqr_magnitude() < 10 ** 2:
-            dir = -vtowards
-
-        # dist to starting spot
-        delta = self.dogfight_initial_pos - self.pos
-        if delta.sqr_magnitude() > 30 ** 2:
-            dir = delta.normalized()
-
-        self.target_velocity = dir * self.get_max_speed()        
+    def update(self, dt):
+        if self.bullets_chambered > 0:
+            self.fast_fire_timer += dt
+            if self.fast_fire_timer > 0.15:
+                self.fast_fire_timer = 0
+                self.special_fire(self.firing_target)
+        return super().update(dt)

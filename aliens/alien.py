@@ -178,7 +178,6 @@ class Alien:
     def update_attack(self):
         for planet in self.scene.get_civ_planets(self.civ):
             # Find the enemy planets nearest to this planet
-            self.near_e
             near_enemy = self._get_possible_attack_targets(planet)
             if not near_enemy:
                 return

@@ -44,6 +44,7 @@ class Bullet(SpriteBase):
 
     def collide(self, other):
         if other.owning_civ == self.shooter.owning_civ: return
+        if self.target and self.target != other: return # No accidentally hitting stuff.
         if not getattr(other, "health", None): return
         reflect = False
         if isinstance(other, satellite.ReflectorShieldObj):

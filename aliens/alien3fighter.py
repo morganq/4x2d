@@ -4,7 +4,7 @@ class Alien3Fighter(Fighter):
     SHIP_NAME = "alien3fighter"
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)
-        self.set_sprite_sheet("assets/alien-fighter.png", 12)
+        self.set_sprite_sheet("assets/alien3fighter.png", 12)
         
     def in_void(self):
         for aura in self.owning_civ.alien.planet_void.values():
