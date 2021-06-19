@@ -43,11 +43,11 @@ class Alien3FighterProductionUpgrade1(Upgrade):
 
 @register_upgrade
 class Alien3FighterProductionUpgrade2(Alien3FighterProductionUpgrade1):
-    name = "alien3controlship"
+    name = "alien3bomber"
     resource_type = "ice"
     category = "ships"
-    title = "Alien Control Ship Production"
-    description = "[^1] [Control Ship] Over 10 seconds"
+    title = "Alien Bomber Production"
+    description = "[^1] [Bomber] Over 10 seconds"
     icon = "fighters6"
     requires = None
     alien = True
@@ -55,7 +55,7 @@ class Alien3FighterProductionUpgrade2(Alien3FighterProductionUpgrade1):
     infinite = True
 
     def apply(self, to):
-        pass
+        to.add_production(ProductionOrder("alien3bomber", 1, 10))
 
 @register_upgrade
 class Alien3FighterProductionUpgrade3(Alien3FighterProductionUpgrade1):
@@ -182,7 +182,7 @@ class Alien3(alien.Alien):
         return 0
 
     def get_attacking_ships(self):
-        return ['alien3fighter']
+        return ['alien3fighter', 'alien3bomber']
 
     def get_colonist(self):
         return 'alien3colonist'

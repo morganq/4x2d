@@ -1,3 +1,4 @@
+from aliens.alien3bomber import Alien3Bomber
 from aliens.alien3fighter import Alien3Fighter
 from aliens.alien2colonist import Alien2Colonist
 from aliens.alien2controlship import Alien2ControlShip
@@ -53,7 +54,8 @@ EMIT_CLASSES = {
     'alien2colonist':Alien2Colonist,
     'alien2battleship':Alien2Battleship,
     'alien3colonist':Alien3Colonist,
-    'alien3fighter':Alien3Fighter
+    'alien3fighter':Alien3Fighter,
+    'alien3bomber':Alien3Bomber
 }
 
 RESOURCE_BASE_RATE = 1/220.0
