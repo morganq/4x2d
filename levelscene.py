@@ -54,6 +54,7 @@ class LevelScene(scene.Scene):
         self.time = 0
         self.debug = False
         self._score = 0
+        self.is_tutorial = False
 
     @property
     def score(self):
@@ -62,7 +63,7 @@ class LevelScene(scene.Scene):
     @score.setter
     def score(self, value):
         self._score = value
-        self.score_text.set_text("%d" % self.time)
+        # TODO: get rid of
 
     def random_object_pos(self):
         pos = None
@@ -113,8 +114,9 @@ class LevelScene(scene.Scene):
             elif obj['type'] == "hazard":
                 o = Hazard(self, V2(*obj['pos']), obj['size'])
             self.game_group.add(o)
+        self.objgrid.generate_grid(self.get_objects_initial())
 
-    def load(self):
+    def create_layers(self):
         self.objgrid = ObjGrid(game.RES[0], game.RES[1], 50)
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
@@ -123,38 +125,18 @@ class LevelScene(scene.Scene):
 
         self.background_group.add(Background(V2(0,0)))
 
-        AlienClass = alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
-        self.enemies = [AlienClass(self, Civ(self))]
-        self.enemy = self.enemies[0]
-        
-        if self.levelfile:
-            self.load_level(self.levelfile)
-        elif True:
-            self.load_level("choke")
-
-        else:
-            homeworld = Planet(self, V2(60, game.RES[1] - 40), 7, Resources(100, 0, 0))
-            homeworld.change_owner(self.my_civ)       
-            self.game_group.add(homeworld)     
-            p = Planet(self, V2(420, 60), 5, Resources(70, 20, 10))
-            p.change_owner(self.enemy.civ)       
-            self.game_group.add(p)     
-
-        self.objgrid.generate_grid(self.get_objects_initial())
-
+    def setup_players(self):
         # Me
-        homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.my_civ))[0]
-        homeworld.population = 3 + self.game.run_info.bonus_population
-        homeworld.ships['fighter'] = 1 + self.game.run_info.bonus_fighters
-        
+        self.homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.my_civ))[0]
+        self.homeworld.population = 3 + self.game.run_info.bonus_population
+        self.homeworld.ships['fighter'] = 1 + self.game.run_info.bonus_fighters
 
         # Alien
         p = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.enemy.civ))[0]
         p.population = 5
 
+    def add_extra_spaceobjects(self):
         num_planets = len(self.get_planets())
-        
-        #avg_pos = sum([p.pos for p in self.get_planets()], V2(0,0)) / num_planets
 
         max_planets = min(int(self.difficulty / 1.5 + 7), 16)
 
@@ -226,6 +208,7 @@ class LevelScene(scene.Scene):
             pos = self.random_object_pos()
             self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))
 
+    def add_ui_elements(self):
         self.meters = {}
         self.upgrade_texts = {}
         for i,r in enumerate(self.my_civ.resources.data.keys()):
@@ -244,11 +227,8 @@ class LevelScene(scene.Scene):
         self.upgrade_button.visible = 0
         self.ui_group.add(self.upgrade_button)
 
-        self.help_button = Button(V2(2, 48), "Help", "small", self.on_click_help)
-        self.ui_group.add(self.help_button)
-
         if game.DEV:
-            self.ui_group.add(Button(V2(2, 68), 'Win', 'small', self.dev_win))
+            self.ui_group.add(Button(V2(2, 48), 'Win', 'small', self.dev_win))
 
         self.o2_meter = o2meter.O2Meter(V2(game.RES[0] - 68, 2))
         
@@ -257,20 +237,9 @@ class LevelScene(scene.Scene):
 
         self.o2_meter.o2 = self.game.run_info.o2
         self.o2_meter._generate_image()
-        self.ui_group.add(self.o2_meter)
+        self.ui_group.add(self.o2_meter)    
 
-
-        self.score_label = Text("- Score -", "small", V2(game.RES[0] - 2, 2), PICO_BLUE)
-        self.score_label.offset = (1, 0)
-        self.score_label._recalc_rect()        
-        #self.ui_group.add(self.score_label)
-
-        self.score_text = Text("0", "small", V2(game.RES[0] - 2, 12), PICO_BLUE)
-        self.score_text.offset = (1, 0)
-        self.score_text._recalc_rect()
-        #self.ui_group.add(self.score_text)
-
-        # run unlocks
+    def setup_run_upgrades(self):
         for tech in self.game.run_info.saved_technologies:
             u = UPGRADE_CLASSES[tech]
             self.my_civ.upgrades.append(u)
@@ -280,7 +249,24 @@ class LevelScene(scene.Scene):
         self.my_civ.blueprints = self.game.run_info.blueprints[::]
         for tech in self.game.run_info.blueprints:
             u = UPGRADE_CLASSES[tech]            
-            self.my_civ.researched_upgrade_names.add(tech)        
+            self.my_civ.researched_upgrade_names.add(tech)
+
+    def load(self):
+        self.create_layers()
+        AlienClass = alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
+        self.enemies = [AlienClass(self, Civ(self))]
+        self.enemy = self.enemies[0]        
+        
+        if self.levelfile:
+            self.load_level(self.levelfile)
+        else:
+            self.load_level("choke")
+
+        self.setup_players()
+        self.add_extra_spaceobjects()
+        self.add_ui_elements()
+
+        self.setup_run_upgrades()        
 
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
 
@@ -310,7 +296,7 @@ class LevelScene(scene.Scene):
 
         if self.options == "fighters":
             for i in range(20):
-                homeworld.add_ship("fighter")    
+                self.homeworld.add_ship("fighter")    
 
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
@@ -366,6 +352,9 @@ class LevelScene(scene.Scene):
     def get_hazards(self):
         return [s for s in self.get_objects() if isinstance(s, Hazard)]
 
+    def get_asteroids(self):
+        return [s for s in self.get_objects() if isinstance(s, Asteroid)]
+
     def get_starting_state(self):
         return levelstates.PlayState(self)
 
@@ -411,14 +400,15 @@ class LevelScene(scene.Scene):
         self.update_times["objgrid"] = time.time() - t
 
         # Detect defeat
-        if not self.get_civ_planets(self.my_civ):
-            self.paused = True
-            self.sm.transition(levelstates.GameOverState(self))
-        
-        # Detect victory
-        if not self.get_civ_planets(self.enemy.civ):
-            self.paused = True
-            self.sm.transition(levelstates.VictoryState(self))
+        if not self.is_tutorial:
+            if not self.get_civ_planets(self.my_civ):
+                self.paused = True
+                self.sm.transition(levelstates.GameOverState(self))
+            
+            # Detect victory
+            if not self.get_civ_planets(self.enemy.civ):
+                self.paused = True
+                self.sm.transition(levelstates.VictoryState(self))
         
         for sprite in self.game_group.sprites() + self.ui_group.sprites() + self.background_group.sprites():
             t = time.time()

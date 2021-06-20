@@ -20,7 +20,7 @@ for font in FONTS.values():
 
 class Text(spritebase.SpriteBase):
     type = None
-    def __init__(self, text, size, pos, color = PICO_WHITE, border=False, multiline_width = 80, center = True, shadow=False, offset = None):
+    def __init__(self, text, size, pos, color = PICO_WHITE, border=False, multiline_width = 80, center = True, shadow=False, offset = None, onclick = None, onhover = None):
         spritebase.SpriteBase.__init__(self, pos)
         self._text = text
         self.size = size
@@ -30,8 +30,12 @@ class Text(spritebase.SpriteBase):
         self.center = center
         self.multiline_width = multiline_width
         self.offset = offset or (0,0)
+        self.onclick = onclick
+        self.onhover = onhover
+        if self.onclick or self.onhover:
+            self.selectable = True
         self.set_text(text)
-        
+
     def set_text(self, text):
         self._text = text
         self.update_image()
@@ -55,6 +59,24 @@ class Text(spritebase.SpriteBase):
         self._width = w
         self._height = h
         self._recalc_rect()
+
+    def on_mouse_enter(self, pos):
+        if self.onhover:
+            self.onhover(True)
+            return True
+        return super().on_mouse_enter(pos)
+
+    def on_mouse_exit(self, pos):
+        if self.onhover:
+            self.onhover(False)
+            return True
+        return super().on_mouse_exit(pos)
+
+    def on_mouse_down(self, pos):
+        if self.onclick:
+            self.onclick()
+        super().on_mouse_down(pos)
+        return True
 
 def render_multiline_to(surface, pos, text, size, color, wrap_width=None, center=True):
     s = render_multiline(text, size, color, wrap_width, center)

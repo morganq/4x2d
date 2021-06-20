@@ -4,13 +4,14 @@ import pygame
 import text
 
 class Slider(SpriteBase):
-    def __init__(self, pos, meter_width, min, max):
+    def __init__(self, pos, meter_width, min, max, onchange=None):
         SpriteBase.__init__(self, pos)
         self.meter_width = meter_width
         self.min = min
         self.max = max
         self.value = self.min
         self.selectable = True
+        self.onchange = onchange
         self._generate_image()
 
     def get_selection_info(self):
@@ -62,8 +63,10 @@ class Slider(SpriteBase):
 
     def on_mouse_down(self, pos):
         self.update_value(pos)
+        self.onchange(self.value)
         return super().on_mouse_down(pos)
 
     def on_drag(self, pos):
         self.update_value(pos)
+        self.onchange(self.value)
         return super().on_drag(pos)

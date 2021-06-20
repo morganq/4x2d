@@ -18,6 +18,11 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
 
         self.tab = None
 
+    def set_visible(self, value):
+        self.visible = value
+        for ci in self._controls:
+            ci['control'].visible = value
+
     def position_nicely(self, scene):
         x = self.panel_for.x - self._width / 2
         y = self.panel_for.y - self._height / 2

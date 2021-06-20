@@ -12,6 +12,30 @@ class RunInfo:
         self.rerolls = 3
         self.o2 = 3600
 
+    def serialize(self):
+        obj = {}
+        obj['data'] = self.data
+        obj['path'] = self.path
+        obj['saved_technologies'] = self.saved_technologies
+        obj['blueprints'] = self.blueprints
+        obj['bonus_population'] = self.bonus_population
+        obj['bonus_fighters'] = self.bonus_fighters
+        obj['rerolls'] = self.rerolls
+        obj['o2'] = self.o2
+        return obj
+    
+    @classmethod
+    def deserialize(cls, obj):
+        r = RunInfo(obj['data'])
+        r.path = obj['path']
+        r.saved_technologies = obj['saved_technologies']
+        r.blueprints = obj['blueprints']
+        r.bonus_population = obj['bonus_population']
+        r.bonus_fighters = obj['bonus_fighters']
+        r.rerolls = obj['rerolls']
+        r.o2 = obj['o2']
+        return r
+
     def choose_path(self, row, column):
         self.path.append((row, column))
 

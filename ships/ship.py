@@ -73,6 +73,7 @@ class Ship(SpaceObject):
         self.fleet_minimum_forces = 0 # The magnitude of the fleet forces before we start caring
 
         # Other stuff
+        self.time = 0
         self.waiting_time = 0
         self._timers["movement_variation"] = random.random() * 6.2818
         self._timers['thrust_particle_time'] = 0
@@ -187,6 +188,7 @@ class Ship(SpaceObject):
         self.state = state
 
     def update(self, dt):
+        self.time += dt
         if self.health <= 0:
             e = explosion.Explosion(self.pos, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.25, 13, scale_fn="log", line_width=1)
             self.scene.game_group.add(e)

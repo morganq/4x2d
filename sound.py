@@ -23,7 +23,10 @@ def init():
     pygame.mixer.init()
     for s,fn in SOUNDFILES.items():
         SOUNDS[s] = pygame.mixer.Sound(resource_path(fn))
-    for name in ['laser1', 'laser2', 'laser3', 'explosion1', 'explosion2', 'control', 'upgrade2', 'hit']:
+    for name in [
+            'laser1', 'laser2', 'laser3', 'explosion1', 'explosion2', 'control', 'upgrade2', 'hit',
+            'talk1', 'talk2', 'talk3'
+        ]:
         load_sound(name, "assets/sounds/%s.wav" % name)            
     pygame.mixer.music.set_endevent(MUSIC_ENDEVENT)
 

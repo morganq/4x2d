@@ -21,6 +21,7 @@ from v2 import V2
 import run
 import optimize
 import xbrz
+import tutorial.tutorial1scene
 import io
 
 DEV = True
@@ -51,10 +52,12 @@ class Game:
                 self.scene = starmapscene.StarMapScene(self)
             elif sys.argv[1] == "upgrades":
                 self.scene = allupgradesscene.AllUpgradesScene(self)
+            elif sys.argv[1] == "tutorial":
+                self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             else:
                 self.scene = levelscene.LevelScene(self, None, None, 1, sys.argv[1])
         else:
-            self.scene = starmapscene.StarMapScene(self)
+            self.scene = menuscene.MenuScene(self)
             #self.scene = introscene.IntroScene(self)
         self.playing_level_index = None
 
@@ -124,8 +127,10 @@ class Game:
     def render(self):
         self.scaled_screen.fill((128,128,128,255))
         self.scene.render()
-        #self.scale_normal()
-        self.scale_xbr()
+        if SCALE == 1:
+            self.scale_normal()
+        else:
+            self.scale_xbr()
         t = pygame.time.get_ticks() - self.frame_time
         self.frame_time = pygame.time.get_ticks()
         text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))

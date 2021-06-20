@@ -172,7 +172,7 @@ class PlayerCiv(Civ):
         self.is_enemy = False
 
     def earn_resource(self, resource, value, where=None):
-        if where:
+        if where and value > 0:
             if isinstance(where, V2):
                 pos = where
             else:

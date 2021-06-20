@@ -49,7 +49,7 @@ class UpgradePanel(Panel):
         box.visible = False
         self.add(box, V2(250,0))
 
-        if game.Game.inst.run_info.rerolls > 0 or game.DEV:
+        if game.Game.inst.run_info.rerolls > 0:# or game.DEV:
             self.add(Button(V2(0,0), "%d left" % game.Game.inst.run_info.rerolls, "small", on_reroll, icon="assets/die.png", label="REROLL"), V2(0, y + 10))
 
         self.redraw()

@@ -23,6 +23,9 @@ class StarMapScene(Scene):
         super().__init__(game)
 
     def start(self):
+        self.game.save.set_run_state(self.game.run_info)
+        self.game.save.save()
+        
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
@@ -48,10 +51,10 @@ class StarMapScene(Scene):
                     p1 = self.galaxies[-2][j].pos
                     travelled = (
                         len(run_path) > r and
-                        run_path[r] == (r, i) and
-                        run_path[r-1] == (r-1, j)
+                        tuple(run_path[r]) == (r, i) and
+                        tuple(run_path[r-1]) == (r-1, j)
                     )
-                    path = StarPath(p1,p2,travelled, run_path[-1] == (r-1, j))
+                    path = StarPath(p1,p2,travelled, tuple(run_path[-1]) == (r-1, j))
                     self.game_group.add(path)
                 if r > 0:
                     self.game_group.add(g)

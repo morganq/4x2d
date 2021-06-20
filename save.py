@@ -1,4 +1,5 @@
 import json
+from run import RunInfo
 from resources import resource_path
 
 DEFAULT_SETTINGS = {
@@ -19,12 +20,14 @@ class Save:
             data = {}
 
         self.level_state = {int(k):v for k,v in data.get("level_state", {}).items()}
+        self.run_state = data.get("run_state", {})
         self.highscores = data.get("highscores", [])
         self.settings = data.get("settings", DEFAULT_SETTINGS)
         SAVE_OBJ = self
 
     def save(self):
         data = {
+            'run_state': self.run_state,
             'level_state': self.level_state,
             'highscores': self.highscores,
             'settings': self.settings
@@ -40,6 +43,15 @@ class Save:
 
     def set_level_state(self, level_index, beaten, steps, stars):
         self.level_state[level_index] = {'beaten':beaten, 'steps':steps, 'stars':stars}
+
+    def set_run_state(self, run):
+        self.run_state = run.serialize()
+
+    def get_run_state(self):
+        if self.run_state:
+            return RunInfo.deserialize(self.run_state)
+        else:
+            return RunInfo()
 
     def get_setting(self, key):
         return self.settings.get(key, DEFAULT_SETTINGS[key])
