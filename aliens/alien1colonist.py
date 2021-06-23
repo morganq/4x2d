@@ -1,12 +1,14 @@
 from ships.colonist import Colonist
 import random
+from ships.all_ships import register_ship
 
+@register_ship
 class Alien1Colonist(Colonist):
     SHIP_BONUS_NAME = 'colonist'
+    SHIP_NAME = "alien1colonist"
     def __init__(self, scene, pos, owning_civ):
         Colonist.__init__(self, scene, pos, owning_civ)
         self.set_sprite_sheet("assets/alien-colonist.png", 12)
-        self.SHIP_NAME = "alien1colonist"
 
     def colonized(self, planet):
         if planet.resources.iron > 30:

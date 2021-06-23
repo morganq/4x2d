@@ -31,7 +31,6 @@ def generate_upgrade_image(upgrade):
 class UpgradeIcon(SpriteBase):
     def __init__(self, pos, upgrade_name, onclick = None, tooltip = False):
         super().__init__(pos)
-        self.scene = game.Game.inst.scene
         self.upgrade = UPGRADE_CLASSES[upgrade_name]
         self.onclick = onclick
         self.tooltip = tooltip
@@ -57,8 +56,8 @@ class UpgradeIcon(SpriteBase):
             else:
                 self._tooltip_panel.pos = self.pos + V2(30,0)
             self._tooltip_panel._reposition_children()
-            self._tooltip_panel.add_all_to_group(self.scene.ui_group)
-            self.scene.ui_group.add(self._tooltip_panel)
+            self.groups()[0].add(self._tooltip_panel)
+            self._tooltip_panel.add_all_to_group(self.groups()[0])
         return super().on_mouse_enter(pos)
 
     def on_mouse_exit(self, pos):

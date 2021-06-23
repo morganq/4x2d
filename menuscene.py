@@ -1,6 +1,5 @@
 from run import RunInfo
-from tutorial.tutorial1scene import Tutorial1Scene
-from tutorial.introscene import IntroScene
+import tutorial.introscene
 from colors import *
 import scene
 import game
@@ -99,7 +98,7 @@ class MenuScene(scene.Scene):
         self.game.update_scale(self.game.save.get_setting("scale"))
 
     def click_tutorial(self):
-        self.game.scene = IntroScene(self.game)
+        self.game.scene = tutorial.introscene.IntroScene(self.game)
         self.game.scene.start()
 
     def click_continue(self):

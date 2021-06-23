@@ -45,7 +45,10 @@ class Save:
         self.level_state[level_index] = {'beaten':beaten, 'steps':steps, 'stars':stars}
 
     def set_run_state(self, run):
-        self.run_state = run.serialize()
+        if run:
+            self.run_state = run.serialize()
+        else:
+            self.run_state = {}
 
     def get_run_state(self):
         if self.run_state:

@@ -50,13 +50,13 @@ class RunInfo:
         (r,c) = self.path[index]
         return self.data[r][c]
 
-    def new_galaxy(self, row, from_links):
+    def new_galaxy(self, row, from_links, level):
         return {
             'node_type':'galaxy',
-            'alien': random.choice(['alien1', 'alien2', 'alien3']),
+            'alien': random.choice(['alien3', 'alien3', 'alien3']),
             'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
             'difficulty': row,
-            'level':random.choice(['belt', 'scatter', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']),
+            'level':level,
             'links': from_links
         }        
 
@@ -88,7 +88,16 @@ class RunInfo:
 
     def generate_run(self):
         self.data = []
+
+        all_levels = ['belt', 'scatter', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']
+        l1 = all_levels[::]
+        random.shuffle(l1)
+        l2 = all_levels[::]
+        random.shuffle(l2)
+        levels = l1 + l2
+
         for row in range(9):
+            level = levels.pop()
             self.data.append([])
             num_columns = 5 - abs(4 - row)
             for column in range(num_columns):
@@ -103,6 +112,6 @@ class RunInfo:
                 if row == 3 or row == 6:
                     node = self.new_store(row, from_links)
                 else:
-                    node = self.new_galaxy(row, from_links)
+                    node = self.new_galaxy(row, from_links, level)
                 self.data[-1].append(node)
         return self.data                 

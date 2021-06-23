@@ -1,0 +1,23 @@
+- HELP -
+Play the tutorial! But since it doesn't cover everything yet...
+
+ASSETS - Each resource - Iron (common), Ice (uncommon), Gas (rare) - has a unique pool of Assets. When you acquire enough of a resource, you'll get a random selection of Assets from the resource's pool. There will always be 1 building Asset, 1 ship production Asset, and 1 technology Asset. Only the lowest tier Assets are in the pool at first, buying an Asset unlocks the next tier of that Asset's tech tree. You can see the tech tree on the right side of the Asset panel when you hover your mouse over an Asset.
+
+SECTOR REWARDS - Each sector has rewards for winning. Memory Crystal and Blueprint each let you select one technology or building to carry on to all future levels. That Asset icon will appear on the left side of the screen in future levels. Click the icon at any time to acquire it. Assets you buy in the Shop work the same way.
+
+SHOP CREDITS - To gain credits to use in the shop, you have to win a level with Assets stored up (available) but not acquired. Each Iron asset stored gives +10 credits, Ice are +15, and Gas are +20.
+
+OXYGEN - But don't just sit around waiting for more Assets, because Oxygen is running out. You have a total of 1 hour of oxygen when you start a run. If it runs out, all your planets and ships slowly start dying. Winning the game after running out of oxygen is possible, but much more difficult! 
+
+POPULATION - Population grows automatically on planets with at least one worker on them, up to the population limit. It grows faster if you have more population, so spreading yourself thin could be a mistake in some cases.
+
+SHIP LIMIT - A planet can only hold as many ships as its max population. Above that, the worst ship will be destroyed every 10 seconds.
+
+TIPS
+ - Expand a little bit at the beginning, but don't neglect making a few fighters to defend. Use fighters to blow up nearby asteroids for the resources.
+ - Ice gets you Bombers (only hits planets / asteroids) and Interceptors (only hits ships) which are better than fighters. Gas gets you battleships, which are great.
+ - Take a look at the higher tier Assets in a tech tree - some of them are very powerful! Sometimes you may want to acquire an Asset solely to unlock the higher tiers.
+
+MISSING FEATURES - Many asset icons and other assets, more alien civs, alien lore/art, a boss, a real loss screen, what happens when you win a run, more types of things to buy in the shop, music, many more sound effects.
+
+MUSIC: Might as well listen to this while playing, until the game has music: https://www.youtube.com/watch?v=fu8J6muzr6o

@@ -30,6 +30,7 @@ class StarMapScene(Scene):
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
+        self.ui_group2 = pygame.sprite.LayeredDirty()
         self.tutorial_group = pygame.sprite.Group()
         self.sm = states.Machine(StarMapState(self))
 
@@ -77,6 +78,8 @@ class StarMapScene(Scene):
 
         self.scroll_panel.scroll(-self.colonist.pos + V2(game.RES[0] / 2, game.RES[1] - 50))
 
+        self.ui_group2.add(text.Text("Credits: %d" % self.game.run_info.credits, "small", V2(3,3), PICO_GREEN,shadow=PICO_BLACK))
+
     def update(self, dt):
         self.colonist.angle += dt
         for s in self.game_group.sprites():
@@ -92,7 +95,8 @@ class StarMapScene(Scene):
         self.scroll_panel.image.fill((0,0,0,0))
         self.background_group.draw(self.scroll_panel.image)
         self.game_group.draw(self.scroll_panel.image)
-        self.ui_group.draw(self.scroll_panel.image)
         self.game.screen.blit(self.scroll_panel.image, self.scroll_panel.pos.tuple_int())
+        self.ui_group.draw(self.scroll_panel.image)
+        self.ui_group2.draw(self.game.screen)
         self.tutorial_group.draw(self.game.screen)
         return super().render()

@@ -8,6 +8,7 @@ from bullet import Bullet
 import pygame
 from particle import Particle
 import random
+from ships.all_ships import register_ship
 
 class WarpWarning(FrameSprite):
     def __init__(self, scene, pos, ship):
@@ -72,6 +73,7 @@ class WarpLine(SpriteBase):
         self.pos = self.obj_a.pos.copy()
         return super().update(dt)
 
+@register_ship
 class Alien1Battleship(Battleship):
     HEALTHBAR_SIZE = (24,2)
     SHIP_NAME = "alien1battleship"

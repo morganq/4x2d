@@ -13,6 +13,11 @@ from v2 import V2
 import pygame
 from colors import *
 
+from aliens import alien2battleship
+from aliens import alien2colonist
+from aliens import alien2fighter
+from aliens import alien2controlship
+
 @register_upgrade
 class Alien2HomeDefenseUpgrade(AddBuildingUpgrade):
     name = "alien2homedefense"
@@ -238,7 +243,7 @@ class Alien2(alien.Alien):
             for ship in self.scene.get_civ_ships(self.civ):
                 if ship.chosen_target == target:
                     return 1
-            if self.time > self.last_attack_time + 120:
+            if self.time > self.last_attack_time + (120 - self.difficulty * 8):
                 return 1
             return 0.15
         if target.health <= 0:

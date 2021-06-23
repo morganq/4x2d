@@ -1,12 +1,14 @@
 from helper import get_nearest
 from aliens.alien3mixin import Alien3Mixin
 from ships.bomber import Bomber
+from ships.all_ships import register_ship
 
+@register_ship
 class Alien3Bomber(Bomber, Alien3Mixin):
+    SHIP_NAME = "alien3bomber"    
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
-        self.set_sprite_sheet("assets/alien3bomber.png", 13)
-        self.SHIP_NAME = "alien3bomber"        
+        self.set_sprite_sheet("assets/alien3bomber.png", 13)   
 
     def get_max_speed(self):
         sp = super().get_max_speed()

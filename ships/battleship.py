@@ -10,7 +10,9 @@ from helper import all_nearby, clamp
 from bullet import Bullet
 import sound
 from laserparticle import LaserParticle
+from ships.all_ships import register_ship
 
+@register_ship
 class Battleship(Fighter): 
     BASE_HEALTH = 160
     BLAST_RADIUS = 0

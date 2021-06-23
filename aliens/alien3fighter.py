@@ -1,7 +1,9 @@
 from aliens.alien3mixin import Alien3Mixin
 from ships.fighter import Fighter
 
+from ships.all_ships import register_ship
 
+@register_ship
 class Alien3Fighter(Fighter, Alien3Mixin):
     SHIP_NAME = "alien3fighter"
     def __init__(self, scene, pos, owning_civ):

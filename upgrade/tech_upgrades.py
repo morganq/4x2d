@@ -64,9 +64,9 @@ class Atomic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nuclear Battery"
-    description = "Each planet has [^+150%] mining rate for the first [60 seconds] after colonizing. [!Destroy] [1] random fighter you control every minute"
+    description = "Each planet has [^+75%] mining rate for the first [60 seconds] after colonizing."
     icon = "nuclearbattery"
-    stats = Stats(mining_rate_first_60=1.5, nuclear_instability=1)
+    stats = Stats(mining_rate_first_60=0.75)
     family = {'tree':'t_atomic', 'parents':[]}
     requires = None
 

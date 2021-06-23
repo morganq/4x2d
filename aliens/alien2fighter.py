@@ -1,5 +1,7 @@
 from ships.fighter import Fighter
+from ships.all_ships import register_ship
 
+@register_ship
 class Alien2Fighter(Fighter):
     SHIP_NAME = "alien2fighter"
     BASE_HEALTH = 30

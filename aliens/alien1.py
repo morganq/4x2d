@@ -6,6 +6,11 @@ from stats import Stats
 from planet import building as buildings
 from upgrade.upgrades import register_upgrade, Upgrade
 
+from aliens import alien1battleship
+from aliens import alien1colonist
+from aliens import alien1fighter
+from aliens import alien1warpship
+
 @register_upgrade
 class Alien1HomeDefenseUpgrade(AddBuildingUpgrade):
     name = "alien1homedefense"
@@ -175,6 +180,10 @@ class Alien1(alien.Alien):
             }             
 
     def get_attack_chance(self, my_planet, target):
+        if self.time > self.last_attack_time + (120 - self.difficulty * 8):
+            return 1        
+        elif my_planet.ships['alien3battleship'] > 0:
+            return 1            
         return sum(my_planet.ships.values()) / 15
 
     def get_colonist(self):

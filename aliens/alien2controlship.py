@@ -4,7 +4,9 @@ from ships.ship import Ship
 from line import Line
 from v2 import V2
 import sound
+from ships.all_ships import register_ship
 
+@register_ship
 class Alien2ControlShip(Fighter):
     SHIP_NAME = "alien2controlship"
     BASE_HEALTH = 55

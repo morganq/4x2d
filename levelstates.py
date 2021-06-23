@@ -1,34 +1,27 @@
-from rangeindicator import RangeIndicator
-from typing import Iterable
-from upgrade.upgrades import UPGRADE_CLASSES
+import pygame
+
+import game
 import rewardscene
+import save
+import sound
+import starmap
+import text
+from anyupgradepanel import AnyUpgradePanel
+from arrow import OrderArrow
+from button import Button
 from colors import *
+from funnotification import FunNotification
+from helppanel import HelpPanel
+from orderpanel import OrderPanel
+from planet.planetpanel import PlanetPanel
+from rangeindicator import RangeIndicator
+from resources import resource_path
+from selector import Selector
 from simplesprite import SimpleSprite
 from states import State, UIEnabledState
-import framesprite
-import game
-import text
-import csv
-import math
-import pygame
-import sound
-from button import Button
-import save
-from resources import resource_path
-from funnotification import FunNotification
-from planet.planetpanel import PlanetPanel
-
-from orderpanel import OrderPanel
-from helppanel import HelpPanel
-from selector import Selector
-from arrow import OrderArrow
-import levelscene
-import starmap
 from upgrade.upgradepanel import UpgradePanel
+from upgrade.upgrades import UPGRADE_CLASSES
 from v2 import V2
-import explosion
-import re
-from anyupgradepanel import AnyUpgradePanel
 
 class PlayState(UIEnabledState):
     def enter(self):
@@ -328,7 +321,8 @@ class UpgradeState(UIEnabledState):
             self.cursor_icon._recalc_rect()
             self.scene.ui_group.add(self.cursor_icon)
             self.hover_filter = self.filter_my_planets
-            self.panel.kill()
+            if self.panel:
+                self.panel.kill()
             self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
             self.scene.ui_group.add(self.selection_info_text)
         elif cursor == "allied_fleet":
@@ -338,7 +332,8 @@ class UpgradeState(UIEnabledState):
             self.cursor_icon._recalc_rect()
             self.scene.ui_group.add(self.cursor_icon)
             self.hover_filter = self.filter_my_fleets
-            self.panel.kill()
+            if self.panel:
+                self.panel.kill()
             self.selection_info_text = text.Text("Select one of your Fleets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
             self.scene.ui_group.add(self.selection_info_text)
         elif cursor == "point":
@@ -347,7 +342,8 @@ class UpgradeState(UIEnabledState):
             self.cursor_icon._recalc_rect()
             self.scene.ui_group.add(self.cursor_icon)
             self.hover_filter = self.filter_only_ui
-            self.panel.kill()
+            if self.panel:
+                self.panel.kill()
             self.selection_info_text = text.Text("Select a point", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
             self.scene.ui_group.add(self.selection_info_text)
         elif cursor == "nearby":
@@ -359,7 +355,8 @@ class UpgradeState(UIEnabledState):
             self.scene.ui_group.add(self.range)
             self.extras.append(self.range)
             self.hover_filter = self.filter_only_ui
-            self.panel.kill()
+            if self.panel:
+                self.panel.kill()
             self.selection_info_text = text.Text("Select a point nearby", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
             self.scene.ui_group.add(self.selection_info_text)                     
 
@@ -503,6 +500,31 @@ class DevAnyUpgradeState(UpgradeState):
     def on_back(self):
         return
 
+class SavedUpgradeState(UpgradeState):
+    def __init__(self, scene):
+        super().__init__(scene)
+
+    def enter(self):
+        self.scene.paused = True
+        self.selected_targets = []
+        self.extras = []
+        self.panel = None
+        return UIEnabledState.enter(self)
+
+    def finish(self, target=None, cancel = False):
+        for extra in self.extras:
+            extra.kill()
+        self.extras = []        
+        if not cancel:
+            self.scene.invalidate_saved_upgrade(self.pending_upgrade)
+            self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+        self.scene.sm.transition(PlayState(self.scene))
+
+    def on_back(self):
+        for extra in self.extras:
+            extra.kill()        
+        self.scene.sm.transition(PlayState(self.scene))
+
 class GameOverState(State):
     def enter(self):
         scores = save.SAVE_OBJ.add_highscore(self.scene.score)
@@ -524,34 +546,28 @@ class GameOverState(State):
             self.scene.ui_group.add(t1)
             self.scene.ui_group.add(t2)
 
+        self.scene.game.save.set_run_state(None)
+
         return super().enter()
 
     def take_input(self, input, event):
         if input == "action" or input == "click":
-            self.scene.game.scene = levelscene.LevelScene(self.scene.game)
-            self.scene.game.scene.start()
+            self.scene.game.set_scene("menu")
                 
 
 class VictoryState(State):
     def enter(self):
         self.scene.ui_group.empty()
-        self.scene.ui_group.add(text.Text("Victory!", "big", V2(170, 60), PICO_BLUE, multiline_width=200))
+        t = text.Text("Click to continue", "medium", V2(250, 200), PICO_WHITE, multiline_width=200)
+        t.offset = (0.5,0)
+        self.scene.ui_group.add(t)
+
+        self.scene.ui_group.add(FunNotification("VICTORY!"))
 
         for r in self.scene.my_civ.upgrades_stocked:
             if r == "iron": self.scene.game.run_info.bonus_credits += 10
             elif r == "ice": self.scene.game.run_info.bonus_credits += 15
             elif r == "gas": self.scene.game.run_info.bonus_credits += 20
-
-        if False and game.DEV:
-            import plotly.graph_objects as go
-            v = self.scene.my_civ.collection_rate_history
-            t = [x * 15 for x in range(len(v))]
-            z = self.scene.my_civ.upgrade_times
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=t, y=v, mode="lines", name="collection rate"))
-            fig.add_trace(go.Scatter(x=z, y=[(i+1)/100 for i in range(len(z))], mode="markers", name="upgrades"))
-            fig.show()
-
 
         return super().enter()
 

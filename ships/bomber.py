@@ -8,7 +8,9 @@ import math
 import planet
 from helper import all_nearby, clamp
 from bullet import Bullet
+from ships.all_ships import register_ship
 
+@register_ship
 class Bomber(Fighter): 
     SHIP_NAME = "bomber"
     SHIP_BONUS_NAME = "bomber"

@@ -3,7 +3,9 @@ from ships.fighter import Fighter
 from helper import get_nearest
 import line
 from v2 import V2
+from ships.all_ships import register_ship
 
+@register_ship
 class Alien1WarpShip(Fighter):
     SHIP_NAME = "alien1warpship"
     SHIP_BONUS_NAME = "fighter"

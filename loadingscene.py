@@ -43,7 +43,10 @@ class LoadingScene(Scene):
             s = FrameSprite((x, 200), img, img.get_width() / 2)
             s.offset = (0.5, 0)
             self.group.add(s)
-            self.group.add(Text(tip[1], "small", (x - 60, 220), multiline_width=120, center=False))
+            if self.game.run_info.get_path_galaxy()['difficulty'] > 1:
+                self.group.add(Text(tip[1], "small", (x - 60, 220), multiline_width=120, center=False))
+            else:
+                self.group.add(Text("", "small", (x - 60, 220), multiline_width=120, center=False))
 
         self.sm = Machine(UIEnabledState(self))
 

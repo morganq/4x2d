@@ -10,6 +10,11 @@ import random
 from aliens.alien3void import Alien3Void
 from v2 import V2
 
+from aliens import alien3battleship
+from aliens import alien3colonist
+from aliens import alien3fighter
+from aliens import alien3bomber
+
 @register_upgrade
 class Alien3HomeDefenseUpgrade(AddBuildingUpgrade):
     name = "a3bhomedefense"
@@ -187,7 +192,9 @@ class Alien3(alien.Alien):
         }
 
     def get_attack_chance(self, my_planet, target):
-        if self.time > self.last_attack_time + 120:
+        if self.time > self.last_attack_time + (100 - self.difficulty * 8):
+            return 1
+        elif my_planet.ships['alien3battleship'] > 0:
             return 1
         else:
             return sum(my_planet.ships.values()) / 15
@@ -202,7 +209,7 @@ class Alien3(alien.Alien):
         return 0
 
     def get_attacking_ships(self):
-        return ['alien3fighter', 'alien3bomber']
+        return ['alien3fighter', 'alien3bomber', 'alien3battleship']
 
     def get_colonist(self):
         return 'alien3colonist'

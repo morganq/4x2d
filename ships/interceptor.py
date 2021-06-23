@@ -10,7 +10,9 @@ from helper import all_nearby, clamp
 from bullet import Bullet
 from ships.bomber import Bomber
 import sound
+from ships.all_ships import register_ship
 
+@register_ship
 class Interceptor(Fighter): 
     BASE_HEALTH = 50
     BLAST_RADIUS = 7

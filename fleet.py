@@ -1,6 +1,6 @@
 from colors import PICO_DARKGREEN, PICO_GREEN
 from spaceobject import SpaceObject
-from ships.ship import FLEET_RADIUS
+import ships
 from button import Button
 import pygame
 import helper

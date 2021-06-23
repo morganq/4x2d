@@ -8,12 +8,15 @@ import helper
 from v2 import V2
 from text import Text
 from icontext import IconText
+from ships.all_ships import register_ship
 
 ATOMIC_BOMB_RANGE = 50
 
+@register_ship
 class Colonist(Ship):
     HEALTHBAR_SIZE = (16,2)
     BASE_HEALTH = 35
+    SHIP_NAME = "colonist"
     
     def __init__(self, scene, pos, owning_civ):
         Ship.__init__(self, scene, pos, owning_civ)
@@ -51,13 +54,6 @@ class Colonist(Ship):
                     self.owning_civ.researched_upgrade_names.add(u.name)       
 
             other.population += self.population
-
-            if self.owning_civ.blueprints:
-                for upgrade in self.owning_civ.blueprints:
-                    u = UPGRADE_CLASSES[upgrade]
-                    u().apply(other)
-                    self.owning_civ.researched_upgrade_names.add(u.name)
-                self.owning_civ.blueprints = []
 
             other.needs_panel_update = True
             self.colonized(other)

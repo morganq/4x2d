@@ -3,16 +3,18 @@ from colors import *
 from particle import Particle
 from .ship import FLEET_RADIUS, STATE_RETURNING, STATE_WAITING, Ship, THRUST_PARTICLE_RATE
 from bullet import Bullet
-from planet import planet
+import planet
 import asteroid
 import random
 import math
 import sound
+from ships.all_ships import register_ship
 from v2 import V2
 
 STATE_DOGFIGHT = 'dogfight'
 STATE_SIEGE = 'siege'
 
+@register_ship
 class Fighter(Ship):
     HEALTHBAR_SIZE = (10,2)
     SHIP_NAME = "fighter"
@@ -214,7 +216,7 @@ class Fighter(Ship):
 
         if not self.effective_target or self.effective_target.health <= 0 or self.effective_target.owning_civ == self.owning_civ:
             # If we just killed a planet, stay in waiting.
-            if self.effective_target and isinstance(self.effective_target, planet.Planet):
+            if self.effective_target and isinstance(self.effective_target, planet.planet.Planet):
                 self.set_state(STATE_WAITING)
             else:
                 self.set_state(STATE_RETURNING)
@@ -263,7 +265,7 @@ class Fighter(Ship):
                 return
 
         delta = self.effective_target.pos - self.pos
-        if isinstance(self.effective_target, planet.Planet) or isinstance(self.effective_target, asteroid.Asteroid):
+        if isinstance(self.effective_target, planet.planet.Planet) or isinstance(self.effective_target, asteroid.Asteroid):
             if (delta.sqr_magnitude() - self.effective_target.radius ** 2 - self.get_weapon_range() ** 2) <= 0:
                 if self.BOMBS: # If we can attack planets, figure out what to do
                     if isinstance(self.effective_target, asteroid.Asteroid):
@@ -293,7 +295,7 @@ class Fighter(Ship):
 
         # Fixing a bug where sometimes we could be put in waiting but need to get out of it
         if self.BOMBS:
-            if isinstance(self.chosen_target, planet.Planet):
+            if isinstance(self.chosen_target, planet.planet.Planet):
                 # if enemy planet
                 if self.chosen_target.owning_civ and self.chosen_target.owning_civ != self.owning_civ:
                     if self.chosen_target.health > 0:

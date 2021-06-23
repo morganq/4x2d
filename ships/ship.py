@@ -2,7 +2,7 @@ from satellite import ReflectorShieldObj
 from colors import *
 from v2 import V2
 from spaceobject import SpaceObject
-from planet import planet, building
+import planet
 import random
 import math
 import particle
@@ -134,7 +134,7 @@ class Ship(SpaceObject):
                 self.scene.game_group.add(p)
         if self._timers['staged_booster'] < 0:
             speed *= 2
-        if self.get_stat('ship_speed_mul_targeting_planets') and self.is_target_enemy() and isinstance(self.effective_target, planet.Planet):
+        if self.get_stat('ship_speed_mul_targeting_planets') and self.is_target_enemy() and isinstance(self.effective_target, planet.planet.Planet):
             speed *= (1 + self.get_stat('ship_speed_mul_targeting_planets'))
             if random.random() < 0.02:
                 p = particle.Particle([PICO_WHITE, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 1.5, self.velocity * -1 + V2.random_angle() * 1.25)
@@ -169,7 +169,7 @@ class Ship(SpaceObject):
 
     def can_land(self, target):
         return (
-            isinstance(target, planet.Planet) and
+            isinstance(target, planet.planet.Planet) and
             target.owning_civ == self.owning_civ and
             target == self.effective_target
         )
@@ -271,7 +271,7 @@ class Ship(SpaceObject):
         else:
             if isinstance(other, bullet.Bullet):
                 return
-            if isinstance(other, ReflectorShieldObj) or isinstance(other, building.ReflectorShieldCircleObj):
+            if isinstance(other, ReflectorShieldObj) or isinstance(other, planet.building.ReflectorShieldCircleObj):
                 return
             delta=(other.pos-self.pos).normalized()
             self.pos += -delta
@@ -368,7 +368,7 @@ class Ship(SpaceObject):
         target_pt = self.effective_target.pos + V2.from_angle(a) * (ATMO_DISTANCE + self.effective_target.radius)
         self.target_velocity = (target_pt - self.pos).normalized() * self.get_max_speed() * 0.5
 
-        if isinstance(self.effective_target, planet.Planet):
+        if isinstance(self.effective_target, planet.planet.Planet):
             if self.can_land(self.effective_target):
                 self.set_state(STATE_CRUISING)
 

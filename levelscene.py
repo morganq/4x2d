@@ -1,42 +1,43 @@
-from collections import defaultdict
-import o2meter
-from objgrid import ObjGrid
-from hazard import Hazard
-from helper import all_nearby, get_nearest
-from upgrade.upgrades import UPGRADE_CLASSES
-from spaceobject import SpaceObject
-import simplesprite
-import sys
-import traceback
+import json
 import random
+import sys
 import time
-import funnotification
-import flowfield
+import traceback
+from collections import defaultdict
 
 import pygame
-import json
-import sound
 
+import fleet
+import flowfield
+import funnotification
 import game
 import levelstates
+import o2meter
+import optimize
 import scene
+import simplesprite
+import sound
 import states
+import aliens
 from asteroid import Asteroid
 from background import Background
-from civ import PlayerCiv, Civ
-from meter import Meter
 from button import Button
-from text import Text, FONTS
+from civ import Civ, PlayerCiv
 from colors import *
-from economy import RESOURCES, Resources, RESOURCE_COLORS
+from debug import debug_render
+from economy import RESOURCE_COLORS, RESOURCES, Resources
+from hazard import Hazard
+from helper import all_nearby, get_nearest
+from meter import Meter
+from objgrid import ObjGrid
 from planet.planet import Planet
 from resources import resource_path
 from ships.ship import Ship
-import fleet
+from spaceobject import SpaceObject
+from text import FONTS, Text
+from upgrade.upgradeicon import UpgradeIcon
+from upgrade.upgrades import UPGRADE_CLASSES
 from v2 import V2
-from debug import debug_render
-import optimize
-from aliens import alien
 
 
 class LevelScene(scene.Scene):
@@ -228,6 +229,15 @@ class LevelScene(scene.Scene):
         self.upgrade_button.visible = 0
         self.ui_group.add(self.upgrade_button)
 
+        upy = 80
+        self.saved_upgrade_buttons = {}
+        for u in self.game.run_info.saved_technologies + self.game.run_info.blueprints:
+            print(u)
+            upicon = UpgradeIcon(V2(3, upy), u, self.on_click_saved_upgrade, tooltip=True)
+            self.saved_upgrade_buttons[u] = upicon
+            self.ui_group.add(upicon)
+            upy += 27
+
         if game.DEV:
             self.ui_group.add(Button(V2(2, 48), 'Win', 'small', self.dev_win))
 
@@ -254,7 +264,7 @@ class LevelScene(scene.Scene):
 
     def load(self):
         self.create_layers()
-        AlienClass = alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
+        AlienClass = aliens.alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
         self.enemies = [AlienClass(self, Civ(self))]
         self.enemy = self.enemies[0]        
         
@@ -305,6 +315,14 @@ class LevelScene(scene.Scene):
     def on_click_upgrade(self):
         self.sm.transition(levelstates.UpgradeState(self))
         sound.play("click1")
+
+    def on_click_saved_upgrade(self, upgrade):
+        st = levelstates.SavedUpgradeState(self)
+        self.sm.transition(st)
+        st.on_select(upgrade)
+
+    def invalidate_saved_upgrade(self, upgrade):
+        self.saved_upgrade_buttons[upgrade.name].kill()
 
     def dev_win(self):
         self.sm.transition(levelstates.VictoryState(self))        
@@ -460,7 +478,7 @@ class LevelScene(scene.Scene):
         for res_type in self.my_civ.resources.data.keys():
             num = len([u for u in self.my_civ.upgrades_stocked if u == res_type])
             if num > 0:
-                self.upgrade_texts[res_type].set_text("%d upgrade%s available!" % (num, "s" if num > 1 else ""))
+                self.upgrade_texts[res_type].set_text("%d asset%s available" % (num, "s" if num > 1 else ""))
             else:
                 self.upgrade_texts[res_type].set_text("")
 
@@ -536,7 +554,7 @@ class LevelScene(scene.Scene):
 
 
     def take_input(self, inp, event):
-        if inp == "other":
+        if inp == "other" and game.DEV:
             if event.key == pygame.K_d:
                 self.debug = not self.debug
             if event.key == pygame.K_1:
@@ -545,4 +563,7 @@ class LevelScene(scene.Scene):
                 self.game_speed = 10.0
             if event.key == pygame.K_f:
                 self.flowfielddebug = (self.flowfielddebug + 1) % len(self.flowfield.fields)
+        if inp == "back":
+            self.game.run_info.path.pop()
+            self.game.set_scene("menu")
         return super().take_input(inp, event)

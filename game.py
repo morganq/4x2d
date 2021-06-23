@@ -170,3 +170,9 @@ class Game:
         global SCALE
         SCALE = scale
         self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
+
+    def set_scene(self, scene_name):
+        self.scene = {
+            'menu':menuscene.MenuScene(self)
+        }[scene_name]
+        self.scene.start()
