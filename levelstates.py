@@ -537,6 +537,11 @@ class VictoryState(State):
         self.scene.ui_group.empty()
         self.scene.ui_group.add(text.Text("Victory!", "big", V2(170, 60), PICO_BLUE, multiline_width=200))
 
+        for r in self.scene.my_civ.upgrades_stocked:
+            if r == "iron": self.scene.game.run_info.bonus_credits += 10
+            elif r == "ice": self.scene.game.run_info.bonus_credits += 15
+            elif r == "gas": self.scene.game.run_info.bonus_credits += 20
+
         if False and game.DEV:
             import plotly.graph_objects as go
             v = self.scene.my_civ.collection_rate_history

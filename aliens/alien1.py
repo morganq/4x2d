@@ -142,9 +142,9 @@ class Alien1(alien.Alien):
     title = "ALIEN CIV 1"
 
     tips = [
-        ("assets/alien-fighter.png", "ALIEN CIV 1 can upgrade their basic fighters significantly, if given enough time."),
-        ("assets/warpship.png", "These defensive ships are tethered to one planet and fire explosive missiles."),
-        ("assets/alien-battleship.png", "[Destroyers] are heavy alien battleships that can warp across the galaxy.")
+        ("assets/alien-fighter.png", "ALIEN CIV 1 terraforms every planet they colonize in order to extract more valuable ice and gas."),
+        ("assets/warpship.png", "Defensive AEGIS ships are tethered to their host planet and fire explosive missiles."),
+        ("assets/alien-battleship.png", "DESTROYERS are heavy alien battleships that can warp across the galaxy.")
     ]
 
     def set_difficulty(self, difficulty):

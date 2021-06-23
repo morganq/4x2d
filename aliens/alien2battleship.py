@@ -33,3 +33,6 @@ class Alien2Battleship(Battleship):
                     if color[3] > 128 and color[0:3] != PICO_BLACK:
                         p = Particle([PICO_WHITE, PICO_RED, PICO_BROWN], 1, self.pos + V2(x - 9, y - 9), 0.25, V2.random_angle() * 5)
                         self.scene.game_group.add(p)
+
+        if self.health <= 0:
+            self.kill()

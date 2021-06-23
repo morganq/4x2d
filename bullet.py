@@ -44,7 +44,6 @@ class Bullet(SpriteBase):
 
     def collide(self, other):
         if other.owning_civ == self.shooter.owning_civ: return
-        if self.target and self.target != other: return # No accidentally hitting stuff.
         if not getattr(other, "health", None): return
         reflect = False
         if isinstance(other, satellite.ReflectorShieldObj):
@@ -57,6 +56,9 @@ class Bullet(SpriteBase):
                 return
             else:
                 reflect = True
+
+        if not reflect:
+            if self.target and self.target != other: return # No accidentally hitting stuff.
 
         if other.get_stat("ship_dodge") > 0:
             if random.random() <= other.get_stat("ship_dodge"):
@@ -149,17 +151,18 @@ class Bullet(SpriteBase):
         speed, angle = self.vel.to_polar()
         facing = self.vel.normalized()
         cp = facing.cross(towards)
+        homing_amt = self.mods.get("homing") + self.time / 2
         try:
             ao = math.acos(facing.dot(towards))
         except ValueError:
             ao = 0
-        if ao < 0.25 * self.mods.get("homing"):
+        if ao < 0.25 * homing_amt:
             angle = math.atan2(towards.y, towards.x)
         else:
             if cp > 0:
-                angle += 3 * dt * self.mods.get("homing")
+                angle += 3 * dt * homing_amt
             else:
-                angle -= 3 * dt * self.mods.get("homing")
+                angle -= 3 * dt * homing_amt
         self.vel = V2.from_angle(angle) * speed
         self._generate_image()
 

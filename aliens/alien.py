@@ -127,10 +127,10 @@ class Alien:
 
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
-        self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 5
-        self.civ.base_stats['mining_rate'] = 0.35 + ((difficulty - 1) / 5)
-        extra_planets = difficulty // 3
-        extra_pops = difficulty % 3
+        self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 4
+        self.civ.base_stats['mining_rate'] = 0.35 + ((difficulty - 1) / 4)
+        extra_planets = difficulty // 2
+        extra_pops = difficulty // 2
         my_planet = self.scene.get_civ_planets(self.civ)[0]
         my_planet.set_health(my_planet.get_max_health(), False)
         my_planet.population += extra_pops
@@ -173,7 +173,9 @@ class Alien:
     def _get_possible_attack_targets(self, planet):
         near_planets = self.scene.get_planets()
         near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
-        near_enemy = [p for p in near_planets if p.owning_civ and p.owning_civ != self.civ][0:2] # 2 nearest        
+        near_enemy = [p for p in near_planets if p.owning_civ and p.owning_civ != self.civ][0:2] # 2 nearest    
+        
+        return near_enemy    
 
     def update_attack(self):
         for planet in self.scene.get_civ_planets(self.civ):

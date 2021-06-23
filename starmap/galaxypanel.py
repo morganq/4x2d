@@ -27,7 +27,7 @@ DIFFICULTY_NAMES = {
 
 class GalaxyPanel(Panel):
     def __init__(self, galaxy, onclick):
-        Panel.__init__(self, (5,5), galaxy)
+        Panel.__init__(self, V2(5,5), galaxy)
         self.galaxy = galaxy
         
         self.tab = {'text':"Sector %d" % galaxy.coords[0], 'color':PICO_PINK}

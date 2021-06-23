@@ -15,7 +15,7 @@ class Battleship(Fighter):
     BASE_HEALTH = 160
     BLAST_RADIUS = 0
     FIRE_RATE = 1.5
-    BASE_DAMAGE = 4
+    BASE_DAMAGE = 6
 
     FIRE_RANGE = 40
     THREAT_RANGE_DEFAULT = 40

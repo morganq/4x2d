@@ -1,3 +1,4 @@
+from store.storenode import StoreNodeGraphic
 from scene import Scene
 from v2 import V2
 import pygame
@@ -43,11 +44,19 @@ class StarMapScene(Scene):
             self.galaxies.append([])
             for i,column in enumerate(row):
                 x = 400 - 80 * (len(row) - 1) + 160 * i
-                alien = ALIENS[column['alien']]
-                g = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], r == len(run_path))
-                self.galaxies[-1].append(g)
+                obj = None
+                if column['node_type'] == 'galaxy':
+                    alien = ALIENS[column['alien']]
+                    obj = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], r == len(run_path))
+                    if len(run_path) <= r:
+                        reward_icon = SimpleSprite(V2(x, y), "assets/%s.png" % column['rewards'][0])
+                        reward_icon.layer = 1
+                        self.game_group.add(reward_icon)                    
+                elif column['node_type'] == 'store':
+                    obj = StoreNodeGraphic(V2(x,y), column['offerings'], (r,i), r == len(run_path))
+                self.galaxies[-1].append(obj)
                 for j in column['links']:
-                    p2 = g.pos
+                    p2 = obj.pos
                     p1 = self.galaxies[-2][j].pos
                     travelled = (
                         len(run_path) > r and
@@ -57,11 +66,7 @@ class StarMapScene(Scene):
                     path = StarPath(p1,p2,travelled, tuple(run_path[-1]) == (r-1, j))
                     self.game_group.add(path)
                 if r > 0:
-                    self.game_group.add(g)
-
-                if len(run_path) <= r:
-                    reward_icon = SimpleSprite(V2(x, y), "assets/%s.png" % column['rewards'][0])
-                    self.game_group.add(reward_icon)
+                    self.game_group.add(obj)
 
             y -= 90
 

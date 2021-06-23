@@ -44,6 +44,18 @@ class RewardState(states.UIEnabledState):
     def on_confirm(self):
         self.scene.setup_next_reward()
 
+class CreditsRewardState(RewardState):
+    def __init__(self, scene, quantity):
+        RewardState.__init__(self, scene)
+        self.title = "Bonus Credits"
+        self.description = "Gain [^+%d] credits for unused Assets" % quantity
+        self.quantity = quantity
+
+    def on_confirm(self):
+        self.scene.game.run_info.credits += self.quantity
+        self.scene.game.run_info.bonus_credits = 0
+        return super().on_confirm()
+
 class JumpDriveRewardState(RewardState):
     def __init__(self, scene):
         RewardState.__init__(self, scene)
@@ -158,6 +170,8 @@ class RewardScene(Scene):
         self.sm = states.Machine(None)
 
         self.rewards = self.game.run_info.get_path_galaxy()['rewards'][::]
+        if self.game.run_info.bonus_credits > 0:
+            self.rewards.append("credits")
         self.setup_next_reward()
 
     def setup_next_reward(self):
@@ -171,6 +185,8 @@ class RewardScene(Scene):
                 self.sm.transition(LifeSupportRewardState(self))
             elif reward == 'jump_drive':
                 self.sm.transition(JumpDriveRewardState(self))
+            elif reward == "credits":
+                self.sm.transition(CreditsRewardState(self, self.game.run_info.bonus_credits))
             else:
                 print(reward)
         else:
@@ -178,6 +194,11 @@ class RewardScene(Scene):
             self.game.run_info.rerolls += 2
             self.game.scene = starmap.starmapscene.StarMapScene(self.game)
             self.game.scene.start()
+
+    def update(self, dt):
+        for spr in self.ui_group.sprites():
+            spr.update(dt)
+        return super().update(dt)
 
     def render(self):
         self.game.screen.fill(PICO_BLACK)

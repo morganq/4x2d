@@ -137,7 +137,6 @@ class Vanguard2aUpgrade(Upgrade):
     stats = Stats(ship_shield_far_from_home = 10)
     family = {'tree':'t_vanguard', 'parents':['t_vanguard1']}
     requires = ('t_vanguard1',)
-    infinite = True
 
 @register_upgrade
 class Vanguard2bUpgrade(Upgrade):
@@ -161,8 +160,8 @@ class Vanguard3Upgrade(Upgrade):
     description = "A [Worker] ship that uses warp drive has a [33% chance] for [^+1] population"
     icon = "quantumweirdness"
     stats = Stats(warp_drive_pop_chance=0.33)
-    family = {'tree':'t_vanguard', 'parents':['t_vanguard2a', 't_vanguard2b']}
-    requires = lambda x: 't_vanguard1' in x and ('t_vanguard2a' in x or 't_vanguard2b' in x)
+    family = {'tree':'t_vanguard', 'parents':['t_vanguard2b']}
+    requires = lambda x: 't_vanguard1' in x and 't_vanguard2b' in x
     infinite = False     
 
 

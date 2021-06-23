@@ -8,7 +8,7 @@ import random
 from upgrade.upgrades import UPGRADE_CLASSES
 from levelstates import UpgradeState
 from ships.colonist import Colonist
-from menuscene import MenuScene
+import menuscene
 
 class Tutorial1Scene(TutorialScene):
     def load_level(self, levelfile):
@@ -63,7 +63,7 @@ class Tutorial1Scene(TutorialScene):
             self.set_tutorial_text("Great! Destroy all the asteroids to collect a lot of iron!", 3)
         if self.my_civ.num_upgrades > 0:
             self.set_tutorial_text(
-                "Nice work. You have enough iron now to acquire a new Asset! Assets let you improve your planets, build more ships, or unlock new technologies.",
+                "Nice work. You have enough iron now to acquire a new Asset! Get Assets to improve your planets, build ships, or unlock new technologies.",
                 4,
                 offset=V2(0, -50)
             )
@@ -92,17 +92,17 @@ class Tutorial1Scene(TutorialScene):
             if self.tut_text_number <= 8:
                 self.set_tutorial_text("Now that you have workers on this planet, mining will begin and worker population will slowly grow.", 9)
             elif self.tut_text_number == 9 and self.tutorial_panel.shown_time > 10:
-                self.set_tutorial_text("Workers on your planet will mine all of its resources: iron, but also smaller amounts of ice and gas. Each resource has its own set of Assets.", 10)
-            elif self.tut_text_number == 10 and self.tutorial_panel.shown_time > 10:
+                self.set_tutorial_text("Workers mine all the types of resources on the planet. For this planet, that means mainly iron, but also some ice and gas. Each resource has its own unique pool of Assets.", 10)
+            elif self.tut_text_number == 10 and self.tutorial_panel.shown_time > 12:
                 self.set_tutorial_text("The more planets you control, the more mining you'll be able to do. Take over the other planet by sending workers to it.", 11)
 
             
         if len(self.get_civ_planets(self.my_civ)) == 2:
-            self.set_tutorial_text("Excellent! Defeating the federation comes down to making smart decisions: choosing your Assets, colonizing planets, and dispatching ships to defeat the enemy.", 12)
+            self.set_tutorial_text("Excellent! Defeating the federation comes down to making smart decisions: choosing your Assets, colonizing planets, and dispatching ships to destroy the enemy.", 12)
             if self.tut_text_number == 12 and self.tutorial_panel.shown_time > 15:
                 self.set_tutorial_text("Good luck!!", 13)
             if self.tut_text_number == 13 and self.tutorial_panel.shown_time > 5:
-                self.game.scene = MenuScene(self.game)
+                self.game.scene = menuscene.MenuScene(self.game)
                 self.game.scene.start()
 
         return super().update(dt)

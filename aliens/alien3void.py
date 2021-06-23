@@ -1,5 +1,5 @@
 from particle import Particle
-from colors import PICO_BLACK, PICO_DARKGRAY, PICO_LIGHTGRAY, PICO_PURPLE
+from colors import *
 from spaceobject import SpaceObject
 import pygame
 from v2 import V2
@@ -7,14 +7,15 @@ import random
 from rangeindicator import RangeIndicator
 
 class Alien3Void(SpaceObject):
-    def __init__(self, scene, pos, radius):
-        super().__init__(scene, pos)
+    def __init__(self, scene, attached, radius):
+        super().__init__(scene, attached.pos)
+        self.attached = attached
         self.radius = radius
         self._layer = -1
         self._generate_image()
         self.offset = (0.5,0.5)
         self.target_radius = self.radius
-        self.ring = RangeIndicator(self.pos, self.radius + 1.5, PICO_PURPLE, 2, 5)
+        self.ring = RangeIndicator(self.pos, self.radius + 1.5, PICO_ORANGE, 2, 5)
         self.ring._layer = -2
         self.scene.game_group.add(self.ring)
 
@@ -39,6 +40,8 @@ class Alien3Void(SpaceObject):
             self.target_radius = self.radius + 5
 
     def update(self, dt):
+        self.pos = self.attached.pos
+        self.ring.pos = self.attached.pos
         if self.radius < self.target_radius:
             self.radius += 1 * dt
             self._generate_image()

@@ -60,6 +60,10 @@ class Colonist(Ship):
                 self.owning_civ.blueprints = []
 
             other.needs_panel_update = True
+            self.colonized(other)
+
+    def colonized(self, planet):
+        pass
 
 
     def update(self, dt):

@@ -1,5 +1,6 @@
 from run import RunInfo
 from tutorial.tutorial1scene import Tutorial1Scene
+from tutorial.introscene import IntroScene
 from colors import *
 import scene
 import game
@@ -32,7 +33,16 @@ class MenuScene(scene.Scene):
 
         y = 45
         dy = 35
-        self.items['continue'] = text.Text("CONTINUE", "small", V2(320, y), onhover=lambda v:self.onhover(0,v), onclick=self.click_continue)
+        self.items['continue'] = text.Text("CONTINUE", "small", V2(320, y), multiline_width=200, onhover=lambda v:self.onhover(0,v), onclick=self.click_continue)
+        if self.game.save.run_state:
+            jumps = len(self.game.save.run_state['path'])-1
+            if jumps == 1:
+                self.items['continue'].set_text("CONTINUE (%d jump)" % jumps)
+            else:
+                self.items['continue'].set_text("CONTINUE (%d jumps)" % jumps)
+        else:
+            self.items['continue'].visible = False
+            self.items['continue'].selectable = False
         self.items['new'] = text.Text("NEW GAME", "small", V2(320, y + dy * 1), onhover=lambda v:self.onhover(1,v), onclick=self.click_new)
         self.items['tutorial'] = text.Text("TUTORIAL", "small", V2(320, y + dy * 2), onhover=lambda v:self.onhover(2,v), onclick=self.click_tutorial)
         self.items['music'] = text.Text("MUSIC", "small", V2(320, y + dy * 3))
@@ -89,7 +99,7 @@ class MenuScene(scene.Scene):
         self.game.update_scale(self.game.save.get_setting("scale"))
 
     def click_tutorial(self):
-        self.game.scene = Tutorial1Scene(self.game)
+        self.game.scene = IntroScene(self.game)
         self.game.scene.start()
 
     def click_continue(self):

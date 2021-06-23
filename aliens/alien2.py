@@ -174,9 +174,9 @@ class Alien2(alien.Alien):
     EXPAND_NUM_NEAREST = 1
     EXPAND_DURATION = 60
     tips = [
-        ("assets/alien2fighter.png", "ALIEN CIV 2 builds slow-moving ships, but can upgrade their speed"),
-        ("assets/alien2controlship.png", "Infiltrators can board and take control of your ships unless you destroy them quickly"),
-        ("assets/alien2battleship.png", "[Motherships] take a long time to build, but can defeat a whole fleet in combat")
+        ("assets/alien2fighter.png", "ALIEN CIV 2 can INTIMIDATE a planet, preventing new buildings or ships from being made there."),
+        ("assets/alien2controlship.png", "Infiltrators can DOMINATE and take control of your ships unless you destroy them quickly."),
+        ("assets/alien2battleship.png", "[Motherships] take a long time to build, but can defeat a whole fleet in combat.")
     ]    
 
     def __init__(self, scene, civ):

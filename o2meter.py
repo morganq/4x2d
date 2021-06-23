@@ -1,6 +1,7 @@
 import spritebase
 from resources import resource_path
 import pygame
+from helper import clamp
 
 O2_MAX = 3600
 class O2Meter(spritebase.SpriteBase):
@@ -15,7 +16,7 @@ class O2Meter(spritebase.SpriteBase):
 
     def _generate_image(self):
         self.image = self.full_image.copy()
-        pxs = (1 - (max(self.o2,0) / O2_MAX)) * 60 + 5
+        pxs = (1 - (clamp(self.o2,0, O2_MAX) / O2_MAX)) * 60 + 5
         self.image.blit(self.empty_image, (0,0), (0, 0, pxs, self.image.get_height()))
 
     def update(self, dt):

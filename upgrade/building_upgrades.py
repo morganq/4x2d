@@ -564,7 +564,7 @@ class Satellite2aUpgrade(AddBuildingUpgrade):
     description = "Covers half the planet with a 50-health reflector shield; shield health regenerates at [^+2] health per second"
     icon = "building_default"
     cursor = "allied_planet"
-    family = {'tree':'satellite', 'parents':['b_satellite2']}
+    family = {'tree':'satellite', 'parents':['b_satellite1']}
     building = ReflectorShieldBuilding
     requires = ('b_satellite1',)
 

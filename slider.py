@@ -63,10 +63,12 @@ class Slider(SpriteBase):
 
     def on_mouse_down(self, pos):
         self.update_value(pos)
-        self.onchange(self.value)
+        if self.onchange:
+            self.onchange(self.value)
         return super().on_mouse_down(pos)
 
     def on_drag(self, pos):
         self.update_value(pos)
-        self.onchange(self.value)
+        if self.onchange:
+            self.onchange(self.value)
         return super().on_drag(pos)

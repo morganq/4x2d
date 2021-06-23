@@ -41,8 +41,8 @@ class Background(SpriteBase):
                 lineleni = min(int(linelenf),4)
                 pygame.draw.line(self.image, color, (x - lineleni, y), (x + lineleni, y), 1)
                 pygame.draw.line(self.image, color, (x, y - lineleni), (x, y + lineleni), 1)
-                off = clamp(math.sin(xt / 90 * ss + pow(-y/10,2)) * 6 + 12,0, 10)
-                if off < 10:
+                off = clamp(math.sin(xt / 90 * ss + pow(-y/10,2)) * 6 + 12,0, 10) * ss
+                if off < 10 * ss and random.random() > 0.5:
                     pygame.draw.line(self.image, color, (x + off, y), (x + GS - off, y), 1)
                     pygame.draw.line(self.image, color, (x - off, y), (x - GS + off, y), 1)
                     pygame.draw.line(self.image, color, (x, y + off), (x, y + GS - off), 1)

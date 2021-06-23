@@ -1,4 +1,5 @@
 import random
+from upgrade.upgrades import UPGRADE_CLASSES
 
 
 class RunInfo:
@@ -11,6 +12,8 @@ class RunInfo:
         self.bonus_fighters = 0
         self.rerolls = 3
         self.o2 = 3600
+        self.credits = 20
+        self.bonus_credits = 0
 
     def serialize(self):
         obj = {}
@@ -22,6 +25,8 @@ class RunInfo:
         obj['bonus_fighters'] = self.bonus_fighters
         obj['rerolls'] = self.rerolls
         obj['o2'] = self.o2
+        obj['credits'] = self.credits
+        obj['bonus_credits'] = self.bonus_credits
         return obj
     
     @classmethod
@@ -34,6 +39,8 @@ class RunInfo:
         r.bonus_fighters = obj['bonus_fighters']
         r.rerolls = obj['rerolls']
         r.o2 = obj['o2']
+        r.credits = obj['credits']
+        r.bonus_credits = obj['bonus_credits']
         return r
 
     def choose_path(self, row, column):
@@ -42,6 +49,42 @@ class RunInfo:
     def get_path_galaxy(self, index = -1):
         (r,c) = self.path[index]
         return self.data[r][c]
+
+    def new_galaxy(self, row, from_links):
+        return {
+            'node_type':'galaxy',
+            'alien': random.choice(['alien1', 'alien2', 'alien3']),
+            'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
+            'difficulty': row,
+            'level':random.choice(['belt', 'scatter', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']),
+            'links': from_links
+        }        
+
+    def new_store(self, row, from_links):
+        offerings = []
+        offer_types = ['memory', 'blueprint', 'o2']
+        random.shuffle(offer_types)
+        for i in range(3):
+            offer_type = offer_types.pop()
+            offering = {'offer_type':offer_type}
+            if offer_type == 'o2':
+                offering['quantity'] = 600
+            elif offer_type == 'memory':
+                techs = [n for n,u in UPGRADE_CLASSES.items() if u.category == "tech" and not u.alien]
+                random.shuffle(techs)
+                offering['upgrades'] = techs[0:3]
+            elif offer_type == 'blueprint':
+                techs = [n for n,u in UPGRADE_CLASSES.items() if u.category == "buildings" and not u.alien]
+                random.shuffle(techs)
+                offering['upgrades'] = techs[0:3]
+            offerings.append(offering)
+
+        return {
+            'node_type':'store',
+            'offerings':offerings,
+            'links': from_links
+        }
+
 
     def generate_run(self):
         self.data = []
@@ -57,13 +100,9 @@ class RunInfo:
                     if column < num_columns - 1: from_links.append(column)
                 else:
                     from_links = [column, column + 1]
-                galaxy = {
-                    #'alien': random.choice(['alien1', 'alien2']),
-                    'alien': random.choice(['alien3']),
-                    'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
-                    'difficulty': row,
-                    'level':random.choice(['belt', 'scatter', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']),
-                    'links': from_links
-                } 
-                self.data[-1].append(galaxy)
+                if row == 3 or row == 6:
+                    node = self.new_store(row, from_links)
+                else:
+                    node = self.new_galaxy(row, from_links)
+                self.data[-1].append(node)
         return self.data                 

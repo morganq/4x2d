@@ -13,7 +13,8 @@ alien ideas:
  - ?: shield blocks the first damage, with cooldown
 
 
- - Alien 1: Mines? | Basic fighter ship, blast radius ship tethered to planet, battleship with slow warp
- - Alien 2: Curse on Target (no prod or building on that planet) | Slow higher health fighter, Boarding/conversion ship, Mothership that is constructed in pieces
- - Alien 3: Creep (void) | Basic fighter, Ship that is stealth in creep until it attacks, big ship with creep radius
+ - Alien 1: TERRAFORM | Basic fighter ship, blast radius ship tethered to planet, battleship with slow warp
+ - Alien 2: INTIMIDATE (no prod or building on that planet) | Slow higher health fighter, Boarding/conversion ship, Mothership that is constructed in pieces
+ - Alien 3: VOID | Basic fighter, Ship that is stealth in creep until it attacks, big ship with creep radius
+ 
  - Alien 4: Power Crystal (moves to different planets powering up units there. attack it to force it away) | 

@@ -15,7 +15,7 @@ class Bomber(Fighter):
     BASE_HEALTH = 55
     BLAST_RADIUS = 0
     FIRE_RATE = 0.4
-    BASE_DAMAGE = 30
+    BASE_DAMAGE = 40
 
     FIRE_RANGE = 35
     THREAT_RANGE_DEFAULT = 40

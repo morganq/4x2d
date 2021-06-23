@@ -55,6 +55,7 @@ class LevelScene(scene.Scene):
         self.debug = False
         self._score = 0
         self.is_tutorial = False
+        self.update_times = defaultdict(lambda:0)
 
     @property
     def score(self):
@@ -381,7 +382,7 @@ class LevelScene(scene.Scene):
             return        
         self.time += dt
 
-        if self.time > 240 and not self.my_civ.scarcity:
+        if self.time > 300 and not self.my_civ.scarcity:
             self.my_civ.enable_scarcity()
             self.enemy.civ.enable_scarcity()
             fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
@@ -399,8 +400,9 @@ class LevelScene(scene.Scene):
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
         self.update_times["objgrid"] = time.time() - t
 
-        # Detect defeat
+        
         if not self.is_tutorial:
+            # Detect defeat
             if not self.get_civ_planets(self.my_civ):
                 self.paused = True
                 self.sm.transition(levelstates.GameOverState(self))
@@ -527,7 +529,10 @@ class LevelScene(scene.Scene):
 
         #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))
         if self.debug:
-            print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))          
+            print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))
+
+        if game.DEV:
+            FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 20, 20), "%d" % self.time, (128,255,128,180))
 
 
     def take_input(self, inp, event):

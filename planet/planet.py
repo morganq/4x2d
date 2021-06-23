@@ -1,42 +1,45 @@
-from aliens.alien3bomber import Alien3Bomber
-from aliens.alien3fighter import Alien3Fighter
+import math
+import random
+from collections import defaultdict
+
+import economy
+import explosion
+import framesprite
+import pygame
+import sound
+import spritebase
+import text
+from aliens.alien1battleship import Alien1Battleship
+from aliens.alien1colonist import Alien1Colonist
+from aliens.alien1fighter import Alien1Fighter
+from aliens.alien1warpship import Alien1WarpShip
+from aliens.alien2battleship import Alien2Battleship
 from aliens.alien2colonist import Alien2Colonist
 from aliens.alien2controlship import Alien2ControlShip
 from aliens.alien2fighter import Alien2Fighter
-from aliens.alien1warpship import Alien1WarpShip
-from aliens.alien2battleship import Alien2Battleship
-import math
-import random
-from upgrade.upgrades import UPGRADE_CLASSES
-from aliens.alien1colonist import Alien1Colonist
-from aliens.alien1fighter import Alien1Fighter
-from aliens.alien1battleship import Alien1Battleship
+from aliens.alien3battleship import Alien3Battleship
+from aliens.alien3bomber import Alien3Bomber
 from aliens.alien3colonist import Alien3Colonist
-
-import framesprite
-import pygame
-import spritebase
+from aliens.alien3fighter import Alien3Fighter
 from colors import *
-from ships.fighter import Fighter
-from ships.bomber import Bomber
-from ships.interceptor import Interceptor
-from ships.colonist import Colonist
-from ships.battleship import Battleship
-from ships.ship import Ship
-from v2 import V2
-from meter import Meter
-from healthy import Healthy
-import economy
-import text
-from planet.shipcounter import ShipCounter
-from icontext import IconText
-from collections import defaultdict
-from helper import all_nearby, clamp, get_nearest
-from .planetart import generate_planet_art
-from spaceobject import SpaceObject
 from funnotification import FunNotification
-import explosion
-import sound
+from healthy import Healthy
+from helper import all_nearby, clamp, get_nearest
+from icontext import IconText
+from meter import Meter
+from ships.battleship import Battleship
+from ships.bomber import Bomber
+from ships.colonist import Colonist
+from ships.fighter import Fighter
+from ships.interceptor import Interceptor
+from ships.ship import Ship
+from spaceobject import SpaceObject
+from upgrade.upgrades import UPGRADE_CLASSES
+from v2 import V2
+
+from planet.shipcounter import ShipCounter
+
+from .planetart import generate_planet_art
 
 EMIT_SHIPS_RATE = 0.125
 EMIT_CLASSES = {
@@ -55,7 +58,8 @@ EMIT_CLASSES = {
     'alien2battleship':Alien2Battleship,
     'alien3colonist':Alien3Colonist,
     'alien3fighter':Alien3Fighter,
-    'alien3bomber':Alien3Bomber
+    'alien3bomber':Alien3Bomber,
+    'alien3battleship':Alien3Battleship
 }
 
 RESOURCE_BASE_RATE = 1/220.0
