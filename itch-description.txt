@@ -18,6 +18,6 @@ TIPS
  - Ice gets you Bombers (only hits planets / asteroids) and Interceptors (only hits ships) which are better than fighters. Gas gets you battleships, which are great.
  - Take a look at the higher tier Assets in a tech tree - some of them are very powerful! Sometimes you may want to acquire an Asset solely to unlock the higher tiers.
 
-MISSING FEATURES - Many asset icons and other assets, more alien civs, alien lore/art, a boss, a real loss screen, what happens when you win a run, more types of things to buy in the shop, music, many more sound effects.
+MISSING FEATURES - Almost all building-on-planet graphics need to be made. Many asset icons and other assets, more alien civs, alien names/lore/art, a boss, a real loss screen, what happens when you win a run, more types of things to buy in the shop, music, many more sound effects.
 
-MUSIC: Might as well listen to this while playing, until the game has music: https://www.youtube.com/watch?v=fu8J6muzr6o
+MUSIC: Might as well listen to this while playing: https://www.youtube.com/watch?v=fu8J6muzr6o

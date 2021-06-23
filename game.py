@@ -24,7 +24,7 @@ import xbrz
 import tutorial.tutorial1scene
 import io
 
-DEV = True
+DEV = len(sys.argv) > 1 and sys.argv[1] == "dev"
 SCALE = 2
 RES = (500,360)
 OBJ = {
@@ -43,7 +43,7 @@ class Game:
         self.screen = pygame.Surface(RES, pygame.SRCALPHA)
         self.run_info = run.RunInfo()
         self.input_mode = 'mouse'
-        if len(sys.argv) > 1 and DEV:
+        if len(sys.argv) > 1:
             if sys.argv[1] == "draw":
                 self.scene = buildingcreatorscene.BuildingCreatorScene(self)
             elif sys.argv[1] == "editor":
@@ -55,7 +55,7 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             else:
-                self.scene = levelscene.LevelScene(self, None, None, 1, sys.argv[1])
+                self.scene = menuscene.MenuScene(self)
         else:
             self.scene = menuscene.MenuScene(self)
             #self.scene = introscene.IntroScene(self)
@@ -140,27 +140,6 @@ class Game:
         self.playing_level_index = index
         self.scene = levelscene.LevelScene(self, level)
         self.scene.start()
-
-    def return_to_map(self, won=False):
-        level = self.playing_level_index
-        if won and self.playing_level_index is not None:
-            level = self.playing_level_index + 1
-        self.scene = worldmapscene.WorldMapScene(self, level)
-        self.scene.start() 
-
-    def record_victory(self, steps):
-        if self.playing_level_index is not None:
-            level = worldmapscene.LEVELS[self.playing_level_index]
-            s3, s2, s1 = level[4:]
-            print(steps, s3,s2,s1)
-            stars = 0
-            if steps <= s3: stars = 3
-            elif steps <= s2: stars = 2
-            elif steps <= s1: stars = 1
-            old_state = self.save.get_level_state(self.playing_level_index)
-            if not old_state['beaten'] or steps < old_state['steps'] or stars > old_state['stars']:
-                self.save.set_level_state(self.playing_level_index, True, steps, stars)
-                self.save.save()
 
     def go_to_menu(self):
         self.scene = menuscene.MenuScene(self)

@@ -88,9 +88,12 @@ class MenuScene(scene.Scene):
         sound.update_volume()        
 
     def sound_change(self, value):
+        changed = self.game.save.get_setting("sound_volume") != value
         self.game.save.set_setting("sound_volume", value)    
         self.update_settings()
-        sound.update_volume()         
+        sound.update_volume() 
+        if changed:
+            sound.play("laser1")        
 
     def click_resolution(self):
         self.game.save.set_setting("scale", (self.game.save.get_setting("scale")) % 3 + 1)
