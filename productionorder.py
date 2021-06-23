@@ -30,11 +30,11 @@ class PermanentHangarProductionOrder(ProductionOrder):
         if self.time > self.period:
             self.time -= self.period
             ship_type = "fighter"
-            for b in planet.buildings:
-                if b['building'].upgrade.name == "b_hangar2a" and ship_type not in ['battleship', 'bomber']:
-                    ship_type = "interceptor"
-                elif b['building'].upgrade.name == "b_hangar2b" and ship_type not in ['battleship']:
-                    ship_type = "bomber"                    
-                elif b['building'].upgrade.name == "b_hangar3":
-                    ship_type = "battleship"
+            #for b in planet.buildings:
+            #    if b['building'].upgrade.name == "b_hangar2a" and ship_type not in ['battleship', 'bomber']:
+            #        ship_type = "interceptor"
+            #    elif b['building'].upgrade.name == "b_hangar2b" and ship_type not in ['battleship']:
+            #        ship_type = "bomber"                    
+            #    elif b['building'].upgrade.name == "b_hangar3":
+            #        ship_type = "battleship"
             planet.add_ship(ship_type)

@@ -498,7 +498,7 @@ class Deserted2aUpgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "War Economy I"
-    description = "Produce [^1] ship of the highest tier hangar type (or [Fighters] if no hangar) every 45 seconds"
+    description = "Produce [^1] [Fighter] every 45 seconds"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'deserted', 'parents':['b_deserted1']}
@@ -529,7 +529,7 @@ class Deserted3Upgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "War Economy II"
-    description = "Produce [^1] ship of the highest tier hangar type (or [Fighters] if no hangar) every 30 seconds"
+    description = "Produce [^1] [Fighter] every 30 seconds"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'deserted', 'parents':['b_deserted2a', 'b_deserted2b']}
