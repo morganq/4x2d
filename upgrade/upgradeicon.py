@@ -49,6 +49,8 @@ class UpgradeIcon(SpriteBase):
 
     def on_mouse_enter(self, pos):
         self._generate_image(True)
+        if self._tooltip_panel:
+            self._tooltip_panel.kill()
         if self.tooltip:
             self._tooltip_panel = TooltipPanel(self.upgrade.title, self.upgrade.description)
             if self._tooltip_panel.width + self.pos.x + 30 > game.RES[0]:

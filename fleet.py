@@ -1,3 +1,4 @@
+from rangeindicator import RangeIndicator
 from colors import PICO_DARKGREEN, PICO_GREEN
 from spaceobject import SpaceObject
 import ships
@@ -17,6 +18,7 @@ class FleetSelectable(SpaceObject):
         self.collision_radius = radius
         self.owning_civ = owning_civ
         self.fleet = fleet
+
         self._generate_image()
 
     def get_selection_info(self):
@@ -37,6 +39,7 @@ class FleetManager:
         self.current_fleets = []
         self.ship_fleets = {}
         self.fleet_order_buttons = {}
+        self.fleet_markers = []
 
     def generate_selectable_objects(self):
         for fleet in self.current_fleets:
@@ -53,7 +56,11 @@ class FleetManager:
         for fleet in self.current_fleets:
             for ship in fleet.ships:
                 ship.fleet = fleet
-                self.ship_fleets[ship] = fleet
+                self.ship_fleets[ship] = fleet        
+        #self.update_fleet_buttons()
+
+    def update_fleet_buttons(self):
+        for fleet in self.current_fleets:
 
             # record which fleets have buttons by looking at their first ships
             first_ship = fleet.ships[0]
@@ -73,7 +80,7 @@ class FleetManager:
                     del self.fleet_order_buttons[first_ship]
 
                 if first_ship in self.fleet_order_buttons:
-                    self.fleet_order_buttons[first_ship].pos = first_ship.pos
+                    self.fleet_order_buttons[first_ship].pos = first_ship.pos        
 
     def recall_fleet(self, fleet):
         nearest, dist = helper.get_nearest(fleet.ships[0].pos, self.scene.get_civ_planets(fleet.ships[0].owning_civ))
@@ -88,6 +95,24 @@ class FleetManager:
             return self.ship_fleets[ship]
         else:
             return Fleet([ship])
+
+    def point_recall(self, point):
+        for fleet in self.current_fleets:
+            p, r = fleet.get_size_info()
+            if (point - p).sqr_magnitude() < (r + 5) ** 2:
+                self.recall_fleet(fleet)
+
+    def update_fleet_markers(self, point):
+        for m in self.fleet_markers:
+            m.kill()
+
+        self.fleet_markers = []
+        for fleet in self.current_fleets:
+            p, r = fleet.get_size_info()
+            if (point - p).sqr_magnitude() < (r + 5) ** 2:
+                m = RangeIndicator(p, r + 3, PICO_DARKGREEN, 2, 2)
+                self.scene.ui_group.add(m)
+                self.fleet_markers.append(m)
 
 class Fleet:
     def __init__(self, ships):
@@ -111,6 +136,7 @@ class Fleet:
             max_x = max(max_x, ship.pos.x)
             max_y = max(max_y, ship.pos.y)
         radius = max(max_x - average.x, average.x - min_x, max_y - average.y, average.y - min_y)
+        radius = max(radius, 5)
         return (average, radius)
 
     def debug_render(self, surface):
@@ -137,7 +163,7 @@ def generate_fleets(scene, civ):
         for fleet in fleets:
             for ship2 in fleet.ships:
                 delta = ship2.pos-ship.pos
-                if delta.sqr_magnitude() < FLEET_RADIUS ** 2:
+                if delta.sqr_magnitude() < FLEET_RADIUS ** 2 and ship.chosen_target == ship2.chosen_target:
                     fleet.ships.append(ship)
                     fleetless = False
                     break

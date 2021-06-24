@@ -61,6 +61,8 @@ class Tutorial1Scene(TutorialScene):
             self.set_tutorial_text("Try dragging from your planet to an asteroid, then you can order fighters to attack it.", 2)
         if len(ships) > 0 and ships[0].time > 1:
             self.set_tutorial_text("Great! Destroy all the asteroids to collect a lot of iron!", 3)
+        if len(ships) > 0 and ships[0].time > 9:
+            self.set_tutorial_text("Once you've given orders to a fleet of ships, they will follow them until complete. You can also right-click on a fleet to cancel their orders.", 3.5)
         if self.my_civ.num_upgrades > 0:
             self.set_tutorial_text(
                 "Nice work. You have enough iron now to acquire a new Asset! Get Assets to improve your planets, build ships, or unlock new technologies.",

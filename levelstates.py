@@ -29,6 +29,7 @@ class PlayState(UIEnabledState):
         self.selector = None # Selection object
         self.arrow = None # Order object
         self.current_panel = None
+        self.mouse_pos = V2(0,0)
 
     def exit(self):
         if self.selector:
@@ -116,6 +117,8 @@ class PlayState(UIEnabledState):
         else:
             if self.arrow:
                 self.arrow.visible = False        
+
+        self.scene.fleet_managers['my'].update_fleet_markers(self.mouse_pos)                
         super().update(dt)
 
     def take_input(self, inp, event):
@@ -147,6 +150,14 @@ class PlayState(UIEnabledState):
                 pass
                 #e = explosion.Explosion(event.gpos, [PICO_WHITE, PICO_YELLOW, PICO_ORANGE, PICO_RED, PICO_RED], 0.25, 6, scale_fn="log", line_width=3)
                 #self.scene.game_group.add(e)
+
+        if inp == "rightclick":
+            self.scene.fleet_managers['my'].point_recall(event.gpos)
+
+        if inp == "mouse_move":
+            self.mouse_pos = event.gpos
+        if inp == "mouse_drag":
+            self.mouse_pos = event.gpos            
 
         return super().take_input(inp, event)
 
