@@ -125,6 +125,9 @@ class Alien:
     def get_attacking_ships(self):
         return []
 
+    def get_max_attackers(self):
+        return int(((self.difficulty - 1) * 1.5))
+
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
         self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 4
@@ -177,6 +180,14 @@ class Alien:
         
         return near_enemy    
 
+    def count_attacking_ships(self):
+        c = 0
+        for ship in self.scene.get_civ_ships(self.civ):
+            if ship.SHIP_BONUS_NAME == "colonist" and ship.chosen_target.owning_civ == self.scene.my_civ:
+                c += 1
+
+        return c
+
     def update_attack(self):
         for planet in self.scene.get_civ_planets(self.civ):
             # Find the enemy planets nearest to this planet
@@ -185,11 +196,15 @@ class Alien:
                 return
             target = random.choice(near_enemy)
             if random.random() < self.get_attack_chance(planet, target):
+                num_attackers = 0
                 sent = False
                 for ship_type in self.get_attacking_ships():
                     if ship_type in planet.ships and planet.ships[ship_type] > 0:
                         for i in range(planet.ships[ship_type]):
+                            if num_attackers + self.count_attacking_ships() >= self.get_max_attackers():
+                                break
                             planet.emit_ship(ship_type, {'to':target})
+                            num_attackers += 1
                             sent = True
                             self.last_attack_time = self.time
                 if sent and random.random() < 0.5 and planet.population > 1:
