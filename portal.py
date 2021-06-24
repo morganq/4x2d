@@ -26,7 +26,6 @@ class Portal(SpaceObject):
                             delta = obj.pos - self.pos
                             obj.pos = self.other_portal.pos + delta / 2
                             lp3 = LaserParticle(obj.pos, self.other_portal.pos, PICO_BLUE, 0.35)
-                            obj.fix_path()
                             self.scene.game_group.add(lp1)
                             self.scene.game_group.add(lp2)
                             self.scene.game_group.add(lp3)
