@@ -1,0 +1,34 @@
+- resolutions seem odd, make them more standard sizes
+* no lol
+- I would recommend adding a click-for-next-screen type approach to the tutorials rather than timing. That is more accessible for slower readers
+* yes
+- I think clicking and dragging should be an option to send your units to another planet. I would prefer clicking once and having the options to then click the planet I want to attack and that will trigger the number of fighters menu. (after playing a bit I don't know how much this matters, I got used to it pretty quickly)
+* probs not
+- I think the number of fighters menu should default to 1 if there is one available. (This also may not make sense now that I've played some more and realized there can be many types of ships)
+* nope
+- The animation in the asset store when you hover over the tech tree is cool!
+- The in game fighting animations are awesome!
+- Nice tutorial, definitely gave me what I needed. I did feel like it kind of ended abruptly though.
+* good point
+- Neat overworld map! Would be cool to be able to zoom in and out as well, but maybe that wouldn't accomplish much?
+- might be good to pause automatically when you click off the screen, or have a setting for that if you think people will want to idle. Darn, I hit esc and it exited me out of my current play through when I thought it would pause :(
+* in game menu
+- Oh, this setup where you can see the enemy planet and what they are doing while you are getting going is awesome! 
+- So many cool assets, feels like I would need to play a lot to get to use all of them!
+- OMG so fun. I just finished my first level and it felt so satisfying to win!
+- I noticed if a worker goes to a small asteroid it stayed there forever. I sent a fighter ship to it and once it destroyed the asteroid, then the worker went back to its home planet.
+- Love the different ship types, that adds a lot of variety
+- When some of my ships were converted, they stayed green so it looked like my own ships were attacking my planets, but I saw them turn red in some cases
+- I'm not sure if it is how I chose to play, but when I was going to lose, I couldn't do anything but wait for several minutes for them to finish me off. Maybe you could detect that someone is going to lose and offer that ahead of time? Also seemed like the enemy chose to sit in their planets for a while even though I was basically dead, so it was like the game was doing nothing.
+* good idea to fix
+
+--First run -> 1262. Super fun game. I think you should be proud of what you have made. Am looking forward to more updates and getting more polish! Keep going!!!
+
+
+===
+
+Asset system needs more explanation
+Allow intercepting the enemy?
+Enemy attacks more steady and consistent early game
+Game is a little slow
+Shouldn't be allowed to send workers to asteroids

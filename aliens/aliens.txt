@@ -14,7 +14,15 @@ alien ideas:
 
 
  - Alien 1: TERRAFORM | Basic fighter ship, blast radius ship tethered to planet, battleship with slow warp
+ * theme is ground/"earth", ecology, planetary
+ * chunky, minerally-looking.. maybe like marble-ish?
+
  - Alien 2: INTIMIDATE (no prod or building on that planet) | Slow higher health fighter, Boarding/conversion ship, Mothership that is constructed in pieces
+ * theme is robots and hacking
+
  - Alien 3: VOID | Basic fighter, Ship that is stealth in creep until it attacks, big ship with creep radius
+ * theme is void
+ * lizard-y things?
  
  - Alien 4: Power Crystal (moves to different planets powering up units there. attack it to force it away) | 
+ * 

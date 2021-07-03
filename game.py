@@ -1,28 +1,29 @@
-import pygame
 import csv
-
-import sound
-import tilemap
-import states
-import levelscene
-from starmap import starmapscene
-import introscene
-import buildingcreatorscene
-import leveleditorscene
-import allupgradesscene
-from resources import resource_path
-import sys
-import menuscene
-import creditsscene
-import simplesprite
-import text
-from colors import *
-from v2 import V2
-import run
-import optimize
-import xbrz
-import tutorial.tutorial1scene
 import io
+import sys
+
+import pygame
+import xbrz
+
+import allupgradesscene
+import buildingcreatorscene
+import creditsscene
+import introscene
+import leveleditorscene
+import levelscene
+import menuscene
+import optimize
+import run
+import simplesprite
+import sound
+import states
+import text
+import tilemap
+import tutorial.tutorial1scene
+from colors import *
+from resources import resource_path
+from starmap import starmapscene
+from v2 import V2
 
 DEV = len(sys.argv) > 1 and sys.argv[1] == "dev"
 SCALE = 2
@@ -105,6 +106,8 @@ class Game:
                         self.scene.take_input("mouse_drag", event)
                     else:
                         self.scene.take_input("mouse_move", event)
+
+                    
 
             dt = clock.tick() / 1000.0
 

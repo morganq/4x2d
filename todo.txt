@@ -1,5 +1,10 @@
-fix double fire and fast movement bugs in ships (fighters?)
+Joystick support:
+ Game: A - view planet panel. B - back. X - Start order arrow.
+       Free Cursor. Nearest selectable object is hovered.
+
 Fix hover / mouse input in a holistic way
+
+
 
 shop:
  - blueprint x3,
