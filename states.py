@@ -1,8 +1,12 @@
 from random import randint
-from v2 import V2
+
 import pygame
+
 import framesprite
 import helper
+import joystickcursor
+from v2 import V2
+
 
 class Machine:
     def __init__(self, state):
@@ -36,8 +40,10 @@ class State:
         self.update(dt)
 
 class UIEnabledState(State):
+    is_basic_joystick_panel = False
     def __init__(self, scene):
         State.__init__(self, scene)
+        self.panel = None
         self.hover_filter = lambda x: True
         self.hover_sprite = None # Mouse is over this one
         self.clicking_sprite = None # Currently mouse-down-ing this one
@@ -49,6 +55,8 @@ class UIEnabledState(State):
         self.key_images = {}
         self.key_targets = {}
         self.key_crosshair = None
+
+        self.joystick_overlay = None
 
     def filter_only_panel_ui(self, o):
         if hasattr(self.panel, "tree_children"):
@@ -68,6 +76,13 @@ class UIEnabledState(State):
         self.scene.ui_group.add(self.key_crosshair)
         self.scene.ui_group.change_layer(self.key_crosshair,3)
         self.key_crosshair.visible = False
+
+        if self.scene.game.input_mode == "mouse":
+            self.set_mouse_input()
+        elif self.scene.game.input_mode == "keyboard":
+            self.set_keyboard_input()
+        elif self.scene.game.input_mode == "joystick":
+            self.set_joystick_input()
 
 
     def deselect(self):
@@ -92,15 +107,40 @@ class UIEnabledState(State):
             self.key_images[d].visible = False        
         self.key_crosshair.visible = False
 
+    def set_joystick_input(self):
+        self.scene.game.input_mode = 'joystick'
+        for i,d in enumerate(['up', 'right', 'down', 'left']):
+            self.key_images[d].visible = False        
+        self.key_crosshair.visible = False        
+
+        if self.is_basic_joystick_panel:
+            if not self.joystick_overlay:
+                self.joystick_overlay = joystickcursor.JoystickPanelCursor(self.scene, self.get_joystick_cursor_controls())
+                self.scene.ui_group.add(self.joystick_overlay)            
+
+    def get_joystick_cursor_controls(self):
+        return []
+
     def take_input(self, input, event):
         if input in ["mouse_move", "mouse_drag", "click", "unclick"]:
             self.set_mouse_input()
         elif input in ['left', 'right', 'up', 'down']:
             self.set_keyboard_input()
+        elif input in ['joymotion']:
+            self.set_joystick_input()
         if self.scene.game.input_mode == 'mouse':
             self.mouse_input(input,event)
         elif self.scene.game.input_mode == 'keyboard':
             self.keyboard_input(input, event)
+        elif self.scene.game.input_mode == 'joystick':
+            self.joystick_input(input, event)            
+
+    def joystick_input(self, input, event):
+        if self.is_basic_joystick_panel:
+            if input == "joymotion":
+                self.joystick_overlay.joystick_delta(event['delta'])
+            if input == "confirm":
+                self.joystick_overlay.confirm()  
 
     def mouse_input(self, input, event):
         handled = False

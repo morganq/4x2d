@@ -1,9 +1,11 @@
-from colors import *
+import re
+
 import pygame
 import pygame.freetype
-from resources import resource_path
+
 import spritebase
-import re
+from colors import *
+from resources import resource_path
 
 pygame.freetype.init()
 
@@ -102,7 +104,14 @@ def get_groups(line, inside_group=None):
         x += 1
     return groups
 
-HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26}
+HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26}   
+
+SYMBOLS = {
+    '*square*':"assets/ps_square.png",
+    '*triangle*':"assets/ps_triangle.png",
+    '*circle*':"assets/ps_circle.png",
+    '*x*':"assets/ps_x.png"
+}
 
 def render_multiline(text, size, color, wrap_width=None, center=True):
     f = FONTS[size]
@@ -143,20 +152,28 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
             if group[0]:
                 group_color = group[0]
             group_text = group[1]
-            if group_text.startswith(" "):
-                running_x += 1
-            rect = f.get_rect(group_text)
-            yo = 0
-            # Hacky comma detection...
-            if rect[3] <= 7 and rect[1] <= 7:
-                yo = 6
-            
-            f.render_to(text_surf, (x + running_x,y + yo), group_text, group_color, (0,0,0,0))
-            if group_text.endswith(" "):
-                running_x += 1
-            
-            running_x += rect[2] + 1
-            is_in_color = group[0]
+
+            # Is text or a symbol?
+            if group_text in SYMBOLS:
+                symbol_img = pygame.image.load(resource_path(SYMBOLS[group_text]))
+                text_surf.blit(symbol_img, (x + running_x, y + yo))
+                running_x += symbol_img.get_width() + 2
+
+            else:
+                if group_text.startswith(" "):
+                    running_x += 1
+                rect = f.get_rect(group_text)
+                yo = 0
+                # Hacky comma detection...
+                if rect[3] <= 7 and rect[1] <= 7:
+                    yo = 6
+                
+                f.render_to(text_surf, (x + running_x,y + yo), group_text, group_color, (0,0,0,0))
+                if group_text.endswith(" "):
+                    running_x += 1
+                
+                running_x += rect[2] + 1
+                is_in_color = group[0]
         y += fh
     return text_surf
 

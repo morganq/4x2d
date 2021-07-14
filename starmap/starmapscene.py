@@ -1,20 +1,20 @@
-from store.storenode import StoreNodeGraphic
-from scene import Scene
-from v2 import V2
-import pygame
-from colors import *
-from background import Background
-from .galaxy import Galaxy
 import game
-import text
+import pygame
 import states
+import text
 from aliens.alien import ALIENS
-from .starpath import StarPath
-from scrollpanel import ScrollPanel
-from .starmapstate import StarMapState
 from animrotsprite import AnimRotSprite
+from background import Background
+from colors import *
+from scene import Scene
+from scrollpanel import ScrollPanel
 from simplesprite import SimpleSprite
+from store.storenode import StoreNodeGraphic
+from v2 import V2
 
+from .galaxy import Galaxy
+from .starmapstate import StarMapState
+from .starpath import StarPath
 
 # click to pick which galaxy to go to next. galaxy panel shows reward and details. start button.
 # animation after selecting
@@ -82,11 +82,12 @@ class StarMapScene(Scene):
 
     def update(self, dt):
         self.colonist.angle += dt
-        for s in self.game_group.sprites():
+        for s in self.game_group.sprites() + self.ui_group.sprites():
+            s._scrolled_offset = self.scroll_panel.pos
             s.update(dt)
 
-        for s in self.ui_group.sprites():
-            s.update(dt)
+        for s in self.ui_group2.sprites():
+            s.update(dt)            
 
         super().update(dt)
 

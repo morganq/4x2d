@@ -1,11 +1,13 @@
+import random
+
 import pygame
 import pygame.gfxdraw
-from resources import resource_path
-from v2 import V2
-import random
-from helper import clamp
 from colors import *
+from helper import clamp
+from resources import resource_path
 from spritebase import SpriteBase
+from v2 import V2
+
 
 def draw_spiral(image, angle, curviness, squash=1, rotate=0):
     w, h = image.get_size()
@@ -107,6 +109,7 @@ class Galaxy(SpriteBase):
         
         self.selectable = True
         self.selection_radius = self._width // 2
+        self.radius = self.selection_radius
         self.is_hover = False
         self.needs_panel_update = False
 

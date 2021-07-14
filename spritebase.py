@@ -1,5 +1,7 @@
 import pygame
+
 from v2 import V2
+
 
 class SpriteBase(pygame.sprite.DirtySprite):
     def __init__(self, pos):
@@ -23,6 +25,7 @@ class SpriteBase(pygame.sprite.DirtySprite):
         self.collidable = False
         self.collision_radius = 0
         self._timers = {}
+        self._scrolled_offset = V2(0,0)
 
     def _recalc_rect(self):
         self.rect = pygame.Rect(
@@ -61,6 +64,10 @@ class SpriteBase(pygame.sprite.DirtySprite):
         else:
             self._pos = V2(*value)
         self._recalc_rect()
+
+    @property
+    def apparent_pos(self):
+        return self._pos + self._scrolled_offset
 
     @property
     def x(self):

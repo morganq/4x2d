@@ -1,16 +1,20 @@
-from spaceobject import SpaceObject
-from satellite import OffWorldMining, OrbitalLaser, ReflectorShield, SpaceStation
-from rangeindicator import RangeIndicator
-from v2 import V2
-from colors import *
-import pygame
-from bullet import Bullet
-import random
-from stats import Stats
 import json
-import planet
+import random
+
+import bullet
+import pygame
+from colors import *
 from helper import all_nearby
+from rangeindicator import RangeIndicator
 from resources import resource_path
+from satellite import (OffWorldMining, OrbitalLaser, ReflectorShield,
+                       SpaceStation)
+from spaceobject import SpaceObject
+from stats import Stats
+from v2 import V2
+
+import planet
+
 
 class Building:
     upgrade = None
@@ -81,7 +85,7 @@ class ArmoryBuilding(Building):
             self.fire_time = 0
             for i in range(planet.population):
                 angle = random.random() * 6.2818
-                b = Bullet(
+                b = bullet.Bullet(
                     planet.pos + V2.from_angle(angle) * planet.get_radius(),
                     random.choice(threats), 
                     planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "damage_base":3 * planet.planet_weapon_mul, "color":PICO_WHITE, "life":5}
@@ -104,7 +108,7 @@ class SSMBatteryBuilding(Building):
             _, angle = delta.to_polar()
             angle += random.random() * 1.5 - 0.75            
             self.fire_time = 0
-            b = Bullet(
+            b = bullet.Bullet(
                 planet.pos + V2.from_angle(angle) * planet.get_radius(),
                 t, 
                 planet, vel=V2.from_angle(angle) * 20, mods={
@@ -132,7 +136,7 @@ class InterplanetarySSMBatteryBuilding(Building):
             delta = t.pos - planet.pos
             _, angle = delta.to_polar()
             angle += random.random() * 1.5 - 0.75
-            b = Bullet(
+            b = bullet.Bullet(
                 planet.pos + V2.from_angle(angle) * planet.get_radius(),
                 t, 
                 planet, vel=V2.from_angle(angle) * 20, mods={
@@ -141,6 +145,7 @@ class InterplanetarySSMBatteryBuilding(Building):
                 )
             planet.scene.game_group.add(b)              
 
+# TODO: re-empl with aura, larger radius
 class EMGeneratorBuilding(Building):
     def __init__(self):
         Building.__init__(self)
@@ -228,7 +233,7 @@ class AlienHomeDefenseBuilding(Building):
             threat = random.choice(threats)
             _,angle = (threat.pos - planet.pos).to_polar()
             angle += random.random() * 0.5 - 0.25
-            b = Bullet(
+            b = bullet.Bullet(
                 planet.pos + V2.from_angle(angle) * planet.get_radius(),
                 threat, 
                 planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "color":PICO_RED},
@@ -248,7 +253,7 @@ class AuraBuilding(Building):
             ships = set(planet.scene.get_my_ships(planet.owning_civ))
         else:
             ships = set([])
-        near = set(all_nearby(planet.pos, ships, 60))
+        near = set(all_nearby(planet.pos, ships, 80))
         far = ships - near
         for ship in near:
             if ship not in self.applied_ships:
@@ -306,7 +311,7 @@ class CommStationObject(SpaceObject):
     def __init__(self, scene, pos):
         super().__init__(scene, pos)
         self.set_sprite_sheet("assets/commstation.png", 19)
-        for obj in all_nearby(self.pos, scene.get_objects_in_range(self.pos, 130), 130):
+        for obj in all_nearby(self.pos, scene.get_objects_in_range(self.pos, 180), 180):
             if isinstance(obj, planet.planet.Planet):
                 obj.in_comm_range = True
 

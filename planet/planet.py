@@ -5,19 +5,19 @@ from collections import defaultdict
 import economy
 import explosion
 import pygame
+import ships.battleship
+import ships.bomber
+import ships.colonist
+import ships.fighter
+import ships.interceptor
 import sound
 from colors import *
 from funnotification import FunNotification
 from helper import all_nearby, clamp, get_nearest
 from icontext import IconText
+from ships.all_ships import SHIPS_BY_NAME
 from spaceobject import SpaceObject
 from v2 import V2
-import ships.colonist
-import ships.fighter
-import ships.bomber
-import ships.interceptor
-import ships.battleship
-from ships.all_ships import SHIPS_BY_NAME
 
 from planet.shipcounter import ShipCounter
 
@@ -106,6 +106,9 @@ class Planet(SpaceObject):
     @population.setter
     def population(self, value):
         self._population = clamp(value, 0, 999)
+
+    def is_buildable(self):
+        return len(self.buildings) < 8 and self.get_stat("prevent_buildings") == 0
 
     def regenerate_art(self):
         self.art = generate_planet_art(

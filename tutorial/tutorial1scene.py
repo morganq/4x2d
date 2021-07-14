@@ -1,14 +1,17 @@
-from asteroid import Asteroid
-from tutorial.tutorialscene import TutorialScene
-from planet.planet import Planet
-from economy import Resources
-from v2 import V2
-import game
 import random
-from upgrade.upgrades import UPGRADE_CLASSES
-from levelstates import UpgradeState
-from ships.colonist import Colonist
+
+import game
 import menuscene
+from asteroid import Asteroid
+from economy import Resources
+from planet.planet import Planet
+from ships.colonist import Colonist
+from upgrade.upgrades import UPGRADE_CLASSES
+from upgradestate import UpgradeState
+from v2 import V2
+
+from tutorial.tutorialscene import TutorialScene
+
 
 class Tutorial1Scene(TutorialScene):
     def load_level(self, levelfile):

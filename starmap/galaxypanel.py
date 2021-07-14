@@ -1,16 +1,15 @@
-from piechart import PieChart
-from panel import Panel
-from text import Text
-from simplesprite import SimpleSprite
-from upgrade.upgradeicon import UpgradeIcon
-from piechart import PieChart
-from colors import *
-from line import Line
-from v2 import V2
-from economy import RESOURCES, RESOURCE_COLORS
 import game
-from button import Button
 import rewardscene
+from button import Button
+from colors import *
+from economy import RESOURCE_COLORS, RESOURCES
+from line import Line
+from panel import Panel
+from piechart import PieChart
+from simplesprite import SimpleSprite
+from text import Text
+from upgrade.upgradeicon import UpgradeIcon
+from v2 import V2
 
 DIFFICULTY_NAMES = {
     1:"minor",
@@ -44,7 +43,10 @@ class GalaxyPanel(Panel):
         self.add(description, V2(0,69))
 
         if galaxy.playable or game.DEV:
-            self.add(Button(V2(0,0), 'LAUNCH', 'small', lambda:onclick(galaxy), icon="assets/i-colonist.png", color=PICO_PINK), V2(0, description.height + 72))
+            t = "LAUNCH"
+            if game.Game.inst.input_mode == "joystick":
+                t = "[*x*] LAUNCH"
+            self.add(Button(V2(0,0), t, 'small', lambda:onclick(galaxy), icon="assets/i-colonist.png", color=PICO_PINK), V2(0, description.height + 72))
 
         self.redraw()
 

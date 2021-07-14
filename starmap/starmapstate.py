@@ -1,16 +1,28 @@
-from store.storenode import StoreNodePanel
-import levelstates
-from .galaxypanel import GalaxyPanel
-from selector import Selector
+import joystickcursor
 import levelscene
-from . import starmapscene
-from loadingscene import LoadingScene
-import states
-import sound
-from store.storescene import StoreScene
+import levelstates
 import menuscene
+import sound
+import states
+from button import Button
+from helper import get_nearest
+from loadingscene import LoadingScene
+from selector import Selector
+from store.storenode import StoreNodePanel
+from store.storescene import StoreScene
+from v2 import V2
+
+from starmap.galaxy import Galaxy
+
+from . import starmapscene
+from .galaxypanel import GalaxyPanel
+
 
 class StarMapState(states.UIEnabledState):
+    def __init__(self, scene):
+        super().__init__(scene)
+        self.joystick_overlay = None
+
     def enter(self):
         self.selector = None
         self.current_panel = None
@@ -50,6 +62,9 @@ class StarMapState(states.UIEnabledState):
         else:
             if self.selector:
                 self.selector.visible = 0
+
+        if self.scene.game.input_mode == "joystick":
+            self.joystick_update(dt)
         super().update(dt)
 
     def click_store(self, store):
@@ -74,7 +89,51 @@ class StarMapState(states.UIEnabledState):
             if input == 'mouse_drag':
                 self.scene.scroll_panel.scroll(self.scene.scroll_panel.pos + event.grel)
 
-        if input == "back":
+        if input == "menu":
             self.scene.game.scene = menuscene.MenuScene(self.scene.game)
             self.scene.game.scene.start()
                 
+    def joy_hover_filter(self, spr):
+        return isinstance(spr, Galaxy)
+
+    def joystick_update(self, dt):
+        all_sprites = []
+        all_sprites.extend(
+            sorted(self.scene.ui_group.sprites()[::], key=lambda x:x.layer, reverse=True)
+        )        
+        all_sprites.extend(
+            sorted(self.scene.game_group.sprites()[::], key=lambda x:x.layer, reverse=True)
+        )
+        selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.joy_hover_filter(s)]
+
+        scrolled_pos = self.joystick_overlay.cursor_pos - self.scene.scroll_panel.pos
+        nearest, d = get_nearest(scrolled_pos, selectable_sprites)
+        if d < 40 ** 2:
+            self.joystick_overlay.set_nearest(nearest)
+        else:
+            self.joystick_overlay.set_nearest(None)
+
+        if self.current_panel and self.current_panel.panel_for != self.joystick_overlay.nearest_obj:
+            self.current_panel.kill()
+            self.current_panel = None
+            self.last_clicked_sprite = None
+
+    def set_joystick_input(self):
+        if not self.joystick_overlay:
+            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, V2(200, 200))
+            self.scene.ui_group2.add(self.joystick_overlay)
+        return super().set_joystick_input()
+
+    def joystick_input(self, input, event):
+        if input == "joymotion":
+            self.joystick_overlay.joystick_delta(event['delta'])
+
+        if input == "special" and len(self.scene.my_civ.upgrades_stocked) > 0:
+            self.scene.on_click_upgrade()
+
+        if input == "confirm":
+            if self.current_panel:
+                self.current_panel.get_control_of_type(Button).onclick()
+            else:
+                if self.joystick_overlay.nearest_obj:
+                    self.last_clicked_sprite = self.joystick_overlay.nearest_obj

@@ -1,9 +1,10 @@
 import pygame
-from colors import *
-from spritebase import SpriteBase
+
 import text
+from colors import *
 from fadeinmixin import FadeInMixin
 from resources import resource_path
+from spritebase import SpriteBase
 
 SIZE_PADDING = {'tiny':3, 'small':4, 'medium':5, 'big':7, 'huge':10}
 HEIGHTS = {'tiny':5, 'small':7, 'medium':16, 'big':10, 'huge':15}
@@ -36,10 +37,17 @@ class Button(SpriteBase, FadeInMixin):
             self._generate_text_image(hover)
 
     def _generate_text_image(self, hover=False):
-        tw = text.FONTS[self.size].get_rect(self.text)
+        color = self.color
+        text_color = PICO_WHITE
+        if hover:
+            color = PICO_WHITE
+            text_color = PICO_BLACK        
+
+        text_img = text.render_multiline(self.text, self.size, text_color)
+        tw = text_img.get_width()
         
         pad = SIZE_PADDING[self.size]
-        w = tw[2] + pad * 4
+        w = tw + pad * 4
         h = HEIGHTS[self.size] + pad * 2
         text_offset = 0
         y_offset = 0
@@ -57,17 +65,13 @@ class Button(SpriteBase, FadeInMixin):
                 y_offset += int((icon.get_height() - HEIGHTS[self.size]) / 2)
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
-        color = self.color
-        text_color = PICO_WHITE
-        if hover:
-            color = PICO_WHITE
-            text_color = PICO_BLACK
         pygame.draw.rect(self.image, color, (0,0,w,h), 0)
         
-        text_x = w / 2 - tw[2] / 2 + text_offset
+        text_x = w / 2 - tw / 2 + text_offset
         icon_x = text_x
 
-        text.FONTS[self.size].render_to(self.image, (text_x, pad + y_offset), self.text, text_color)
+        #text.FONTS[self.size].render_to(self.image, (text_x, pad + y_offset), self.text, text_color)
+        self.image.blit(text_img, (text_x, pad + y_offset))
         if icon:
             icon_x = text_x - 4 - icon.get_width()
             icon_y = pad + y_offset + int((HEIGHTS[self.size] - icon.get_height()) / 2)

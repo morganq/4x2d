@@ -1,28 +1,46 @@
-from run import RunInfo
-import tutorial.introscene
-from colors import *
-import scene
-import game
-import save
-import text
-import pygame
-import simplesprite
-import framesprite
 import math
 import sys
-import sound
+
+import pygame
+
 import creditsscene
+import framesprite
+import game
+import save
+import scene
+import simplesprite
+import sound
 import states
-from v2 import V2
-from starmap import starmapscene
+import text
+import tutorial.introscene
+from colors import *
+from run import RunInfo
 from slider import Slider
+from starmap import starmapscene
+from v2 import V2
+
+
+class MenuState(states.UIEnabledState):
+    is_basic_joystick_panel = True  
+
+    def get_joystick_cursor_controls(self):
+        controls = []
+        if self.scene.items['continue'].selectable:
+            controls.append([self.scene.items['continue']])
+        controls.append([self.scene.items['new']])
+        controls.append([self.scene.items['tutorial']])
+        controls.append([self.scene.music_meter])
+        controls.append([self.scene.sound_meter])
+        controls.append([self.scene.items['resolution']])
+        controls.append([self.scene.items['credits']])
+        controls.append([self.scene.items['exit']])
+        return controls
 
 class MenuScene(scene.Scene):
     def start(self):
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
-        self.sm = states.Machine(states.UIEnabledState(self))
         bg = simplesprite.SimpleSprite(V2(0,0), "assets/menubg.png")
         self.background_group.add(bg)
 
@@ -66,6 +84,8 @@ class MenuScene(scene.Scene):
         #sound.play_music("overworld")
 
         self.time = 0
+
+        self.sm = states.Machine(MenuState(self))
 
     def onhover(self, item, value):
         if value:

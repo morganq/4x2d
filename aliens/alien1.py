@@ -1,15 +1,14 @@
-from aliens import alien
 from helper import clamp
-from upgrade.building_upgrades import AddBuildingUpgrade, make_simple_stats_building
+from planet import building as buildings
 from productionorder import ProductionOrder
 from stats import Stats
-from planet import building as buildings
-from upgrade.upgrades import register_upgrade, Upgrade
+from upgrade.building_upgrades import (AddBuildingUpgrade,
+                                       make_simple_stats_building)
+from upgrade.upgrades import Upgrade, register_upgrade
 
-from aliens import alien1battleship
-from aliens import alien1colonist
-from aliens import alien1fighter
-from aliens import alien1warpship
+from aliens import (alien, alien1battleship, alien1colonist, alien1fighter,
+                    alien1warpship)
+
 
 @register_upgrade
 class Alien1HomeDefenseUpgrade(AddBuildingUpgrade):
@@ -144,12 +143,12 @@ class Alien1EconUpgradeGas(Alien1EconUpgradeIce):
 class Alien1(alien.Alien):
     name = "alien1"
     EXPAND_NUM_NEAREST = 3
-    title = "ALIEN CIV 1"
+    title = "BARYSI NOMADS"
 
     tips = [
-        ("assets/alien-fighter.png", "ALIEN CIV 1 terraforms every planet they colonize in order to extract more valuable ice and gas."),
-        ("assets/warpship.png", "Defensive AEGIS ships are tethered to their host planet and fire explosive missiles."),
-        ("assets/alien-battleship.png", "DESTROYERS are heavy alien battleships that can warp across the galaxy.")
+        ("assets/alieninfo-terraform.png", "The Barysi Terraform planets they colonize, in order to extract more valuable ice and gas"),
+        ("assets/alieninfo-warpship.png", "Defensive AEGIS ships are tethered to their host planet and are equipped with an explosive payload"),
+        ("assets/alieninfo-crusher.png", "CRUSHERS are heavy Barysi battleships that can warp across the galaxy")
     ]
 
     def set_difficulty(self, difficulty):

@@ -1,24 +1,27 @@
-from resources import resource_path
-from run import RunInfo
-from tutorial.tutorial1scene import Tutorial1Scene
-from colors import *
-import scene
-import game
-import save
-import text
-import pygame
-import simplesprite
-import framesprite
 import math
 import sys
-import sound
+
 import creditsscene
-import states
-from v2 import V2
-from starmap import starmapscene
-from slider import Slider
-from tutorial.tutorialmessage import TutorialMessage
+import framesprite
+import game
 import menuscene
+import pygame
+import save
+import scene
+import simplesprite
+import sound
+import states
+import text
+from colors import *
+from resources import resource_path
+from run import RunInfo
+from slider import Slider
+from starmap import starmapscene
+from v2 import V2
+
+from tutorial.tutorial1scene import Tutorial1Scene
+from tutorial.tutorialmessage import TutorialMessage
+
 
 class IntroScene(scene.Scene):
     def start(self):
@@ -92,7 +95,7 @@ class IntroScene(scene.Scene):
         super().update(dt)
 
     def take_input(self, inp, event):
-        if inp == "back":
+        if inp == "menu":
             self.game.scene = menuscene.MenuScene(self.game)
             self.game.scene.start()
         return super().take_input(inp, event)

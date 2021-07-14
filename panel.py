@@ -1,12 +1,14 @@
-from colors import PICO_BLACK, PICO_DARKBLUE, PICO_WHITE
-import spritebase
-from v2 import V2
 import pygame
-import text
-import resources
+
 import game
-from helper import clamp
+import resources
+import spritebase
+import text
+from colors import PICO_BLACK, PICO_DARKBLUE, PICO_WHITE
 from fadeinmixin import FadeInMixin
+from helper import clamp
+from v2 import V2
+
 
 class Panel(spritebase.SpriteBase, FadeInMixin):
     def __init__(self, pos, panel_for):
@@ -44,6 +46,12 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
 
     def remove(self, control):
         self._controls = [c for c in self._controls if c['control'] != control]
+
+    def get_control_of_type(self, klass):
+        return self.get_controls_of_type(klass)[0]
+
+    def get_controls_of_type(self, klass):
+        return [c['control'] for c in self._controls if isinstance(c['control'], klass)]      
 
     def add_all_to_group(self, group):
         group.add(self)

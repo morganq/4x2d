@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import pygame
 
+import aliens
 import fleet
 import flowfield
 import funnotification
@@ -18,7 +19,7 @@ import scene
 import simplesprite
 import sound
 import states
-import aliens
+import upgradestate
 from asteroid import Asteroid
 from background import Background
 from button import Button
@@ -313,11 +314,11 @@ class LevelScene(scene.Scene):
         self.sm.transition(levelstates.HelpState(self))
 
     def on_click_upgrade(self):
-        self.sm.transition(levelstates.UpgradeState(self))
+        self.sm.transition(upgradestate.UpgradeState(self))
         sound.play("click1")
 
     def on_click_saved_upgrade(self, upgrade):
-        st = levelstates.SavedUpgradeState(self)
+        st = upgradestate.SavedUpgradeState(self)
         self.sm.transition(st)
         st.on_select(upgrade)
 
@@ -392,6 +393,7 @@ class LevelScene(scene.Scene):
         ut = time.time()
         self.update_times = defaultdict(lambda:0)
         base_dt = dt
+        self.game_speed = max(round((self.game.game_speed_input * 3) + 1), self.game_speed)
         dt *= self.game_speed
         if self.paused:
             self.sm.state.paused_update(dt)
@@ -430,7 +432,13 @@ class LevelScene(scene.Scene):
                 self.paused = True
                 self.sm.transition(levelstates.VictoryState(self))
         
-        for sprite in self.game_group.sprites() + self.ui_group.sprites() + self.background_group.sprites():
+        for sprite in self.ui_group.sprites():
+            t = time.time()
+            sprite.update(base_dt)
+            elapsed = time.time() - t
+            self.update_times[type(sprite)] += elapsed
+
+        for sprite in self.game_group.sprites() + self.background_group.sprites():
             t = time.time()
             sprite.update(dt)
             elapsed = time.time() - t
@@ -563,7 +571,7 @@ class LevelScene(scene.Scene):
                 self.game_speed = 10.0
             if event.key == pygame.K_f:
                 self.flowfielddebug = (self.flowfielddebug + 1) % len(self.flowfield.fields)
-        if inp == "back":
+        if inp == "menu": #TODO: pause menu
             self.game.run_info.path.pop()
             self.game.set_scene("menu")
         return super().take_input(inp, event)

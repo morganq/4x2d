@@ -1,14 +1,17 @@
-from laserparticle import LaserParticle
-from bullet import Bullet
-from colors import PICO_BLUE, PICO_PINK
-from spritebase import SpriteBase
-import pygame
-from spaceobject import SpaceObject
-import game
-from v2 import V2
 import math
-from asteroid import Asteroid
+
+import pygame
+
+import bullet
+import game
 import helper
+from asteroid import Asteroid
+from colors import PICO_BLUE, PICO_PINK
+from laserparticle import LaserParticle
+from spaceobject import SpaceObject
+from spritebase import SpriteBase
+from v2 import V2
+
 
 class Satellite(SpaceObject):
     ANGLE_OFFSET = 0
@@ -118,7 +121,7 @@ class OrbitalLaser(Satellite):
         while (p.x > 0 and p.x < game.RES[0]) and (p.y > 0 and p.y < game.RES[1]):
             p += d
             steps += 1
-            possible = [o for o in self.scene.get_objects_in_range(p, 25) if not isinstance(o, Bullet)]
+            possible = [o for o in self.scene.get_objects_in_range(p, 25) if not isinstance(o, bullet.Bullet)]
             nearest, dsq = helper.get_nearest(p, possible)
             if not nearest:
                 continue
@@ -137,6 +140,6 @@ class OrbitalLaser(Satellite):
             if self.target:
                 lp = LaserParticle(self.pos, self.target.pos, PICO_PINK, 0.25)
                 self.scene.game_group.add(lp)
-                b = Bullet(self.target.pos, self.target, self, mods={'damage_base':6 * self.planet.planet_weapon_mul})
+                b = bullet.Bullet(self.target.pos, self.target, self, mods={'damage_base':6 * self.planet.planet_weapon_mul})
                 self.scene.game_group.add(b)
         return super().update(dt)

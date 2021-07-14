@@ -1,11 +1,13 @@
-from productionorder import PermanentHangarProductionOrder
-from upgrade.upgrades import register_upgrade, Upgrade
-from planet import building
-from planet.building import *
-from stats import Stats
 import defensematrix
 import portal
+from planet import building
 from planet import building as buildings
+from planet.building import *
+from productionorder import PermanentHangarProductionOrder
+from stats import Stats
+
+from upgrade.upgrades import Upgrade, register_upgrade
+
 
 class AddBuildingUpgrade(Upgrade):
     building = None
@@ -34,10 +36,10 @@ class Econ2AUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Nuclear Reactor"
-    description = "[^+100%] [Mining Rate] for [Primary Resource], [!-3] [Max Population]"
+    description = "[^+100%] [Mining Rate] for [Primary Resource], [!No more Buildings can be constructed here]"
     icon = "nuclearreactor"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats=Stats(top_mining_rate=1, pop_max_add=-3), shape="nuclearreactor")
+    building = make_simple_stats_building(stats=Stats(top_mining_rate=1, prevent_buildings=1), shape="nuclearreactor")
     requires = ("b_econ1",)
     family = {'tree':'econ', 'parents':['b_econ1']}
 
@@ -102,11 +104,11 @@ class Pop2bUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "University"
-    description = "Ship production is [^+5%] faster for each population"
+    description = "Ship production is [^+15%] faster for each population"
     icon = "university"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop1']}
-    building = make_simple_stats_building(stats=Stats(ship_production_per_pop=0.05), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(ship_production_per_pop=0.15), shape="lifesupport")
     requires = ('b_pop1',)
 
 @register_upgrade
@@ -200,7 +202,7 @@ class Defense2aUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Resilient Ecosystem"
-    description = "[^+100%] health and [^+2] health regeneration per second"
+    description = "[^+100%] health and [^+5] health regeneration per second"
     icon = "resilientecosystem"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
@@ -213,11 +215,11 @@ class Defense2bUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Armory"
-    description = "Fire [1 missile per population] at nearby enemy ships"
+    description = "When this planet takes damage, [!-1 pop], [^+1 fighter]. [!(10 second cooldown)]"
     icon = "armory"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
-    building = ArmoryBuilding
+    building = make_simple_stats_building(stats=Stats(armory=1), shape="lifesupport")
     requires = ('b_defense1',)
 
 @register_upgrade
@@ -298,11 +300,11 @@ class Launchpad1Upgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Headquarters"
-    description = "50% chance to gain [^+1] population whenever you launch a colonist ship towards an enemy or neutral planet [!(20 second cooldown)]"
+    description = "Gain [^+1] population whenever you launch a colonist ship towards an enemy or neutral planet [!(20 second cooldown)]"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(launchpad_pop_chance=0.5), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(launchpad_pop_chance=1), shape="modulardwellings")
 
 @register_upgrade
 class Launchpad2aUpgrade(AddBuildingUpgrade):
@@ -323,11 +325,11 @@ class Launchpad2bUpgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Launchpad"
-    description = "33% chance for [^+1] [Fighter] whenever you launch an [Interceptor] or [Bomber] towards an enemy planet [!(10 second cooldown)]"
+    description = "[^+1] [Fighter] whenever you launch an [Interceptor] or [Bomber] towards an enemy planet [!(20 second cooldown)]"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad1']}
-    building = make_simple_stats_building(stats=Stats(launchpad_fighter_chance=0.33), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(launchpad_fighter_chance=1.0), shape="lifesupport")
     requires = ('b_launchpad1',)
 
 @register_upgrade
@@ -336,11 +338,11 @@ class Launchpad3Upgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Military Parade"
-    description = "[^+1] population and [^+50] health restored whenever you launch a Battleship towards an enemy planet"
+    description = "[^+1] population whenever you launch a Battleship towards an enemy planet"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad2a', 'b_launchpad2b']}
-    building = make_simple_stats_building(stats=Stats(launchpad_battleship_health=50,launchpad_battleship_pop=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(launchpad_battleship_pop=1), shape="lifesupport")
     requires = lambda x:'b_launchpad1' in x and ('b_launchpad2a' in x or 'b_launchpad2b' in x)
     infinite = False    
 
@@ -529,7 +531,7 @@ class Deserted3Upgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "War Economy II"
-    description = "Produce [^1] [Fighter] every 30 seconds"
+    description = "Produce [^1] [Fighter] every 40 seconds"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'deserted', 'parents':['b_deserted2a', 'b_deserted2b']}
@@ -537,7 +539,7 @@ class Deserted3Upgrade(AddBuildingUpgrade):
     requires = lambda x:'b_deserted1' in x and ('b_deserted2a' in x or 'b_deserted2b' in x)
 
     def apply(self, to):
-        p = PermanentHangarProductionOrder(30)
+        p = PermanentHangarProductionOrder(40)
         to.add_production(p)
         return super().apply(to)    
 

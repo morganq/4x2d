@@ -2,6 +2,7 @@ from collections import defaultdict
 
 VALID_STAT_NAMES = [
     'alien_control_mul',
+    'armory', # TODO: implement
     'asteroid_yield_mul', 
     'atomic_bomb',
     'battleship_damage_mul',
@@ -65,6 +66,7 @@ VALID_STAT_NAMES = [
     'pop_growth_rate_per_docked_ship',
     'pop_max_add',
     'pop_max_mul',
+    'prevent_buildings',
     'raze_upgrade', 
     'reactive_field',
     'regen', 
