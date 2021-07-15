@@ -1,17 +1,19 @@
-import satellite
-from status_effect import GreyGooEffect
-from colors import *
-from v2 import V2
-from spritebase import SpriteBase
-import pygame
 import math
-import helper
 import random
-import ships
+
+import pygame
+
+import helper
 import planet
+import satellite
+import ships
+import sound
+from colors import *
 from explosion import Explosion
 from planet import building
-import sound
+from spritebase import SpriteBase
+from status_effect import GreyGooEffect
+from v2 import V2
 
 VEL = 50
 DEATH_TIME = 1
@@ -94,11 +96,6 @@ class Bullet(SpriteBase):
                         if civ:
                             r = obj.get_primary_resource()
                             civ.earn_resource(r, civ.upgrade_limits.data[r], obj)
-                    if self.mods.get("raze_make_colonist"):
-                        s = ships.colonist.Colonist(self.shooter.scene, self.shooter.pos, self.shooter.owning_civ)
-                        s.set_pop(1)
-                        s.set_target(obj)
-                        self.shooter.scene.game_group.add(s)
 
             if self.mods.get("iron_on_hit"):
                 if isinstance(obj, ships.ship.Ship):
@@ -116,9 +113,11 @@ class Bullet(SpriteBase):
             self.bounces -= 1
             targets = self.shooter.scene.get_enemy_objects(self.owning_civ)
             nearby_targets = helper.all_nearby(self.pos, targets, 25)
+            if self.target and self.target in nearby_targets:
+                nearby_targets.remove(self.target)
             if nearby_targets:
                 self.target = random.choice(nearby_targets)
-                (self.target.pos - self.pos).normalized() * self.vel.magnitude()
+                self.vel = (self.target.pos - self.pos).normalized() * self.vel.magnitude()
             else:
                 self.kill()
 

@@ -54,7 +54,7 @@ class RunInfo:
     def new_galaxy(self, row, from_links, level):
         return {
             'node_type':'galaxy',
-            'alien': random.choice(['alien1']),#['alien1', 'alien2', 'alien3']),
+            'alien': random.choice(['alien1', 'alien2', 'alien3']),
             'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
             'difficulty': row,
             'level':level,

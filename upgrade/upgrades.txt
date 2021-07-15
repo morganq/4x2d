@@ -152,43 +152,34 @@ gas:
 =======
 
 new concepts:
- - directional buildings
- - +1 max pop every 30 seconds; growth stops after 300 seconds or when you colonize a new planet
- - replace armory: when your planet takes damage, -1 pop, +1 fighter. 10 second cooldown
- - is sufficiently high health regen useful? maybe yes?
- - replace launchpad-style abilities... 
+ - combo tech. fleets with a bomber 
 
 =======
 
 refinery, nuclear reactor* (test), military surplus, io matrix
 modular dwellings, life support, university* (test), underground shelter
 fighter hangar, inter hangar, bomb hangar, battle hangar
-reflector, resilient ecosystem* (test), armory* (impl), low orbit defenses* (test)
+reflector, resilient ecosystem* (test), armory* (test), low orbit defenses* (test)
 
-ssm battery, interplanetary ssm, em generator* (impl), caustic amplifier* (not useful?)
-headquarters* (broken with recall), employment office, launchpad* (broken with recall), military parade* (broken with recall)
+ssm battery, interplanetary ssm, em generator, caustic amplifier* (test)
+headquarters* (test), employment office, workforce housing* (test), memorial* (test)
 strip mining, cryosteel alloy, terraform, anodized cryosteel
 
 comm station* (test), defensive matrix, portal
-bunker trap, war economy 1* (test), scrap collector* (earlier tier?), war economy 2* (test)
+bunker trap, scrap collector, war economy 1* (test), war economy 2* (test)
 space station, orbital reflector, off-world mining* (test), orbital laser
 
 --
 
-higher tier ship stuff
-civilian convoy-
+precise assembly, spaceport* (test), material reconstruction, overgrowth
+nuclear battery, isotope conversion, atomic assembler, unstable reactor
+vanguard boosters, vanguard armor, warp drive, quantum weirdness* (weird)
+munitions recycling, proximity alert, nanothread plating, grey goo
 
---
+resonance reloader*, phasing lattice*, fragmentation sequence, crystal repeater* (test)
+orbital targeting soluton, artificial intelligence* , coordination protocol*, robotic assembly
+hostile takeover* (test), fire bomb, space mining, spoils,
 
-precise assembly, metabolic cycle-, material reconstruction, overgrowth
-nuclear battery, isotope conversion, atomic assembler, unstable reactor* (maybe should be a building?)
-vanguard boosters*, vanguard armor, warp drive, quantum weirdness* (weird)
-munitions recycling, proximity alert* (unclear/bad), nanothread plating, root* (unclear/bad)
-
-resonance reloader*, phasing lattice* (never get), fragmentation sequence, crystal repeater* (test)
-orbital targeting soluton* (too strong?), artificial intelligence* (interesting...), coordination protocol*, robotic assembly
-pillage* (bomber near a razed ship?), fire bomb, space mining* (unclear), spoils,
-
-laser diode* (boring), fleet upgrade* (test), auto focus, refractor shield* (rethink)
-supercritical materials, transient field* (bad), grav reinforcement* (bad), relativistic targeting* (bufF)
-unknown artifact* (hmmm), alien thrusters* (buff, boring), kinetic sling, alien core drill* (redundant with building)
+laser diode, fleet upgrade* (test), auto focus, refractor shield* (test)
+supercritical materials, transient field*, grav reinforcement*, relativistic targeting* 
+unknown artifact* (hmmm), alien thrusters* (buff, boring), kinetic sling, alien core drill*

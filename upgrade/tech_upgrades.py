@@ -1,7 +1,10 @@
-from upgrade.upgrades import register_upgrade, Upgrade
-from stats import Stats
 import random
+
 import game
+from stats import Stats
+
+from upgrade.upgrades import Upgrade, register_upgrade
+
 
 ### 1) Mechanics: light grey ###
 @register_upgrade
@@ -21,10 +24,10 @@ class Mechanics2aUpgrade(Upgrade):
     name = "t_mechanics2a"
     resource_type = "iron"
     category = "tech"
-    title = "Metabolic Cycle"
-    description = "Planets gain [^+2] health per second if no ships are docked"
+    title = "Spaceport"
+    description = "Planets with no docked ships gain [^+2] health per second and [^+33%] population growth rate"
     icon = "tech_default"
-    stats = Stats(planet_regen_without_ships = 2)
+    stats = Stats(planet_regen_without_ships = 2, pop_growth_without_ships = 0.33)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
 
@@ -50,9 +53,9 @@ class Mechanics3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Overgrowth"
-    description = "Population grows [^+10%] faster for each docked ship"
+    description = "Population grows [^+20%] faster for each docked ship"
     icon = "tech_default"
-    stats = Stats(pop_growth_rate_per_docked_ship = 0.1)
+    stats = Stats(pop_growth_rate_per_docked_ship = 0.2)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics2a', 't_mechanics2b']}
     requires = lambda x: 't_mechanics1' in x and ('t_mechanics2a' in x or 't_mechanics2b' in x)
     infinite = True    
@@ -76,7 +79,7 @@ class Atomic2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Isotope Conversion"
-    description = "Gain [150] ice and [100] gas. Iron is [!frozen] for [20 seconds]."
+    description = "Gain [150] [Ice] and [100] [Gas]. [Iron] is [!Frozen] for [20 seconds]."
     icon = "isotope"
     stats = Stats()
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
@@ -149,7 +152,7 @@ class Vanguard2bUpgrade(Upgrade):
     stats = Stats(warp_drive = 3)
     family = {'tree':'t_vanguard', 'parents':['t_vanguard1']}
     requires = ('t_vanguard1',)
-    infinite = True   
+    infinite = True
 
 @register_upgrade
 class Vanguard3Upgrade(Upgrade):
@@ -207,10 +210,10 @@ class Quantum3Upgrade(Upgrade):
     name = "t_quantum3"
     resource_type = "iron"
     category = "tech"
-    title = "Root"
-    description = "Enemy ships near your planets move and attack [!25%] slower"
+    title = "Grey Goo"
+    description = "Fighter missiles apply Grey Goo on hit, inflicting damage over time to the target."
     icon = "tech_default"
-    stats = Stats(planet_slow_aura=0.25)
+    stats = Stats(grey_goo=1)
     family = {'tree':'t_quantum', 'parents':['t_quantum2a', 't_quantum2b']}
     requires = lambda x: 't_quantum1' in x and ('t_quantum2a' in x or 't_quantum2b' in x)
     infinite = False    
@@ -221,10 +224,10 @@ class Crystal1Upgrade(Upgrade):
     name = "t_crystal1"
     resource_type = "ice"
     category = "tech"
-    title = "Resonance Reloader"
-    description = "[Interceptors] fire [^+33%] faster in deep space"
+    title = "Crystal Repeater"
+    description = "[Interceptor] missiles bounce to hit a second target"
     icon = "resonancereloader"
-    stats = Stats(interceptor_fire_rate_deep_space=0.33)
+    stats = Stats(interceptor_missile_bounce=1)
     family = {'tree':'t_crystal', 'parents':[]}
     requires = None
 
@@ -258,9 +261,9 @@ class Crystal3Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Crystal Repeater"
-    description = "[Interceptor] missiles bounce to [^+1] nearby target"
+    description = "[Interceptors] gain a 10 health shield, and their missiles bounce to [^+1] target"
     icon = "crystalrepeater"
-    stats = Stats(interceptor_missile_bounce=1)
+    stats = Stats(interceptor_shield=10, interceptor_missile_bounce=1)
     family = {'tree':'t_crystal', 'parents':['t_crystal2a', 't_crystal2b']}
     requires = lambda x: 't_crystal1' in x and ('t_crystal2a' in x or 't_crystal2b' in x)
     infinite = True
@@ -273,9 +276,9 @@ class AI1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Orbital Targeting Solution"
-    description = "Ships gain [^+100%] attack speed for [10 seconds] after take-off"
+    description = "Ships gain [^+66%] attack speed for [10 seconds] after take-off"
     icon = "orbitaltargeting"
-    stats = Stats(ship_fire_rate_after_takeoff=1)
+    stats = Stats(ship_fire_rate_after_takeoff=0.66)
     family = {'tree':'t_ai', 'parents':[]}
     requires = None
 
@@ -285,7 +288,7 @@ class AI2aUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Artificial Intelligence"
-    description = "Population growth rate [^+33%] and population grows on planets even with [0] population"
+    description = "Population growth rate [^+33%]. Population grows on planets even with [0] population"
     icon = "ai"
     stats = Stats(pop_growth_min_reduction=1, pop_growth_rate=0.33)
     family = {'tree':'t_ai', 'parents':['t_ai1']}
@@ -322,8 +325,8 @@ class Proximity1Upgrade(Upgrade):
     name = "t_proximity1"
     resource_type = "ice"
     category = "tech"
-    title = "Pillage"
-    description = "A [Bomber] that razes a planet sends out [^1] [Worker] ship to colonize it"
+    title = "Hostile Takeover"
+    description = "A [Bomber] that helps raze a planet sends out a [Worker] ship to colonize it"
     icon = "tech_default"
     stats = Stats(bomber_colonist=1)
     family = {'tree':'t_proximity', 'parents':[]}
@@ -424,23 +427,22 @@ class Exotic1Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Supercritical Materials"
-    description = "Gain [^3x] resources from asteroids"
+    description = "Gain [^+200%%] resources from asteroids"
     icon = "tech_default"
     stats = Stats(asteroid_yield_mul=2.0)
     family = {'tree':'t_exotic', 'parents':[]}
     requires = None
 
 
-# TODO: replace
 @register_upgrade
 class Exotic2aUpgrade(Upgrade):
     name = "t_exotic2a"
     resource_type = "gas"
     category = "tech"
     title = "Transient Field"
-    description = "Planets gain [^+100%] health for the first [60 seconds] you control them"
+    description = "Ships gain [^+10] health"
     icon = "tech_default"
-    stats = Stats(planet_temp_health_mul=1.0)
+    stats = Stats(ship_health_add=10)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
     requires = ('t_exotic1',)
 
@@ -451,9 +453,9 @@ class Exotic2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Gravitational Reinforcement"
-    description = "Planets gain [^+50%] health if near other planets you control"
+    description = "Ships gain +35%% fire rate"
     icon = "tech_default"
-    stats = Stats(planet_proximity_health_mul=0.5)
+    stats = Stats(ship_fire_rate=0.35)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
     requires = ('t_exotic1',)
 
@@ -463,12 +465,11 @@ class Exotic3Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Relativistic Targeting"
-    description = "Ships gain [^+15%] attack range"
+    description = "Ships gain [^+35%%] attack range"
     icon = "tech_default"
-    stats = Stats(ship_weapon_range=0.15)
+    stats = Stats(ship_weapon_range=0.35)
     family = {'tree':'t_exotic', 'parents':['t_exotic2a', 't_exotic2b']}
     requires = lambda x: 't_exotic1' in x and ('t_exotic2a' in x or 't_exotic2b' in x)
-    infinite = True
 
 ### 10) Alien - yellow
 @register_upgrade
@@ -493,9 +494,9 @@ class Alien2aUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Alien Thrusters"
-    description = "Ships move [^+15%] faster"
+    description = "Ships move [^+33%] faster"
     icon = "tech_default"
-    stats = Stats(ship_speed_mul=0.15)
+    stats = Stats(ship_speed_mul=0.33)
     family = {'tree':'t_alien', 'parents':['t_alien1']}
     requires = ('t_alien1',)
 

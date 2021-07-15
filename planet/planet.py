@@ -15,6 +15,7 @@ from colors import *
 from funnotification import FunNotification
 from helper import all_nearby, clamp, get_nearest
 from icontext import IconText
+from line import IndicatorLine, Line
 from ships.all_ships import SHIPS_BY_NAME
 from spaceobject import SpaceObject
 from v2 import V2
@@ -32,8 +33,8 @@ POP_GROWTH_IMPROVEMENT_PER_POP = 5
 POPULATION_GROWTH_MIN_TIME = 20
 HP_PER_BUILDING = 10
 DESTROY_EXCESS_SHIPS_TIME = 10
-PLANET_PROXIMITY = 100
-HAZARD_PROXIMITY = 70
+PLANET_PROXIMITY = 130
+HAZARD_PROXIMITY = 130
 
 class Planet(SpaceObject):
     HEALTHBAR_SIZE = (30,4)
@@ -82,10 +83,6 @@ class Planet(SpaceObject):
         self._generate_base_frames()
         self.frame = 0        
 
-        self.shipcounter = ShipCounter(self)
-        self.scene.ui_group.add(self.shipcounter)
-        self.set_health(self.get_max_health())
-
         ### Upgrades ###
         self.unstable_reaction = 0
         self.owned_time = 0
@@ -93,10 +90,23 @@ class Planet(SpaceObject):
         self.underground_buildings = {}
         self.planet_weapon_mul = 1
         self.in_comm_range = False
-        self._timers['last_launchpad_pop'] = 20
+        self._timers['last_launchpad_pop'] = 999
+        self._timers['armory'] = 999
+        self._timers['headquarters'] = 999
+        self._timers['memorial'] = 999
+        self.housing_growth_repeater = 0
+        self.housing_growth_timer = 0
+        self.housing_max_pop = 0
+
+        self.upgrade_indicators = defaultdict(lambda:None)
+        self.created_upgrade_indicators = defaultdict(lambda:None)
 
         # opt
         self._timers['opt_time'] = random.random()
+
+        self.shipcounter = ShipCounter(self)
+        self.scene.ui_group.add(self.shipcounter)
+        self.set_health(self.get_max_health())        
 
     def __str__(self) -> str:
         return "<Planet %s>" % str(self.pos)
@@ -246,11 +256,13 @@ class Planet(SpaceObject):
     def get_pop_growth_time(self):
         rate = 1 + self.get_stat('pop_growth_rate')
         rate *= 1 + (self.get_stat("pop_growth_rate_per_docked_ship") * sum(self.ships.values()))
+        if sum(self.ships.values()) == 0:
+            rate *= 1 + (self.get_stat("pop_growth_without_ships"))
         growth_time = max(POPULATION_GROWTH_TIME - POP_GROWTH_IMPROVEMENT_PER_POP * self.population, POPULATION_GROWTH_MIN_TIME)
         return growth_time / rate
 
     def get_max_pop(self):
-        return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add")
+        return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add") + self.housing_max_pop
 
     def update(self, dt):
         real_dt = dt
@@ -294,6 +306,7 @@ class Planet(SpaceObject):
                 s = ship_class(self.scene, self.pos + off * self.get_radius(), self.owning_civ)
                 if 'colonist' in ship_type:
                     s.set_pop(data['num'])
+                s.origin = self
                 s.set_target(target)
                 s.angle = math.atan2(off.y, off.x)
                 s.velocity = off * 10
@@ -368,10 +381,13 @@ class Planet(SpaceObject):
             if prod.ship_type in ['fighter', 'interceptor', 'bomber', 'battleship']:
                 prod_rate *= 1 + self.get_stat("%s_production" % prod.ship_type)
 
+            self.upgrade_indicators['ship_production_proximity'] = None
             if self.get_stat("ship_production_proximity"):
                 enemy_planets = self.scene.get_enemy_planets(self.owning_civ)
-                if get_nearest(self.pos, enemy_planets)[1] < PLANET_PROXIMITY ** 2:
+                nearest, dist = get_nearest(self.pos, enemy_planets)
+                if dist < PLANET_PROXIMITY ** 2:
                     prod_rate *= 1 + self.get_stat("ship_production_proximity")
+                    self.upgrade_indicators['ship_production_proximity'] = nearest
                     
 
             prod.number_mul = prod_amt_mul
@@ -465,10 +481,11 @@ class Planet(SpaceObject):
         self.planet_weapon_mul = 1
         if self.population == 0:
             self.planet_weapon_mul += self.get_stat("planet_weapon_boost_zero_pop")
-            
 
         if sum(self.ships.values()) == 0:
             self.planet_weapon_mul += self.get_stat("planet_weapon_boost_zero_ships")
+
+        self.planet_weapon_mul += self.get_stat("planet_weapon_boost") 
 
         if self.get_stat("planet_slow_aura"):
             enemy_ships = set(self.scene.get_enemy_ships(self.owning_civ))
@@ -478,6 +495,44 @@ class Planet(SpaceObject):
                 ship.slow_aura = self.get_stat("planet_slow_aura")
             for ship in far:
                 ship.slow_aura = 0
+
+        if self.get_stat("max_pop_growth") and self.housing_growth_timer < self.get_stat("max_pop_growth") and not self.owning_civ.housing_colonized:
+            self.housing_growth_timer += dt
+            self.housing_growth_repeater += dt
+            if self.housing_growth_repeater >= 30:
+                self.housing_growth_repeater = 0
+                self.housing_max_pop += 1
+
+        self.upgrade_indicators['ship_production_proximity'] = None
+        if self.get_stat("ship_production_proximity"):
+            enemy_planets = self.scene.get_enemy_planets(self.owning_civ)
+            nearest, dist = get_nearest(self.pos, enemy_planets)
+            if dist < PLANET_PROXIMITY ** 2:
+                self.upgrade_indicators['ship_production_proximity'] = nearest               
+
+        self.upgrade_indicators['mining_rate_proximity'] = None
+        if self.get_stat("mining_rate_proximity"):
+            nearest, distsq = get_nearest(self.pos,self.scene.get_hazards())
+            if distsq < HAZARD_PROXIMITY ** 2:
+                self.upgrade_indicators['mining_rate_proximity'] = nearest               
+
+        for key in list(self.upgrade_indicators.keys()) + list(self.created_upgrade_indicators.keys()):
+            if self.upgrade_indicators[key] and not self.created_upgrade_indicators[key]:
+                self.create_indicator(key)
+            elif self.created_upgrade_indicators[key] and not self.upgrade_indicators[key]:
+                self.created_upgrade_indicators[key].kill()
+                self.created_upgrade_indicators[key] = None
+
+    def create_indicator(self, key):
+        print("create indicator", key)
+        if key == "ship_production_proximity":
+            obj = IndicatorLine(self, self.pos, self.upgrade_indicators[key].pos, PICO_RED, name="Proximity Alert")
+            self.scene.ui_group.add(obj)
+            self.created_upgrade_indicators[key] = obj
+        if key == "mining_rate_proximity":
+            obj = IndicatorLine(self, self.pos, self.upgrade_indicators[key].pos, PICO_LIGHTGRAY, name="Space Mining")
+            self.scene.ui_group.add(obj)
+            self.created_upgrade_indicators[key] = obj            
 
     def get_primary_resource(self):
         resource_order = [(a,b) for (a,b) in self.resources.data.items() if b > 0]
@@ -493,10 +548,18 @@ class Planet(SpaceObject):
                 self.scene.game_group.add(e)
         self.change_owner(None)
         
+    def emitted_ship_died(self, ship):
+        if self.get_stat("memorial") and self._timers['memorial'] >= 20:
+            self.add_ship("fighter")
+            self._timers['memorial'] = 0
 
+    def emitted_ship_colonized(self, ship, planet):
+        if self.get_stat("headquarters") and self._timers['headquarters'] >= 30:
+            self.add_population(1)
+            self._timers['headquarters'] = 0
 
     def add_population(self, num):
-        self._population += num
+        self._population = max(self._population + num, 0)
         self.needs_panel_update = True
         if self.owning_civ == self.scene.my_civ:
             it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
@@ -570,6 +633,12 @@ class Planet(SpaceObject):
         if self.get_stat("damage_iron"):
             self.owning_civ.earn_resource("iron", self.get_stat("damage_iron"), where=self)
         pre_health = self.health
+
+        if self.get_stat("armory") and self._timers['armory'] > 10:
+            self._timers['armory'] = 0
+            self.add_population(-1)
+            self.add_ship("fighter")
+
         return_val = super().take_damage(damage, origin=origin)
         return return_val
 

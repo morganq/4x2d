@@ -1,18 +1,19 @@
-from satellite import ReflectorShieldObj
-from colors import *
-from v2 import V2
-from spaceobject import SpaceObject
-import planet
-import random
 import math
-import particle
+import random
+
 import bullet
-import helper
 import explosion
+import helper
+import particle
+import planet
 import pygame
 import sound
-from resources import resource_path
+from colors import *
 from laserparticle import LaserParticle
+from resources import resource_path
+from satellite import ReflectorShieldObj
+from spaceobject import SpaceObject
+from v2 import V2
 
 ROTATE_SPEED = 6.2818
 FLEET_RADIUS = 25
@@ -51,6 +52,7 @@ class Ship(SpaceObject):
         self.collidable = True
         self.stationary = False
         self.fleet = None
+        self.origin = None # Planet we were emitted from
 
         self._layer = 1
 
@@ -397,6 +399,9 @@ class Ship(SpaceObject):
             if nearby:
                 other = random.choice(nearby)
                 other.health += self.get_stat("ship_death_heal") # TODO: Particles!
+
+        if self.origin:
+            self.origin.emitted_ship_died(self)
 
         return super().kill()
 

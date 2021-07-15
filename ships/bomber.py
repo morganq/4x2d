@@ -1,14 +1,19 @@
-from ships.fighter import Fighter, STATE_DOGFIGHT
-from ships.ship import Ship, THRUST_PARTICLE_RATE, STATE_WAITING, STATE_CRUISING
+import math
+import random
+
+import planet
+from bullet import Bullet
 from colors import *
+from helper import all_nearby, clamp
 from particle import Particle
 from v2 import V2
-import random
-import math
-import planet
-from helper import all_nearby, clamp
-from bullet import Bullet
+
+import ships
 from ships.all_ships import register_ship
+from ships.fighter import STATE_DOGFIGHT, Fighter
+from ships.ship import (STATE_CRUISING, STATE_WAITING, THRUST_PARTICLE_RATE,
+                        Ship)
+
 
 @register_ship
 class Bomber(Fighter): 
@@ -32,6 +37,7 @@ class Bomber(Fighter):
         super().__init__(scene, pos, owning_civ)
         
         self.set_sprite_sheet("assets/bomber.png", 12)
+        self.can_create_colonist = False
 
     def prepare_bullet_mods(self):
         mods = super().prepare_bullet_mods()
@@ -56,4 +62,23 @@ class Bomber(Fighter):
         for i in range(10):
             pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-            self.scene.game_group.add(p)               
+            self.scene.game_group.add(p)    
+
+    def set_target(self, target):
+        if target.owning_civ and target.owning_civ != self.owning_civ:
+            self.can_create_colonist = True
+        return super().set_target(target)           
+
+    def update(self, dt):
+        if (
+            isinstance(self.effective_target, planet.planet.Planet) and
+            self.effective_target.health <= 0 and
+            self.can_create_colonist and
+            self.get_stat("bomber_colonist")
+        ):
+            s = ships.colonist.Colonist(self.scene, self.pos, self.owning_civ)
+            s.set_pop(1)
+            s.set_target(self.effective_target)
+            self.shooter.scene.game_group.add(s)
+            self.can_create_colonist = False
+        return super().update(dt)

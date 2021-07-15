@@ -272,7 +272,7 @@ class Dangerous2bUpgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Atmospheric EM Generator"
-    description = "Enemy ships are disabled for 3 seconds the first time they move into range"
+    description = "Enemy ships are disabled for 5 seconds the first time they move into range"
     icon = "emgenerator"
     cursor = "allied_planet"
     family = {'tree':'dangerous', 'parents':['b_dangerous1']}
@@ -285,11 +285,11 @@ class Dangerous3Upgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Caustic Amplifier"
-    description = "If you have 0 ships, planetary weapons deal [^+50%] damage"
+    description = "Planetary weapons deal [^+50%] damage"
     icon = "causticamplifier"
     cursor = "allied_planet"
     family = {'tree':'dangerous', 'parents':['b_dangerous2a', 'b_dangerous2b']}
-    building = make_simple_stats_building(stats=Stats(planet_weapon_boost_zero_ships=0.5), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(planet_weapon_boost=0.5), shape="lifesupport")
     requires = lambda x:'b_dangerous1' in x and ('b_dangerous2a' in x or 'b_dangerous2b' in x)
     infinite = False
 
@@ -300,11 +300,11 @@ class Launchpad1Upgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Headquarters"
-    description = "Gain [^+1] population whenever you launch a colonist ship towards an enemy or neutral planet [!(20 second cooldown)]"
+    description = "When a [Worker] sent from this planet colonizes a planet, [^+1] Population. [!30 second cooldown]"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(launchpad_pop_chance=1), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(headquarters=1), shape="modulardwellings")
 
 @register_upgrade
 class Launchpad2aUpgrade(AddBuildingUpgrade):
@@ -324,25 +324,29 @@ class Launchpad2bUpgrade(AddBuildingUpgrade):
     name = "b_launchpad2b"
     resource_type = "ice"
     category = "buildings"
-    title = "Launchpad"
-    description = "[^+1] [Fighter] whenever you launch an [Interceptor] or [Bomber] towards an enemy planet [!(20 second cooldown)]"
+    title = "Workforce Housing"
+    description = "[^+1] Max Population every 30 seconds; growth stops after 300 seconds or when you colonize a new planet"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad1']}
-    building = make_simple_stats_building(stats=Stats(launchpad_fighter_chance=1.0), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(max_pop_growth=300), shape="lifesupport")
     requires = ('b_launchpad1',)
+
+    def apply(self, to):
+        to.owning_civ.housing_colonized = False
+        return super().apply(to)
 
 @register_upgrade
 class Launchpad3Upgrade(AddBuildingUpgrade):
     name = "b_launchpad3"
     resource_type = "ice"
     category = "buildings"
-    title = "Military Parade"
-    description = "[^+1] population whenever you launch a Battleship towards an enemy planet"
+    title = "Memorial"
+    description = "When a ship sent from this planet dies, [^+1] [Fighter]. [!20 second cooldown]"    
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad2a', 'b_launchpad2b']}
-    building = make_simple_stats_building(stats=Stats(launchpad_battleship_pop=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(memorial=1), shape="lifesupport")
     requires = lambda x:'b_launchpad1' in x and ('b_launchpad2a' in x or 'b_launchpad2b' in x)
     infinite = False    
 
@@ -495,26 +499,8 @@ class Deserted2bUpgrade(AddBuildingUpgrade):
     infinite = True
 
 @register_upgrade
-class Deserted2aUpgrade(AddBuildingUpgrade):
-    name = "b_deserted2a"
-    resource_type = "gas"
-    category = "buildings"
-    title = "War Economy I"
-    description = "Produce [^1] [Fighter] every 45 seconds"
-    icon = "building_default"
-    cursor = "allied_planet"
-    family = {'tree':'deserted', 'parents':['b_deserted1']}
-    requires = ('b_deserted1',)
-    building = make_simple_stats_building(stats=Stats(), shape="modulardwellings")
-
-    def apply(self, to):
-        p = PermanentHangarProductionOrder(45)
-        to.add_production(p)
-        return super().apply(to)
-
-@register_upgrade
-class Deserted2bUpgrade(AddBuildingUpgrade):
-    name = "b_deserted2b"
+class Deserted2Upgrade(AddBuildingUpgrade):
+    name = "b_deserted2"
     resource_type = "gas"
     category = "buildings"
     title = "Scrap Collector"
@@ -523,23 +509,41 @@ class Deserted2bUpgrade(AddBuildingUpgrade):
     cursor = "allied_planet"
     building = make_simple_stats_building(stats = Stats(damage_iron=5), shape="modulardwellings")
     family = {'tree':'deserted', 'parents':['b_deserted1']}
-    requires = ('b_deserted1',)        
+    requires = ('b_deserted1',)
 
 @register_upgrade
-class Deserted3Upgrade(AddBuildingUpgrade):
+class Deserted3aUpgrade(AddBuildingUpgrade):
+    name = "b_deserted3a"
+    resource_type = "gas"
+    category = "buildings"
+    title = "War Economy A"
+    description = "Produce [^1] [Fighter] every 45 seconds, [!-100% Max Population]"
+    icon = "building_default"
+    cursor = "allied_planet"
+    family = {'tree':'deserted', 'parents':['b_deserted2']}
+    requires = ('b_deserted1', 'b_deserted2')
+    building = make_simple_stats_building(stats=Stats(pop_max_mul=-1), shape="modulardwellings")
+
+    def apply(self, to):
+        p = PermanentHangarProductionOrder(45)
+        to.add_production(p)
+        return super().apply(to)        
+
+@register_upgrade
+class Deserted3bUpgrade(AddBuildingUpgrade):
     name = "b_deserted3"
     resource_type = "gas"
     category = "buildings"
-    title = "War Economy II"
-    description = "Produce [^1] [Fighter] every 40 seconds"
+    title = "War Economy B"
+    description = "Produce [^1] [Fighter] every 30 seconds, [!-90% Max Health]"
     icon = "building_default"
     cursor = "allied_planet"
-    family = {'tree':'deserted', 'parents':['b_deserted2a', 'b_deserted2b']}
-    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
-    requires = lambda x:'b_deserted1' in x and ('b_deserted2a' in x or 'b_deserted2b' in x)
+    building = make_simple_stats_building(stats=Stats(planet_health_mul=-0.9), shape="lifesupport")
+    family = {'tree':'deserted', 'parents':['b_deserted2']}
+    requires = ('b_deserted1', 'b_deserted2')
 
     def apply(self, to):
-        p = PermanentHangarProductionOrder(40)
+        p = PermanentHangarProductionOrder(45)
         to.add_production(p)
         return super().apply(to)    
 

@@ -1,16 +1,20 @@
-from ships.fighter import Fighter, STATE_DOGFIGHT
-from ships.ship import Ship, THRUST_PARTICLE_RATE, STATE_WAITING, STATE_CRUISING
+import math
+import random
+
+import planet
+import sound
+from bullet import Bullet
 from colors import *
+from helper import all_nearby, clamp
 from particle import Particle
 from v2 import V2
-import random
-import math
-import planet
-from helper import all_nearby, clamp
-from bullet import Bullet
-from ships.bomber import Bomber
-import sound
+
 from ships.all_ships import register_ship
+from ships.bomber import Bomber
+from ships.fighter import STATE_DOGFIGHT, Fighter
+from ships.ship import (STATE_CRUISING, STATE_WAITING, THRUST_PARTICLE_RATE,
+                        Ship)
+
 
 @register_ship
 class Interceptor(Fighter): 
@@ -90,3 +94,6 @@ class Interceptor(Fighter):
                 self.fast_fire_timer = 0
                 self.special_fire(self.firing_target)
         return super().update(dt)
+
+    def get_max_shield(self):
+        return super().get_max_shield() + self.get_stat("interceptor_shield")

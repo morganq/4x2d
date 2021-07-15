@@ -1,6 +1,10 @@
 import pygame
+
+import text
+from colors import PICO_WHITE
 from spritebase import SpriteBase
 from v2 import V2
+
 
 def ptmin(a,b):
     if a.x > b.x:
@@ -34,3 +38,36 @@ class Line(SpriteBase):
 
         self._offset = (0 if delta.x > 0 else 1, 0 if delta.y > 0 else 1)
         self._recalc_rect()
+
+class IndicatorLine(Line):
+    def __init__(self, planet, start, end, color, name=None):
+        self.planet = planet
+        self.name = name
+        self.name_text = None
+        self.time = 0
+        super().__init__(start, end, color)
+        if self.name:
+            self.name_text = text.Text(self.name, "tiny", (start + end) / 2, multiline_width=80, shadow=True)
+            self.name_text.offset = (0.5,0.5)
+            self.planet.scene.ui_group.add(self.name_text)
+
+    def update(self, dt):
+        self.time += dt
+        if self.time < 1:
+            if (self.time * 6) % 1 < 0.5:
+                self.visible = False
+            else:
+                self.visible = True
+        else:
+            if self.planet.frame == 1:
+                self.visible = True
+                self.name_text.visible = True
+            else:
+                self.visible = False
+                self.name_text.visible = False
+        return super().update(dt)
+
+    def kill(self):
+        if self.name_text:
+            self.name_text.kill()
+        return super().kill()

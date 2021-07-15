@@ -93,7 +93,7 @@ class PlayState(UIEnabledState):
                     self.current_panel = None
 
 
-                just_update = self.last_clicked_sprite.needs_panel_update
+                just_update = True #self.last_clicked_sprite.needs_panel_update
                 if self.current_panel and just_update:
                     self.last_clicked_sprite.needs_panel_update = False
                     self.current_panel.kill()
@@ -214,7 +214,7 @@ class PlayState(UIEnabledState):
                             self.current_panel.kill()
                             self.current_panel = None
 
-                        just_update = spr.needs_panel_update
+                        just_update = True #spr.needs_panel_update
                         if self.current_panel and just_update:
                             spr.needs_panel_update = False
                             self.current_panel.kill()

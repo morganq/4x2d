@@ -27,22 +27,27 @@ VALID_STAT_NAMES = [
     'fighter_production_amt_halving',
     'fighter_production',
     'fighter_production_amt',
+    'fighter_regen',
     'fire_rate_over_time', 
     'gas_mining_rate',
     'grey_goo_collection',
     'grey_goo',
+    'headquarters', # +1 pop when worker sent from here colonizes
     'ice_mining_rate',
     'interceptor_blast_radius',
+    'interceptor_damage_mul',
+    'interceptor_fire_rate_deep_space', 
+    'interceptor_fire_rate_near_bombers',    
     'interceptor_missile_bounce',
     'interceptor_production', 
-    'interceptor_fire_rate_deep_space', 
-    'interceptor_fire_rate_near_bombers',
-    'interceptor_damage_mul',
+    'interceptor_shield',
     'interplanetary_missiles',
-    'launchpad_pop_chance', #chance for +1 pop when sending colonist
+    'launchpad_pop_chance', #chance for +1 pop when sending workers
     'launchpad_fighter_chance', #chance for +1 fighter w bomber/interceptor
     'launchpad_battleship_health', #+hp when launching battleship
     'launchpad_battleship_pop', #+1 pop when launching battleship
+    'max_pop_growth', # +1 max pop every 30 seconds
+    'memorial', # +1 fighter when ship sent from here dies
     'mining_rate',
     'mining_rate_first_60', 
     'mining_rate_at_max_pop', 
@@ -59,11 +64,13 @@ VALID_STAT_NAMES = [
     'planet_shield', 
     'planet_slow_aura', 
     'planet_temp_health_mul', 
+    'planet_weapon_boost',
     'planet_weapon_boost_zero_pop',
     'planet_weapon_boost_zero_ships',
     'pop_growth_min_reduction',
     'pop_growth_rate',
     'pop_growth_rate_per_docked_ship',
+    'pop_growth_without_ships',
     'pop_max_add',
     'pop_max_mul',
     'prevent_buildings',

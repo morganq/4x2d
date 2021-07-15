@@ -1,6 +1,8 @@
-from upgrade.upgrades import register_upgrade, Upgrade
-from productionorder import ProductionOrder
 import ships
+from productionorder import ProductionOrder
+
+from upgrade.upgrades import Upgrade, register_upgrade
+
 
 @register_upgrade
 class Basic1Upgrade(Upgrade):
@@ -88,7 +90,7 @@ class InstantFighters2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "War Manufacturing"
-    description = "Train [^2] [Fighters] [^Instantly], Planet loses [!25] health"
+    description = "Train [^2] [Fighters] [^Instantly], Planet loses [!50] health"
     icon = "warmanufacturing"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['s_instantfighters1']}
@@ -97,7 +99,7 @@ class InstantFighters2bUpgrade(Upgrade):
     def apply(self, to):
         p = ProductionOrder("fighter", 2, 0.25)
         to.add_production(p)        
-        to.health -= 25
+        to.health -= 50
 
 @register_upgrade
 class InstantFighters3aUpgrade(Upgrade):
@@ -105,7 +107,7 @@ class InstantFighters3aUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Guard Deployment II"
-    description = "Train [^3] [Fighters] [^Instantly], [!-3] population"
+    description = "Train [^3] [Fighters] [^Instantly], [!-2] population"
     icon = "guarddeployment2"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['s_instantfighters2a']}
@@ -115,7 +117,7 @@ class InstantFighters3aUpgrade(Upgrade):
     def apply(self, to):
         p = ProductionOrder("fighter", 3, 0.25)
         to.add_production(p)        
-        to.population -= 3    
+        to.population -= 2
 
 @register_upgrade
 class InstantFighters3bUpgrade(Upgrade):
@@ -123,7 +125,7 @@ class InstantFighters3bUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "War Manufacturing II"
-    description = "Train [^3] [Fighters] [^Instantly], Planet loses [!35] health"
+    description = "Train [^3] [Fighters] [^Instantly], Planet loses [!80] health"
     icon = "warmanufacturing2"
     cursor = "allied_planet"
     family = {'tree':'instantfighters', 'parents':['s_instantfighters2b']}
@@ -133,7 +135,7 @@ class InstantFighters3bUpgrade(Upgrade):
     def apply(self, to):
         p = ProductionOrder("fighter", 3, 0.25)
         to.add_production(p)        
-        to.health -= 35
+        to.health -= 80
 
 @register_upgrade
 class LongFighters1Upgrade(Upgrade):
@@ -149,7 +151,7 @@ class LongFighters1Upgrade(Upgrade):
     def apply(self, to):
         p = ProductionOrder("fighter", 4, 120)
         to.add_production(p)        
-        to.owning_civ.resources.iron += 50
+        to.owning_civ.earn_resource("iron", 50)
 
 @register_upgrade
 class LongFighters2aUpgrade(Upgrade):
@@ -182,7 +184,7 @@ class LongFighters2bUpgrade(Upgrade):
     def apply(self, to):
         p = ProductionOrder("fighter", 4, 120)
         to.add_production(p)        
-        to.owning_civ.resources.iron += 100
+        to.owning_civ.earn_resource("iron", 100)
 
 @register_upgrade
 class LongFighters3Upgrade(Upgrade):
@@ -208,15 +210,32 @@ class Warp1Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Fleet Warp"
-    description = "Every ship warps towards its target and gains [^+67%] attack speed for [6 seconds]"
+    description = "Every ship warps into range of its target and gains [^+67%] attack speed for [6 seconds]"
     icon = "ship_default"
     cursor = None
     family = {'tree':'warp', 'parents':[]}
-    infinite = True
 
     def apply(self, to):
         for ship in to.scene.get_civ_ships(to):
             ship.command_warp()
+
+@register_upgrade
+class Warp2Upgrade(Upgrade):
+    name = "s_warp2"
+    resource_type = "iron"
+    category = "ships"
+    title = "Fleet Warp"
+    description = "Every ship is [^fully repaired], warps into range of its target, and gains [^+67%] attack speed for [6 seconds]"
+    icon = "ship_default"
+    cursor = None
+    family = {'tree':'warp', 'parents':['s_warp1']}
+    requires = ('s_warp1',)
+    infinite = True
+
+    def apply(self, to):
+        for ship in to.scene.get_civ_ships(to):
+            ship.health = ship.get_max_health()
+            ship.command_warp()            
 
 #### ICE ####
 
@@ -225,32 +244,131 @@ class Interceptors1Upgrade(Upgrade):
     name = "s_basicinterceptors1"
     resource_type = "ice"
     category = "ships"
-    title = "Interceptors"
-    description = "Train [^2] [Interceptors] Over [45 seconds]"
+    title = "Interceptor"
+    description = "Train [^1] [Interceptor] Over [10 seconds]"
     icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'basicinterceptors', 'parents':[]}
-    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("interceptor", 1, 10)
+        to.add_production(p)
+
+@register_upgrade
+class Interceptors2Upgrade(Upgrade):
+    name = "s_basicinterceptors2"
+    resource_type = "ice"
+    category = "ships"
+    title = "Interceptor II"
+    description = "Train [^2] [Interceptors] Over [45 seconds]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicinterceptors', 'parents':['s_basicinterceptors1']}
+    requires = ('s_basicinterceptors1',)
 
     def apply(self, to):
         p = ProductionOrder("interceptor", 2, 45)
         to.add_production(p)
 
 @register_upgrade
+class Interceptors3aUpgrade(Upgrade):
+    name = "s_basicinterceptors3a"
+    resource_type = "ice"
+    category = "ships"
+    title = "Interceptor Assembly Line"
+    description = "Train [^3] [Interceptors] Over [60 seconds]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicinterceptors', 'parents':['s_basicinterceptors2']}
+    requires = ('s_basicinterceptors1', 's_basicinterceptors2')
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("interceptor", 3, 60)
+        to.add_production(p)
+
+@register_upgrade
+class Interceptors3bUpgrade(Upgrade):
+    name = "s_basicinterceptors3b"
+    resource_type = "ice"
+    category = "ships"
+    title = "Ad-Hoc Interceptors"
+    description = "Train [^2] [Interceptors] Instantly"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicinterceptors', 'parents':['s_basicinterceptors2']}
+    requires = ('s_basicinterceptors1', 's_basicinterceptors2')
+
+    def apply(self, to):
+        p = ProductionOrder("interceptor", 2, 0.5)
+        to.add_production(p)        
+
+@register_upgrade
 class Bombers1Upgrade(Upgrade):
     name = "s_basicbombers1"
     resource_type = "ice"
     category = "ships"
-    title = "Bombers"
-    description = "Train [^2] [Bombers] Over [45 seconds]"
+    title = "Bomb Squadron"
+    description = "Train [^2] [Bombers] Over [60 seconds]"
     icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'basicbombers', 'parents':[]}
-    infinite = True
+    
+
+    def apply(self, to):
+        p = ProductionOrder("bomber", 2, 60)
+        to.add_production(p)  
+
+@register_upgrade
+class Bombers2aUpgrade(Upgrade):
+    name = "s_basicbombers2a"
+    resource_type = "ice"
+    category = "ships"
+    title = "Bomb Squadron II"
+    description = "Train [^3] [Bombers] Over [60 seconds]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicbombers', 'parents':['s_basicbombers1']}
+    requires = ('s_basicbombers1',)
+
+    def apply(self, to):
+        p = ProductionOrder("bomber", 3, 60)
+        to.add_production(p) 
+
+@register_upgrade
+class Bombers2bUpgrade(Upgrade):
+    name = "s_basicbombers2b"
+    resource_type = "ice"
+    category = "ships"
+    title = "Bomb Support"
+    description = "Train [^2] [Bombers] Over [45 seconds], [^+150] [Iron]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicbombers', 'parents':['s_basicbombers1']}
+    requires = ('s_basicbombers1',)
 
     def apply(self, to):
         p = ProductionOrder("bomber", 2, 45)
-        to.add_production(p)       
+        to.add_production(p)                
+        to.owning_civ.earn_resource("iron", 150)
+
+@register_upgrade
+class Bombers3Upgrade(Upgrade):
+    name = "s_basicbombers3"
+    resource_type = "ice"
+    category = "ships"
+    title = "Bomb Support II"
+    description = "Train [^3] [Bombers] Over [60 seconds], [^+75] [Gas]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicbombers', 'parents':['s_basicbombers2a', 's_basicbombers2b']}
+    requires = lambda x: 's_basicbombers1' in x and ('s_basicbombers2a' in x or 's_basicbombers2b' in x)
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("bomber", 3, 60)
+        to.add_production(p)                
+        to.owning_civ.earn_resource("gas", 75)        
 
 @register_upgrade
 class HangarProduction1Upgrade(Upgrade):
@@ -258,23 +376,47 @@ class HangarProduction1Upgrade(Upgrade):
     resource_type = "ice"
     category = "ships"
     title = "Specialized Manufacturing"
-    description = "Train [^1] ship [^instantly] at each hangar"
+    description = "Train [^1] ship at each hangar, over [30 seconds]"
     icon = "ship_default"
     cursor = None
     family = {'tree':'hangarprod', 'parents':[]}
+
+    def apply(self, to):
+        for planet in to.scene.get_civ_planets(to):
+            for building in planet.buildings:
+                if building['building'].upgrade.name == "b_hangar1":
+                    planet.add_production(ProductionOrder("fighter", 1, 30))
+                elif building['building'].upgrade.name == "b_hangar2a":
+                    planet.add_production(ProductionOrder("interceptor", 1, 30))
+                elif building['building'].upgrade.name == "b_hangar2b":
+                    planet.add_production(ProductionOrder("bomber", 1, 30))
+                elif building['building'].upgrade.name == "b_hangar3":
+                    planet.add_production(ProductionOrder("battleship", 1, 30))
+
+@register_upgrade
+class HangarProduction2Upgrade(Upgrade):
+    name = "s_hangarprod2"
+    resource_type = "ice"
+    category = "ships"
+    title = "Specialized Manufacturing II"
+    description = "Train [^1] ship [^instantly] at each hangar"
+    icon = "ship_default"
+    cursor = None
+    family = {'tree':'hangarprod', 'parents':['hangarprod1']}
+    requires = ('hangarprod1',)
     infinite = True
 
     def apply(self, to):
         for planet in to.scene.get_civ_planets(to):
             for building in planet.buildings:
                 if building['building'].upgrade.name == "b_hangar1":
-                    planet.add_ship("fighter")
+                    planet.add_production(ProductionOrder("fighter", 1, 1))
                 elif building['building'].upgrade.name == "b_hangar2a":
-                    planet.add_ship("interceptor")
+                    planet.add_production(ProductionOrder("interceptor", 1, 1))
                 elif building['building'].upgrade.name == "b_hangar2b":
-                    planet.add_ship("bomber")                    
+                    planet.add_production(ProductionOrder("bomber", 1, 1))
                 elif building['building'].upgrade.name == "b_hangar3":
-                    planet.add_ship("battleship")
+                    planet.add_production(ProductionOrder("battleship", 1, 1))                 
 
 
 ### GAS ####
@@ -284,16 +426,65 @@ class Battleships1Upgrade(Upgrade):
     name = "s_basicbattleships1"
     resource_type = "gas"
     category = "ships"
-    title = "Battleships"
+    title = "Battleship"
     description = "Train [^1] [Battleship] Over [30 seconds]"
     icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'basicbattleships', 'parents':[]}
-    infinite = True
 
     def apply(self, to):
         p = ProductionOrder("battleship", 1, 30)
-        to.add_production(p)         
+        to.add_production(p)  
+
+@register_upgrade
+class Battleships2Upgrade(Upgrade):
+    name = "s_basicbattleships2"
+    resource_type = "gas"
+    category = "ships"
+    title = "Battleship II"
+    description = "Train [^1] [Battleship] Over [20 seconds]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicbattleships', 'parents':['s_basicbattleships1']}
+    requires = ('s_basicbattleships1',)
+
+    def apply(self, to):
+        p = ProductionOrder("battleship", 1, 20)
+        to.add_production(p)
+
+@register_upgrade
+class Battleships3aUpgrade(Upgrade):
+    name = "s_basicbattleships3a"
+    resource_type = "gas"
+    category = "ships"
+    title = "Emergency Battleship"
+    description = "Train [^1] [Battleship] [^instantly]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicbattleships', 'parents':['s_basicbattleships2']}
+    requires = ('s_basicbattleships1', 's_basicbattleships2')
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("battleship", 1, 0.5)
+        to.add_production(p)
+
+@register_upgrade
+class Battleships3bUpgrade(Upgrade):
+    name = "s_basicbattleships3b"
+    resource_type = "gas"
+    category = "ships"
+    title = "Battleship III"
+    description = "Train [^2] [Battleships] Over [60 seconds]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'basicbattleships', 'parents':['s_basicbattleships2']}
+    requires = ('s_basicbattleships1', 's_basicbattleships2')
+    infinite = True
+
+    def apply(self, to):
+        p = ProductionOrder("battleship", 2, 60)
+        to.add_production(p)
 
 @register_upgrade
 class PerPlanetProduction1Upgrade(Upgrade):
@@ -301,35 +492,71 @@ class PerPlanetProduction1Upgrade(Upgrade):
     resource_type = "gas"
     category = "ships"
     title = "Planetary Guard"
-    description = "Train [^1] [Fighter] over [20 seconds] at each planet"
+    description = "Train [^1] [Fighter] over [40 seconds] at each planet"
     icon = "ship_default"
     cursor = None
     family = {'tree':'perplanet', 'parents':[]}
+
+    def apply(self, to):
+        for planet in to.scene.get_civ_planets(to):
+            planet.add_production(ProductionOrder("fighter", 1, 40))
+
+@register_upgrade
+class PerPlanetProduction1Upgrade(Upgrade):
+    name = "s_perplanet2"
+    resource_type = "gas"
+    category = "ships"
+    title = "Planetary Guard II"
+    description = "Train [^1] [Fighter] over [10 seconds] at each planet"
+    icon = "ship_default"
+    cursor = None
+    family = {'tree':'perplanet', 'parents':['s_perplanet1']}
+    requires = ('s_perplanet1',)
     infinite = True
 
     def apply(self, to):
         for planet in to.scene.get_civ_planets(to):
-            planet.add_production(ProductionOrder("fighter", 1, 20))
+            planet.add_production(ProductionOrder("fighter", 1, 10))            
 
 @register_upgrade
-class AddColonistProduction1Upgrade(Upgrade):
-    name = "s_addcolonist1"
+class VarietyProduction1Upgrade(Upgrade):
+    name = "s_variety1"
     resource_type = "gas"
     category = "ships"
-    title = "Civilian Convoy"
-    description = "Add a [^1] population [Worker] ship to up to 3 random fleets"
+    title = "Armada"
+    description = "Train [^2] [Bombers] and [^2] [Interceptors] over [45 seconds]. [Iron] is [!Frozen] for [20 seconds]"
     icon = "ship_default"
-    cursor = None
-    family = {'tree':'addcolonist', 'parents':[]}
+    cursor = "allied_planet"
+    family = {'tree':'variety', 'parents':[]}
+
+    def apply(self, to):
+        p = ProductionOrder("bomber", 2, 45)
+        to.add_production(p)  
+        p = ProductionOrder("interceptor", 2, 45)
+        to.add_production(p)          
+        to.owning_civ.frozen.iron += 20
+
+@register_upgrade
+class VarietyProduction2Upgrade(Upgrade):
+    name = "s_variety2"
+    resource_type = "gas"
+    category = "ships"
+    title = "Armada II"
+    description = "Train [^2] [Bombers], [^2] [Interceptors], and [^2] [Fighters] over [45 seconds]. [Iron] is [!Frozen] for [20 seconds]"
+    icon = "ship_default"
+    cursor = "allied_planet"
+    family = {'tree':'variety', 'parents':['s_variety1']}
+    requires = ('s_variety1')
     infinite = True
 
     def apply(self, to):
-        for fleet in to.scene.fleet_managers['my'].current_fleets[0:3]:
-            pos, rad = fleet.get_size_info()
-            s = ships.colonist.Colonist(to.scene, pos, to)
-            s.set_pop(1)
-            s.set_target(fleet.ships[0].chosen_target)
-            to.scene.game_group.add(s)
+        p = ProductionOrder("fighter", 2, 45)
+        to.add_production(p)
+        p = ProductionOrder("bomber", 2, 45)
+        to.add_production(p)
+        p = ProductionOrder("interceptor", 2, 45)
+        to.add_production(p)
+        to.owning_civ.frozen.iron += 20
 
 
 

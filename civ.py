@@ -1,13 +1,15 @@
-from optimize import frame_memoize
-import economy
-from upgrade import upgrades
-from colors import *
-from collections import defaultdict
-from stats import Stats
-from icontext import IconText
-from v2 import V2
 import random
+from collections import defaultdict
+
+import economy
 import sound
+from colors import *
+from icontext import IconText
+from optimize import frame_memoize
+from stats import Stats
+from upgrade import upgrades
+from v2 import V2
+
 
 class Civ:
     name = None
@@ -38,6 +40,7 @@ class Civ:
         
         ### Upgrades Stuff ###
         self.nuclear_instability_timer = 0
+        self.housing_colonized = False # Turns True when we colonize something
 
         self.blueprints = []
 

@@ -1,15 +1,19 @@
-from helper import all_nearby, clamp, get_nearest
-from colors import *
-from particle import Particle
-from .ship import FLEET_RADIUS, STATE_RETURNING, STATE_WAITING, Ship, THRUST_PARTICLE_RATE
-from bullet import Bullet
-import planet
-import asteroid
-import random
 import math
+import random
+
+import asteroid
+import planet
 import sound
-from ships.all_ships import register_ship
+from bullet import Bullet
+from colors import *
+from helper import all_nearby, clamp, get_nearest
+from particle import Particle
 from v2 import V2
+
+from ships.all_ships import register_ship
+
+from .ship import (FLEET_RADIUS, STATE_RETURNING, STATE_WAITING,
+                   THRUST_PARTICLE_RATE, Ship)
 
 STATE_DOGFIGHT = 'dogfight'
 STATE_SIEGE = 'siege'
@@ -100,10 +104,11 @@ class Fighter(Ship):
             'damage_add': damage_add,
             'missile_speed':self.get_stat("ship_missile_speed"),
             'raze_upgrade': self.get_stat("raze_upgrade"),
-            'color':PICO_LIGHTGRAY
+            'color':PICO_LIGHTGRAY,
         }
         if self.SHIP_BONUS_NAME == "fighter":
             mods['iron_on_hit'] = self.get_stat("fighter_damage_iron")
+            mods['grey_goo'] = self.get_stat("grey_goo")
 
         return mods        
 

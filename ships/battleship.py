@@ -1,16 +1,20 @@
-from ships.fighter import Fighter, STATE_DOGFIGHT
-from ships.ship import Ship, THRUST_PARTICLE_RATE, STATE_WAITING, STATE_CRUISING
+import math
+import random
+
+import planet
+import sound
+from bullet import Bullet
 from colors import *
+from helper import all_nearby, clamp
+from laserparticle import LaserParticle
 from particle import Particle
 from v2 import V2
-import random
-import math
-import planet
-from helper import all_nearby, clamp
-from bullet import Bullet
-import sound
-from laserparticle import LaserParticle
+
 from ships.all_ships import register_ship
+from ships.fighter import STATE_DOGFIGHT, Fighter
+from ships.ship import (STATE_CRUISING, STATE_WAITING, THRUST_PARTICLE_RATE,
+                        Ship)
+
 
 @register_ship
 class Battleship(Fighter): 
@@ -42,13 +46,15 @@ class Battleship(Fighter):
     def get_fire_rate(self):
         fr = super().get_fire_rate()
         if self.get_stat("battleship_laser"):
-            fr *= 1.25
+            fr *= 2.5
         return fr
 
     def fire_laser(self, at):
         lp = LaserParticle(self.pos, at.pos, PICO_PINK, 0.25)
         self.scene.game_group.add(lp)
-        b = Bullet(at.pos, at, self, mods=self.prepare_bullet_mods())
+        mods = self.prepare_bullet_mods()
+        mods['damage_base'] = 4
+        b = Bullet(at.pos, at, self, mods=mods)
         self.scene.game_group.add(b)        
         
         enemies = self.scene.get_enemy_objects(self.owning_civ)

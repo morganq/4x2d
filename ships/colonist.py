@@ -1,14 +1,17 @@
-from upgrade.upgrades import UPGRADE_CLASSES
+import random
+
+import helper
 from colors import *
+from icontext import IconText
 from particle import Particle
 from planet import planet
-from .ship import STATE_WAITING, Ship, THRUST_PARTICLE_RATE, ATMO_DISTANCE
-import random
-import helper
-from v2 import V2
 from text import Text
-from icontext import IconText
+from upgrade.upgrades import UPGRADE_CLASSES
+from v2 import V2
+
 from ships.all_ships import register_ship
+
+from .ship import ATMO_DISTANCE, STATE_WAITING, THRUST_PARTICLE_RATE, Ship
 
 ATOMIC_BOMB_RANGE = 50
 
@@ -57,6 +60,9 @@ class Colonist(Ship):
 
             other.needs_panel_update = True
             self.colonized(other)
+            if self.origin:
+                self.origin.emitted_ship_colonized(self, other)
+            self.owning_civ.housing_colonized = True
 
     def colonized(self, planet):
         pass
