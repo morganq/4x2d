@@ -10,13 +10,13 @@ class Basic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Standard Order"
-    description = "Train [^3] [Fighters] Over [30 seconds]"
+    description = "Train [^2] [Fighters] Over [30 seconds]"
     icon = "standardorder"
     cursor = "allied_planet"
     family = {'tree':'basicfighters', 'parents':[]}
 
     def apply(self, to):
-        p = ProductionOrder("fighter", 3, 30)
+        p = ProductionOrder("fighter", 2, 30)
         to.add_production(p)
 
 @register_upgrade
@@ -143,13 +143,13 @@ class LongFighters1Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Efficient Assembly"
-    description = "Train [^4] [Fighters] Over [120 seconds], [^+50] Iron"
+    description = "Train [^3] [Fighters] Over [120 seconds], [^+50] Iron"
     icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':[]}
 
     def apply(self, to):
-        p = ProductionOrder("fighter", 4, 120)
+        p = ProductionOrder("fighter", 3, 120)
         to.add_production(p)        
         to.owning_civ.earn_resource("iron", 50)
 
@@ -159,14 +159,14 @@ class LongFighters2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Strategic Assembly"
-    description = "Train [^5] [Fighters] Over [120 seconds]"
+    description = "Train [^4] [Fighters] Over [120 seconds]"
     icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':['s_longfighters1']}
     requires = ('s_longfighters1',)
 
     def apply(self, to):
-        p = ProductionOrder("fighter", 5, 120)
+        p = ProductionOrder("fighter", 4, 120)
         to.add_production(p)
 
 @register_upgrade
@@ -175,7 +175,7 @@ class LongFighters2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Efficient Assembly II"
-    description = "Train [^4] [Fighters] Over [120 seconds], [^+100] Iron"
+    description = "Train [^3] [Fighters] Over [120 seconds], [^+100] Iron"
     icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':['s_longfighters1']}
@@ -192,7 +192,7 @@ class LongFighters3Upgrade(Upgrade):
     resource_type = "iron"
     category = "ships"
     title = "Efficient Assembly III"
-    description = "Train [^5] [Fighters] Over [120 seconds], [^+50] Gas"
+    description = "Train [^4] [Fighters] Over [120 seconds], [^+50] Gas"
     icon = "ship_default"
     cursor = "allied_planet"
     family = {'tree':'longfighters', 'parents':['s_longfighters2a', 's_longfighters2b']}

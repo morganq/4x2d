@@ -112,6 +112,7 @@ class UpgradeState(UIEnabledState):
             self.joystick_overlay.kill()
             self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos)
             self.scene.ui_group.add(self.joystick_overlay)
+            self.joystick_overlay.set_button_options(["[*x*] Select"])
 
         if self.panel:
             self.panel.kill()
@@ -248,7 +249,10 @@ class UpgradeState(UIEnabledState):
             self.joystick_overlay.joystick_delta(event['delta'])
 
         if input == "back":
-            self.on_back()
+            if self.pending_upgrade:
+                self.on_back()
+            else:
+                self.finish(cancel = True)
 
         if input == "confirm":
             spr = self.joystick_overlay.nearest_obj

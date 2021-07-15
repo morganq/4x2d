@@ -22,6 +22,8 @@ class JoystickCursor(SpriteBase):
         self.hovering = None
         self.joystick_state = V2(0,0)
         self.scene = scene
+        self.options_text = text.Text("", "small", V2(0,0), PICO_PINK, multiline_width=200, center=False)
+        self.scene.ui_group.add(self.options_text)
         self._generate_image()
 
     def _generate_image(self):
@@ -59,12 +61,14 @@ class JoystickCursor(SpriteBase):
     def update(self, dt):
         self.cursor_pos += self.joystick_state * dt * 350
         self.scene.game.last_joystick_pos = self.cursor_pos
+        self.options_text.pos = self.cursor_pos + V2(8, -8)
         self._generate_image()
         return super().update(dt)
 
     def kill(self):
         if self.hovering and self.hovering.alive():
             self.hovering.on_mouse_exit(self.hovering.pos)
+        self.options_text.kill()
         super().kill()
 
     def update_hover(self):
@@ -72,7 +76,14 @@ class JoystickCursor(SpriteBase):
             self.hovering.on_mouse_exit(self.hovering.pos)
         if self.nearest_obj:
             self.hovering = self.nearest_obj
-            self.hovering.on_mouse_enter(self.hovering.pos)        
+            self.hovering.on_mouse_enter(self.hovering.pos)
+
+    def set_button_options(self, options):
+        if options:
+            self.options_text.set_text("\n".join(options))
+        else:
+            self.options_text.set_text("")
+
 
 class JoystickPanelCursor(SpriteBase):
     def __init__(self, scene, controls):

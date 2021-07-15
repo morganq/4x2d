@@ -1,10 +1,12 @@
-from panel import Panel
-from slider import Slider
-from colors import *
-from text import Text
+import game
 from button import Button
-from v2 import V2
+from colors import *
+from panel import Panel
 from simplesprite import SimpleSprite
+from slider import Slider
+from text import Text
+from v2 import V2
+
 
 class OrderPanel(Panel):
     def __init__(self, pos, planet_from, planet_to, on_order):
@@ -34,7 +36,10 @@ class OrderPanel(Panel):
                 self.sliders[ship] = slider
                 y += 45
 
-        self.add(Button(V2(0,0), "LAUNCH", "small", self.on_launch_click), V2(20, y))
+        t = "LAUNCH"
+        if game.Game.inst.input_mode == "joystick":
+            t = "[*x*] LAUNCH"
+        self.add(Button(V2(0,0), t, "small", self.on_launch_click), V2(20, y))
 
         self.redraw()
 

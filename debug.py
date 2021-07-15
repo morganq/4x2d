@@ -1,7 +1,10 @@
-import pygame
-import text
 import math
+
+import pygame
+
+import text
 from v2 import V2
+
 
 def debug_render(screen, scene):
     surf = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
@@ -29,6 +32,8 @@ def debug_render(screen, scene):
             
     for planet in scene.get_civ_planets(scene.enemy.civ):
         text.FONTS['tiny'].render_to(surf, (planet.pos + V2(-15,15)).tuple(), "%s" % sum(planet.ships.values()), (255,128,255,120))
+
+    text.FONTS['tiny'].render_to(surf, (250, 5), ["feeling safe","in fear"][scene.enemy.fear_attack], (255,128,255,120))
             
 
     #surf.set_alpha(50)

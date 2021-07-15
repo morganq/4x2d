@@ -53,7 +53,7 @@ class Civ:
             }            
         else:
             return {
-                'iron':25,
+                'iron':30,
                 'ice':35,
                 'gas':50
             }        
@@ -142,6 +142,8 @@ class Civ:
     def prereqs_met(self, uname):
         u = upgrades.UPGRADE_CLASSES[uname]
         if not u.requires: return True
+        if isinstance(u.requires, str):
+            return u.requires in self.researched_upgrade_names
         if isinstance(u.requires, tuple):
             return all([ru in self.researched_upgrade_names for ru in u.requires])
         else:

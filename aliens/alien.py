@@ -1,4 +1,5 @@
 import random
+
 from upgrade.upgrades import UPGRADE_CLASSES
 
 ALIENS = {}
@@ -28,6 +29,7 @@ class Alien:
         self.last_attack_time = 0
         self.time = 0
         self.fear_attack = False
+        self.redistribute_timer = 0
 
     # Returns True if, on this frame, (self.time % duration) just looped over to 0
     def duration_edge(self, duration, offset = 0):
@@ -64,13 +66,15 @@ class Alien:
         return ships
 
     def check_fear_attack(self):
+        if self.difficulty <= 2:
+            self.fear_attack = False
+            return
+
         mine = self.count_ships(self.civ)
         enemys = self.count_ships(self.scene.my_civ)
         if enemys > mine * 1.33:
-            print("in fear", mine, enemys)
             self.fear_attack = True
         else:
-            print("feelin safe", mine, enemys)
             self.fear_attack = False
 
     def update(self, dt):
@@ -105,13 +109,41 @@ class Alien:
         if self.duration_edge(self.DEFEND_DURATION):
             self.update_defend()
 
-        if self.duration_edge(10):
+        if self.duration_edge(20):
             for fleet in self.scene.fleet_managers['enemy'].current_fleets:
                 if fleet.is_waiting():
                     self.scene.fleet_managers['enemy'].recall_fleet(fleet)
 
         if self.duration_edge(5):
             self.check_fear_attack()
+
+        if self.redistribute_timer <= 0:
+            self.redistribute_excess_ships()
+        self.redistribute_timer -= dt
+
+    def redistribute_excess_ships(self):
+        all_my_planets = self.scene.get_civ_planets(self.civ)
+        random.shuffle(all_my_planets)
+        for planet in all_my_planets:
+            sent = False
+            total_ships = sum(planet.ships.values())
+            max_ships = planet.get_max_ships()
+            if total_ships > max_ships:
+                other_planets = all_my_planets[::]
+                other_planets.remove(planet)
+                other = random.choice(other_planets)
+                d = total_ships - max_ships
+                for i in range(d):
+                    possible_ships = [k for k in self.get_attacking_ships() if planet.ships[k] > 0]
+                    if possible_ships:
+                        randomship = random.choice(possible_ships)
+                        planet.emit_ship(randomship, {'to': other})
+                        sent = True
+                if sent:
+                    self.redistribute_timer = random.randint(25, 50)
+                    return # just one transfer per round
+                    
+
 
     def get_expand_chance(self, planet):
         return 0.05 * planet.population
@@ -130,8 +162,9 @@ class Alien:
 
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
-        self.civ.base_stats['planet_health_mul'] = (difficulty - 1) / 4
-        self.civ.base_stats['mining_rate'] = 0.35 + ((difficulty - 1) / 4)
+        self.civ.base_stats['planet_health_mul'] = -0.5 + (difficulty - 1) / 4
+        self.civ.base_stats['mining_rate'] = -0.5 + ((difficulty - 1) / 4)
+        self.civ.base_stats['max_ships_mul'] = min(-0.65 + (difficulty - 1) / 6,0)
         extra_planets = difficulty // 2
         extra_pops = difficulty // 2
         my_planet = self.scene.get_civ_planets(self.civ)[0]

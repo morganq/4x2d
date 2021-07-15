@@ -183,6 +183,21 @@ class PlayState(UIEnabledState):
             self.joystick_overlay.set_nearest(nearest)
         else:
             self.joystick_overlay.set_nearest(None)
+            nearest = None
+
+        if self.joy_controls_state == "default":
+            if isinstance(nearest, planet.planet.Planet):
+                if nearest.owning_civ == self.scene.my_civ:
+                    self.joystick_overlay.set_button_options(["[*x*] Planet Info", "[*square*] Order Ships"])
+                else:
+                    self.joystick_overlay.set_button_options(["[*x*] Planet Info"])
+            else:
+                self.joystick_overlay.set_button_options([])
+        elif self.joy_controls_state == "arrow":
+            if nearest:
+                self.joystick_overlay.set_button_options(["[*x*] Select Target", "[*circle*] Cancel"])
+            else:
+                self.joystick_overlay.set_button_options(["[*circle*] Cancel"])
 
         if self.current_panel and self.current_panel.panel_for != self.joystick_overlay.nearest_obj:
             self.current_panel.kill()
@@ -238,15 +253,16 @@ class PlayState(UIEnabledState):
 
             elif self.joy_controls_state == "arrow":
                 spr = self.joystick_overlay.nearest_obj
-                target_selection = spr.get_selection_info()
-                if spr != self.joy_arrow_from and target_selection:
-                    if target_selection['type'] == 'planet':
-                        self.scene.sm.transition(OrderShipsState(self.scene, self.joy_arrow_from, spr))
-                        spr.on_mouse_exit(V2(0,0))
+                if spr:
+                    target_selection = spr.get_selection_info()
+                    if spr != self.joy_arrow_from and target_selection:
+                        if target_selection['type'] == 'planet':
+                            self.scene.sm.transition(OrderShipsState(self.scene, self.joy_arrow_from, spr))
+                            spr.on_mouse_exit(V2(0,0))
 
-                    if target_selection['type'] == 'asteroid':
-                        self.scene.sm.transition(OrderShipsState(self.scene, self.joy_arrow_from, spr))
-                        spr.on_mouse_exit(V2(0,0))
+                        if target_selection['type'] == 'asteroid':
+                            self.scene.sm.transition(OrderShipsState(self.scene, self.joy_arrow_from, spr))
+                            spr.on_mouse_exit(V2(0,0))
 
         if input == "action":
             if self.joy_controls_state == "default":
@@ -259,6 +275,14 @@ class PlayState(UIEnabledState):
                     self.deselect()
                     self.joy_arrow_from = spr
                     self.joy_hover_filter = self.target_joy_hover_filter
+
+        if input == "back":
+            if self.joy_controls_state == "arrow":
+                self.joy_controls_state = "default"
+                self.arrow.visible = False
+            elif self.current_panel:
+                self.current_panel.kill()
+                self.current_panel = None
 
     def keyboard_input(self, input, event):
         if input == 'other' and event.key == pygame.K_RETURN:
@@ -357,9 +381,16 @@ class OrderShipsState(UIEnabledState):
                 self.scene.sm.transition(PlayState(self.scene))
         return super().mouse_input(input, event)
 
+    def joystick_input(self, input, event):
+        if input == "back":
+            self.scene.sm.transition(PlayState(self.scene))
+
+        if input == "confirm":
+            self.panel.on_launch_click()
+        return super().joystick_input(input, event)
+
     def get_joystick_cursor_controls(self):
         controls = list(self.panel.sliders.values())
-        controls.append(self.panel.get_control_of_type(Button))
         return [[c] for c in controls]
 
 

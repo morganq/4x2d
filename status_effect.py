@@ -1,8 +1,10 @@
+import random
+
 import game
 import particle
 from colors import *
 from v2 import V2
-import random
+
 
 class StatusEffect:
     def __init__(self, owner, applier):
@@ -28,6 +30,9 @@ class GreyGooEffect(StatusEffect):
         self.name = "Grey Goo"
 
     def update(self, dt):
+        if not self.owner or not self.owner.alive():
+            self.kill()
+            return
         self.time -= dt
         if (self.time + dt) % 0.1 < self.time % 0.1:
             pvel = V2.from_angle(random.random() * 6.2818) * 5
@@ -36,8 +41,9 @@ class GreyGooEffect(StatusEffect):
             game.Game.inst.scene.game_group.add(p)
 
         if (self.time + dt) % 1 < self.time % 1:
-            self.owner.health -= (0.25 * len([e for e in self.owner.status_effects if e.name == "Grey Goo"]))
-            if self.owner.owning_civ.get_stat("grey_goo_collection") > 0:
+            dmg = (0.25 * len([e for e in self.owner.status_effects if e.name == "Grey Goo"]))
+            self.owner.take_damage(dmg, self.applier)
+            if self.owner.owning_civ and self.owner.owning_civ.get_stat("grey_goo_collection") > 0:
                 self.owner.owning_civ.resources.iron += self.owner.owning_civ.get_stat("grey_goo_collection")
         if self.time <= 0:
             self.kill()

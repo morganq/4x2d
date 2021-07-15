@@ -393,7 +393,7 @@ class LevelScene(scene.Scene):
         ut = time.time()
         self.update_times = defaultdict(lambda:0)
         base_dt = dt
-        self.game_speed = max(round((self.game.game_speed_input * 3) + 1), self.game_speed)
+        self.game_speed = round((self.game.game_speed_input * 3) + 1)
         dt *= self.game_speed
         if self.paused:
             self.sm.state.paused_update(dt)
@@ -521,7 +521,6 @@ class LevelScene(scene.Scene):
 
             gi = pygame.Surface(self.game.screen.get_size(), pygame.SRCALPHA)
             gi.fill((0,0,0,0))
-            print(len(self.flowfield.fields))
             ff = list(self.flowfield.fields.values())[self.flowfielddebug]
             for y,gr in enumerate(ff.grid):
                 for x,gc in enumerate(gr):
@@ -555,7 +554,8 @@ class LevelScene(scene.Scene):
 
         #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))
         if self.debug:
-            print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))
+            pass
+            #print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))
 
         if game.DEV:
             FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 20, 20), "%d" % self.time, (128,255,128,180))
@@ -566,12 +566,12 @@ class LevelScene(scene.Scene):
             if event.key == pygame.K_d:
                 self.debug = not self.debug
             if event.key == pygame.K_1:
-                self.game_speed = 1.0
+                self.game.game_speed_input = 0
             if event.key == pygame.K_0:
-                self.game_speed = 10.0
+                self.game.game_speed_input = 1
             if event.key == pygame.K_f:
                 self.flowfielddebug = (self.flowfielddebug + 1) % len(self.flowfield.fields)
         if inp == "menu": #TODO: pause menu
-            self.game.run_info.path.pop()
-            self.game.set_scene("menu")
+            pass
+
         return super().take_input(inp, event)

@@ -567,7 +567,7 @@ class Planet(SpaceObject):
             self.scene.ui_group.add(it)        
 
     def get_max_ships(self):
-        return self.get_max_pop()
+        return round(self.get_max_pop() * (self.get_stat("max_ships_mul") + 1))
 
     def get_threats(self):
         enemy_ships = self.scene.get_enemy_ships(self.owning_civ)
