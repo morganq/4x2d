@@ -137,7 +137,7 @@ class PlayState(UIEnabledState):
             if self.arrow:
                 self.arrow.visible = False        
 
-        self.scene.fleet_managers['my'].update_fleet_markers(self.mouse_pos)                
+        self.scene.fleet_managers['my'].update_fleet_markers(self.mouse_pos)
         super().update(dt)
 
     def take_input(self, inp, event):
@@ -177,6 +177,8 @@ class PlayState(UIEnabledState):
             sorted(self.scene.game_group.sprites()[::], key=lambda x:x.layer, reverse=True)
         )
         selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.joy_hover_filter(s)]
+        if self.joy_controls_state == "default":
+            self.scene.fleet_managers['my'].update_fleet_markers(self.joystick_overlay.cursor_pos)
 
         nearest, d = get_nearest(self.joystick_overlay.cursor_pos, selectable_sprites)
         if d < 40 ** 2:
@@ -283,6 +285,8 @@ class PlayState(UIEnabledState):
             elif self.current_panel:
                 self.current_panel.kill()
                 self.current_panel = None
+            else:
+                self.scene.fleet_managers['my'].point_recall(self.joystick_overlay.cursor_pos)
 
     def keyboard_input(self, input, event):
         if input == 'other' and event.key == pygame.K_RETURN:
