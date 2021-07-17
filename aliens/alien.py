@@ -2,6 +2,8 @@ import random
 
 from upgrade.upgrades import UPGRADE_CLASSES
 
+from aliens import buildorder
+
 ALIENS = {}
 
 class Alien:
@@ -30,6 +32,9 @@ class Alien:
         self.time = 0
         self.fear_attack = False
         self.redistribute_timer = 0
+
+    def get_build_order_steps(self):
+        return []
 
     # Returns True if, on this frame, (self.time % duration) just looped over to 0
     def duration_edge(self, duration, offset = 0):
@@ -84,13 +89,20 @@ class Alien:
             self.resource_priority = None
             self.update_resource_priority(dt)
             offered = self.civ.offer_upgrades(self.civ.upgrades_stocked[0], lambda x:x.alien_name == self.name)
-            choice = {
-                'grow':'buildings',
-                'produce':'ships',
-                'tech':'tech'
-            }[self.resource_priority]
-            up = UPGRADE_CLASSES[offered[choice]]
-            if choice == 'tech':
+            bo_step = self.build_order.get_current_step(self.time)
+            up = None
+            if bo_step and bo_step.name == "research":
+                if bo_step.asset in list(offered.values()):
+                    up = UPGRADE_CLASSES[bo_step.asset]
+                    self.build_order.completed_current_step()
+            if not up:
+                choice = {
+                    'grow':'buildings',
+                    'produce':'ships',
+                    'tech':'tech'
+                }[self.resource_priority]
+                up = UPGRADE_CLASSES[offered[choice]]
+            if up.category == 'tech':
                 up().apply(self.civ)
             else:
                 target = self.pick_upgrade_target(up)
@@ -131,17 +143,18 @@ class Alien:
             if total_ships > max_ships:
                 other_planets = all_my_planets[::]
                 other_planets.remove(planet)
-                other = random.choice(other_planets)
-                d = total_ships - max_ships
-                for i in range(d):
-                    possible_ships = [k for k in self.get_attacking_ships() if planet.ships[k] > 0]
-                    if possible_ships:
-                        randomship = random.choice(possible_ships)
-                        planet.emit_ship(randomship, {'to': other})
-                        sent = True
-                if sent:
-                    self.redistribute_timer = random.randint(25, 50)
-                    return # just one transfer per round
+                if other_planets:
+                    other = random.choice(other_planets)
+                    d = total_ships - max_ships
+                    for i in range(d):
+                        possible_ships = [k for k in self.get_attacking_ships() if planet.ships[k] > 0]
+                        if possible_ships:
+                            randomship = random.choice(possible_ships)
+                            planet.emit_ship(randomship, {'to': other})
+                            sent = True
+                    if sent:
+                        self.redistribute_timer = random.randint(25, 50)
+                        return # just one transfer per round
                     
 
 
@@ -158,7 +171,18 @@ class Alien:
         return []
 
     def get_max_attackers(self):
-        return int(((self.difficulty - 1) * 1.5))
+        curve = {
+            1: 0,
+            2: 2,
+            3: 4,
+            4: 4,
+            5: 6,
+        }.get(self.difficulty, 999)        
+
+        if self.difficulty > 1 and self.time > 300:
+            curve *= 2
+
+        return curve
 
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
@@ -178,6 +202,8 @@ class Alien:
             near_unclaimed[i].change_owner(self.civ)
             near_unclaimed[i].population = extra_pops
             near_unclaimed[i].set_health(near_unclaimed[i].get_max_health(), False)
+
+        self.build_order = buildorder.BuildOrder(self.get_build_order_steps())
 
     def update_expansion(self):
         for planet in self.scene.get_civ_planets(self.civ):
@@ -218,8 +244,21 @@ class Alien:
         for ship in self.scene.get_civ_ships(self.civ):
             if ship.SHIP_BONUS_NAME == "colonist" and ship.chosen_target.owning_civ == self.scene.my_civ:
                 c += 1
+        for planet in self.scene.get_civ_planets(self.civ):
+            for ship_type, emit_data in planet.emit_ships_queue:
+                targets_enemy = emit_data['to'].owning_civ and emit_data['to'].owning_civ != self.civ
+                if ship_type in self.get_attacking_ships() and targets_enemy:
+                    c += 1
 
         return c
+
+    def count_expanding_ships(self):
+        colonists_out = 0
+        for ship in self.scene.get_civ_ships(self.civ):
+            if ship.SHIP_BONUS_NAME == "colonist":
+                colonists_out += 1
+        return colonists_out        
+                
 
     def update_attack(self):
         for planet in self.scene.get_civ_planets(self.civ):
@@ -240,6 +279,10 @@ class Alien:
                             num_attackers += 1
                             sent = True
                             self.last_attack_time = self.time
+                            if not self.build_order.is_over():
+                                bostep = self.build_order.get_current_step(self.time)
+                                if bostep and bostep.name == "attack":   
+                                    self.build_order.completed_current_step()                         
                 if sent and random.random() < 0.5 and planet.population > 1:
                     planet.emit_ship(self.get_colonist(), {'to':target, 'num':random.randint(1, planet.population-1)})
 

@@ -1,19 +1,20 @@
-from aliens import alien
+import random
+
 from helper import clamp
-from upgrade.building_upgrades import AddBuildingUpgrade, make_simple_stats_building
+from planet import building as buildings
 from productionorder import ProductionOrder
 from stats import Stats
-from planet import building as buildings
-from upgrade.upgrades import register_upgrade, Upgrade
-from aliens.alien3battleship import Alien3Battleship
-import random
-from aliens.alien3void import Alien3Void
+from upgrade.building_upgrades import (AddBuildingUpgrade,
+                                       make_simple_stats_building)
+from upgrade.upgrades import Upgrade, register_upgrade
 from v2 import V2
 
-from aliens import alien3battleship
-from aliens import alien3colonist
-from aliens import alien3fighter
-from aliens import alien3bomber
+from aliens import (alien, alien3battleship, alien3bomber, alien3colonist,
+                    alien3fighter)
+from aliens.alien3battleship import Alien3Battleship
+from aliens.alien3void import Alien3Void
+from aliens.buildorder import *
+
 
 @register_upgrade
 class Alien3HomeDefenseUpgrade(AddBuildingUpgrade):
@@ -132,7 +133,7 @@ class Alien3(alien.Alien):
     ATTACK_DURATION = 15
     DEFEND_DURATION = 15
     EXPAND_NUM_NEAREST = 2
-    EXPAND_DURATION = 60
+    EXPAND_DURATION = 12
     tips = [
         ("assets/alien3fighter.png", "ALIEN CIV 3 produces VOID FIELDS around their planets which grant shields and speed to their ships."),
         ("assets/alien3bomber.png", "The STEALTH BOMBER is invisible within VOID FIELDS."),
@@ -144,9 +145,28 @@ class Alien3(alien.Alien):
         self.planet_void = {}
         self.ship_void = {}
 
+    def get_build_order_steps(self):
+        if self.difficulty == 1:
+            return [
+                BOResearch(0,"a3sfighter"),
+                BOResearch(30,"a3tvoid"),
+                BOResearch(50,"a3tvoid"),
+                BOExpand(60),
+                BOExpand(60),
+            ]
+        return [
+            BOResearch(0,"a3sfighter"),
+            BOAttack(20),
+            BOResearch(30,"a3tvoid"),
+            BOResearch(50,"a3tvoid"),
+            BOResearch(70,"a3sfighter"),
+            BOExpand(70),
+            BOExpand(70),
+        ]
+
     def set_difficulty(self, difficulty):
         super().set_difficulty(difficulty)
-        self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
+        #self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
 
     def update(self, dt):
         if self.difficulty > 1:
@@ -192,18 +212,48 @@ class Alien3(alien.Alien):
         }
 
     def get_attack_chance(self, my_planet, target):
-        if self.time > self.last_attack_time + (100 - self.difficulty * 8):
-            return 1
+        odds = 0
+        if not self.build_order.is_over():
+            bostep = self.build_order.get_current_step(self.time)
+            if bostep and bostep.name == "attack":
+                print("Attacking because it's the build order")
+                odds = 1
+            else:
+                odds = 0
+
+        elif self.time > self.last_attack_time + (120 - self.difficulty * 8):
+            print("Attacking because it's been %d seconds" % (120 - self.difficulty * 8))
+            odds = 1
+
         elif my_planet.ships['alien3battleship'] > 0:
+            print("Attacking because we have a battleship")
             return 1
+
         else:
-            return sum(my_planet.ships.values()) / 15
+            print("Random chance to attack")
+            odds = 0.1
+
+        if self.count_attacking_ships() < self.get_max_attackers():
+            return odds
+        else:
+            print("May have attacked, but at max attackers", self.get_max_attackers())
+            return 0
 
     def get_expand_chance(self, planet):    
+        if not self.build_order.is_over():
+            bostep = self.build_order.get_current_step(self.time)
+            if bostep and bostep.name == "expand":
+                self.build_order.completed_current_step()
+                return 1
+            else:
+                return 0
+
+        colonists_out = self.count_expanding_ships()              
+
         if len(self.scene.get_civ_planets(self.civ)) < 3:
-            return 0.1 * planet.population
+            return 0.1 * planet.population / (colonists_out + 1)
         else:
-            return 0.01 * planet.population
+            return 0.01 * planet.population / (colonists_out + 1)
 
     def get_defend_chance(self, my_planet, target):
         return 0

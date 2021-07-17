@@ -8,6 +8,7 @@ from upgrade.upgrades import Upgrade, register_upgrade
 
 from aliens import (alien, alien1battleship, alien1colonist, alien1fighter,
                     alien1warpship)
+from aliens.buildorder import *
 
 
 @register_upgrade
@@ -151,9 +152,29 @@ class Alien1(alien.Alien):
         ("assets/alieninfo-crusher.png", "CRUSHERS are heavy Barysi battleships that can warp across the galaxy")
     ]
 
+    def get_build_order_steps(self):
+        if self.difficulty == 1:
+            return [
+                BOExpand(0),
+                BOResearch(0,"alien1fighters"),
+                BOExpand(20),
+                BOResearch(60,"alien1fighters"),
+                BOResearch(130, "alien1warpship")
+            ]
+        return [
+            BOExpand(0),
+            BOResearch(0,"alien1fighters"),
+            BOExpand(20),
+            BOResearch(60,"alien1fighters"),
+            BOAttack(80),
+            BOExpand(80),
+            BOResearch(130, "alien1warpship")
+        ]
+
     def set_difficulty(self, difficulty):
         super().set_difficulty(difficulty)
-        self.EXPAND_DURATION = max(40 - (difficulty * 2), 10)
+        #self.EXPAND_DURATION = max(40 - (difficulty * 2), 10)
+        self.EXPAND_DURATION = 10
 
         my_planet = self.scene.get_civ_planets(self.civ)[0]
         my_planet.add_ship("alien1warpship")
@@ -179,11 +200,32 @@ class Alien1(alien.Alien):
             }             
 
     def get_attack_chance(self, my_planet, target):
-        if self.time > self.last_attack_time + (120 - self.difficulty * 8):
-            return 1        
-        elif my_planet.ships['alien3battleship'] > 0:
-            return 1            
-        return sum(my_planet.ships.values()) / 15
+        odds = 0
+        if not self.build_order.is_over():
+            bostep = self.build_order.get_current_step(self.time)
+            if bostep and bostep.name == "attack":
+                print("Attacking because it's the build order")
+                odds = 1
+            else:
+                odds = 0
+
+        elif self.time > self.last_attack_time + (120 - self.difficulty * 8):
+            print("Attacking because it's been %d seconds" % (120 - self.difficulty * 8))
+            odds = 1
+
+        elif my_planet.ships['alien1battleship'] > 0:
+            print("Attacking because we have a battleship")
+            return 1
+
+        else:
+            print("Random chance to attack")
+            odds = 0.1
+
+        if self.count_attacking_ships() < self.get_max_attackers():
+            return odds
+        else:
+            print("May have attacked, but at max attackers", self.get_max_attackers())
+            return 0
 
     def get_colonist(self):
         return "alien1colonist"
@@ -201,12 +243,24 @@ class Alien1(alien.Alien):
         return near_unclaimed
 
     def get_expand_chance(self, planet):    
+        if not self.build_order.is_over():
+            bostep = self.build_order.get_current_step(self.time)
+            if bostep and bostep.name == "expand":
+                self.build_order.completed_current_step()
+                return 1
+            else:
+                return 0
+
         num_planets = len(self.scene.get_civ_planets(self.civ))
         z = clamp((120 - self.time) / 20, 1, 3)
         if num_planets < 4:
-            return 0.15 * (planet.population-1) * z
+            odds = 0.15 * (planet.population-1) * z
         else:
-            return 0.009 * planet.population
+            odds = 0.009 * planet.population
+
+        colonists_out = self.count_expanding_ships()
+
+        return odds / (colonists_out + 1)
 
     def get_defend_chance(self, my_planet, target):
         return 0

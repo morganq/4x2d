@@ -2,6 +2,8 @@ import pygame
 
 import game
 import joystickcursor
+import menuscene
+import pausepanel
 import planet
 import rewardscene
 import save
@@ -145,12 +147,12 @@ class PlayState(UIEnabledState):
             if inp == "other" and event.key == pygame.K_u:
                 self.scene.sm.transition(upgradestate.DevAnyUpgradeState(self.scene))
 
-            if inp == "other" and event.key == pygame.K_p:
-                self.scene.paused = not self.scene.paused
-
             if inp == "other" and event.key == pygame.K_s:
                 name = input("ship name> ")
                 self.scene.get_civ_planets(self.scene.my_civ)[0].add_ship(name)
+
+        if inp == "menu":
+            self.scene.sm.transition(PauseState(self.scene))
 
         if inp == "rightclick":
             self.scene.fleet_managers['my'].point_recall(event.gpos)
@@ -454,3 +456,28 @@ class VictoryState(State):
             )
             self.scene.game.scene.start()
                                 
+
+class PauseState(UIEnabledState):
+    def enter(self):
+        self.scene.paused = True
+        self.panel = pausepanel.PausePanel(V2(0,0), None, self.on_resume, self.on_quit)
+        self.panel.position_nicely(self.scene)
+        self.panel.fade_in()
+        self.panel.add_all_to_group(self.scene.ui_group)
+
+        return super().enter()
+
+    def get_joystick_cursor_controls(self):
+        return [[b] for b in self.panel.get_controls_of_type(Button)]
+
+    def on_resume(self):
+        self.scene.sm.transition(PlayState(self.scene))
+
+    def on_quit(self):
+        self.scene.game.scene = menuscene.MenuScene(self.scene.game)
+        self.scene.game.scene.start()
+
+    def exit(self):
+        self.scene.paused = False
+        self.panel.kill()
+        return super().exit()

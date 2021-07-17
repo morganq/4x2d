@@ -1,22 +1,23 @@
-from resources import resource_path
-from spritebase import SpriteBase
-from aliens import alien
-from helper import clamp
-from upgrade.building_upgrades import AddBuildingUpgrade, make_simple_stats_building
-from productionorder import ProductionOrder
-from stats import Stats
-from planet import building as buildings
-from upgrade.upgrades import register_upgrade, Upgrade
-from aliens.alien2battleship import Alien2Battleship
 import random
-from v2 import V2
+
 import pygame
 from colors import *
+from helper import clamp
+from planet import building as buildings
+from productionorder import ProductionOrder
+from resources import resource_path
+from spritebase import SpriteBase
+from stats import Stats
+from upgrade.building_upgrades import (AddBuildingUpgrade,
+                                       make_simple_stats_building)
+from upgrade.upgrades import Upgrade, register_upgrade
+from v2 import V2
 
-from aliens import alien2battleship
-from aliens import alien2colonist
-from aliens import alien2fighter
-from aliens import alien2controlship
+from aliens import (alien, alien2battleship, alien2colonist, alien2controlship,
+                    alien2fighter)
+from aliens.alien2battleship import Alien2Battleship
+from aliens.buildorder import *
+
 
 @register_upgrade
 class Alien2HomeDefenseUpgrade(AddBuildingUpgrade):
@@ -177,7 +178,7 @@ class Alien2(alien.Alien):
     ATTACK_DURATION = 15
     DEFEND_DURATION = 3
     EXPAND_NUM_NEAREST = 1
-    EXPAND_DURATION = 60
+    EXPAND_DURATION = 10
     tips = [
         ("assets/alien2fighter.png", "ALIEN CIV 2 can INTIMIDATE a planet, preventing new buildings or ships from being made there."),
         ("assets/alien2controlship.png", "Infiltrators can DOMINATE and take control of your ships unless you destroy them quickly."),
@@ -190,6 +191,24 @@ class Alien2(alien.Alien):
         self.attack_to = None
         self.pick_new_target_time = 0
         self.curse = None
+
+    def get_build_order_steps(self):
+        if self.difficulty == 1:
+            return [
+                BOExpand(0),
+                BOResearch(0,"alien2econrate"),
+                BOResearch(30,"alien2econrate"),
+                BOResearch(50,"alien2fighters"),
+                BOExpand(80)
+            ]
+        return [
+            BOExpand(0),
+            BOResearch(0,"alien2econrate"),
+            BOResearch(30,"alien2econrate"),
+            BOResearch(50,"alien2fighters"),
+            BOExpand(80),
+            BOResearch(100, "alien2techspeed")
+        ]
 
     def update(self, dt):
         self.pick_new_target_time += dt
@@ -214,15 +233,15 @@ class Alien2(alien.Alien):
 
     def set_difficulty(self, difficulty):
         super().set_difficulty(difficulty)
-        self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
+        #self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
 
     def get_resource_priority_odds(self):
         if self.time < 180 and self.fear_attack:
             return {'produce':0.95, 'grow':0.05,'tech':0}
         if self.time < 180:
             return {
-                'grow':0.3,
-                'produce':0.4,
+                'grow':0.5,
+                'produce':0.2,
                 'tech':0.3
             }
         elif self.time < 300:
@@ -239,16 +258,38 @@ class Alien2(alien.Alien):
             }
 
     def get_attack_chance(self, my_planet, target):
-        if target == self.attack_to:
+        odds = 0
+        if not self.build_order.is_over():
+            bostep = self.build_order.get_current_step(self.time)
+            if bostep and bostep.name == "attack":
+                print("Attacking because it's the build order")
+                odds = 1
+            else:
+                odds = 0
+
+        elif self.time > self.last_attack_time + (130 - self.difficulty * 4):
+            print("Attacking because it's been %d seconds" % (130 - self.difficulty * 4))
+            odds = 1
+
+        elif my_planet.ships['alien2battleship'] > 0:
+            print("Attacking because we have a battleship")
+            return 1
+
+        elif target == self.attack_to:
             for ship in self.scene.get_civ_ships(self.civ):
                 if ship.chosen_target == target:
+                    print("Attacking because other ships are attacking the intimidated target")
                     return 1
-            if self.time > self.last_attack_time + (120 - self.difficulty * 8):
-                return 1
-            return 0.15
-        if target.health <= 0:
-            return 1
-        return 0
+
+        else:
+            print("Random chance to attack")
+            odds = 0.1
+
+        if self.count_attacking_ships() < self.get_max_attackers():
+            return odds
+        else:
+            print("May have attacked, but at max attackers", self.get_max_attackers())
+            return 0
 
     def _get_possible_attack_targets(self, planet):
         if self.attack_to:
@@ -256,10 +297,20 @@ class Alien2(alien.Alien):
         return []
 
     def get_expand_chance(self, planet):    
+        if not self.build_order.is_over():
+            bostep = self.build_order.get_current_step(self.time)
+            if bostep and bostep.name == "expand":
+                self.build_order.completed_current_step()
+                return 1
+            else:
+                return 0
+
+        colonists_out = self.count_expanding_ships()             
+
         if len(self.scene.get_civ_planets(self.civ)) < 3:
-            return 0.1 * planet.population
+            return 0.1 * planet.population / (colonists_out + 1)
         else:
-            return 0.01 * planet.population
+            return 0.01 * planet.population / (colonists_out + 1)
 
     def get_defend_chance(self, my_planet, target):
         if self.attack_from == target and sum(my_planet.ships.values()) > 0:

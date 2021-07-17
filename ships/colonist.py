@@ -56,13 +56,15 @@ class Colonist(Ship):
                     u().apply(other)  
                     self.owning_civ.researched_upgrade_names.add(u.name)       
 
+                self.colonized(other)
+                if self.origin:
+                    self.origin.emitted_ship_colonized(self, other)
+                self.owning_civ.housing_colonized = True                
+
             other.population += self.population
 
             other.needs_panel_update = True
-            self.colonized(other)
-            if self.origin:
-                self.origin.emitted_ship_colonized(self, other)
-            self.owning_civ.housing_colonized = True
+        
 
     def colonized(self, planet):
         pass
