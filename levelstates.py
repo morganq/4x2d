@@ -220,6 +220,9 @@ class PlayState(UIEnabledState):
         if input == "joymotion":
             self.joystick_overlay.joystick_delta(event['delta'])
 
+        if game.DEV and input == "cheat1":
+            self.scene.sm.transition(VictoryState(self.scene))
+
         if input == "special" and len(self.scene.my_civ.upgrades_stocked) > 0:
             self.scene.on_click_upgrade()
 
@@ -434,30 +437,34 @@ class GameOverState(State):
 class VictoryState(State):
     def enter(self):
         self.scene.ui_group.empty()
-        t = text.Text("Click to continue", "medium", V2(250, 200), PICO_WHITE, multiline_width=200)
-        t.offset = (0.5,0)
-        self.scene.ui_group.add(t)
+        #t = text.Text("Click to continue", "medium", V2(250, 200), PICO_WHITE, multiline_width=200)
+        #t.offset = (0.5,0)
+        #self.scene.ui_group.add(t)
 
         self.scene.ui_group.add(FunNotification("VICTORY!"))
 
+        self.scene.game.run_info.bonus_credits += 30
         for r in self.scene.my_civ.upgrades_stocked:
-            if r == "iron": self.scene.game.run_info.bonus_credits += 10
-            elif r == "ice": self.scene.game.run_info.bonus_credits += 15
-            elif r == "gas": self.scene.game.run_info.bonus_credits += 20
+            if r == "iron": self.scene.game.run_info.bonus_credits += 5
+            elif r == "ice": self.scene.game.run_info.bonus_credits += 10
+            elif r == "gas": self.scene.game.run_info.bonus_credits += 15
+        self.scene.game.run_info.bonus_credits = max(self.scene.game.run_info.bonus_credits, 90)
 
         return super().enter()
 
     def take_input(self, input, event):
-        if input == "action" or input == "click":
+        if input == "action" or input == "click" or input == "confirm":
             self.scene.game.scene = rewardscene.RewardScene(
                 self.scene.game,
                 [u.name for u in self.scene.my_civ.upgrades],
                 [u for u in self.scene.my_civ.researched_upgrade_names if UPGRADE_CLASSES[u].category == 'buildings'],
             )
             self.scene.game.scene.start()
+
                                 
 
 class PauseState(UIEnabledState):
+    is_basic_joystick_panel = True
     def enter(self):
         self.scene.paused = True
         self.panel = pausepanel.PausePanel(V2(0,0), None, self.on_resume, self.on_quit)

@@ -427,7 +427,7 @@ class Exotic1Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Supercritical Materials"
-    description = "Gain [^+200%%] resources from asteroids"
+    description = "Gain [^+200%] resources from asteroids"
     icon = "tech_default"
     stats = Stats(asteroid_yield_mul=2.0)
     family = {'tree':'t_exotic', 'parents':[]}
@@ -453,7 +453,7 @@ class Exotic2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Gravitational Reinforcement"
-    description = "Ships gain +35%% fire rate"
+    description = "Ships gain +35% fire rate"
     icon = "tech_default"
     stats = Stats(ship_fire_rate=0.35)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
@@ -465,7 +465,7 @@ class Exotic3Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Relativistic Targeting"
-    description = "Ships gain [^+35%%] attack range"
+    description = "Ships gain [^+35%] attack range"
     icon = "tech_default"
     stats = Stats(ship_weapon_range=0.35)
     family = {'tree':'t_exotic', 'parents':['t_exotic2a', 't_exotic2b']}

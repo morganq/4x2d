@@ -70,6 +70,10 @@ class SpriteBase(pygame.sprite.DirtySprite):
         return self._pos + self._scrolled_offset
 
     @property
+    def top_left(self):
+        return V2(self.rect[0], self.rect[1])
+
+    @property
     def x(self):
         return self._pos.x
 

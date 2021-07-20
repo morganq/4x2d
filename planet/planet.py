@@ -140,6 +140,7 @@ class Planet(SpaceObject):
         if civ is not None:
             self.health = max(self.health, self.get_max_health() / 4)
         self._population = 0
+        self.emit_ships_queue = []
         self.ships = defaultdict(int)
         self.production = []
         self.owned_time = 0
@@ -567,7 +568,11 @@ class Planet(SpaceObject):
             self.scene.ui_group.add(it)        
 
     def get_max_ships(self):
-        return round(self.get_max_pop() * (self.get_stat("max_ships_mul") + 1))
+        s = round(self.get_max_pop() * (self.get_stat("max_ships_mul") + 1))
+        hard_max = self.get_stat("max_ships_per_planet")
+        if hard_max > 0:
+            s = min(s, hard_max)
+        return s
 
     def get_threats(self):
         enemy_ships = self.scene.get_enemy_ships(self.owning_civ)

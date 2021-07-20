@@ -1,22 +1,28 @@
-from text import Text
-import pygame
-from scene import Scene
-import levelstates
-from button import Button
-from v2 import V2
-import game
-import states
-from colors import *
-import starmap
 import random
-from upgrade import upgradeicon
+
+import pygame
+
+import game
+import levelstates
+import starmap
+import states
+from button import Button
+from colors import *
+from scene import Scene
 from spritebase import SpriteBase
+from text import Text
+from upgrade import upgradeicon
+from v2 import V2
 
 REWARDS = {
     'jump_drive':{'title':'Jump Drive', 'description':'Begin with +2 fighter in future battles'},
     'life_support':{'title':'Life Support', 'description': 'Begin with +2 population in future battles'},
     'memory_crystal':{'title':'Memory Crystal', 'description': 'Pick a technology to carry on to future battles'},
     'blueprint':{'title':'Blueprint', 'description': 'Pick a construct to carry on to future battles'},
+    'level_fighter':{'title':'Upgrade Fighter', 'description':'Upgrade Fighters to have more health and damage'},
+    'level_interceptor':{'title':'Upgrade Interceptors', 'description':'Upgrade Interceptors to have more health and damage'},
+    'level_bomber':{'title':'Upgrade Bombers', 'description':'Upgrade Bombers to have more health and damage'},
+    'level_battleship':{'title':'Upgrade Battleships', 'description':'Upgrade Battleships to have more health and damage'},
 }
 
 class RewardSelector(SpriteBase):
@@ -28,14 +34,18 @@ class RewardSelector(SpriteBase):
         
 
 class RewardState(states.UIEnabledState):
+    is_basic_joystick_panel = True
     def enter(self):
         self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 60), PICO_BLUE, multiline_width=400, offset=(0.5,0)))
         self.scene.ui_group.add(Text(self.description, 'big', V2(game.RES[0] / 2, 90), PICO_WHITE, multiline_width=300, offset=(0.5,0)))
 
-        confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50), "Confirm", "big", self.on_confirm)
-        confirm_button.offset = (0.5,0.5)
-        self.scene.ui_group.add(confirm_button)
+        self.confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50), "Confirm", "big", self.on_confirm)
+        self.confirm_button.offset = (0.5,0.5)
+        self.scene.ui_group.add(self.confirm_button)
         return super().enter()
+
+    def get_joystick_cursor_controls(self):
+        return [[self.confirm_button]]
 
     def exit(self):
         self.scene.ui_group.empty()
@@ -48,7 +58,7 @@ class CreditsRewardState(RewardState):
     def __init__(self, scene, quantity):
         RewardState.__init__(self, scene)
         self.title = "Bonus Credits"
-        self.description = "Gain [^+%d] credits for unused Assets" % quantity
+        self.description = "Gain [^+30] credits for victory, and [^+%d] credits for unused Assets" % (quantity - 30)
         self.quantity = quantity
 
     def on_confirm(self):
@@ -65,6 +75,17 @@ class JumpDriveRewardState(RewardState):
     def on_confirm(self):
         self.scene.game.run_info.bonus_fighters += 2
         return super().on_confirm()
+
+class LevelUpRewardState(RewardState):
+    def __init__(self, scene, ship_type):
+        RewardState.__init__(self, scene)
+        self.title = REWARDS['level_%s' % ship_type]['title']
+        self.description = REWARDS['level_%s' % ship_type]['description']
+        self.ship_type = ship_type
+
+    def on_confirm(self):
+        self.scene.game.run_info.ship_levels[self.ship_type] += 1
+        return super().on_confirm()        
 
 class LifeSupportRewardState(RewardState):
     def __init__(self, scene):
@@ -83,10 +104,18 @@ class MemoryCrystalRewardState(RewardState):
         self.selected = None
         self.title = REWARDS['memory_crystal']['title']
         self.description = REWARDS['memory_crystal']['description']
+        self.icons = {}
+
+    def get_joystick_cursor_controls(self):
+        if self.icons:
+            return [
+                list(self.icons.values()),
+                [self.confirm_button]
+            ]
+        else:
+            return [[self.confirm_button]]
 
     def enter(self):
-        RewardState.enter(self)
-
         self.selector = RewardSelector(V2(-3,-3), (29,29), PICO_BLUE, 2)
         self.selector.visible = False
         self.scene.ui_group.add(self.selector)
@@ -102,6 +131,8 @@ class MemoryCrystalRewardState(RewardState):
             icon = upgradeicon.UpgradeIcon(p, technology, self.select_technology, True)
             self.icons[technology] = icon
             self.scene.ui_group.add(icon)
+
+        RewardState.enter(self)
 
     def select_technology(self, upgrade, **kwargs):
         self.selector.pos = self.icons[upgrade.name].pos + V2(-1, 0)
@@ -123,10 +154,18 @@ class BlueprintRewardState(RewardState):
         self.selected = None
         self.title = REWARDS['blueprint']['title']
         self.description = REWARDS['blueprint']['description']
+        self.icons = {}
+
+    def get_joystick_cursor_controls(self):
+        if self.icons:
+            return [
+                list(self.icons.values()),
+                [self.confirm_button]
+            ]
+        else:
+            return [[self.confirm_button]]
 
     def enter(self):
-        RewardState.enter(self)
-
         self.selector = RewardSelector(V2(-3,-3), (29,29), PICO_BLUE, 2)
         self.selector.visible = False
         self.scene.ui_group.add(self.selector)
@@ -142,6 +181,8 @@ class BlueprintRewardState(RewardState):
             icon = upgradeicon.UpgradeIcon(p, building, self.select_building, True)
             self.icons[building] = icon
             self.scene.ui_group.add(icon)
+
+        RewardState.enter(self)
 
     def select_building(self, upgrade, **kwargs):
         self.selector.pos = self.icons[upgrade.name].pos + V2(-1, 0)
@@ -187,6 +228,9 @@ class RewardScene(Scene):
                 self.sm.transition(JumpDriveRewardState(self))
             elif reward == "credits":
                 self.sm.transition(CreditsRewardState(self, self.game.run_info.bonus_credits))
+            elif reward in ["level_fighter", "level_interceptor", "level_bomber", "level_battleship"]:
+                ship_type = reward.split("level_")[1]
+                self.sm.transition(LevelUpRewardState(self, ship_type))
             else:
                 print(reward)
         else:

@@ -174,15 +174,15 @@ class Alien2CurseIndicator(SpriteBase):
 
 class Alien2(alien.Alien):
     name = "alien2"
-    title = "ALIEN CIV 2"
+    title = "THE NETWORK"
     ATTACK_DURATION = 15
     DEFEND_DURATION = 3
     EXPAND_NUM_NEAREST = 1
     EXPAND_DURATION = 10
     tips = [
-        ("assets/alien2fighter.png", "ALIEN CIV 2 can INTIMIDATE a planet, preventing new buildings or ships from being made there."),
-        ("assets/alien2controlship.png", "Infiltrators can DOMINATE and take control of your ships unless you destroy them quickly."),
-        ("assets/alien2battleship.png", "[Motherships] take a long time to build, but can defeat a whole fleet in combat.")
+        ("assets/alieninfo-intimidate.png", "THE NETWORK can INTIMIDATE a planet, preventing new buildings or ships from being made there."),
+        ("assets/alieninfo-worm.png", "SUPERVISOR ships can HACK and take control of your ships unless you destroy them quickly."),
+        ("assets/alieninfo-destroyer.png", "DESTROYERS take a long time to build, but can defeat a whole fleet in combat.")
     ]    
 
     def __init__(self, scene, civ):
@@ -279,7 +279,7 @@ class Alien2(alien.Alien):
             for ship in self.scene.get_civ_ships(self.civ):
                 if ship.chosen_target == target:
                     print("Attacking because other ships are attacking the intimidated target")
-                    return 1
+                    odds = 1
 
         else:
             print("Random chance to attack")

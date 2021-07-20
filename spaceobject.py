@@ -1,6 +1,8 @@
+from collections import defaultdict
+
 from animrotsprite import AnimRotSprite
 from healthy import Healthy
-from collections import defaultdict
+
 
 class SpaceObject(AnimRotSprite, Healthy):
     HEALTHBAR_SIZE = (20, 3)
@@ -45,7 +47,8 @@ class SpaceObject(AnimRotSprite, Healthy):
         self.status_effects.append(effect)
 
     def remove_effect(self, effect):
-        self.status_effects.remove(effect)
+        if effect in self.status_effects:
+            self.status_effects.remove(effect)
 
     def kill(self):
         self.health_bar.kill()

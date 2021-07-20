@@ -242,17 +242,17 @@ class UpgradeState(UIEnabledState):
                     self.finish(target=self.hover_sprite)      
 
     def joystick_input(self, input, event):
-        if self.pending_upgrade is None:
-            return super().joystick_input(input, event)
-
-        if input == "joymotion":
-            self.joystick_overlay.joystick_delta(event['delta'])
-
         if input == "back":
             if self.pending_upgrade:
                 self.on_back()
             else:
                 self.finish(cancel = True)
+
+        if self.pending_upgrade is None:
+            return super().joystick_input(input, event)
+
+        if input == "joymotion":
+            self.joystick_overlay.joystick_delta(event['delta'])
 
         if input == "confirm":
             spr = self.joystick_overlay.nearest_obj

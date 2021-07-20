@@ -118,7 +118,8 @@ class Game:
                     2:"back",
                     0:"action",
                     3:"special",
-                    9:"menu"
+                    9:"menu",
+                    8:"cheat1"
                 }
                 axes = [0,1]
 

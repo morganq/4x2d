@@ -1,4 +1,5 @@
 import random
+from math import radians
 
 from upgrade.upgrades import UPGRADE_CLASSES
 
@@ -15,6 +16,7 @@ class RunInfo:
         self.o2 = 3600
         self.credits = 20
         self.bonus_credits = 0
+        self.ship_levels = {'fighter':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
 
     def serialize(self):
         obj = {}
@@ -28,6 +30,7 @@ class RunInfo:
         obj['o2'] = self.o2
         obj['credits'] = self.credits
         obj['bonus_credits'] = self.bonus_credits
+        obj['ship_levels'] = self.ship_levels
         return obj
     
     @classmethod
@@ -42,6 +45,7 @@ class RunInfo:
         r.o2 = obj['o2']
         r.credits = obj['credits']
         r.bonus_credits = obj['bonus_credits']
+        r.ship_levels = obj['ship_levels']
         return r
 
     def choose_path(self, row, column):
@@ -51,11 +55,23 @@ class RunInfo:
         (r,c) = self.path[index]
         return self.data[r][c]
 
+    def generate_reward_pool(self):
+        self.reward_pool = []
+        self.reward_pool.extend(['memory_crystal'] * 8)
+        self.reward_pool.extend(['blueprint'] * 8)
+        self.reward_pool.extend(['life_support'] * 12)
+        self.reward_pool.extend(['jump_drive'] * 12)
+        self.reward_pool.extend(['level_fighter'] * 2)
+        self.reward_pool.extend(['level_interceptor'] * 2)
+        self.reward_pool.extend(['level_bomber'] * 2)
+        self.reward_pool.extend(['level_battleship'] * 2)
+        random.shuffle(self.reward_pool)
+
     def new_galaxy(self, row, from_links, level):
         return {
             'node_type':'galaxy',
             'alien': random.choice(['alien1', 'alien2', 'alien3']),
-            'rewards': [random.choice(['memory_crystal', 'life_support', 'jump_drive', 'blueprint'])],
+            'rewards': [self.reward_pool.pop()],
             'difficulty': row,
             'level':level,
             'links': from_links
@@ -63,7 +79,7 @@ class RunInfo:
 
     def new_store(self, row, from_links):
         offerings = []
-        offer_types = ['memory', 'blueprint', 'o2']
+        offer_types = ['memory', 'blueprint', 'o2', 'levelup']
         random.shuffle(offer_types)
         for i in range(3):
             offer_type = offer_types.pop()
@@ -78,6 +94,8 @@ class RunInfo:
                 techs = [n for n,u in UPGRADE_CLASSES.items() if u.category == "buildings" and not u.alien]
                 random.shuffle(techs)
                 offering['upgrades'] = techs[0:3]
+            elif offer_type == 'levelup':
+                offering['ship'] = random.choice(['fighter', 'interceptor', 'bomber', 'battleship'])
             offerings.append(offering)
 
         return {
@@ -89,6 +107,7 @@ class RunInfo:
 
     def generate_run(self):
         self.data = []
+        self.generate_reward_pool()
 
         all_levels = ['belt', 'scatter', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']
         l1 = all_levels[::]
@@ -97,22 +116,172 @@ class RunInfo:
         random.shuffle(l2)
         levels = l1 + l2
 
-        for row in range(9):
+        height = 11
+        for row in range(height):
             level = levels.pop()
             self.data.append([])
-            num_columns = 5 - abs(4 - row)
+            num_columns = (height // 2) + 1 - abs((height // 2) - row)
             for column in range(num_columns):
                 if row == 0:
                     from_links = []
-                elif row < 5:   
+                elif row < (height // 2) + 1:   
                     from_links = []
                     if column > 0: from_links.append(column - 1)
                     if column < num_columns - 1: from_links.append(column)
                 else:
                     from_links = [column, column + 1]
-                if row == 3 or row == 6:
-                    node = self.new_store(row, from_links)
-                else:
-                    node = self.new_galaxy(row, from_links, level)
+
+                node = self.new_galaxy(row, from_links, level)
                 self.data[-1].append(node)
-        return self.data                 
+
+        self.prune_path()
+        self.add_stores()
+        return self.data
+
+    def prune_path(self):
+        def prune_one():
+            row = random.randint(2, len(self.data) - 1)
+            col = random.randint(0, len(self.data[row]) - 1)
+            neighbors = get_neighbors(self.data, (row,col))
+            if len(neighbors) > 1:
+                n = random.choice(neighbors)
+                self.data[n[0]][n[1]]['links'].remove(col)
+
+        #for _ in range(10):
+        #    prune_one()
+
+        while len(get_paths(self.data, (0,0))) > 20:
+            print("pruning more")
+            prune_one()
+
+
+        row = 0
+        col = 0
+        while row < len(self.data):
+            while col < len(self.data[row]):
+                node = self.data[row][col]
+                # If we have no incoming paths...
+                if len(node['links']) == 0 and row > 0:
+                    # Get rid of the neighbors incoming paths...
+                    for nrow, ncol in get_neighbors(self.data, (row,col)):
+                        neighbor_node = self.data[nrow][ncol]
+                        if col in neighbor_node['links']:
+                            print("removing child links to me", (row, col))
+                            new_links = []
+                            for link in neighbor_node['links']:
+                                if link < col:
+                                    new_links.append(link)
+                                elif link > col:
+                                    new_links.append(link)
+                            neighbor_node['links'] = new_links
+                # Make object links
+                node['object_links'] = [self.data[row - 1][c] for c in node['links']]
+                # Make sort value
+                node['sort_value'] = col
+                col += 1
+            row += 1
+            col = 0
+
+        row = 0
+        col = 0
+        while row < len(self.data) - 1:
+            while col < len(self.data[row]):
+                node = self.data[row][col]
+                if len(node['links']) == 0 and row > 0:
+                    for col2 in range(len(self.data[row + 1])):
+                        above_node = self.data[row + 1][col2]
+                        new_links = []
+                        for link in above_node['links']:
+                            if link < col:
+                                new_links.append(link)
+                            elif link > col:
+                                new_links.append(link - 1)
+                        above_node['links'] = new_links
+                    print("pop", row, col)
+                    self.data[row].pop(col)
+                else:
+                    col += 1
+            row += 1
+            col = 0
+
+    def add_stores(self):
+        def count_stores():
+            store_nums = []
+            for path in get_paths(self.data, (0,0)):
+                stores = 0
+                for nr,nc in path:
+                    if self.data[nr][nc]['node_type'] == 'store':
+                        stores += 1
+                store_nums.append(stores)
+            return store_nums
+
+        for i in range(4):
+            print(i)
+            iterations = 0
+            done = False
+            while not done:
+                row = 2 + 2 * i
+                if iterations > 3:
+                    row = random.randint(2, len(self.data) - 2)
+                col = random.randint(0, len(self.data[row])-1)
+                print("trying", row, col)
+                old_node = self.data[row][col]
+                if old_node['node_type'] == 'store':
+                    print("already got a store here")
+                    iterations += 1
+                    continue
+                self.data[row][col] = self.new_store(row, old_node['links'])
+                max_stores = max(count_stores())
+                if max_stores < 3 or iterations > 10:
+                    print("success")
+                    done = True
+                else:
+                    print("nope")
+                    iterations += 1
+                    done = False
+                    self.data[row][col] = old_node
+
+                
+
+
+def get_neighbors(graph, node):
+    neighbors = []
+    cnrow, cncol = node
+    if len(graph) > cnrow + 1:
+        for neighborcol,node in enumerate(graph[cnrow + 1]):
+            for link in node['links']:
+                if link == cncol:
+                    neighbors.append((cnrow + 1, neighborcol))
+    return neighbors
+
+def get_paths(graph, node):
+    paths = []
+    my_path = [node]
+    done = False
+    while not done:
+        cnrow, cncol = my_path[-1]
+        current_node = graph[cnrow][cncol]
+
+        # Get neighbors
+        neighbors = get_neighbors(graph, my_path[-1])
+
+        # Count neighbors...
+        # 0 = we're done
+        if len(neighbors) == 0:
+            paths.append(my_path)
+            return paths
+
+        # 1 = no choice to make
+        elif len(neighbors) == 1:
+            my_path.append(neighbors[0])
+
+        # 2+ = pick first as mine, and call get_paths for the others. attach path so far to returned paths
+        else:
+            for n in neighbors[1:]:
+                other_paths = get_paths(graph, n)
+                for other_path in other_paths:
+                    full_other_path = my_path[::]
+                    full_other_path.extend(other_path)
+                    paths.append(full_other_path)
+            my_path.append(neighbors[0])
+

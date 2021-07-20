@@ -1,3 +1,4 @@
+import game
 import joystickcursor
 import levelscene
 import levelstates
@@ -8,7 +9,7 @@ from button import Button
 from helper import get_nearest
 from loadingscene import LoadingScene
 from selector import Selector
-from store.storenode import StoreNodePanel
+from store.storenode import StoreNodeGraphic, StoreNodePanel
 from store.storescene import StoreScene
 from v2 import V2
 
@@ -94,7 +95,7 @@ class StarMapState(states.UIEnabledState):
             self.scene.game.scene.start()
                 
     def joy_hover_filter(self, spr):
-        return isinstance(spr, Galaxy)
+        return isinstance(spr, Galaxy) or isinstance(spr, StoreNodeGraphic)
 
     def joystick_update(self, dt):
         all_sprites = []
@@ -118,6 +119,17 @@ class StarMapState(states.UIEnabledState):
             self.current_panel = None
             self.last_clicked_sprite = None
 
+        if self.joystick_overlay.cursor_pos.x < 20:
+            self.scene.scroll_panel.scroll(self.scene.scroll_panel.pos + V2(300 * dt, 0))
+        if self.joystick_overlay.cursor_pos.x > game.RES[0] - 20:
+            self.scene.scroll_panel.scroll(self.scene.scroll_panel.pos + V2(-300 * dt, 0))
+        if self.joystick_overlay.cursor_pos.y < 20:
+            self.scene.scroll_panel.scroll(self.scene.scroll_panel.pos + V2(0, 300 * dt))
+        if self.joystick_overlay.cursor_pos.y > game.RES[1] - 20:
+            self.scene.scroll_panel.scroll(self.scene.scroll_panel.pos + V2(0, -300 * dt))
+
+        self.joystick_overlay.cursor_pos = self.joystick_overlay.cursor_pos.rect_contain(20, 20, game.RES[0] - 40, game.RES[1] - 40)
+
     def set_joystick_input(self):
         if not self.joystick_overlay:
             self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, V2(200, 200))
@@ -127,9 +139,6 @@ class StarMapState(states.UIEnabledState):
     def joystick_input(self, input, event):
         if input == "joymotion":
             self.joystick_overlay.joystick_delta(event['delta'])
-
-        if input == "special" and len(self.scene.my_civ.upgrades_stocked) > 0:
-            self.scene.on_click_upgrade()
 
         if input == "confirm":
             if self.current_panel:

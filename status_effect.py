@@ -41,6 +41,9 @@ class GreyGooEffect(StatusEffect):
             game.Game.inst.scene.game_group.add(p)
 
         if (self.time + dt) % 1 < self.time % 1:
+            if self.owner.owning_civ == self.applier.owning_civ:
+                self.kill()
+                return
             dmg = (0.25 * len([e for e in self.owner.status_effects if e.name == "Grey Goo"]))
             self.owner.take_damage(dmg, self.applier)
             if self.owner.owning_civ and self.owner.owning_civ.get_stat("grey_goo_collection") > 0:

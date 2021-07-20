@@ -3,6 +3,7 @@ import math
 import pygame
 
 import game
+import store
 import text
 import upgrade
 from button import Button
@@ -108,7 +109,7 @@ class JoystickPanelCursor(SpriteBase):
             c.height + 8
         )
         #pygame.draw.rect(self.image, PICO_PINK, rect, 1)
-        pygame.draw.line(self.image, PICO_PINK, (c.x - 2, c.y), (c.x - 2, c.y + c.height))
+        pygame.draw.line(self.image, PICO_PINK, (c.top_left.x - 2, c.top_left.y), (c.top_left.x - 2, c.top_left.y + c.height))
 
         self._width, self._height = game.RES
 
@@ -161,7 +162,12 @@ class JoystickPanelCursor(SpriteBase):
 
     def confirm(self):
         c = self.get_current_control()
-        if isinstance(c, Button) or isinstance(c, text.Text) or isinstance(c, upgrade.upgradebutton.UpgradeButton):
+        if (
+            isinstance(c, Button) or
+            isinstance(c, text.Text) or
+            isinstance(c, upgrade.upgradebutton.UpgradeButton) or 
+            isinstance(c, upgrade.upgradeicon.UpgradeIcon) or 
+            isinstance(c, store.storescene.StoreItemButton)):
             c.on_mouse_down(c.pos)
 
     def joystick_delta(self, delta):

@@ -1,13 +1,15 @@
-from tutorial.tutorialmessage import TutorialMessage
+import fleet
+import flowfield
+import game
+import sound
 from aliens import alien
 from civ import Civ
 from helper import get_nearest
-import game
-from v2 import V2
-import fleet
-import flowfield
 from levelscene import LevelScene
-import sound
+from v2 import V2
+
+from tutorial.tutorialmessage import TutorialMessage
+
 
 class TutorialScene(LevelScene):
     def __init__(self, game):
@@ -68,8 +70,6 @@ class TutorialScene(LevelScene):
         self.tutorial_panel.add_all_to_group(self.ui_group)
         self.tutorial_panel._reposition_children()
         self.tutorial_panel.set_visible(False)
-        
-        self.setup_run_upgrades()        
 
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
 

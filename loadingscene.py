@@ -27,15 +27,16 @@ class LoadingScene(Scene):
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
 
-        alien_obj = alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
+        alien_code = self.game.run_info.get_path_galaxy()['alien']
+        alien_obj = alien.ALIENS[alien_code]
         nametext = Text(alien_obj.title, "huge", (30, 35), multiline_width=300, center=False)
         self.group.add(nametext)
-        self.group.add(Text("SECTOR WARNING", "big", (30, 15), PICO_LIGHTGRAY, multiline_width=300, center=False))
+        self.group.add(Text("ALIEN FORCES", "big", (30, 15), PICO_LIGHTGRAY, multiline_width=300, center=False))
         self.loading_text = Text("Loading...", "small", (game.RES[0] - 70, 325), center=False)
         self.loading_text.offset = (0.5, 0)
         self.group.add(self.loading_text)
 
-        self.group.add(SimpleSprite((0, 65), "assets/aliengraphic.png"))
+        self.group.add(SimpleSprite((0, 65), "assets/%sgraphic.png" % alien_code))
 
         tw = 120
         for i,tip in enumerate(alien_obj.tips):
@@ -76,7 +77,7 @@ class LoadingScene(Scene):
         return super().take_input(inp, event)
 
     def render(self):
-        self.game.screen.fill(PICO_DARKGRAY)
+        self.game.screen.fill(PICO_DARKBLUE)
         self.group.draw(self.game.screen)
         self.ui_group.draw(self.game.screen)
         self.rendered = True 

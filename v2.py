@@ -1,6 +1,9 @@
 import math
 import random
 
+from helper import clamp
+
+
 class V2:
     """A two-dimensional vector with Cartesian coordinates."""
 
@@ -96,6 +99,10 @@ class V2:
 
     def copy(self):
         return V2(self.x, self.y)
+
+    def rect_contain(self, x1, y1, w, h):
+        return V2(clamp(self.x, x1, x1 + w), clamp(self.y, y1, y1 + h))
+            
 
     @staticmethod
     def from_angle(angle):

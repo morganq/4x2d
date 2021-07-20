@@ -34,17 +34,17 @@ class StarMapScene(Scene):
         self.tutorial_group = pygame.sprite.Group()
         self.sm = states.Machine(StarMapState(self))
 
-        self.background_group.add(Background(V2(0,0), 10, size=(950,1500)))        
-        self.scroll_panel = ScrollPanel(V2(0,0),(800,850))
+        self.background_group.add(Background(V2(0,0), 10, size=(1150,1500)))        
+        self.scroll_panel = ScrollPanel(V2(0,0),(1100,1250))
 
         run_path = self.game.run_info.path
         
         self.galaxies = []
-        y = 790
+        y = 990
         for r,row in enumerate(self.game.run_info.data):
             self.galaxies.append([])
             for i,column in enumerate(row):
-                x = 400 - 80 * (len(row) - 1) + 160 * i
+                x = 600 - 80 * (len(row) - 1) + 160 * i
                 obj = None
                 if column['node_type'] == 'galaxy':
                     alien = ALIENS[column['alien']]

@@ -169,7 +169,7 @@ class LevelScene(scene.Scene):
                 if delta < dist:
                     dist = delta
             if dist > separation ** 2:
-                if pos.x /2 + (game.RES[1] - pos.y) < game.RES[1] - 100:
+                if False: #pos.x /2 + (game.RES[1] - pos.y) < game.RES[1] - 100:
                     size = random.randint(4,7)
                     if random.random() > 0.5:
                         pr = Resources(100, 0, 0)
@@ -178,11 +178,11 @@ class LevelScene(scene.Scene):
                         iron = random.randint(7,10)
                         pr = Resources(iron * 10, (10 - iron) * 10, 0)
                 else:
-                    size = random.randint(2, 5)
+                    size = random.randint(2, 7)
                     resources = {'a':0, 'b':0, 'c':0}
                     # One resource
                     ra = random.random()
-                    if ra > 0.75:
+                    if ra > 0.66:
                         resources['a'] = 10
                     # Two resource
                     elif ra > 0.33:
@@ -194,10 +194,10 @@ class LevelScene(scene.Scene):
                         resources['b'] = random.randint(1, 10 - resources['a'])
                         resources['c'] = 10 - resources['a'] - resources['b']
                     rb = random.random()
-                    if rb > 0.6:
+                    if rb > 0.45:
                         pr = Resources(resources['a'] * 10, resources['b'] * 10, resources['c'] * 10)
                         size += 1
-                    elif rb > 0.25:
+                    elif rb > 0.20:
                         pr = Resources(resources['b'] * 10, resources['a'] * 10, resources['c'] * 10)
                     else:
                         pr = Resources(resources['c'] * 10, resources['b'] * 10, resources['a'] * 10)
@@ -251,18 +251,6 @@ class LevelScene(scene.Scene):
         self.o2_meter._generate_image()
         self.ui_group.add(self.o2_meter)    
 
-    def setup_run_upgrades(self):
-        for tech in self.game.run_info.saved_technologies:
-            u = UPGRADE_CLASSES[tech]
-            self.my_civ.upgrades.append(u)
-            u().apply(self.my_civ)
-            self.my_civ.researched_upgrade_names.add(tech)
-
-        self.my_civ.blueprints = self.game.run_info.blueprints[::]
-        for tech in self.game.run_info.blueprints:
-            u = UPGRADE_CLASSES[tech]            
-            self.my_civ.researched_upgrade_names.add(tech)
-
     def load(self):
         self.create_layers()
         AlienClass = aliens.alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
@@ -276,9 +264,7 @@ class LevelScene(scene.Scene):
 
         self.setup_players()
         self.add_extra_spaceobjects()
-        self.add_ui_elements()
-
-        self.setup_run_upgrades()        
+        self.add_ui_elements()    
 
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
 

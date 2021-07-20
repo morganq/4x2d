@@ -260,6 +260,8 @@ class UIEnabledState(State):
             self.key_picked_sprite.on_mouse_up(self.key_picked_sprite.pos)            
 
     def exit(self):
+        if self.joystick_overlay:
+            self.joystick_overlay.kill()
         self.key_crosshair.kill()
         for d in ['left', 'up', 'right', 'down']:
             self.key_images[d].kill()

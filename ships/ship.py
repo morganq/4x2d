@@ -99,6 +99,9 @@ class Ship(SpaceObject):
         self._timers['opt_time'] = random.random()
         self.opt_fleet_forces = V2(0,0)
 
+        if self.SHIP_NAME in ['fighter', 'interceptor', 'bomber', 'battleship'] and self.owning_civ.is_enemy:
+            self.update_color()
+
     def get_stat(self, stat):
         return self.owning_civ.get_stat(stat)
 
@@ -434,8 +437,10 @@ class Ship(SpaceObject):
         self.chosen_target = target
         self.effective_target = target
         self.set_state(STATE_CRUISING)
+        self.update_color()
 
-        new_color = PICO_GREEN if owner == self.scene.my_civ else PICO_RED
+    def update_color(self):
+        new_color = PICO_GREEN if self.owning_civ == self.scene.my_civ else PICO_RED
 
         for x in range(self._sheet.get_width()):
             for y in range(self._sheet.get_height()):

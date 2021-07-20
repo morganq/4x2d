@@ -1,10 +1,11 @@
-from v2 import V2
-from panel import Panel
-from simplesprite import SimpleSprite
 import game
 from button import Button
 from colors import *
+from panel import Panel
+from simplesprite import SimpleSprite
 from text import Text
+from v2 import V2
+
 
 class StoreNodeGraphic(SimpleSprite):
     def __init__(self, pos, offerings, coords, playable):
@@ -16,6 +17,7 @@ class StoreNodeGraphic(SimpleSprite):
         self.playable = playable
         self.needs_panel_update = False
         self.offset = (0.5, 0.5)
+        self.radius = 9
 
     def get_selection_info(self):
         return {'type':'store'}
@@ -29,7 +31,10 @@ class StoreNodePanel(Panel):
         self.add(Text("Shop", "small", (0,0), PICO_WHITE, False, multiline_width=100), V2(0,0))
 
         if store.playable or game.DEV:
-            self.add(Button(V2(0,0), 'LAUNCH', 'small', lambda:onclick(store), icon="assets/i-colonist.png", color=PICO_PINK), V2(0, 15))
+            t = "LAUNCH"
+            if game.Game.inst.input_mode == "joystick":
+                t = "[*x*] LAUNCH"
+            self.add(Button(V2(0,0), t, 'small', lambda:onclick(store), icon="assets/i-colonist.png", color=PICO_PINK), V2(0, 15))
 
         self.redraw()
 

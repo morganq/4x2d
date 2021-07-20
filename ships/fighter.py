@@ -93,13 +93,16 @@ class Fighter(Ship):
         return self.state != STATE_DOGFIGHT
 
     def prepare_bullet_mods(self):
+        base_damage = self.BASE_DAMAGE
+        if not self.owning_civ.is_enemy:
+            base_damage *= 1 + (self.scene.game.run_info.ship_levels[self.SHIP_BONUS_NAME] - 1) * 0.5
         damage_add = 0
         extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
         damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
         damage_add += self.get_stat("ship_weapon_damage")
         damage_mul = self.get_stat("%s_damage_mul" % self.SHIP_BONUS_NAME)
         mods =  {
-            'damage_base': self.BASE_DAMAGE,
+            'damage_base': base_damage,
             'damage_mul': damage_mul,
             'damage_add': damage_add,
             'missile_speed':self.get_stat("ship_missile_speed"),
@@ -204,6 +207,12 @@ class Fighter(Ship):
             dir = delta.normalized()
 
         self.target_velocity = dir * self.get_max_speed()
+
+    def get_max_health(self):
+        hp = super().get_max_health()
+        if self.owning_civ.is_enemy == False:
+            hp *= 1 + (self.scene.game.run_info.ship_levels[self.SHIP_BONUS_NAME] - 1) * 0.5
+        return hp
 
     def exit_state_dogfight(self):
         self.effective_target = self.post_dogfight_target

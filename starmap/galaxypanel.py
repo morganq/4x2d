@@ -38,7 +38,7 @@ class GalaxyPanel(Panel):
 
         self.add(Text("- REWARD -", "tiny", (0,0), PICO_WHITE, False, multiline_width=100), V2(29,30)) 
         self.add(SimpleSprite(V2(0,0), "assets/%s.png" % galaxy.rewards[0]), V2(0, 46))
-        self.add(Text("[^%s]" % rewardscene.REWARDS[galaxy.rewards[0]]['title'], "small", (0,0), PICO_WHITE, False, multiline_width=100), V2(27,51))
+        self.add(Text("[^%s]" % rewardscene.REWARDS[galaxy.rewards[0]]['title'], "small", (0,0), PICO_WHITE, False, multiline_width=140), V2(27,51))
         description = Text(rewardscene.REWARDS[galaxy.rewards[0]]['description'], "small", (0,0), PICO_WHITE, False, multiline_width=110, center=False)
         self.add(description, V2(0,69))
 

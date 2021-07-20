@@ -129,15 +129,15 @@ class Alien3EconUpgrade3(Alien3EconUpgrade):
 
 class Alien3(alien.Alien):
     name = "alien3"
-    title = "ALIEN CIV 3"
+    title = "VOID KEEPERS"
     ATTACK_DURATION = 15
     DEFEND_DURATION = 15
     EXPAND_NUM_NEAREST = 2
     EXPAND_DURATION = 12
     tips = [
-        ("assets/alien3fighter.png", "ALIEN CIV 3 produces VOID FIELDS around their planets which grant shields and speed to their ships."),
-        ("assets/alien3bomber.png", "The STEALTH BOMBER is invisible within VOID FIELDS."),
-        ("assets/alien3battleship.png", "The MOTHERSHIP produces its own VOID FIELDS - like a moving planet!")
+        ("assets/alieninfo-void.png", "VOID KEEPERS generate VOID FIELDS around their planets, which grant shields and speed to their ships."),
+        ("assets/alieninfo-stealth.png", "The STEALTH BOMBER is invisible within VOID FIELDS."),
+        ("assets/alieninfo-mothership.png", "The MOTHERSHIP produces its own VOID FIELDS for attacking fleets.")
     ]    
 
     def __init__(self, scene, civ):

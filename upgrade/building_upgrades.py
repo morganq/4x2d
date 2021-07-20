@@ -36,7 +36,7 @@ class Econ2AUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Nuclear Reactor"
-    description = "[^+100%] [Mining Rate] for [Primary Resource], [!No more Buildings can be constructed here]"
+    description = "[^+100%] [Mining Rate] for [Primary Resource], [!No more Buildings or Ships can be built here]"
     icon = "nuclearreactor"
     cursor = "allied_planet"
     building = make_simple_stats_building(stats=Stats(top_mining_rate=1, prevent_buildings=1), shape="nuclearreactor")
@@ -370,11 +370,11 @@ class Scarcest2aUpgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Cryosteel Alloy"
-    description = "[^+5] [Ice] for every 10 [Iron] mined"
+    description = "[^+1] [Ice] for every 1 [Iron] mined"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':['b_scarcest1']}
-    building = make_simple_stats_building(stats=Stats(mining_ice_per_iron=0.5), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(mining_ice_per_iron=1), shape="lifesupport")
     requires = ('b_scarcest1',)
 
 @register_upgrade
@@ -400,12 +400,12 @@ class Scarcest3Upgrade(AddBuildingUpgrade):
     name = "b_scarcest3"
     resource_type = "ice"
     category = "buildings"
-    title = "Anodized Cryosteel"
-    description = "[^+3] [Ice] and [^+2] [Gas] for every 10 [Iron] mined"
+    title = "Noble Alloy"
+    description = "[^+1] [Gas] for every 1 [Iron] mined"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':['b_scarcest2a', 'b_scarcest2b']}
-    building = make_simple_stats_building(stats=Stats(mining_ice_per_iron = 0.3, mining_gas_per_iron = 0.2), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(mining_gas_per_iron = 1), shape="lifesupport")
     requires = lambda x:'b_scarcest1' in x and ('b_scarcest2a' in x or 'b_scarcest2b' in x)
     infinite = True  
 

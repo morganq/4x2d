@@ -1,16 +1,17 @@
-from button import Button
-from upgrade.upgrades import UPGRADE_CLASSES
-from text import Text
-from spritebase import SpriteBase
-from colors import *
-from scene import Scene
 import pygame
+import starmap
 import states
 import text
-from v2 import V2
-from upgrade.upgradeicon import UpgradeIcon
+from button import Button
+from colors import *
+from scene import Scene
 from simplesprite import SimpleSprite
-import starmap
+from spritebase import SpriteBase
+from text import Text
+from upgrade.upgradeicon import UpgradeIcon
+from upgrade.upgrades import UPGRADE_CLASSES
+from v2 import V2
+
 
 class StoreItemButton(SpriteBase):
     def __init__(self, pos, element, name, description, price, bought=False, can_afford=True, onclick=None):
@@ -70,21 +71,51 @@ class StoreItemButton(SpriteBase):
             self.onclick()
         return super().on_mouse_down(pos)               
 
+class StoreState(states.UIEnabledState):
+    is_basic_joystick_panel = True
+    def __init__(self, scene):
+        super().__init__(scene)
+        self.tooltip_timer = 0
+        self.last_tooltip = None
+
+    def get_joystick_cursor_controls(self):
+        return self.scene.buttons
+
+    def joystick_input(self, input, event):
+        if input == "back":
+            self.scene.on_exit()
+        return super().joystick_input(input, event)
+
+    def update(self, dt):
+        if self.scene.game.input_mode == "joystick":
+            control = self.joystick_overlay.get_current_control()
+            if isinstance(control, StoreItemButton) and isinstance(control.element, UpgradeIcon):
+                if not control.element._tooltip_panel or not control.element._tooltip_panel.alive():
+                    if self.last_tooltip:
+                        self.last_tooltip.on_mouse_exit(V2(0,0))
+                    control.element.on_mouse_enter(control.element.pos)
+                    self.last_tooltip = control.element
+            else:
+                if self.last_tooltip:
+                    self.last_tooltip.on_mouse_exit(V2(0,0))                
+
+        return super().update(dt)
+
 class StoreScene(Scene):
     def __init__(self, game, store):
         super().__init__(game)
         self.offerings = store.offerings
         self.bought = set()
-        print(self.offerings)
 
     def start(self):
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
-        self.sm = states.Machine(states.UIEnabledState(self))
         self.build_shop()
+        self.sm = states.Machine(StoreState(self))
 
     def build_shop(self):
+        self.buttons = []
         self.ui_group.empty()
         t = Text("Shop (MOCKUP)", "big", V2(250, 10), PICO_BLACK, multiline_width=300)
         t.offset = (0.5, 0)
@@ -99,7 +130,8 @@ class StoreScene(Scene):
             name = {
                 'memory':'Memory Crystals',
                 'o2':'Oxygen Refill',
-                'blueprint':'Blueprints'
+                'blueprint':'Blueprints',
+                'levelup':'Level Up'
             }[row['offer_type']]
             t = Text(name, "small", V2(250, y - 15), PICO_BLACK, multiline_width=200)
             t.offset = (0.5, 0)
@@ -107,13 +139,19 @@ class StoreScene(Scene):
             fn = {
                 'memory':self.create_memory_row,
                 'o2':self.create_o2_row,
-                'blueprint':self.create_blueprint_row
+                'blueprint':self.create_blueprint_row,
+                'levelup':self.create_levelup_row
             }[row['offer_type']]
 
             fn(row, y)
             y += 90
         
-        self.ui_group.add(Button(V2(360, 325), "Exit Shop", "big", self.exit))
+        t = "Exit Shop"
+        bx = 360
+        if self.game.input_mode == "joystick":
+            t = "[*circle*] Exit Shop"
+            bx = 330
+        self.ui_group.add(Button(V2(bx, 325), t, "big", self.on_exit))
 
     def update(self, dt):
         for spr in self.ui_group.sprites():
@@ -129,9 +167,10 @@ class StoreScene(Scene):
 
     def buy(self, product):
         self.bought.add(product)
-        self.build_shop()
+        self.start()
 
     def create_memory_row(self, row, y):
+        self.buttons.append([])
         def make_onclick(price, upgrade):
             return lambda : self.buy_memory(price, upgrade)
         for i,upgrade in enumerate(row['upgrades']):
@@ -165,6 +204,7 @@ class StoreScene(Scene):
             )
             self.ui_group.add(sib)
             self.ui_group.add(elem)
+            self.buttons[-1].append(sib)
 
     def buy_memory(self, price, upgrade):
         self.game.run_info.credits -= price
@@ -185,6 +225,7 @@ class StoreScene(Scene):
         )
         self.ui_group.add(sib)
         self.ui_group.add(elem)
+        self.buttons.append([sib])
 
     def buy_o2(self, price, quantity):
         self.game.run_info.credits -= price
@@ -192,6 +233,7 @@ class StoreScene(Scene):
         self.buy("o2")
 
     def create_blueprint_row(self, row, y):
+        self.buttons.append([])
         def make_onclick(price, upgrade):
             return lambda : self.buy_blueprint(price, upgrade)
         for i,upgrade in enumerate(row['upgrades']):
@@ -222,12 +264,36 @@ class StoreScene(Scene):
             )
             self.ui_group.add(sib)
             self.ui_group.add(elem)
+            self.buttons[-1].append(sib)
 
     def buy_blueprint(self, price, upgrade):
         self.game.run_info.credits -= price
         self.game.run_info.blueprints.append(upgrade)
         self.buy(upgrade)
+
+    def create_levelup_row(self, row, y):
+        ship = row['ship']
+        elem = SimpleSprite(V2(0,0), "assets/i-%s.png" % ship)
+        price = 100
+        sib = StoreItemButton(
+            V2(175, y),
+            elem,
+            "%s Level %d" % (ship.title(), self.game.run_info.ship_levels[ship] + 1),
+            "Improve health and damage of all %ss" % ship.title(),
+            price,
+            bought = 'levelup' in self.bought,
+            can_afford = self.game.run_info.credits >= price,
+            onclick=lambda: self.buy_levelup(price, ship)
+        )
+        self.ui_group.add(sib)
+        self.ui_group.add(elem)
+        self.buttons.append([sib])
+
+    def buy_levelup(self, price, ship):
+        self.game.run_info.credits -= price
+        self.game.run_info.ship_levels[ship] += 1
+        self.buy("levelup")
         
-    def exit(self):
+    def on_exit(self):
         self.game.scene = starmap.starmapscene.StarMapScene(self.game)
         self.game.scene.start()

@@ -174,9 +174,10 @@ class Alien:
         curve = {
             1: 0,
             2: 2,
-            3: 4,
-            4: 4,
-            5: 6,
+            3: 3,
+            4: 3,
+            5: 4,
+            6: 6,
         }.get(self.difficulty, 999)        
 
         if self.difficulty > 1 and self.time > 300:
@@ -187,8 +188,9 @@ class Alien:
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
         self.civ.base_stats['planet_health_mul'] = -0.5 + (difficulty - 1) / 4
-        self.civ.base_stats['mining_rate'] = -0.5 + ((difficulty - 1) / 4)
-        self.civ.base_stats['max_ships_mul'] = min(-0.65 + (difficulty - 1) / 6,0)
+        self.civ.base_stats['mining_rate'] = 0.75 #-0.5 + ((difficulty - 1) / 6)
+        #self.civ.base_stats['max_ships_mul'] = min(-0.55 + (difficulty - 1) / 10,0)
+        self.civ.base_stats['max_ships_per_planet'] = int((difficulty + 5) / 2)
         extra_planets = difficulty // 2
         extra_pops = difficulty // 2
         my_planet = self.scene.get_civ_planets(self.civ)[0]

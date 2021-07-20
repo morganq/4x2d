@@ -48,6 +48,7 @@ VALID_STAT_NAMES = [
     'launchpad_battleship_pop', #+1 pop when launching battleship
     'max_pop_growth', # +1 max pop every 30 seconds
     'max_ships_mul',
+    'max_ships_per_planet', 
     'memorial', # +1 fighter when ship sent from here dies
     'mining_rate',
     'mining_rate_first_60', 

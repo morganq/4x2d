@@ -147,7 +147,7 @@ class Alien1(alien.Alien):
     title = "BARYSI NOMADS"
 
     tips = [
-        ("assets/alieninfo-terraform.png", "The Barysi Terraform planets they colonize, in order to extract more valuable ice and gas"),
+        ("assets/alieninfo-terraform.png", "The BARYSI Terraform all planets they colonize, in order to extract more valuable ice and gas"),
         ("assets/alieninfo-warpship.png", "Defensive AEGIS ships are tethered to their host planet and are equipped with an explosive payload"),
         ("assets/alieninfo-crusher.png", "CRUSHERS are heavy Barysi battleships that can warp across the galaxy")
     ]
