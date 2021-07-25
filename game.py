@@ -119,15 +119,8 @@ class Game:
                     else:
                         self.scene.take_input("mouse_move", event)
 
-                #TODO: configurable
-                bindings = {
-                    1:"confirm",
-                    2:"back",
-                    0:"action",
-                    3:"special",
-                    9:"menu",
-                    8:"cheat1"
-                }
+                bindings = {int(k):v for k,v in self.save.get_setting("controls").items()}
+                reverse_bindings = {v:k for k,v in bindings.items()}
                 axes = [0,1]
 
                 if event.type == pygame.JOYDEVICEADDED:
@@ -135,14 +128,14 @@ class Game:
 
                 if event.type == pygame.JOYAXISMOTION:
                     delta = V2(self.joysticks[0].get_axis(axes[0]), self.joysticks[0].get_axis(axes[1]))
-                    if delta.sqr_magnitude() < 0.15 ** 2:
+                    if delta.sqr_magnitude() < 0.35 ** 2:
                         delta = V2(0,0)
                     if delta.tuple() != self.last_joy_axes:
                         self.scene.take_input("joymotion", {'delta':delta})
                         self.last_joy_axes = delta.tuple()
 
                     if self.input_mode == "joystick":
-                        self.game_speed_input = (self.joysticks[0].get_axis(4) + 1) / 2
+                        self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]
 
                 if event.type == pygame.JOYHATMOTION:
                     delta = V2(event.value[0], -event.value[1])
@@ -154,7 +147,7 @@ class Game:
                     try:
                         self.scene.take_input(bindings[event.button], event)
                     except KeyError:
-                        pass
+                        self.scene.take_input(None, event)
                     
                 #if event.type == pygame.JOYBUTTONUP:
                 #    self.scene.take_input("joyup", event)
@@ -210,3 +203,8 @@ class Game:
             'menu':menuscene.MenuScene(self)
         }[scene_name]
         self.scene.start()
+
+    def is_xbox(self):
+        if self.joysticks:
+            return self.joysticks[0].get_numbuttons() != 14
+        return False

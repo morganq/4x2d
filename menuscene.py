@@ -3,6 +3,7 @@ import sys
 
 import pygame
 
+import controlsscene
 import creditsscene
 import framesprite
 import game
@@ -29,6 +30,7 @@ class MenuState(states.UIEnabledState):
             controls.append([self.scene.items['continue']])
         controls.append([self.scene.items['new']])
         controls.append([self.scene.items['tutorial']])
+        controls.append([self.scene.items['controls']])
         controls.append([self.scene.music_meter])
         controls.append([self.scene.sound_meter])
         controls.append([self.scene.items['resolution']])
@@ -62,11 +64,12 @@ class MenuScene(scene.Scene):
             self.items['continue'].selectable = False
         self.items['new'] = text.Text("NEW GAME", "small", V2(320, y + dy * 1), onhover=lambda v:self.onhover(1,v), onclick=self.click_new)
         self.items['tutorial'] = text.Text("TUTORIAL", "small", V2(320, y + dy * 2), onhover=lambda v:self.onhover(2,v), onclick=self.click_tutorial)
-        self.items['music'] = text.Text("MUSIC", "small", V2(320, y + dy * 3))
-        self.items['sound'] = text.Text("SOUND", "small", V2(320, y + dy * 4))
-        self.items['resolution'] = text.Text("RESOLUTION", "small", V2(320, y + dy * 5), onhover=lambda v:self.onhover(5,v), onclick=self.click_resolution)
-        self.items['credits'] = text.Text("CREDITS", "small", V2(320, y + dy * 6), onhover=lambda v:self.onhover(6,v))
-        self.items['exit'] = text.Text("EXIT", "small", V2(320, y + dy * 7), onhover=lambda v:self.onhover(7,v), onclick=sys.exit)
+        self.items['controls'] = text.Text("CONTROLS", "small", V2(320, y + dy * 3), onhover=lambda v:self.onhover(3,v), onclick=self.click_controls)
+        self.items['music'] = text.Text("MUSIC", "small", V2(320, y + dy * 4))
+        self.items['sound'] = text.Text("SOUND", "small", V2(320, y + dy * 5))
+        self.items['resolution'] = text.Text("RESOLUTION", "small", V2(320, y + dy * 6), onhover=lambda v:self.onhover(6,v), onclick=self.click_resolution)
+        self.items['credits'] = text.Text("CREDITS", "small", V2(320, y + dy * 7), onhover=lambda v:self.onhover(7,v))
+        self.items['exit'] = text.Text("EXIT", "small", V2(320, y + dy * 8), onhover=lambda v:self.onhover(8,v), onclick=sys.exit)
         
         self.item_names = list(self.items.keys())
 
@@ -132,7 +135,11 @@ class MenuScene(scene.Scene):
     def click_new(self):
         self.game.run_info = RunInfo()
         self.game.scene = starmapscene.StarMapScene(self.game)
-        self.game.scene.start()                
+        self.game.scene.start()             
+
+    def click_controls(self):
+        self.game.scene = controlsscene.ControlsScene(self.game)
+        self.game.scene.start()                        
 
     def update_selection(self):
         for key, item in self.items.items():

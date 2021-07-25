@@ -1,12 +1,22 @@
 import json
-from run import RunInfo
+
 from resources import resource_path
+from run import RunInfo
 
 DEFAULT_SETTINGS = {
     'music_volume': 5,
     'sound_volume': 5,
     'scale': 2,
-    'showed_credits': False
+    'showed_credits': False,
+    'controls':{
+        1:"confirm",
+        2:"back",
+        0:"action",
+        3:"special",
+        4:"game_speed",
+        9:"menu",
+        8:"cheat1"
+    }
 }
 
 FILENAME = "save.json"
