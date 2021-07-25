@@ -1,7 +1,9 @@
-from spritebase import SpriteBase
-from colors import *
 import pygame
+
 import text
+from colors import *
+from spritebase import SpriteBase
+
 
 class Slider(SpriteBase):
     def __init__(self, pos, meter_width, min, max, onchange=None):
@@ -58,17 +60,16 @@ class Slider(SpriteBase):
         self.set_value(round(x * (self.max - self.min) + self.min))
 
     def set_value(self, value):
+        old_value = self.value
         self.value = min(max(value, self.min), self.max)
+        if old_value != self.value and self.onchange:
+            self.onchange(self.value)
         self._generate_image()        
 
     def on_mouse_down(self, pos):
         self.update_value(pos)
-        if self.onchange:
-            self.onchange(self.value)
         return super().on_mouse_down(pos)
 
     def on_drag(self, pos):
         self.update_value(pos)
-        if self.onchange:
-            self.onchange(self.value)
         return super().on_drag(pos)

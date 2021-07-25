@@ -58,22 +58,41 @@ class Tutorial1Scene(TutorialScene):
 
     def update(self, dt):
         if self.time_edge(1.5, dt):
-            self.set_tutorial_text("Click your planet to see its status and resources. Drag from your planet to an asteroid to order a fighter to attack.", 1)
+            if self.game.input_mode == "joystick":
+                self.set_tutorial_text("Press [*x*] on your planet to see its status and resources. Press [*square*] to order ships from a planet and send one to an asteroid.", 1)
+            else:
+                self.set_tutorial_text("Click your planet to see its status and resources. Drag from your planet to an asteroid to order a fighter to attack.", 1)
         ships = self.get_civ_ships(self.my_civ)
-        if self.time_edge(15, dt) and len(ships) == 0:
-            self.set_tutorial_text("Try dragging from your planet to an asteroid, then you can order fighters to attack it.", 2)
+        if self.time_edge(20, dt) and len(ships) == 0:
+            if self.game.input_mode == "joystick":
+                self.set_tutorial_text("Try pressing [*square*] with your cursor on your planet, then moving the cursor to an asteroid.", 2)
+            else:
+                self.set_tutorial_text("Try dragging from your planet to an asteroid, then you can order fighters to attack it.", 2)
         if len(ships) > 0 and ships[0].time > 1:
             self.set_tutorial_text("Great! Destroy all the asteroids to collect a lot of iron!", 3)
         if len(ships) > 0 and ships[0].time > 9:
-            self.set_tutorial_text("Once you've given orders to a fleet of ships, they will follow them until complete. You can also right-click on a fleet to cancel their orders.", 3.5)
+            if self.game.input_mode == "joystick":
+                self.set_tutorial_text("Once you've given orders to a fleet of ships, they will follow them until complete. You can also press [*circle*] on a fleet to cancel their orders.", 3.5)
+            else:
+                self.set_tutorial_text("Once you've given orders to a fleet of ships, they will follow them until complete. You can also right-click on a fleet to cancel their orders.", 3.5)
         if self.my_civ.num_upgrades > 0:
-            self.set_tutorial_text(
-                "Nice work. You have enough iron now to acquire a new Asset! Get Assets to improve your planets, build ships, or unlock new technologies.",
-                4,
-                offset=V2(0, -50)
-            )
+            if self.game.input_mode == "joystick":
+                self.set_tutorial_text(
+                    "Nice work. You have enough iron now to acquire a new Asset! Press [*triangle*]. Get Assets to improve your planets, build ships, or unlock new technologies.",
+                    4,
+                    offset=V2(0, -50)
+                )
+            else:
+                self.set_tutorial_text(
+                    "Nice work. You have enough iron now to acquire a new Asset! Get Assets to improve your planets, build ships, or unlock new technologies.",
+                    4,
+                    offset=V2(0, -50)
+                )
             if self.tutorial_panel.shown_time > 14:
-                self.set_tutorial_text("Click the Asset button below to acquire a new Asset.", 5,offset=V2(0, -50))
+                if self.game.input_mode == "joystick":
+                    self.set_tutorial_text("Click the Asset button below to acquire a new Asset.", 5,offset=V2(0, -50))
+                else:
+                    self.set_tutorial_text("Press [*triangle*] to acquire a new Asset.", 5,offset=V2(0, -50))
 
         if isinstance(self.sm.state, UpgradeState):
             self.set_tutorial_text("", 6)

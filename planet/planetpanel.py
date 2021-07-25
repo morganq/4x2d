@@ -1,13 +1,15 @@
-from piechart import PieChart
-from panel import Panel
-from text import Text
-from simplesprite import SimpleSprite
-from upgrade.upgradeicon import UpgradeIcon
-from piechart import PieChart
+from re import M
+
 from colors import *
+from economy import RESOURCE_COLORS, RESOURCES
 from line import Line
+from panel import Panel
+from piechart import PieChart
+from simplesprite import SimpleSprite
+from text import Text
+from upgrade.upgradeicon import UpgradeIcon
 from v2 import V2
-from economy import RESOURCES, RESOURCE_COLORS
+
 
 class PlanetPanel(Panel):
     def __init__(self, planet):
@@ -26,7 +28,7 @@ class PlanetPanel(Panel):
                 is_mine = True
 
         self.tab = {'text':'%s Planet' % (owner,), 'color':color, 'icon':'assets/i-planet.png'}
-        self.add(Text("Health: %d/%d" % (planet.health, planet.get_max_health()), "small", (0,0), PICO_WHITE, False), V2(0,0))
+        self.add(Text("Health: %d/%d" % (planet.health, planet.get_max_health()), "small", (0,0), PICO_WHITE, False, multiline_width=120), V2(0,0))
         self.add(Text("Resources", "small", (0,0), PICO_WHITE, False), V2(0,15))
         
         y = 30

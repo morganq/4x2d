@@ -1,10 +1,11 @@
-from ships.fighter import Fighter
 from ships.all_ships import register_ship
+from ships.fighter import Fighter
+
 
 @register_ship
 class Alien2Fighter(Fighter):
     SHIP_NAME = "alien2fighter"
-    BASE_HEALTH = 30
+    BASE_HEALTH = 25
     BASE_DAMAGE = 3
     MAX_SPEED = 5
     def __init__(self, scene, pos, owning_civ):

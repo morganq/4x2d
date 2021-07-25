@@ -1,18 +1,21 @@
-from pygame import font
-from framesprite import FrameSprite
-from spritebase import SpriteBase
-from button import Button
-from panel import Panel
-import pygame
-from colors import *
-from text import FONTS, Text
-from upgrade.upgradebutton import UpgradeButton
+import random
+
 import economy
 import game
-import random
-from upgrade import upgrades
-from upgrade.upgradeicon import UpgradeIcon
+import pygame
+from button import Button
+from colors import *
+from framesprite import FrameSprite
+from panel import Panel
+from pygame import font
+from spritebase import SpriteBase
+from text import FONTS, Text
 from v2 import V2
+
+from upgrade import upgrades
+from upgrade.upgradebutton import UpgradeButton
+from upgrade.upgradeicon import UpgradeIcon
+
 
 class UpgradePanel(Panel):
     def __init__(self, pos, offered_upgrades, resource, on_select, on_reroll):
@@ -49,8 +52,12 @@ class UpgradePanel(Panel):
         box.visible = False
         self.add(box, V2(250,0))
 
+        self.joystick_controls = []
+        self.joystick_controls.extend([[c] for c in self.get_controls_of_type(UpgradeButton)])
+
         if game.Game.inst.run_info.rerolls > 0:# or game.DEV:
             self.add(Button(V2(0,0), "%d left" % game.Game.inst.run_info.rerolls, "small", on_reroll, icon="assets/die.png", label="REROLL"), V2(0, y + 10))
+            self.joystick_controls.append([self.get_control_of_type(Button)])            
 
         self.redraw()
 
@@ -60,6 +67,11 @@ class UpgradePanel(Panel):
 
     def hover_update(self, hovering, button):
         if hovering == False: return
+
+        self.joystick_controls = [[c] for c in self.get_controls_of_type(UpgradeButton)]
+        reroll = self.get_control_of_type(Button)
+        if reroll:
+            self.joystick_controls.append([reroll])
 
         for child in self.tree_children:
             child.kill()
@@ -90,6 +102,7 @@ class UpgradePanel(Panel):
                     if len(row) > 1:
                         pos = V2(self.width - 75 + cy * 37, 0)
                     icon = UpgradeIcon(pos + V2(self.x - 4, self.y + 50 + rx * 50), upg.name, None, True)
+                    self.joystick_controls[rx].append(icon)
                     game.Game.inst.scene.ui_group.add(icon)
                     self.tree_children.append(icon)
                     positions[upg.name] = icon.pos

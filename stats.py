@@ -11,6 +11,7 @@ VALID_STAT_NAMES = [
     'battleship_production', 
     'bomber_colonist', 
     'bomber_damage_mul',
+    'bomber_dodge_num',
     'bomber_production', 
     'bomber_raze_chance',
     'colonize_random_building', 
@@ -46,6 +47,7 @@ VALID_STAT_NAMES = [
     'launchpad_fighter_chance', #chance for +1 fighter w bomber/interceptor
     'launchpad_battleship_health', #+hp when launching battleship
     'launchpad_battleship_pop', #+1 pop when launching battleship
+    'lost_planet_upgrade',
     'max_pop_growth', # +1 max pop every 30 seconds
     'max_ships_mul',
     'max_ships_per_planet', 

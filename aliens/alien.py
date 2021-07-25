@@ -156,7 +156,9 @@ class Alien:
                         self.redistribute_timer = random.randint(25, 50)
                         return # just one transfer per round
                     
-
+    @classmethod
+    def get_quote(kls):
+        return random.choice(kls.quotes)
 
     def get_expand_chance(self, planet):
         return 0.05 * planet.population
@@ -194,7 +196,6 @@ class Alien:
         extra_planets = difficulty // 2
         extra_pops = difficulty // 2
         my_planet = self.scene.get_civ_planets(self.civ)[0]
-        my_planet.set_health(my_planet.get_max_health(), False)
         my_planet.population += extra_pops
 
         near_planets = self.scene.get_planets()
@@ -204,6 +205,9 @@ class Alien:
             near_unclaimed[i].change_owner(self.civ)
             near_unclaimed[i].population = extra_pops
             near_unclaimed[i].set_health(near_unclaimed[i].get_max_health(), False)
+
+        for planet in self.scene.get_civ_planets(self.civ):
+            planet.set_health(planet.get_max_health(), False)            
 
         self.build_order = buildorder.BuildOrder(self.get_build_order_steps())
 

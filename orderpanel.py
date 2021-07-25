@@ -36,9 +36,17 @@ class OrderPanel(Panel):
                 self.sliders[ship] = slider
                 y += 45
 
+        if not self.sliders:
+            self.add(Text("No ships!", "small", V2(0,0)), V2(0,0))
+            y += 25
+
         t = "LAUNCH"
         if game.Game.inst.input_mode == "joystick":
             t = "[*x*] LAUNCH"
+        if not self.sliders:
+            t = "BACK"
+            if game.Game.inst.input_mode == "joystick":
+                t = "[*circle*] BACK"
         self.add(Button(V2(0,0), t, "small", self.on_launch_click), V2(20, y))
 
         self.redraw()

@@ -10,6 +10,7 @@ import save
 import sound
 import starmap
 import text
+import upgrade
 import upgradestate
 from anyupgradepanel import AnyUpgradePanel
 from arrow import OrderArrow
@@ -160,12 +161,12 @@ class PlayState(UIEnabledState):
         if inp == "mouse_move":
             self.mouse_pos = event.gpos
         if inp == "mouse_drag":
-            self.mouse_pos = event.gpos 
+            self.mouse_pos = event.gpos
 
         return super().take_input(inp, event)
 
     def default_joy_hover_filter(self, x):
-        return isinstance(x, planet.planet.Planet)
+        return isinstance(x, planet.planet.Planet) or isinstance(x, upgrade.upgradeicon.UpgradeIcon)
 
     def target_joy_hover_filter(self, x):
         return isinstance(x, planet.planet.Planet) or isinstance(x, Asteroid)
@@ -230,6 +231,11 @@ class PlayState(UIEnabledState):
             if self.joy_controls_state == "default":
                 spr = self.joystick_overlay.nearest_obj
                 if spr:
+                    # Check if we clicked a stored upgrade
+                    if isinstance(spr, upgrade.upgradeicon.UpgradeIcon):
+                        spr.on_mouse_down(spr.pos)
+
+                    # Otherwise...
                     selection_info = spr.get_selection_info()
                     if selection_info and selection_info['type'] == 'planet':
                         if self.current_panel and self.current_panel.panel_for != spr:
@@ -286,6 +292,7 @@ class PlayState(UIEnabledState):
         if input == "back":
             if self.joy_controls_state == "arrow":
                 self.joy_controls_state = "default"
+                self.joy_hover_filter = self.default_joy_hover_filter
                 self.arrow.visible = False
             elif self.current_panel:
                 self.current_panel.kill()
@@ -406,7 +413,9 @@ class OrderShipsState(UIEnabledState):
 
 class GameOverState(State):
     def enter(self):
-        scores = save.SAVE_OBJ.add_highscore(self.scene.score)
+        print("score", "resource", self.scene.score)
+        self.scene.game.run_info.score += int(self.scene.score)
+        scores = save.SAVE_OBJ.add_highscore(self.scene.game.run_info.score)
         self.scene.game_group.empty()
         self.scene.ui_group.empty()
         save.SAVE_OBJ.save()
@@ -448,7 +457,13 @@ class VictoryState(State):
             if r == "iron": self.scene.game.run_info.bonus_credits += 5
             elif r == "ice": self.scene.game.run_info.bonus_credits += 10
             elif r == "gas": self.scene.game.run_info.bonus_credits += 15
-        self.scene.game.run_info.bonus_credits = max(self.scene.game.run_info.bonus_credits, 90)
+        self.scene.game.run_info.bonus_credits = min(self.scene.game.run_info.bonus_credits, 90)
+
+        speed_bonus = int((1000000 / (self.scene.time + 120)))
+        print("score", "resource", self.scene.score, "speed", speed_bonus)
+        self.scene.game.run_info.score += int(self.scene.score) + speed_bonus
+
+        self.scene.game.run_info.choose_path(*self.scene.game.run_info.next_path_segment)
 
         return super().enter()
 

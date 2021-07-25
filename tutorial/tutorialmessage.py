@@ -1,10 +1,12 @@
+import random
+
+import sound
 from framesprite import FrameSprite
 from panel import Panel
+from simplesprite import SimpleSprite
 from text import Text
 from v2 import V2
-from simplesprite import SimpleSprite
-import random
-import sound
+
 
 class TutorialMessage(Panel):
     def __init__(self, message):
@@ -20,6 +22,8 @@ class TutorialMessage(Panel):
 
         self.talk_timer = len(message) / 20
         self.shown_time = 0
+        self.speed = 1
+        self.done = True
 
         self.redraw()
 
@@ -30,8 +34,11 @@ class TutorialMessage(Panel):
         self.redraw()
         self.talk_timer = len(text) / 20
         self.shown_time = 0
+        self.speed = 1
+        self.done = False
 
     def update(self, dt):
+        dt *= self.speed
         self.talk_timer -= dt
         self.shown_time += dt
         if self.shown_time > 0.5 and len(self.text._text) < len(self.target_message):
@@ -47,4 +54,7 @@ class TutorialMessage(Panel):
 
         else:
             self.face.frame = 2
+
+        if len(self.text._text) >= len(self.target_message):
+            self.done = True
         return super().update(dt)

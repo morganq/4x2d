@@ -56,6 +56,9 @@ class Interceptor(Fighter):
 
     def prepare_bullet_mods(self):
         mods = super().prepare_bullet_mods()
+        if not self.owning_civ.is_enemy:
+            damage_curve = [1, 1.5, 1.9, 2.2]
+            mods['damage_base'] *= damage_curve[self.scene.game.run_info.ship_levels["interceptor"] - 1]        
         mods['bounces'] = self.get_stat("interceptor_missile_bounce")
         mods['color'] = PICO_YELLOW
         return mods
@@ -94,6 +97,13 @@ class Interceptor(Fighter):
                 self.fast_fire_timer = 0
                 self.special_fire(self.firing_target)
         return super().update(dt)
+
+    def get_max_health(self):
+        hp = super().get_max_health()
+        if not self.owning_civ.is_enemy:
+            hp_curve = [1, 1.6, 2.1, 2.6]
+            hp *= hp_curve[self.scene.game.run_info.ship_levels["interceptor"] - 1]           
+        return hp
 
     def get_max_shield(self):
         return super().get_max_shield() + self.get_stat("interceptor_shield")

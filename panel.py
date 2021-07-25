@@ -52,7 +52,10 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
         self._controls = [c for c in self._controls if c['control'] != control]
 
     def get_control_of_type(self, klass):
-        return self.get_controls_of_type(klass)[0]
+        try:
+            return self.get_controls_of_type(klass)[0]
+        except IndexError:
+            return None
 
     def get_controls_of_type(self, klass):
         return [c['control'] for c in self._controls if isinstance(c['control'], klass)]      

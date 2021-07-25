@@ -138,10 +138,10 @@ class MenuScene(scene.Scene):
         for key, item in self.items.items():
             if key == self.item_names[self.selected_item_index]:
                 item.color = PICO_GREEN
-                item.set_text("> " + item._text.split("> ")[-1])
+                item.set_text(item._text)
             else:
                 item.color = PICO_WHITE
-                item.set_text(item._text.split("> ")[-1])
+                item.set_text(item._text)
 
     def update_settings(self):
         mw = self.game.save.get_setting("music_volume")

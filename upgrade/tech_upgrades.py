@@ -237,9 +237,9 @@ class Crystal2aUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Phasing Lattice"
-    description = "Ships near enemy planets have a [^+15%] chance to dodge missile weapons"
+    description = "[Bombers] dodge the first 3 attacks that target them"
     icon = "phasinglattice"
-    stats = Stats(ship_dodge_near_enemy_planets=0.15)
+    stats = Stats(bomber_dodge_num=3)
     family = {'tree':'t_crystal', 'parents':['t_crystal1']}
     requires = ('t_crystal1',)
 
@@ -249,7 +249,7 @@ class Crystal2bUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Fragmentation Sequence"
-    description = "If a [Worker] ship is destroyed, it explodes for [^20] damage. Radius is based on ship population"
+    description = "If a [Worker] ship is destroyed, it explodes for [^5] damage. Damage and radius increase with ship population"
     icon = "fragmentationsequence"
     stats = Stats(atomic_bomb=1)
     family = {'tree':'t_crystal', 'parents':['t_crystal1']}
@@ -362,7 +362,7 @@ class Proximity3Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Spoils"
-    description = "When you raze a planet, gain [^1 full upgrade] of its primary resource"
+    description = "When you raze a planet, gain [^1 full asset] of its primary resource"
     icon = "tech_default"
     stats = Stats(raze_upgrade=1)
     family = {'tree':'t_proximity', 'parents':['t_proximity2a', 't_proximity2b']}
@@ -376,7 +376,7 @@ class Optics1Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Laser Diode"
-    description = "[Battleships] rapidly fire lasers instead of missiles"
+    description = "[Battleship] weapon upgrade - rapid laser array replaces missile weapon"
     icon = "tech_default"
     stats = Stats(battleship_laser=1)
     family = {'tree':'t_optics', 'parents':[]}
@@ -388,9 +388,9 @@ class Optics2aUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Fleet Upgrade"
-    description = "[Battleships] gain [^+50%] health, other ships have [!-25%] health"
+    description = "[Battleships] gain [^+67%] health, other ships have [!-33%] health"
     icon = "tech_default"
-    stats = Stats(ship_health_mul=-0.25, battleship_health_mul=0.75)
+    stats = Stats(ship_health_mul=-0.33, battleship_health_mul=1)
     family = {'tree':'t_optics', 'parents':['t_optics1']}
     requires = ('t_optics1',)
 
@@ -452,10 +452,10 @@ class Exotic2bUpgrade(Upgrade):
     name = "t_exotic2b"
     resource_type = "gas"
     category = "tech"
-    title = "Gravitational Reinforcement"
-    description = "Ships gain +35% fire rate"
+    title = "Jettison"
+    description = "When you lose a planet, gain [^1 full asset] of the planet's primary resource"
     icon = "tech_default"
-    stats = Stats(ship_fire_rate=0.35)
+    stats = Stats(lost_planet_upgrade=1)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
     requires = ('t_exotic1',)
 

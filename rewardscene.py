@@ -36,8 +36,8 @@ class RewardSelector(SpriteBase):
 class RewardState(states.UIEnabledState):
     is_basic_joystick_panel = True
     def enter(self):
-        self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 60), PICO_BLUE, multiline_width=400, offset=(0.5,0)))
-        self.scene.ui_group.add(Text(self.description, 'big', V2(game.RES[0] / 2, 90), PICO_WHITE, multiline_width=300, offset=(0.5,0)))
+        self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 50), PICO_BLUE, multiline_width=480, offset=(0.5,0)))
+        self.scene.ui_group.add(Text(self.description, 'big', V2(game.RES[0] / 2, 90), PICO_WHITE, multiline_width=380, offset=(0.5,0)))
 
         self.confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50), "Confirm", "big", self.on_confirm)
         self.confirm_button.offset = (0.5,0.5)
@@ -84,7 +84,7 @@ class LevelUpRewardState(RewardState):
         self.ship_type = ship_type
 
     def on_confirm(self):
-        self.scene.game.run_info.ship_levels[self.ship_type] += 1
+        self.scene.game.run_info.ship_levels[self.ship_type] = min(self.scene.game.run_info.ship_levels[self.ship_type] + 1, 3)
         return super().on_confirm()        
 
 class LifeSupportRewardState(RewardState):
@@ -122,8 +122,9 @@ class MemoryCrystalRewardState(RewardState):
 
         self.icons = {}
 
-        selected_technologies = list(self.technologies)
+        selected_technologies = [t for t in self.technologies if t not in self.scene.game.run_info.saved_technologies]
         random.shuffle(selected_technologies)
+        selected_technologies = list(set(selected_technologies))
         selected_technologies = selected_technologies[0:4]
         l = len(selected_technologies)
         for i,technology in enumerate(selected_technologies):
@@ -172,7 +173,8 @@ class BlueprintRewardState(RewardState):
 
         self.icons = {}
 
-        selected_buildings = list(self.buildings)
+        selected_buildings = [b for b in self.buildings if b not in self.scene.game.run_info.blueprints]
+        selected_buildings = list(set(selected_buildings))
         random.shuffle(selected_buildings)
         selected_buildings = selected_buildings[0:4]
         l = len(selected_buildings)

@@ -26,7 +26,7 @@ from .planetart import generate_planet_art
 
 EMIT_SHIPS_RATE = 0.125
 
-RESOURCE_BASE_RATE = 1/220.0
+RESOURCE_BASE_RATE = 1/190.0
 
 POPULATION_GROWTH_TIME = 40
 POP_GROWTH_IMPROVEMENT_PER_POP = 5
@@ -82,6 +82,7 @@ class Planet(SpaceObject):
 
         self._generate_base_frames()
         self.frame = 0        
+        self.time = 0
 
         ### Upgrades ###
         self.unstable_reaction = 0
@@ -130,6 +131,10 @@ class Planet(SpaceObject):
         return self.alive() # pygame alive
 
     def change_owner(self, civ):
+        if self.get_stat("lost_planet_upgrade"):
+            r = self.get_primary_resource()
+            amt = self.owning_civ.upgrade_limits.data[r]
+            self.owning_civ.earn_resource(r, amt, self)
         self.lose_buildings()
         self.owning_civ = civ
         if civ in self.underground_buildings:
@@ -273,6 +278,9 @@ class Planet(SpaceObject):
         else:
             return super().update(real_dt)
 
+        self.time += dt
+        if self.time < 1:
+            self.set_health(self.get_max_health())
 
         # Emit ships which are queued
         if self.emit_ships_queue:

@@ -115,7 +115,8 @@ class UIEnabledState(State):
 
         if self.is_basic_joystick_panel:
             if not self.joystick_overlay:
-                self.joystick_overlay = joystickcursor.JoystickPanelCursor(self.scene, self.get_joystick_cursor_controls())
+                controls = self.get_joystick_cursor_controls()
+                self.joystick_overlay = joystickcursor.JoystickPanelCursor(self.scene, controls)
                 self.scene.ui_group.add(self.joystick_overlay)            
 
     def get_joystick_cursor_controls(self):
@@ -124,14 +125,14 @@ class UIEnabledState(State):
     def take_input(self, input, event):
         if input in ["mouse_move", "mouse_drag", "click", "unclick"]:
             self.set_mouse_input()
-        elif input in ['left', 'right', 'up', 'down']:
-            self.set_keyboard_input()
+        #elif input in ['left', 'right', 'up', 'down']:
+        #    self.set_keyboard_input()
         elif input in ['joymotion']:
             self.set_joystick_input()
         if self.scene.game.input_mode == 'mouse':
             self.mouse_input(input,event)
-        elif self.scene.game.input_mode == 'keyboard':
-            self.keyboard_input(input, event)
+        #elif self.scene.game.input_mode == 'keyboard':
+        #    self.keyboard_input(input, event)
         elif self.scene.game.input_mode == 'joystick':
             self.joystick_input(input, event)            
 

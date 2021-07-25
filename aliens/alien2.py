@@ -73,6 +73,8 @@ class Alien2FighterProductionUpgrade3(Alien2FighterProductionUpgrade1):
     resource_type = "gas"    
 
     def apply(self, to):
+        if to.owning_civ.alien.difficulty <= 1:
+            return
         found_ship = None
         for ship in to.scene.get_civ_ships(to.owning_civ):
             if isinstance(ship, Alien2Battleship):
@@ -179,11 +181,20 @@ class Alien2(alien.Alien):
     DEFEND_DURATION = 3
     EXPAND_NUM_NEAREST = 1
     EXPAND_DURATION = 10
+
+    quotes = [
+    ]
+
     tips = [
         ("assets/alieninfo-intimidate.png", "THE NETWORK can INTIMIDATE a planet, preventing new buildings or ships from being made there."),
         ("assets/alieninfo-worm.png", "SUPERVISOR ships can HACK and take control of your ships unless you destroy them quickly."),
         ("assets/alieninfo-destroyer.png", "DESTROYERS take a long time to build, but can defeat a whole fleet in combat.")
     ]    
+
+    @classmethod
+    def get_quote(kls):
+        s = "\"DEVICE TALLY\nAYE: %d,%d,%d\nNAY: %d\nThe Network has chosen: violence.\""
+        return s % (random.randint(1,6), random.randint(101,999), random.randint(101,999), random.randint(4,9))
 
     def __init__(self, scene, civ):
         super().__init__(scene, civ)

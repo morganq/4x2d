@@ -24,7 +24,8 @@ class Fighter(Ship):
     SHIP_NAME = "fighter"
     SHIP_BONUS_NAME = "fighter"
     FIRE_RATE = 0.75
-    BASE_DAMAGE = 5
+    BASE_DAMAGE = 4
+    BASE_HEALTH = 15
 
     FIRE_RANGE = 30
     THREAT_RANGE_DEFAULT = 40
@@ -94,8 +95,9 @@ class Fighter(Ship):
 
     def prepare_bullet_mods(self):
         base_damage = self.BASE_DAMAGE
-        if not self.owning_civ.is_enemy:
-            base_damage *= 1 + (self.scene.game.run_info.ship_levels[self.SHIP_BONUS_NAME] - 1) * 0.5
+        if not self.owning_civ.is_enemy and self.SHIP_BONUS_NAME == "fighter":
+            fighter_damage_curve = [1, 1.5, 1.9, 2.2]
+            base_damage *= fighter_damage_curve[self.scene.game.run_info.ship_levels["fighter"] - 1]
         damage_add = 0
         extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
         damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
@@ -210,8 +212,9 @@ class Fighter(Ship):
 
     def get_max_health(self):
         hp = super().get_max_health()
-        if self.owning_civ.is_enemy == False:
-            hp *= 1 + (self.scene.game.run_info.ship_levels[self.SHIP_BONUS_NAME] - 1) * 0.5
+        if not self.owning_civ.is_enemy and self.SHIP_BONUS_NAME == "fighter":
+            fighter_hp_curve = [1, 1.3, 1.6, 1.9]
+            hp *= fighter_hp_curve[self.scene.game.run_info.ship_levels["fighter"] - 1]        
         return hp
 
     def exit_state_dogfight(self):

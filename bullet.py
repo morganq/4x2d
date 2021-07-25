@@ -72,6 +72,12 @@ class Bullet(SpriteBase):
             if dist < NEAR_ENEMY_PLANETS_DIST ** 2:     
                 if random.random() <= other.get_stat("ship_dodge_near_enemy_planets"):
                     self.kill()                       
+
+        if isinstance(other, ships.bomber.Bomber):
+            if other.get_dodges_left() > 0:
+                other.dodge()
+                self.kill()
+                return
                 
         damage = self.mods.get("damage_base", 1)
         damage *= 1 + self.mods.get("damage_mul", 0)

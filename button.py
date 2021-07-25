@@ -5,6 +5,7 @@ from colors import *
 from fadeinmixin import FadeInMixin
 from resources import resource_path
 from spritebase import SpriteBase
+from v2 import V2
 
 SIZE_PADDING = {'tiny':3, 'small':4, 'medium':5, 'big':7, 'huge':10}
 HEIGHTS = {'tiny':5, 'small':7, 'medium':16, 'big':10, 'huge':15}
@@ -20,6 +21,7 @@ class Button(SpriteBase, FadeInMixin):
         self.image_path = image_path
         self.label = label
         self.icon = icon
+        self.joy_button = None
         self._generate_image()
 
     def _generate_image(self, hover=False):
@@ -80,10 +82,14 @@ class Button(SpriteBase, FadeInMixin):
             self.image.blit(icon, (icon_x, icon_y))
 
         if self.label:
+            #text.render_multiline_to(self.image, (icon_x, pad), self.label, "tiny", text_color)
             text.FONTS['tiny'].render_to(self.image, (icon_x, pad), self.label, text_color)
 
         z = {'tiny':2, 'small':3,'medium':3,'big':4,'huge':5}[self.size]
         pygame.draw.polygon(self.image, (255,255,255,0), [(w-z,0), (w,0), (w,z)])
+
+        if self.joy_button:
+            text.render_multiline_to(self.image, (1, 1), self.joy_button, "tiny", text_color)
 
         self._width = w
         self._height = h

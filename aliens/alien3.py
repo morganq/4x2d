@@ -69,7 +69,8 @@ class Alien3FighterProductionUpgrade3(Alien3FighterProductionUpgrade1):
     resource_type = "gas"    
 
     def apply(self, to):
-        to.add_production(ProductionOrder("alien3battleship", 1, 10))
+        if to.owning_civ.alien.difficulty > 1:
+            to.add_production(ProductionOrder("alien3battleship", 1, 10))
 
 @register_upgrade
 class Alien3Tech1Upgrade(Upgrade):
@@ -134,6 +135,11 @@ class Alien3(alien.Alien):
     DEFEND_DURATION = 15
     EXPAND_NUM_NEAREST = 2
     EXPAND_DURATION = 12
+
+    quotes = [
+        "\"Has it called you here? Will you face the void?\""
+    ]
+
     tips = [
         ("assets/alieninfo-void.png", "VOID KEEPERS generate VOID FIELDS around their planets, which grant shields and speed to their ships."),
         ("assets/alieninfo-stealth.png", "The STEALTH BOMBER is invisible within VOID FIELDS."),

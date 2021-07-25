@@ -50,9 +50,15 @@ class StarMapScene(Scene):
                     alien = ALIENS[column['alien']]
                     obj = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], r == len(run_path))
                     if len(run_path) <= r:
-                        reward_icon = SimpleSprite(V2(x, y), "assets/%s.png" % column['rewards'][0])
-                        reward_icon.layer = 1
-                        self.game_group.add(reward_icon)                    
+                        if r < len(self.game.run_info.data) - 1:
+                            reward_icon = SimpleSprite(V2(x, y), "assets/%s.png" % column['rewards'][0])
+                            reward_icon.layer = 1
+                            self.game_group.add(reward_icon)        
+                        if column['mods']:
+                            exc = SimpleSprite(V2(x - 10, y - 10), "assets/exclamation.png")
+                            exc.layer = 2
+                            self.game_group.add(exc)
+
                 elif column['node_type'] == 'store':
                     obj = StoreNodeGraphic(V2(x,y), column['offerings'], (r,i), r == len(run_path))
                 self.galaxies[-1].append(obj)

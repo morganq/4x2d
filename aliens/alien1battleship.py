@@ -1,14 +1,16 @@
-from framesprite import FrameSprite
-from spritebase import SpriteBase
-from ships.battleship import Battleship
-from v2 import V2
-import text
-from colors import *
-from bullet import Bullet
-import pygame
-from particle import Particle
 import random
+
+import pygame
+import text
+from bullet import Bullet
+from colors import *
+from framesprite import FrameSprite
+from particle import Particle
 from ships.all_ships import register_ship
+from ships.battleship import Battleship
+from spritebase import SpriteBase
+from v2 import V2
+
 
 class WarpWarning(FrameSprite):
     def __init__(self, scene, pos, ship):
@@ -125,7 +127,7 @@ class Alien1Battleship(Battleship):
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
 
-        for j in range(5):
+        for j in range(3):
             towards = (self.effective_target.pos - self.pos).normalized()
             b = Bullet(self.pos, self.effective_target, self, vel=V2.random_angle() * 10, mods=self.prepare_bullet_mods())
             self.scene.game_group.add(b)

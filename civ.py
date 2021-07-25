@@ -19,7 +19,7 @@ class Civ:
         self.is_enemy = True        
         self.resources = economy.Resources()
         self.frozen = economy.Resources(0,0,0)
-        self.upgrade_limits = economy.Resources(30,80,150)
+        self.upgrade_limits = economy.Resources(25,80,150)
         self.upgrades_stocked = []
         self.upgrades = []
         self.researched_upgrade_names = set()
@@ -29,6 +29,9 @@ class Civ:
         self.offered_upgrades = {}
 
         self.scarcity = False
+
+        self.upkeep_enabled = True
+        self.upkeep_timer = 0
 
         # Analytics
         self.num_upgrades = 0
@@ -47,7 +50,7 @@ class Civ:
     def get_upgrade_increase_amts(self):
         if self.scarcity:
             return {
-                'iron':25 * 4,
+                'iron':30 * 4,
                 'ice':35 * 4,
                 'gas':50 * 4
             }            
@@ -68,19 +71,38 @@ class Civ:
         self.frame_stats = {}
         self.resources_update(dt)
         self.upgrades_update(dt)
+        if self.upkeep_enabled:
+            self.upkeep_update(dt)
         self.time += dt
 
-    def get_all_fighters(self):
-        all_fighters = []
+    def upkeep_update(self, dt):
+        self.upkeep_timer += dt
+        if self.upkeep_timer > 5:
+            self.upkeep_timer -= 5
+            value = -len(self.get_all_combat_ships())
+            self.resources.iron = max(self.resources.iron + value, 0)
+            if not self.is_enemy:
+                it = IconText(V2(70, 60), None, "%d" % value, economy.RESOURCE_COLORS["iron"])
+                self.scene.ui_group.add(it)                
+
+
+    def get_all_combat_ships(self):
+        all_ships = []
         for s in self.scene.get_civ_ships(self):
-            if s.SHIP_NAME == 'fighter':
-                all_fighters.append({'type':'ship', 'object':s})
+            if s.SHIP_BONUS_NAME != 'colonist':
+                all_ships.append({'type':'ship', 'object':s, 'name':s.SHIP_NAME})
         
         for p in self.scene.get_civ_planets(self):
-            if p.ships['fighter'] > 0:
-                for i in range(p.ships['fighter']):
-                    all_fighters.append({'type':'planet', 'object':p})
-        return all_fighters
+            for k,v in p.ships.items():
+                for i in range(v):
+                    all_ships.append({'type':'planet', 'object':p, 'name':k})
+            for (ship_type, data) in p.emit_ships_queue:
+                all_ships.append({'type':'planet', 'object':p, 'name':ship_type})
+
+        return all_ships
+
+    def get_all_fighters(self):
+        return [s for s in self.get_all_combat_ships() if s['name'] == "fighter"]
 
     def resources_update(self, dt):
         for res_type in self.resources.data.keys():

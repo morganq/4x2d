@@ -3,6 +3,7 @@ import re
 import pygame
 import pygame.freetype
 
+import game
 import spritebase
 from colors import *
 from resources import resource_path
@@ -14,7 +15,8 @@ FONTS = {
     'small':pygame.freetype.Font(resource_path("assets/Minecraftia-Regular.ttf"), 8),
     'medium':pygame.freetype.Font(resource_path("assets/Pixeled.ttf"), 10),
     'big':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 20),
-    'huge':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 30)
+    'huge':pygame.freetype.Font(resource_path("assets/m12.ttf"), 30),
+    'pixolde':pygame.freetype.Font(resource_path("assets/Pixolde-Italic.ttf"), 16),
 }
 
 for font in FONTS.values():
@@ -91,12 +93,15 @@ def get_groups(line, inside_group=None):
     x = 0
     while x < len(line):
         if line[x] == "[":
-            if line[x+1] in TEXT_COLORS.keys():
-                color = line[x+1]
-                groups.append((TEXT_COLORS[color], ""))
-                x += 1
+            if "]" in line:
+                if line[x+1] in TEXT_COLORS.keys():
+                    color = line[x+1]
+                    groups.append((TEXT_COLORS[color], ""))
+                    x += 1
+                else:
+                    groups.append((PICO_WHITE, ""))
             else:
-                groups.append((PICO_WHITE, ""))
+                return groups
         elif line[x] == "]":
             groups.append((False, ""))
         else:
@@ -104,13 +109,20 @@ def get_groups(line, inside_group=None):
         x += 1
     return groups
 
-HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26}   
+HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26, 'bm_army':12, 'pixolde':16}
 
-SYMBOLS = {
+SYMBOLS_PS = {
     '*square*':"assets/ps_square.png",
     '*triangle*':"assets/ps_triangle.png",
     '*circle*':"assets/ps_circle.png",
     '*x*':"assets/ps_x.png"
+}
+
+SYMBOLS_XBOX = {
+    '*square*':"assets/xbox_x.png",
+    '*triangle*':"assets/xbox_y.png",
+    '*circle*':"assets/xbox_b.png",
+    '*x*':"assets/xbox_a.png"
 }
 
 def render_multiline(text, size, color, wrap_width=None, center=True):
@@ -154,8 +166,13 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
             group_text = group[1]
 
             # Is text or a symbol?
-            if group_text in SYMBOLS:
-                symbol_img = pygame.image.load(resource_path(SYMBOLS[group_text]))
+            joys = game.Game.inst.joysticks
+            if joys and joys[0].get_numbuttons() == 14:
+                symbols = SYMBOLS_PS
+            else:
+                symbols = SYMBOLS_XBOX
+            if group_text in symbols:
+                symbol_img = pygame.image.load(resource_path(symbols[group_text]))
                 text_surf.blit(symbol_img, (x + running_x, y + yo))
                 running_x += symbol_img.get_width() + 2
 

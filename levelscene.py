@@ -66,7 +66,6 @@ class LevelScene(scene.Scene):
     @score.setter
     def score(self, value):
         self._score = value
-        # TODO: get rid of
 
     def random_object_pos(self):
         pos = None
@@ -178,14 +177,14 @@ class LevelScene(scene.Scene):
                         iron = random.randint(7,10)
                         pr = Resources(iron * 10, (10 - iron) * 10, 0)
                 else:
-                    size = random.randint(2, 7)
+                    size = random.randint(2, 6)
                     resources = {'a':0, 'b':0, 'c':0}
                     # One resource
                     ra = random.random()
                     if ra > 0.66:
                         resources['a'] = 10
                     # Two resource
-                    elif ra > 0.33:
+                    elif ra > 0.2:
                         resources['a'] = random.randint(5,10)
                         resources['b'] = 10 - resources['a']
                     # Three
@@ -194,11 +193,12 @@ class LevelScene(scene.Scene):
                         resources['b'] = random.randint(1, 10 - resources['a'])
                         resources['c'] = 10 - resources['a'] - resources['b']
                     rb = random.random()
-                    if rb > 0.45:
+                    if rb > 0.6:
                         pr = Resources(resources['a'] * 10, resources['b'] * 10, resources['c'] * 10)
                         size += 1
-                    elif rb > 0.20:
+                    elif rb > 0.25:
                         pr = Resources(resources['b'] * 10, resources['a'] * 10, resources['c'] * 10)
+                        size -= 1
                     else:
                         pr = Resources(resources['c'] * 10, resources['b'] * 10, resources['a'] * 10)
                         size -= 1
@@ -233,14 +233,13 @@ class LevelScene(scene.Scene):
         upy = 80
         self.saved_upgrade_buttons = {}
         for u in self.game.run_info.saved_technologies + self.game.run_info.blueprints:
-            print(u)
-            upicon = UpgradeIcon(V2(3, upy), u, self.on_click_saved_upgrade, tooltip=True)
+            upicon = UpgradeIcon(V2(-2, upy), u, self.on_click_saved_upgrade, tooltip=True)
             self.saved_upgrade_buttons[u] = upicon
             self.ui_group.add(upicon)
             upy += 27
 
         if game.DEV:
-            self.ui_group.add(Button(V2(2, 48), 'Win', 'small', self.dev_win))
+            self.ui_group.add(Button(V2(160, 3), 'Win', 'small', self.dev_win))
 
         self.o2_meter = o2meter.O2Meter(V2(game.RES[0] - 68, 2))
         
@@ -251,9 +250,38 @@ class LevelScene(scene.Scene):
         self.o2_meter._generate_image()
         self.ui_group.add(self.o2_meter)    
 
+        #self.army_size_label = Text("ARMY COST", "small", V2(4, 55), PICO_YELLOW, multiline_width=200)
+        #self.ui_group.add(self.army_size_label)
+        
+        self.army_size = Text("", "tiny", V2(4, 42), PICO_YELLOW, multiline_width=200, center=False)
+        if self.my_civ.upkeep_enabled:
+            self.ui_group.add(self.army_size)
+
+    def setup_mods(self):
+        galaxy = self.game.run_info.get_current_level_galaxy()
+        if not galaxy['mods']:
+            return
+        mod = galaxy['mods'][0] # only 1 for now
+        if mod == "warp_drive":
+            self.enemy.civ.base_stats['warp_drive'] = 5
+        elif mod == "big_planet":
+            p = self.get_civ_planets(self.enemy.civ)[0]
+            p.size += 10
+            p.regenerate_art()
+        elif mod == "reflector":
+            for planet in self.get_civ_planets(self.enemy.civ):
+                planet.add_building(UPGRADE_CLASSES["b_defense1"])
+        elif mod == "ship_shield_far_from_home":
+            self.enemy.civ.base_stats['ship_shield_far_from_home'] = 5
+        elif mod == "atomic_bomb":
+            self.enemy.civ.base_stats['atomic_bomb'] = 1
+        elif mod == "battleship":
+            p = self.get_civ_planets(self.enemy.civ)[0]
+            p.add_ship("%sbattleship" % galaxy['alien'])
+
     def load(self):
         self.create_layers()
-        AlienClass = aliens.alien.ALIENS[self.game.run_info.get_path_galaxy()['alien']]
+        AlienClass = aliens.alien.ALIENS[self.game.run_info.get_current_level_galaxy()['alien']]
         self.enemies = [AlienClass(self, Civ(self))]
         self.enemy = self.enemies[0]        
         
@@ -278,6 +306,7 @@ class LevelScene(scene.Scene):
         self.flowfielddebug = 0
 
         self.enemy.set_difficulty(self.difficulty)
+        self.setup_mods()
 
         if self.options == "surround":
             for planet in self.get_civ_planets(None):
@@ -460,6 +489,10 @@ class LevelScene(scene.Scene):
             text = "%s" % r.upper()
             if self.upgrade_button.visible == False or self.upgrade_button.text != text:
                 self.upgrade_button.text = text
+                if self.game.input_mode == "joystick":
+                    self.upgrade_button.joy_button = "[*triangle*]"
+                else:
+                    self.upgrade_button.joy_button = None
                 self.upgrade_button.label = "ASSET"
                 self.upgrade_button.icon = "assets/i-%s.png" % r
                 self.upgrade_button.color = PICO_RED
@@ -490,6 +523,9 @@ class LevelScene(scene.Scene):
         for enemy in self.enemies:
             enemy.civ.update(dt)
         self.update_times['civs'] = time.time() - t
+
+        army = len(self.my_civ.get_all_combat_ships())
+        self.army_size.set_text("Fleet Upkeep: %.1f Iron / sec" % (-army / 5,))
 
         self.update_times['update'] = time.time() - ut
         
@@ -545,6 +581,13 @@ class LevelScene(scene.Scene):
 
         if game.DEV:
             FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 20, 20), "%d" % self.time, (128,255,128,180))
+
+        if self.game.game_speed_input > 0:
+            color = PICO_BLUE if ((self.time % 2) > 1) else PICO_WHITE
+            pygame.draw.rect(self.game.screen, PICO_BLUE, (0, 0, game.RES[0], game.RES[1]), 1)
+            tri = [V2(0,0), V2(4,4), V2(0,8)]
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(game.RES[0] - 12, game.RES[1] - 12)).tuple() for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(game.RES[0] - 7, game.RES[1] - 12)).tuple() for z in tri], 0)
 
 
     def take_input(self, inp, event):

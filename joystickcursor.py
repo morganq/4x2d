@@ -23,7 +23,7 @@ class JoystickCursor(SpriteBase):
         self.hovering = None
         self.joystick_state = V2(0,0)
         self.scene = scene
-        self.options_text = text.Text("", "small", V2(0,0), PICO_PINK, multiline_width=200, center=False)
+        self.options_text = text.Text("", "small", V2(0,0), PICO_PINK, multiline_width=200, center=False, shadow=PICO_BLACK)
         self.scene.ui_group.add(self.options_text)
         self._generate_image()
 
@@ -34,9 +34,11 @@ class JoystickCursor(SpriteBase):
         pygame.draw.circle(self.image, PICO_WHITE, self.cursor_pos.tuple(), 2, 0)
 
         if self.nearest_obj:
+            hx = (0.5 - self.nearest_obj.offset[0]) * self.nearest_obj.width
+            hy = (0.5 - self.nearest_obj.offset[1]) * self.nearest_obj.height
             rect = (
-                self.nearest_obj.apparent_pos.x - self.nearest_obj.radius - 4,
-                self.nearest_obj.apparent_pos.y - self.nearest_obj.radius - 4,
+                self.nearest_obj.apparent_pos.x + hx - self.nearest_obj.radius - 4,
+                self.nearest_obj.apparent_pos.y + hy - self.nearest_obj.radius - 4,
                 self.nearest_obj.radius * 2 + 8,
                 self.nearest_obj.radius * 2 + 8
             )
@@ -60,7 +62,7 @@ class JoystickCursor(SpriteBase):
         self.update_hover()
 
     def update(self, dt):
-        self.cursor_pos += self.joystick_state * dt * 350
+        self.cursor_pos = (self.cursor_pos + self.joystick_state * dt * 350).rect_contain(0, 0, game.RES[0], game.RES[1])
         self.scene.game.last_joystick_pos = self.cursor_pos
         self.options_text.pos = self.cursor_pos + V2(8, -8)
         self._generate_image()
@@ -75,7 +77,8 @@ class JoystickCursor(SpriteBase):
     def update_hover(self):
         if self.hovering and self.hovering.alive() and self.hovering != self.nearest_obj:
             self.hovering.on_mouse_exit(self.hovering.pos)
-        if self.nearest_obj:
+            self.hovering = None
+        if self.nearest_obj and self.hovering != self.nearest_obj:
             self.hovering = self.nearest_obj
             self.hovering.on_mouse_enter(self.hovering.pos)
 
@@ -95,8 +98,12 @@ class JoystickPanelCursor(SpriteBase):
         self.joystick_state = V2(0,0)        
         self.last_dir = None
         self.hovering = None
-        self.update_hover()
-        self._generate_image()
+        self.time = 0
+        if self.controls:
+            self.update_hover()
+            self._generate_image()
+        else:
+            self.visible = False
 
     def _generate_image(self):
         self.image = pygame.Surface((game.RES[0], game.RES[1]), pygame.SRCALPHA)
@@ -109,7 +116,17 @@ class JoystickPanelCursor(SpriteBase):
             c.height + 8
         )
         #pygame.draw.rect(self.image, PICO_PINK, rect, 1)
-        pygame.draw.line(self.image, PICO_PINK, (c.top_left.x - 2, c.top_left.y), (c.top_left.x - 2, c.top_left.y + c.height))
+        color = PICO_PINK
+        #pygame.draw.line(self.image, color, (c.top_left.x - 2, c.top_left.y), (c.top_left.x - 2, c.top_left.y + c.height))
+        pts = [
+            #(c.top_left + V2(-6, c.height // 2 - 4)).tuple(),
+            #(c.top_left + V2(-2, c.height // 2)).tuple(),
+            #(c.top_left + V2(-6, c.height // 2 + 4)).tuple(),
+            (c.top_left + V2(-6, 3 - 4)).tuple(),
+            (c.top_left + V2(-2, 3)).tuple(),
+            (c.top_left + V2(-6, 3 + 4)).tuple(),            
+        ]
+        pygame.draw.polygon(self.image, color, pts, 0)
 
         self._width, self._height = game.RES
 
@@ -119,10 +136,14 @@ class JoystickPanelCursor(SpriteBase):
         super().kill()
 
     def get_current_control(self):
-        return self.controls[self.control_pos[1]][self.control_pos[0]]
+        if self.controls:
+            return self.controls[self.control_pos[1]][self.control_pos[0]]
+        else:
+            return None
 
     def press(self, dir):
         c = self.get_current_control()
+        if c is None: return
         if dir == "down":
             y = min(self.control_pos[1] + 1, len(self.controls) - 1)
             x = clamp(self.control_pos[0], 0, len(self.controls[y]) - 1)
@@ -155,6 +176,7 @@ class JoystickPanelCursor(SpriteBase):
                 self._generate_image()
 
     def update_hover(self):
+        if self.get_current_control() is None: return
         if self.hovering and self.hovering.alive() and self.get_current_control() != self.hovering:
             self.hovering.on_mouse_exit(self.hovering.pos)
         self.hovering = self.get_current_control()
@@ -162,15 +184,18 @@ class JoystickPanelCursor(SpriteBase):
 
     def confirm(self):
         c = self.get_current_control()
+        if c is None: return
         if (
             isinstance(c, Button) or
             isinstance(c, text.Text) or
             isinstance(c, upgrade.upgradebutton.UpgradeButton) or 
             isinstance(c, upgrade.upgradeicon.UpgradeIcon) or 
-            isinstance(c, store.storescene.StoreItemButton)):
+            isinstance(c, store.storescene.StoreItemButton)
+        ):
             c.on_mouse_down(c.pos)
 
     def joystick_delta(self, delta):
+        if self.get_current_control() is None: return
         self.joystick_state = delta
         if delta.sqr_magnitude() > 0.75 ** 2:
             _,ang = delta.to_polar()
@@ -183,6 +208,3 @@ class JoystickPanelCursor(SpriteBase):
                 self.press(dir)
         else:
             self.last_dir = None
-
-    def update(self, dt):
-        return super().update(dt)

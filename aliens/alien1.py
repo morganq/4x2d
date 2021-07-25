@@ -73,8 +73,9 @@ class Alien1FighterProductionUpgrade(Upgrade):
     infinite = True
 
     def apply(self, to):
-        p = ProductionOrder("alien1battleship", 1, 60)
-        to.add_production(p)
+        if to.owning_civ.alien.difficulty > 1:
+            p = ProductionOrder("alien1battleship", 1, 60)
+            to.add_production(p)
 
 @register_upgrade
 class Alien1Tech1Upgrade(Upgrade):
@@ -145,6 +146,10 @@ class Alien1(alien.Alien):
     name = "alien1"
     EXPAND_NUM_NEAREST = 3
     title = "BARYSI NOMADS"
+
+    quotes = [
+        "\"Every vein and shard in this system belongs to us.\""
+    ]
 
     tips = [
         ("assets/alieninfo-terraform.png", "The BARYSI Terraform all planets they colonize, in order to extract more valuable ice and gas"),

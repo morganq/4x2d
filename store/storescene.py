@@ -174,19 +174,19 @@ class StoreScene(Scene):
         def make_onclick(price, upgrade):
             return lambda : self.buy_memory(price, upgrade)
         for i,upgrade in enumerate(row['upgrades']):
-            price = 25
+            price = 40
             elem = UpgradeIcon(V2(0,0), upgrade, tooltip=True)
             u = UPGRADE_CLASSES[upgrade]
 
             # Adjust price
             if u.resource_type == "ice":
-                price += 5
+                price += 10
             if u.resource_type == "gas":
-                price += 10
-            if "2" in u.name:
-                price += 10
-            if "3" in u.name:
                 price += 20
+            if "2" in u.name:
+                price += 20
+            if "3" in u.name:
+                price += 40
 
             if len(u.title) > 22:
                 title = u.title[0:19] + "..."
@@ -237,17 +237,17 @@ class StoreScene(Scene):
         def make_onclick(price, upgrade):
             return lambda : self.buy_blueprint(price, upgrade)
         for i,upgrade in enumerate(row['upgrades']):
-            price = 25
+            price = 30
             elem = UpgradeIcon(V2(0,0), upgrade, tooltip=True)
             u = UPGRADE_CLASSES[upgrade]
             if u.resource_type == "ice":
-                price += 5
+                price += 10
             if u.resource_type == "gas":
-                price += 10
-            if "2" in u.name:
-                price += 10
-            if "3" in u.name:
                 price += 20
+            if "2" in u.name:
+                price += 20
+            if "3" in u.name:
+                price += 40
             if len(u.title) > 22:
                 title = u.title[0:19] + "..."
             else:
@@ -291,7 +291,7 @@ class StoreScene(Scene):
 
     def buy_levelup(self, price, ship):
         self.game.run_info.credits -= price
-        self.game.run_info.ship_levels[ship] += 1
+        self.game.run_info.ship_levels[ship] = min(self.game.run_info.ship_levels[ship] + 1, 3)
         self.buy("levelup")
         
     def on_exit(self):

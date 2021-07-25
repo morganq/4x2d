@@ -21,6 +21,7 @@ import text
 import tilemap
 import tutorial.tutorial1scene
 from colors import *
+from helper import clamp
 from resources import resource_path
 from starmap import starmapscene
 from v2 import V2
@@ -88,11 +89,17 @@ class Game:
                     elif event.key == pygame.K_RIGHT: self.scene.take_input("right", event)
                     elif event.key == pygame.K_UP: self.scene.take_input("up", event)
                     elif event.key == pygame.K_DOWN: self.scene.take_input("down", event)
-                    elif event.key == pygame.K_SPACE: self.scene.take_input("action", event)
+                    elif event.key == pygame.K_SPACE:
+                        self.scene.take_input("action", event)
+                        self.game_speed_input = clamp(int(1 - self.game_speed_input), 0, 1)
                     elif event.key == pygame.K_ESCAPE:
                         self.scene.take_input("menu", event)
                     else:
                         self.scene.take_input("other", event)
+                
+                #if event.type == pygame.KEYUP:
+                #    if event.key == pygame.K_SPACE:
+                #        self.game_speed_input = 0
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
@@ -134,7 +141,8 @@ class Game:
                         self.scene.take_input("joymotion", {'delta':delta})
                         self.last_joy_axes = delta.tuple()
 
-                    self.game_speed_input = (self.joysticks[0].get_axis(4) + 1) / 2
+                    if self.input_mode == "joystick":
+                        self.game_speed_input = (self.joysticks[0].get_axis(4) + 1) / 2
 
                 if event.type == pygame.JOYHATMOTION:
                     delta = V2(event.value[0], -event.value[1])
@@ -151,7 +159,6 @@ class Game:
                 #if event.type == pygame.JOYBUTTONUP:
                 #    self.scene.take_input("joyup", event)
                 #    print(event)
-                    
 
             dt = clock.tick() / 1000.0
 

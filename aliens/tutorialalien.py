@@ -1,4 +1,4 @@
-from aliens import alien
+from aliens import alien, buildorder
 from aliens.alien1 import Alien1
 
 

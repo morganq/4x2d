@@ -3,6 +3,11 @@ from math import radians
 
 from upgrade.upgrades import UPGRADE_CLASSES
 
+RUN_INFO_SERIALIZE_FIELDS = [
+    'data', 'path', 'saved_technologies', 'blueprints',
+    'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
+    'bonus_credits', 'ship_levels', 'score'
+]
 
 class RunInfo:
     def __init__(self, data = None):
@@ -17,35 +22,21 @@ class RunInfo:
         self.credits = 20
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
+        self.score = 0
+
+        self.next_path_segment = (0,0)
 
     def serialize(self):
         obj = {}
-        obj['data'] = self.data
-        obj['path'] = self.path
-        obj['saved_technologies'] = self.saved_technologies
-        obj['blueprints'] = self.blueprints
-        obj['bonus_population'] = self.bonus_population
-        obj['bonus_fighters'] = self.bonus_fighters
-        obj['rerolls'] = self.rerolls
-        obj['o2'] = self.o2
-        obj['credits'] = self.credits
-        obj['bonus_credits'] = self.bonus_credits
-        obj['ship_levels'] = self.ship_levels
+        for key in RUN_INFO_SERIALIZE_FIELDS:
+            obj[key] = getattr(self, key)
         return obj
     
     @classmethod
     def deserialize(cls, obj):
-        r = RunInfo(obj['data'])
-        r.path = obj['path']
-        r.saved_technologies = obj['saved_technologies']
-        r.blueprints = obj['blueprints']
-        r.bonus_population = obj['bonus_population']
-        r.bonus_fighters = obj['bonus_fighters']
-        r.rerolls = obj['rerolls']
-        r.o2 = obj['o2']
-        r.credits = obj['credits']
-        r.bonus_credits = obj['bonus_credits']
-        r.ship_levels = obj['ship_levels']
+        r = RunInfo("placeholder")
+        for key in RUN_INFO_SERIALIZE_FIELDS:
+            setattr(r, key, obj[key])
         return r
 
     def choose_path(self, row, column):
@@ -54,6 +45,10 @@ class RunInfo:
     def get_path_galaxy(self, index = -1):
         (r,c) = self.path[index]
         return self.data[r][c]
+
+    def get_current_level_galaxy(self):
+        (r,c) = self.next_path_segment
+        return self.data[r][c]        
 
     def generate_reward_pool(self):
         self.reward_pool = []
@@ -68,14 +63,22 @@ class RunInfo:
         random.shuffle(self.reward_pool)
 
     def new_galaxy(self, row, from_links, level):
+        mods = []
+        if row == 4:
+            mods = [random.choice(["warp_drive", "big_planet", "ship_shield_far_from_home", "atomic_bomb"])]
+
+        if row == 8:
+            mods = [random.choice(["battleship"])]
+
         return {
             'node_type':'galaxy',
             'alien': random.choice(['alien1', 'alien2', 'alien3']),
             'rewards': [self.reward_pool.pop()],
             'difficulty': row,
             'level':level,
-            'links': from_links
-        }        
+            'links': from_links,
+            'mods': mods
+        }
 
     def new_store(self, row, from_links):
         offerings = []
@@ -116,7 +119,7 @@ class RunInfo:
         random.shuffle(l2)
         levels = l1 + l2
 
-        height = 11
+        height = 9
         for row in range(height):
             level = levels.pop()
             self.data.append([])
@@ -150,8 +153,7 @@ class RunInfo:
         #for _ in range(10):
         #    prune_one()
 
-        while len(get_paths(self.data, (0,0))) > 20:
-            print("pruning more")
+        while len(get_paths(self.data, (0,0))) > 7:
             prune_one()
 
 
@@ -166,7 +168,6 @@ class RunInfo:
                     for nrow, ncol in get_neighbors(self.data, (row,col)):
                         neighbor_node = self.data[nrow][ncol]
                         if col in neighbor_node['links']:
-                            print("removing child links to me", (row, col))
                             new_links = []
                             for link in neighbor_node['links']:
                                 if link < col:
@@ -197,7 +198,6 @@ class RunInfo:
                             elif link > col:
                                 new_links.append(link - 1)
                         above_node['links'] = new_links
-                    print("pop", row, col)
                     self.data[row].pop(col)
                 else:
                     col += 1
@@ -215,31 +215,31 @@ class RunInfo:
                 store_nums.append(stores)
             return store_nums
 
-        for i in range(4):
-            print(i)
+        store_row_places = [3, 5, 7]
+        random.shuffle(store_row_places)
+        for i in range(3):
             iterations = 0
             done = False
             while not done:
-                row = 2 + 2 * i
+                row = store_row_places[-1]
                 if iterations > 3:
-                    row = random.randint(2, len(self.data) - 2)
+                    row = 4
+                    while row == 4:                    
+                        row = random.randint(2, len(self.data) - 2)
                 col = random.randint(0, len(self.data[row])-1)
-                print("trying", row, col)
                 old_node = self.data[row][col]
                 if old_node['node_type'] == 'store':
-                    print("already got a store here")
                     iterations += 1
                     continue
                 self.data[row][col] = self.new_store(row, old_node['links'])
                 max_stores = max(count_stores())
                 if max_stores < 3 or iterations > 10:
-                    print("success")
                     done = True
                 else:
-                    print("nope")
                     iterations += 1
                     done = False
                     self.data[row][col] = old_node
+            store_row_places.pop()
 
                 
 

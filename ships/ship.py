@@ -99,8 +99,7 @@ class Ship(SpaceObject):
         self._timers['opt_time'] = random.random()
         self.opt_fleet_forces = V2(0,0)
 
-        if self.SHIP_NAME in ['fighter', 'interceptor', 'bomber', 'battleship'] and self.owning_civ.is_enemy:
-            self.update_color()
+        self.updated_color = False
 
     def get_stat(self, stat):
         return self.owning_civ.get_stat(stat)
@@ -193,6 +192,9 @@ class Ship(SpaceObject):
         self.state = state
 
     def update(self, dt):
+        if not self.updated_color and self.SHIP_NAME in ['fighter', 'interceptor', 'bomber', 'battleship'] and self.owning_civ.is_enemy:
+            self.update_color()
+            self.updated_color = True
         self.time += dt
         if self.health <= 0:
             e = explosion.Explosion(self.pos, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.25, 13, scale_fn="log", line_width=1)

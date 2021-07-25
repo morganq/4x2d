@@ -38,9 +38,19 @@ class Bomber(Fighter):
         
         self.set_sprite_sheet("assets/bomber.png", 12)
         self.can_create_colonist = False
+        self.num_dodges = 0
+
+    def get_dodges_left(self):
+        return self.get_stat("bomber_dodge_num") - self.num_dodges
+
+    def dodge(self):
+        self.num_dodges += 1
 
     def prepare_bullet_mods(self):
         mods = super().prepare_bullet_mods()
+        if not self.owning_civ.is_enemy:
+            damage_curve = [1, 1.5, 1.9, 2.2]
+            mods['damage_base'] *= damage_curve[self.scene.game.run_info.ship_levels["bomber"] - 1]
         mods['raze_chance'] = self.get_stat("bomber_raze_chance")
         mods['raze_make_colonist'] = self.get_stat('bomber_colonist')
         mods['color'] = PICO_PINK
@@ -82,3 +92,10 @@ class Bomber(Fighter):
             self.shooter.scene.game_group.add(s)
             self.can_create_colonist = False
         return super().update(dt)
+
+    def get_max_health(self):
+        hp = super().get_max_health()
+        if not self.owning_civ.is_enemy:
+            hp_curve = [1, 1.6, 2.1, 2.6]
+            hp *= hp_curve[self.scene.game.run_info.ship_levels["bomber"] - 1]           
+        return hp

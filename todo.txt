@@ -1,11 +1,6 @@
-Refine upgrades
-Complete ship upgrades
-Fix ship color bug for converted ships
+Required for release:
+ - test another full run
 
-
-
-shop:
- - blueprint x3,
- - memory x3,
- - o2 +10% (always), 
- - +1 random planet, 
+After release:
+ - saving progress mid game
+ - asset names pass

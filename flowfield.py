@@ -1,13 +1,14 @@
+import time
 from math import inf
-from v2 import V2
-import planet
+
 import asteroid
-from helper import clamp, get_nearest
 import game
 import hazard
-import time
+import planet
+from helper import clamp, get_nearest
+from v2 import V2
 
-GRIDSIZE = 10
+GRIDSIZE = 7
 EXTRA = 5
 
 class FlowFieldMap:

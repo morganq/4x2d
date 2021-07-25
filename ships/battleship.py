@@ -41,6 +41,9 @@ class Battleship(Fighter):
     def get_max_health(self):
         mh = super().get_max_health()
         mh *= 1 + self.get_stat("battleship_health_mul")
+        if not self.owning_civ.is_enemy:
+            hp_curve = [1, 2.0, 2.65, 3.0]
+            mh *= hp_curve[self.scene.game.run_info.ship_levels["battleship"] - 1]
         return mh
 
     def get_fire_rate(self):
@@ -49,11 +52,19 @@ class Battleship(Fighter):
             fr *= 2.5
         return fr
 
+    def prepare_bullet_mods(self):
+        mods = super().prepare_bullet_mods()
+        if self.get_stat("battleship_laser"):
+            mods['damage_base'] = 4
+        if not self.owning_civ.is_enemy:
+            damage_curve = [1, 1.5, 1.9, 2.2]
+            mods['damage_base'] *= damage_curve[self.scene.game.run_info.ship_levels["battleship"] - 1]        
+        return mods
+
     def fire_laser(self, at):
-        lp = LaserParticle(self.pos, at.pos, PICO_PINK, 0.25)
+        lp = LaserParticle(self.pos, at.pos, PICO_PINK, 0.75)
         self.scene.game_group.add(lp)
         mods = self.prepare_bullet_mods()
-        mods['damage_base'] = 4
         b = Bullet(at.pos, at, self, mods=mods)
         self.scene.game_group.add(b)        
         

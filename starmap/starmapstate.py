@@ -76,7 +76,8 @@ class StarMapState(states.UIEnabledState):
 
     def click_launch(self, galaxy):
         sound.play("click1")
-        self.scene.game.run_info.choose_path(*galaxy.coords)
+        #self.scene.game.run_info.choose_path(*galaxy.coords)
+        self.scene.game.run_info.next_path_segment = galaxy.coords
         self.scene.game.scene = LoadingScene(self.scene.game,galaxy)
         self.scene.game.scene.start()
 

@@ -1,12 +1,13 @@
+import game
+import pygame
+import text
 from colors import *
+from economy import RESOURCE_COLORS
 from resources import resource_path
 from spritebase import SpriteBase
 from tooltippanel import TooltipPanel
 from v2 import V2
-import pygame
-import game
-import text
-from economy import RESOURCE_COLORS
+
 from upgrade.upgrades import UPGRADE_CATEGORY_COLORS, UPGRADE_CLASSES
 
 HOVER_COLORS = {
@@ -37,6 +38,7 @@ class UpgradeIcon(SpriteBase):
         self._tooltip_panel = None
         self.selectable = True
         self.layer = 1
+        self.radius = 13
 
         self._generate_image()
 

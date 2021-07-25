@@ -62,9 +62,8 @@ class UpgradeState(UIEnabledState):
 
     def get_joystick_cursor_controls(self):
         l = []
-        l.extend([[c] for c in self.panel.get_controls_of_type(UpgradeButton)])
-        l.append([self.panel.get_control_of_type(Button)])
-        return l
+        if self.panel:
+            return self.panel.joystick_controls
 
     def exit(self):
         self.hover_filter = lambda x:True
@@ -249,6 +248,7 @@ class UpgradeState(UIEnabledState):
                 self.finish(cancel = True)
 
         if self.pending_upgrade is None:
+            self.joystick_overlay.controls = self.get_joystick_cursor_controls()
             return super().joystick_input(input, event)
 
         if input == "joymotion":

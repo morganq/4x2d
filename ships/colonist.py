@@ -2,6 +2,7 @@ import random
 
 import helper
 from colors import *
+from explosion import Explosion
 from icontext import IconText
 from particle import Particle
 from planet import planet
@@ -13,7 +14,7 @@ from ships.all_ships import register_ship
 
 from .ship import ATMO_DISTANCE, STATE_WAITING, THRUST_PARTICLE_RATE, Ship
 
-ATOMIC_BOMB_RANGE = 50
+ATOMIC_BOMB_RANGE = 20
 
 @register_ship
 class Colonist(Ship):
@@ -67,7 +68,9 @@ class Colonist(Ship):
         
 
     def colonized(self, planet):
-        pass
+        mods = self.scene.game.run_info.get_current_level_galaxy()['mods']
+        if mods and mods[0] == 'reflector':
+            planet.add_building(UPGRADE_CLASSES['b_defense1'])
 
 
     def update(self, dt):
@@ -89,8 +92,9 @@ class Colonist(Ship):
             enemy_objs = self.scene.get_enemy_objects(self.owning_civ)
             near_enemies = helper.all_nearby(self.pos, enemy_objs, ATOMIC_BOMB_RANGE * range_adjust)
             for enemy in near_enemies:
-                enemy.take_damage(50, self)
-            # TODO: particles
+                enemy.take_damage(self.population * 5, self)
+            e = Explosion(self.pos, [PICO_GREEN, PICO_WHITE, PICO_GREEN, PICO_DARKGREEN], 0.75, ATOMIC_BOMB_RANGE * range_adjust, lambda x:helper.clamp(x * 3,0,1))
+            self.scene.game_group.add(e)
             
         self.num_label.kill()
         return super().kill()
