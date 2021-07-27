@@ -2,5 +2,7 @@ Required for release:
  - test another full run
 
 After release:
+ - explain different ships
+ - explain / change 0 population
  - saving progress mid game
  - asset names pass
