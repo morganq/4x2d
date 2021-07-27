@@ -250,13 +250,6 @@ class LevelScene(scene.Scene):
         self.o2_meter._generate_image()
         self.ui_group.add(self.o2_meter)    
 
-        #self.army_size_label = Text("ARMY COST", "small", V2(4, 55), PICO_YELLOW, multiline_width=200)
-        #self.ui_group.add(self.army_size_label)
-        
-        self.army_size = Text("", "tiny", V2(4, 42), PICO_YELLOW, multiline_width=200, center=False)
-        if self.my_civ.upkeep_enabled:
-            self.ui_group.add(self.army_size)
-
     def setup_mods(self):
         galaxy = self.game.run_info.get_current_level_galaxy()
         if not galaxy['mods']:
@@ -344,8 +337,7 @@ class LevelScene(scene.Scene):
         self.sm.transition(levelstates.VictoryState(self))        
 
     def on_civ_resource_change(self, res_type, val):
-        self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
-        self.meters[res_type].value = self.my_civ.resources.data[res_type]
+        pass
 
     def get_objects_initial(self):
         return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
@@ -512,6 +504,13 @@ class LevelScene(scene.Scene):
         if self.options != "pacifist":
             for enemy in self.enemies:
                 enemy.update(dt)
+
+        for res_type in self.my_civ.upgrade_limits.data.keys():
+            ratio = self.my_civ.upgrade_limits.data[res_type] / self.my_civ.base_upgrade_limits.data[res_type]
+            self.upgrade_texts[res_type].x = 120 * ratio + 20
+            self.meters[res_type].set_width(120 * ratio)
+            self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
+            self.meters[res_type].value = self.my_civ.resources.data[res_type]
         
         t = time.time()
         self.fleet_managers['my'].update(dt)
@@ -523,9 +522,6 @@ class LevelScene(scene.Scene):
         for enemy in self.enemies:
             enemy.civ.update(dt)
         self.update_times['civs'] = time.time() - t
-
-        army = len(self.my_civ.get_all_combat_ships())
-        self.army_size.set_text("Fleet Upkeep: %.1f Iron / sec" % (-army / 5,))
 
         self.update_times['update'] = time.time() - ut
         

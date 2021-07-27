@@ -1,6 +1,7 @@
+import pygame
+
 from colors import DARKEN_COLOR, PICO_BLACK, PICO_DARKBLUE, PICO_PURPLE
 from spritebase import SpriteBase
-import pygame
 
 STAY_TIME = 5.0
 
@@ -18,6 +19,12 @@ class Meter(SpriteBase):
         self._value = 0
         self._apparent_value = 0
         self._generate_image()
+
+    def set_width(self, new_width):
+        if new_width != self.width:
+            self._width = new_width
+            self.meter_width = new_width
+            self._generate_image()
 
     @property
     def value(self):

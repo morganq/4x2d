@@ -45,7 +45,7 @@ class Tutorial1Scene(TutorialScene):
 
     def load(self):
         super().load()
-        self.my_civ.upgrade_limits.iron = 230
+        self.my_civ.base_upgrade_limits.iron = 230
         self.o2_meter.kill()
 
         self.my_civ.offered_upgrades = {

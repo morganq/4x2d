@@ -4,6 +4,7 @@ from collections import defaultdict
 import economy
 import sound
 from colors import *
+from helper import clamp
 from icontext import IconText
 from optimize import frame_memoize
 from stats import Stats
@@ -19,7 +20,8 @@ class Civ:
         self.is_enemy = True        
         self.resources = economy.Resources()
         self.frozen = economy.Resources(0,0,0)
-        self.upgrade_limits = economy.Resources(25,80,150)
+        self.base_upgrade_limits = economy.Resources(25,80,150)
+        self.upgrade_limits = economy.Resources(9999,9999,9999)
         self.upgrades_stocked = []
         self.upgrades = []
         self.researched_upgrade_names = set()
@@ -62,29 +64,29 @@ class Civ:
             }        
 
     def enable_scarcity(self):
-        self.upgrade_limits.iron += 200
-        self.upgrade_limits.ice += 200
-        self.upgrade_limits.gas += 200
+        self.base_upgrade_limits.iron += 200
+        self.base_upgrade_limits.ice += 200
+        self.base_upgrade_limits.gas += 200
         self.scarcity = True
+        self.upkeep_update()
 
     def update(self, dt):
         self.frame_stats = {}
         self.resources_update(dt)
         self.upgrades_update(dt)
-        if self.upkeep_enabled:
-            self.upkeep_update(dt)
+        self.upkeep_update()
         self.time += dt
 
-    def upkeep_update(self, dt):
-        self.upkeep_timer += dt
-        if self.upkeep_timer > 5:
-            self.upkeep_timer -= 5
-            value = -len(self.get_all_combat_ships())
-            self.resources.iron = max(self.resources.iron + value, 0)
-            if not self.is_enemy:
-                it = IconText(V2(70, 60), None, "%d" % value, economy.RESOURCE_COLORS["iron"])
-                self.scene.ui_group.add(it)                
+    def upkeep_update(self):
+        upkeep = self.get_upkeep_ratio()
+        if not self.upkeep_enabled:
+            upkeep = 0
+        self.upgrade_limits.iron = self.base_upgrade_limits.iron * (1 + upkeep)
+        self.upgrade_limits.ice = self.base_upgrade_limits.ice
+        self.upgrade_limits.gas = self.base_upgrade_limits.gas
 
+    def get_upkeep_ratio(self):
+        return clamp(len(self.get_all_combat_ships()) - 0, 0, 20) * 0.05
 
     def get_all_combat_ships(self):
         all_ships = []
@@ -109,7 +111,8 @@ class Civ:
             while self.resources.data[res_type] >= self.upgrade_limits.data[res_type]:
                 self.upgrades_stocked.append(res_type)
                 self.resources.set_resource(res_type, self.resources.data[res_type] - self.upgrade_limits.data[res_type])
-                self.upgrade_limits.data[res_type] = int(self.upgrade_limits.data[res_type] + self.get_upgrade_increase_amts()[res_type])
+                self.base_upgrade_limits.data[res_type] = int(self.base_upgrade_limits.data[res_type] + self.get_upgrade_increase_amts()[res_type])
+                self.upkeep_update()
                 self.num_upgrades += 1
                 if not self.is_enemy:
                     sound.play("upgrade")
