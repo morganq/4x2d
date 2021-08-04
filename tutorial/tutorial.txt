@@ -1,14 +1,14 @@
 Non-trivial Concepts:
- - Click planet for status
- - Drag / button for order arrow
+ * Click planet for status
+ * Drag / button for order arrow
  - Blow up asteroids for $
    - On hover show prompt?
  - Send workers to colonize
    - On hover show prompt?
- - Recall Ships
+ * Recall Ships
    - On hover show prompt
  - Different resources have different Asset pools
-   - Significantly different Asset icon per resource
+   * Significantly different Asset icon per resource
    - Connect resource meter to icon... flies out of the icon and moves to the bottom?
  - 0 Population
    - Exclamation point. When you click the planet, it explains the issue.

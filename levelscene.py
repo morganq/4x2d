@@ -32,6 +32,7 @@ from economy import RESOURCE_COLORS, RESOURCES, Resources
 from hazard import Hazard
 from helper import all_nearby, get_nearest
 from levelbackground import LevelBackground
+from line import AssetLine, Line
 from meter import Meter
 from objgrid import ObjGrid
 from planet.planet import Planet
@@ -217,11 +218,11 @@ class LevelScene(scene.Scene):
         self.meters = {}
         self.upgrade_texts = {}
         for i,r in enumerate(self.my_civ.resources.data.keys()):
-            self.meters[r] = Meter(V2(15,3 + i * 14), 120, 9, RESOURCE_COLORS[r], self.my_civ.upgrade_limits.data[r])
+            self.meters[r] = Meter(V2(19,3 + i * 14), 120, 9, RESOURCE_COLORS[r], self.my_civ.upgrade_limits.data[r])
             self.meters[r].stay = True
-            self.ui_group.add(simplesprite.SimpleSprite(V2(2,2 + i * 14), "assets/i-%s.png" % r))
+            self.ui_group.add(simplesprite.SimpleSprite(V2(6,2 + i * 14), "assets/i-%s.png" % r))
             self.ui_group.add(self.meters[r])
-            self.upgrade_texts[r] = Text("", "small", V2(140, 4 + i * 14), multiline_width=200)
+            self.upgrade_texts[r] = Text("", "small", V2(144, 4 + i * 14), multiline_width=200)
             self.ui_group.add(self.upgrade_texts[r])
 
         self.my_civ.resources.on_change(self.on_civ_resource_change)
@@ -235,7 +236,7 @@ class LevelScene(scene.Scene):
             upy += 27
 
         if game.DEV:
-            self.ui_group.add(Button(V2(2, game.RES[1] - 20), 'Win', 'small', self.dev_win))
+            self.ui_group.add(Button(V2(game.RES[0] - 50, game.RES[1] - 20), 'Win', 'small', self.dev_win))
 
         self.o2_meter = o2meter.O2Meter(V2(game.RES[0] - 68, 2))
         
@@ -245,6 +246,8 @@ class LevelScene(scene.Scene):
         self.o2_meter.o2 = self.game.run_info.o2
         self.o2_meter._generate_image()
         self.ui_group.add(self.o2_meter)    
+
+        self.upgrade_lines = []
 
     def setup_mods(self):
         galaxy = self.game.run_info.get_current_level_galaxy()
@@ -524,6 +527,7 @@ class LevelScene(scene.Scene):
             button.joy_button = None
         button.label = "ASSET"
         button.icon = "assets/i-%s.png" % resource
+        color = RESOURCE_COLORS[resource]
         if resource == "iron":
             button.color = PICO_LIGHTGRAY
         else:
@@ -537,6 +541,15 @@ class LevelScene(scene.Scene):
         self.ui_group.add(button) 
         self.asset_buttons.append(button)  
         self.update_asset_buttons()    
+
+        y1 = self.meters[resource].y + 4
+        y2 = button.get_center().y
+        x2 = button.top_left.x
+        l1 = AssetLine(V2(3,y1), V2(6, y1), color)
+        l2 = AssetLine(V2(3,y1), V2(3, y2), color)
+        l3 = AssetLine(V2(3, y2), V2(x2, y2), color)
+        for line in [l1,l2,l3]:
+            self.ui_group.add(line)
         
 
     def pop_asset_button(self):

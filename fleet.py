@@ -59,31 +59,7 @@ class FleetManager:
         for fleet in self.current_fleets:
             for ship in fleet.ships:
                 ship.fleet = fleet
-                self.ship_fleets[ship] = fleet        
-        #self.update_fleet_buttons()
-
-    def update_fleet_buttons(self):
-        for fleet in self.current_fleets:
-
-            # record which fleets have buttons by looking at their first ships
-            first_ship = fleet.ships[0]
-            def make_onclick(fleet):
-                def onclick(*args):
-                    self.recall_fleet(fleet)
-                return onclick
-            if self.civ == self.scene.my_civ:
-                if fleet.is_waiting() and first_ship not in self.fleet_order_buttons:
-                    # replace with a graphic and a tooltip
-                    b = Button(first_ship.pos, '', 'small', make_onclick(fleet), image_path="assets/recall.png")
-                    b.offset = (-0.15, 1.25)
-                    self.scene.ui_group.add(b)
-                    self.fleet_order_buttons[first_ship] = b
-                elif not fleet.is_waiting() and first_ship in self.fleet_order_buttons:
-                    self.fleet_order_buttons[first_ship].kill()
-                    del self.fleet_order_buttons[first_ship]
-
-                if first_ship in self.fleet_order_buttons:
-                    self.fleet_order_buttons[first_ship].pos = first_ship.pos        
+                self.ship_fleets[ship] = fleet           
 
     def recall_fleet(self, fleet):
         nearest, dist = helper.get_nearest(fleet.ships[0].pos, self.scene.get_civ_planets(fleet.ships[0].owning_civ))
@@ -157,7 +133,6 @@ class Fleet:
         scene = self.ships[0].scene
         self.selectable_object = FleetSelectable(scene, average, radius, self.ships[0].owning_civ, self)
         scene.game_group.add(self.selectable_object)
-        print(self.selectable_object.pos, radius)
         
 
     def __str__(self):

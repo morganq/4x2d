@@ -47,6 +47,8 @@ class PlayState(UIEnabledState):
         self.joy_controls_state = "default"
         self.joy_hover_filter = self.default_joy_hover_filter
         self.joy_arrow_from = None
+        self.options_text = text.Text("", "small", V2(0,0), PICO_PINK, multiline_width=200, shadow=PICO_BLACK, center=False)
+        self.scene.ui_group.add(self.options_text)
 
     def exit(self):
         if self.selector:
@@ -57,6 +59,7 @@ class PlayState(UIEnabledState):
             self.current_panel.kill()
         if self.joystick_overlay:
             self.joystick_overlay.kill()
+        self.options_text.kill()
         super().exit()
 
     def deselect(self):
@@ -86,7 +89,23 @@ class PlayState(UIEnabledState):
     def update(self, dt):
         if self.scene.game.input_mode == "joystick":
             self.joystick_update(dt)
-            return
+        else:
+            self.mouse_update(dt)
+
+    def mouse_update(self, dt):
+        self.options_text.pos = self.mouse_pos + V2(8, -8)
+        # Hover planet info
+        # TODO: optimize?
+        options = ""
+        if (
+            self.hover_sprite and
+            isinstance(self.hover_sprite, planet.planet.Planet) and 
+            not self.current_panel
+        ):
+            if self.hover_sprite.owning_civ == self.scene.my_civ:
+                options = "[*left*] Planet Info\n[*drag*] Order Ships"
+            else:
+                options = "[*left*] Planet Info"
 
         if self.last_clicked_sprite:
             selection_info = self.last_clicked_sprite.get_selection_info()
@@ -138,9 +157,16 @@ class PlayState(UIEnabledState):
                     self.deselect()
         else:
             if self.arrow:
-                self.arrow.visible = False        
+                self.arrow.visible = False    
 
         self.scene.fleet_managers['my'].update_fleet_markers(self.mouse_pos)
+        if self.scene.fleet_managers['my'].fleet_markers:
+            options = "[*right*] Recall Ships"
+
+        if self.arrow and self.arrow.visible:
+            options = ""
+            
+        self.options_text.set_text(options)
         super().update(dt)
 
     def take_input(self, inp, event):

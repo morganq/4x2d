@@ -114,6 +114,7 @@ HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26, 'bm_army':12
 SYMBOLS = {
     '*left*':"assets/mouse_left.png",
     '*right*':"assets/mouse_right.png",
+    '*drag*':"assets/mouse_drag.png",
 }
 
 SYMBOLS_PS = {

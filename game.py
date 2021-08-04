@@ -58,6 +58,9 @@ class Game:
                 self.scene = allupgradesscene.AllUpgradesScene(self)
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
+            elif sys.argv[1] == "game":
+                print("GAME")
+                self.scene = levelscene.LevelScene(self, "choke", "alien1", 3)
             else:
                 self.scene = menuscene.MenuScene(self)
         else:
