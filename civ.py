@@ -86,15 +86,15 @@ class Civ:
         self.upgrade_limits.gas = self.base_upgrade_limits.gas
 
     def get_upkeep_ratio(self):
-        return clamp(len(self.get_all_combat_ships()) - 6, 0, 15) * 0.075
+        return clamp(len(self.get_all_combat_ships()) - 0, 0, 15) * 0.075
 
     def get_all_combat_ships(self):
         all_ships = []
-        for s in self.scene.get_civ_ships(self):
-            if s.SHIP_BONUS_NAME != 'colonist':
+        for s in self.scene.get_civ_ships(self, skip_objgrid=True):
+            if s.SHIP_BONUS_NAME != 'colonist' and s.is_alive():
                 all_ships.append({'type':'ship', 'object':s, 'name':s.SHIP_NAME})
         
-        for p in self.scene.get_civ_planets(self):
+        for p in self.scene.get_civ_planets(self, skip_objgrid=True):
             for k,v in p.ships.items():
                 for i in range(v):
                     all_ships.append({'type':'planet', 'object':p, 'name':k})
@@ -116,6 +116,7 @@ class Civ:
                 self.num_upgrades += 1
                 if not self.is_enemy:
                     self.scene.add_asset_button(res_type)
+                    self.scene.meters[res_type].flash()
                     sound.play("upgrade")
                     if res_type == 'iron':
                         self.upgrade_times.append(self.time)

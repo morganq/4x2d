@@ -1,6 +1,7 @@
 import pygame
 
-from colors import DARKEN_COLOR, PICO_BLACK, PICO_DARKBLUE, PICO_PURPLE
+from colors import (DARKEN_COLOR, PICO_BLACK, PICO_DARKBLUE, PICO_PURPLE,
+                    PICO_YELLOW)
 from spritebase import SpriteBase
 
 STAY_TIME = 5.0
@@ -10,6 +11,8 @@ class Meter(SpriteBase):
         SpriteBase.__init__(self, pos)
         self.stay = False
         self.stay_time = 0
+
+        self.flash_time = 0
 
         self.meter_width = width
         self.meter_height = height
@@ -57,13 +60,26 @@ class Meter(SpriteBase):
         else:
             px = round((self.meter_width - 4) * (self._apparent_value / max_value))
             pygame.draw.rect(self.image, self.color, (0,0, self.meter_width, self.meter_height), 1)
-            pygame.draw.rect(self.image, self.color, (2,2, px, self.meter_height - 4), 0)
+            color = self.color
+            if self.flash_time > 0:
+                px = (self.meter_width - 4)
+                color = self.color if (self.flash_time * 8) % 1 > 0.5 else PICO_YELLOW
+            pygame.draw.rect(self.image, color, (2,2, px, self.meter_height - 4), 0)
 
         self._width = self.meter_width
         self._height = self.meter_height
         self._recalc_rect()
 
+    def flash(self):
+        self.flash_time = 2
+
     def update(self, dt):
+        if self.flash_time > 0:
+            self.flash_time -= dt
+            self._generate_image()
+            self.visible = 1
+            return
+
         if self._apparent_value < min(self._value, self.max_value):
             self._apparent_value = min(self._apparent_value + self.max_value * dt * 2, self._value)
             self._generate_image()

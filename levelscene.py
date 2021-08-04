@@ -351,7 +351,9 @@ class LevelScene(scene.Scene):
     def get_planets(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet)]
 
-    def get_civ_planets(self, civ):
+    def get_civ_planets(self, civ, skip_objgrid = False):
+        if skip_objgrid:
+            return [s for s in self.get_objects_initial() if isinstance(s,Planet) and s.owning_civ == civ] 
         return [s for s in self.get_objects() if isinstance(s,Planet) and s.owning_civ == civ]
 
     def get_enemy_planets(self, civ):
@@ -372,7 +374,9 @@ class LevelScene(scene.Scene):
     def get_enemy_objects(self, civ):
         return [s for s in self.get_objects() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]
 
-    def get_civ_ships(self, civ):
+    def get_civ_ships(self, civ, skip_objgrid = False):
+        if skip_objgrid:
+            return [s for s in self.get_objects_initial() if isinstance(s,Ship) and s.owning_civ == civ]
         return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ == civ]        
 
     def get_hazards(self):
@@ -475,13 +479,6 @@ class LevelScene(scene.Scene):
         elapsed = time.time() - t
         self.update_times["collisions"] = elapsed
 
-        #for res_type in self.my_civ.resources.data.keys():
-        #    num = len([u for u in self.my_civ.upgrades_stocked if u == res_type])
-        #    if num > 0:
-        #        self.upgrade_texts[res_type].set_text("%d asset%s available" % (num, "s" if num > 1 else ""))
-        #    else:
-        #        self.upgrade_texts[res_type].set_text("")
-
         if self.options != "pacifist":
             for enemy in self.enemies:
                 enemy.update(dt)
@@ -518,7 +515,7 @@ class LevelScene(scene.Scene):
                 button.onclick = None
             
     def add_asset_button(self, resource):
-        button = Button(V2(game.RES[0] / 2, game.RES[1] - 4), "UPGRADE", "big", None, asset_border=True)
+        button = Button(V2(game.RES[0] / 2, game.RES[1] - 4), "UPGRADE", "big", None, asset_border=True, fixed_width=90)
         text = "%s" % resource.upper()
         button.text = text
         if self.game.input_mode == "joystick":
@@ -548,6 +545,9 @@ class LevelScene(scene.Scene):
         l1 = AssetLine(V2(3,y1), V2(6, y1), color)
         l2 = AssetLine(V2(3,y1), V2(3, y2), color)
         l3 = AssetLine(V2(3, y2), V2(x2, y2), color)
+        l1.next_line = l2
+        l2.next_line = l3
+        l1.start()
         for line in [l1,l2,l3]:
             self.ui_group.add(line)
         

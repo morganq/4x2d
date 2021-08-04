@@ -2,6 +2,7 @@ import pygame
 
 import text
 from colors import PICO_WHITE
+from helper import clamp
 from spritebase import SpriteBase
 from v2 import V2
 
@@ -30,7 +31,6 @@ class Line(SpriteBase):
         h = max(abs(delta.y),1)
         pt1 = V2(0 if delta.x > 0 else abs(delta.x), 0 if delta.y > 0 else abs(delta.y))
         pt2 = V2(abs(delta.x) if delta.x > 0 else 0, abs(delta.y) if delta.y > 0 else 0)
-        print (delta, w,h,pt1,pt2)
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
         pygame.draw.line(self.image, self.color, pt1.tuple(), pt2.tuple(), 1)
@@ -43,19 +43,38 @@ class Line(SpriteBase):
 class AssetLine(Line):
     def __init__(self, start, end, color):
         super().__init__(start, end, color)
-        self.time = 0
+        self.next_line = None
+        self.time = -999999999
+        self.pt_start = self.pt1.copy()
+        self.pt_final = self.pt2.copy()
+        self.delta = (self.pt2 - self.pt1).normalized()
+        self.len = (self.pt2 - self.pt1).magnitude()
+        self.pt2 = self.pt1.copy()
+        self.visible = False
+        self._generate_image()
     
+    def start(self):
+        self.time = 0
+        self.visible = True
+        self.update_len()
+
+    def update_len(self):
+        t = self.time * 1750
+        l1 = clamp(t, 0, self.len)
+        self.pt2 = self.pt_start + self.delta * l1
+        l2 = clamp(t - 800, 0, self.len)
+        self.pt1 = self.pt_start + self.delta * l2
+        if l1 >= self.len:
+            if self.next_line and self.next_line.time < 0:
+                self.next_line.start()
+        if l2 >= self.len:
+            self.kill()
+        self._generate_image()
+        self.pos = self.pt1
+
     def update(self, dt):
         self.time += dt
-        if self.time < 0.75:
-            if (self.time * 8) % 1 > 0.5:
-                self.visible = False
-            else:
-                self.visible = True
-        else:
-            self.visible = True
-        if self.time > 1.5:
-            self.kill()
+        self.update_len()
         return super().update(dt)
 
 class IndicatorLine(Line):

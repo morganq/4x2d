@@ -11,11 +11,12 @@ SIZE_PADDING = {'tiny':3, 'small':4, 'medium':5, 'big':7, 'huge':10}
 HEIGHTS = {'tiny':5, 'small':10, 'medium':16, 'big':10, 'huge':15}
 
 class Button(SpriteBase, FadeInMixin):
-    def __init__(self, pos, text, size, onclick, image_path=None, label=None, icon=None, color=PICO_BLUE, asset_border = False):
+    def __init__(self, pos, text, size, onclick, image_path=None, label=None, icon=None, color=PICO_BLUE, asset_border = False, fixed_width = None):
         SpriteBase.__init__(self, pos)
         self.color = color
         self.text = text
         self.size = size
+        self.fixed_width = fixed_width
         self.onclick = onclick
         self.selectable = True
         self.image_path = image_path
@@ -68,6 +69,8 @@ class Button(SpriteBase, FadeInMixin):
             if icon.get_height() > HEIGHTS[self.size]:
                 h += int((icon.get_height() - HEIGHTS[self.size]))
                 y_offset += int((icon.get_height() - HEIGHTS[self.size]) / 2)
+
+        w = self.fixed_width or w
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
         pygame.draw.rect(self.image, color, (0,0,w,h), 0)
