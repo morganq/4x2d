@@ -96,7 +96,7 @@ def generate_galaxy_art(radius, also_hover = False):
 
 
 class Galaxy(SpriteBase):
-    def __init__(self, pos, coords, alien, rewards, difficulty, level, playable):
+    def __init__(self, pos, coords, alien, rewards, difficulty, level, signal, playable):
         super().__init__(pos)
         self.offset = (0.5, 0.5)
         self._generate_image()
@@ -105,6 +105,7 @@ class Galaxy(SpriteBase):
         self.rewards = rewards
         self.difficulty = difficulty
         self.level = level
+        self.signal = signal
         self.playable = playable
         
         self.selectable = True

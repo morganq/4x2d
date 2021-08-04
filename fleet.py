@@ -1,10 +1,13 @@
-from rangeindicator import RangeIndicator
-from colors import PICO_DARKGREEN, PICO_GREEN
-from spaceobject import SpaceObject
+from collections import defaultdict
+
+import pygame
+
+import helper
 import ships
 from button import Button
-import pygame
-import helper
+from colors import PICO_DARKGREEN, PICO_GREEN
+from rangeindicator import RangeIndicator
+from spaceobject import SpaceObject
 from v2 import V2
 
 FLEET_RADIUS = 30
@@ -86,8 +89,7 @@ class FleetManager:
         nearest, dist = helper.get_nearest(fleet.ships[0].pos, self.scene.get_civ_planets(fleet.ships[0].owning_civ))
         if nearest:        
             for ship in fleet.ships: 
-                ship.chosen_target = nearest
-                ship.effective_target = nearest
+                ship.set_target(nearest)
                 ship.set_state('returning')
 
     def get_ship_fleet(self, ship):
@@ -124,6 +126,12 @@ class Fleet:
         if average_time >= 6:
             return True
         return False
+
+    def mode_state(self):
+        states = defaultdict(lambda:0)
+        for s in self.ships:
+            states[s.state] += 1
+        return max([(b,a) for a,b in states.items()])[1]
 
     def get_size_info(self):
         average = V2(0,0)

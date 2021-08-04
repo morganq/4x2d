@@ -1,5 +1,6 @@
 import pygame
 
+import game
 import joystickcursor
 import levelstates
 import planet
@@ -29,13 +30,12 @@ class UpgradeState(UIEnabledState):
         self.pending_upgrade = None
         self.cursor_icon = None
         self.selection_info_text = None
-        self.back_button = None
+        #self.back_button = None
         self.current_cursor = None
 
     def enter(self):
         sound.play("panel")
         self.scene.paused = True
-        self.scene.upgrade_button.visible = False
         resource = self.scene.my_civ.upgrades_stocked[0]
         self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
         self.panel.add_all_to_group(self.scene.ui_group)
@@ -53,12 +53,12 @@ class UpgradeState(UIEnabledState):
             x.owning_civ == self.scene.my_civ and 
             x.upgradeable and
             x.is_buildable()
-        ) or x == self.back_button
+        )
 
     def filter_my_fleets(self, x):
         return (
             x.get_selection_info() and x.get_selection_info()['type'] == 'fleet' and x.owning_civ == self.scene.my_civ
-        ) or x == self.back_button       
+        )
 
     def get_joystick_cursor_controls(self):
         l = []
@@ -72,8 +72,8 @@ class UpgradeState(UIEnabledState):
             self.selection_info_text.kill()
         if self.cursor_icon:
             self.cursor_icon.kill()
-        if self.back_button:
-            self.back_button.kill()
+        #if self.back_button:
+        #    self.back_button.kill()
         super().exit()
 
     def finish(self, target=None, cancel = False):
@@ -85,6 +85,7 @@ class UpgradeState(UIEnabledState):
             self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
             self.scene.my_civ.clear_offers()
             sound.play("upgrade2")
+            self.scene.pop_asset_button()
         if self.panel:
             self.panel.kill()
         if self.joystick_overlay:
@@ -169,9 +170,9 @@ class UpgradeState(UIEnabledState):
         else:
             self.pending_upgrade = upgrade
             self.setup_cursor_type(self.current_cursor)
-            self.back_button = Button(self.scene.upgrade_button.pos, "Back", "small", self.on_back)
-            self.back_button.offset = (0.5, 1)
-            self.scene.ui_group.add(self.back_button)            
+            #self.back_button = Button(V2(game.RES[0] / 2, game.RES[1] - 5), "Back", "small", self.on_back)
+            #self.back_button.offset = (0.5, 1)
+            #self.scene.ui_group.add(self.back_button)            
 
     def next_selection_step(self):
         sound.play("click1")
@@ -200,6 +201,9 @@ class UpgradeState(UIEnabledState):
                 self.cursor_icon.pos = event.gpos + V2(10,10)
 
         if self.current_cursor:
+            if input == "menu":
+                self.on_back()
+
             if input == "click" and self.hover_sprite:
                 sel = self.hover_sprite.get_selection_info()
                 if sel:
@@ -226,19 +230,13 @@ class UpgradeState(UIEnabledState):
                     return                
 
         else:
+            if input == "menu":
+                self.finish(cancel = True)
+
             if input == "click":
                 pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
                 if not pr.collidepoint(event.gpos.tuple()):
-                    self.finish(cancel = True)
-
-    def keyboard_input(self, input, event):
-        super().keyboard_input(input, event)
-        if self.cursor_icon:
-            if input == 'action' and self.hover_sprite:
-                sel = self.hover_sprite.get_selection_info()
-                if sel and sel['type'] == "planet" and self.hover_sprite.owning_civ == self.scene.my_civ:
-                    u = self.pending_upgrade().apply(self.hover_sprite)
-                    self.finish(target=self.hover_sprite)      
+                    self.finish(cancel = True)    
 
     def joystick_input(self, input, event):
         if input == "back":
@@ -305,6 +303,8 @@ class UpgradeState(UIEnabledState):
             self.cursor_icon.kill()
             self.cursor_icon = None
 
+        self.current_cursor = None
+
         self.cursor_type = None
         self.pending_upgrade = None
         resource = self.scene.my_civ.upgrades_stocked[0]
@@ -313,8 +313,8 @@ class UpgradeState(UIEnabledState):
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
         self.hover_filter = self.filter_only_panel_ui
-        self.back_button.kill()
-        self.back_button = None
+        #self.back_button.kill()
+        #self.back_button = None
         self.selection_info_text.kill()
         self.selection_info_text = None
         self.selected_targets = []

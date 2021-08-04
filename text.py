@@ -111,6 +111,11 @@ def get_groups(line, inside_group=None):
 
 HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26, 'bm_army':12, 'pixolde':16}
 
+SYMBOLS = {
+    '*left*':"assets/mouse_left.png",
+    '*right*':"assets/mouse_right.png",
+}
+
 SYMBOLS_PS = {
     '*square*':"assets/ps_square.png",
     '*triangle*':"assets/ps_triangle.png",
@@ -150,12 +155,15 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
     text_surf = pygame.Surface((w,h), pygame.SRCALPHA)
     y = 0
     is_in_color = None
+    max_x = 0
     for line in lines:
         _,_,fw,fh = f.get_rect(line)
         fh = HEIGHTS[size]
         groups = get_groups(line, is_in_color)
         running_x = 0
-        for group in groups:            
+        for group in groups:      
+            if not group:
+                continue
             if center:
                 x = (w - fw) // 2
             else:
@@ -168,9 +176,9 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
             # Is text or a symbol?
             joys = game.Game.inst.joysticks
             if joys and joys[0].get_numbuttons() == 14:
-                symbols = SYMBOLS_PS
+                symbols = {**SYMBOLS, **SYMBOLS_PS}
             else:
-                symbols = SYMBOLS_XBOX
+                symbols = {**SYMBOLS, **SYMBOLS_XBOX}
             if group_text in symbols:
                 symbol_img = pygame.image.load(resource_path(symbols[group_text]))
                 text_surf.blit(symbol_img, (x + running_x, y + yo))
@@ -191,7 +199,12 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
                 
                 running_x += rect[2] + 1
                 is_in_color = group[0]
+        max_x = max(max_x, running_x)
         y += fh
+    if max_x < text_surf.get_width():
+        ret_surf = pygame.Surface((max_x, text_surf.get_height()), pygame.SRCALPHA)
+        ret_surf.blit(text_surf, (0,0))
+        return ret_surf
     return text_surf
 
 if __name__ == "__main__":

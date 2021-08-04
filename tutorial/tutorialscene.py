@@ -63,6 +63,7 @@ class TutorialScene(LevelScene):
 
         self.setup_players()
         self.my_civ.upkeep_enabled = False
+        self.background.generate_image(self.get_objects_initial())
         self.add_ui_elements()
 
         self.tutorial_panel = TutorialMessage(" ")

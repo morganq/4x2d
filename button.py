@@ -8,10 +8,10 @@ from spritebase import SpriteBase
 from v2 import V2
 
 SIZE_PADDING = {'tiny':3, 'small':4, 'medium':5, 'big':7, 'huge':10}
-HEIGHTS = {'tiny':5, 'small':7, 'medium':16, 'big':10, 'huge':15}
+HEIGHTS = {'tiny':5, 'small':10, 'medium':16, 'big':10, 'huge':15}
 
 class Button(SpriteBase, FadeInMixin):
-    def __init__(self, pos, text, size, onclick, image_path=None, label=None, icon=None, color=PICO_BLUE):
+    def __init__(self, pos, text, size, onclick, image_path=None, label=None, icon=None, color=PICO_BLUE, asset_border = False):
         SpriteBase.__init__(self, pos)
         self.color = color
         self.text = text
@@ -22,6 +22,7 @@ class Button(SpriteBase, FadeInMixin):
         self.label = label
         self.icon = icon
         self.joy_button = None
+        self.asset_border = asset_border
         self._generate_image()
 
     def _generate_image(self, hover=False):
@@ -41,6 +42,8 @@ class Button(SpriteBase, FadeInMixin):
     def _generate_text_image(self, hover=False):
         color = self.color
         text_color = PICO_WHITE
+        if sum(color) > 180 * 3:
+            text_color = PICO_BLACK
         if hover:
             color = PICO_WHITE
             text_color = PICO_BLACK        
@@ -73,7 +76,7 @@ class Button(SpriteBase, FadeInMixin):
         icon_x = text_x
 
         #text.FONTS[self.size].render_to(self.image, (text_x, pad + y_offset), self.text, text_color)
-        self.image.blit(text_img, (text_x, pad + y_offset))
+        self.image.blit(text_img, (text_x, pad + y_offset + 1))
         if icon:
             icon_x = text_x - 4 - icon.get_width()
             icon_y = pad + y_offset + int((HEIGHTS[self.size] - icon.get_height()) / 2)
@@ -91,20 +94,27 @@ class Button(SpriteBase, FadeInMixin):
         if self.joy_button:
             text.render_multiline_to(self.image, (1, 1), self.joy_button, "tiny", text_color)
 
+        if self.asset_border:
+            pygame.draw.line(self.image, PICO_BLACK, (0,0), (0,h))
+            pygame.draw.line(self.image, PICO_BLACK, (0,h-1), (w,h-1))
+
         self._width = w
         self._height = h
         self._recalc_rect()
 
     def on_mouse_enter(self, pos):
-        self._generate_image(True)
+        if self.onclick:
+            self._generate_image(True)
         return super().on_mouse_enter(pos)
 
     def on_mouse_exit(self, pos):
-        self._generate_image(False)
+        if self.onclick:
+            self._generate_image(False)
         return super().on_mouse_exit(pos)
 
     def on_mouse_down(self, pos):
-        self.onclick()
-        self._generate_image(False)
-        super().on_mouse_down(pos)
-        return True
+        if self.onclick:
+            self.onclick()
+            self._generate_image(False)
+            super().on_mouse_down(pos)
+            return True

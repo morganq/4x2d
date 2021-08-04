@@ -1,12 +1,16 @@
-import pygame
-from colors import *
-from scene import Scene
-from background import Background
-from spritebase import SpriteBase
-import text
-from v2 import V2
-from helper import clamp
 import json
+
+import pygame
+
+import text
+from background import Background
+from colors import *
+from helper import clamp
+from levelbackground import LevelBackground
+from scene import Scene
+from spritebase import SpriteBase
+from v2 import V2
+
 
 class LEObject(SpriteBase):
     def __init__(self, pos, obj_type):
@@ -60,13 +64,17 @@ class LevelEditorScene(Scene):
         self.current_object_resources = [10,0,0]
         self.current_object_resources_index = 0
         self.current_object = None
+        self.time = 0
+        self.redo_background_timer = 0
     
     def start(self):
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
 
-        self.background_group.add(Background(V2(0,0)))
+        self.background = LevelBackground(V2(0,0))
+        self.background.generate_image([])
+        self.background_group.add(self.background)
 
     def save(self):
         pass
@@ -82,6 +90,7 @@ class LevelEditorScene(Scene):
 
         if inp == "unclick":
             self.current_object = None
+            self.background.generate_image(self.game_group.sprites())
 
         if inp == "mouse_drag":
             if self.current_object:
@@ -131,3 +140,7 @@ class LevelEditorScene(Scene):
         text.render_multiline_to(self.game.screen, (33,16), str(self.current_object_resources[2]), "small", PICO_PINK)
         pygame.draw.rect(self.game.screen, PICO_LIGHTGRAY, (3 + self.current_object_resources_index * 15, 24,6,2))
         return super().render()
+
+    def update(self, dt):
+        self.time += dt
+        return super().update(dt)

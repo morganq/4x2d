@@ -554,7 +554,7 @@ class Satellite1Upgrade(AddBuildingUpgrade):
     name = "b_satellite1"
     resource_type = "gas"
     category = "buildings"
-    title = "Space Station"
+    title = "Orbital Habitat"
     description = "[^+4] maximum population"
     icon = "building_default"
     cursor = "allied_planet"

@@ -87,8 +87,12 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
             icon = None
             if 'icon' in self.tab:
                 icon = pygame.image.load(resources.resource_path(self.tab['icon']))
-                icon_offset = icon.get_width() + 4                
-            tab_text = text.render_multiline(self.tab['text'], 'small', PICO_BLACK)
+                icon_offset = icon.get_width() + 4
+
+            tab_foreground = PICO_BLACK
+            if sum(self.tab['color']) < 128 * 3:
+                tab_foreground = PICO_WHITE
+            tab_text = text.render_multiline(self.tab['text'], 'small', tab_foreground)
             tab_width = tab_text.get_size()[0] + 8 + icon_offset            
         
         box_width = xmax + self.padding * 2

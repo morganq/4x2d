@@ -40,10 +40,11 @@ class MenuState(states.UIEnabledState):
 
 class MenuScene(scene.Scene):
     def start(self):
-        self.background_group = pygame.sprite.Group()
+        self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         bg = simplesprite.SimpleSprite(V2(0,0), "assets/menubg.png")
+        bg.dirty = 1
         self.background_group.add(bg)
 
         self.selected_item_index = 0
@@ -99,11 +100,13 @@ class MenuScene(scene.Scene):
         self.time += dt
         super().update(dt)
 
-    def render(self):
-        self.background_group.draw(self.game.screen)
-        self.game_group.draw(self.game.screen)
-        self.ui_group.draw(self.game.screen)        
-        return super().render()
+    def render(self):   
+        dirty = []
+        dirty.extend(self.background_group.draw(self.game.screen))
+        dirty.extend(self.game_group.draw(self.game.screen))
+        dirty.extend(self.ui_group.draw(self.game.screen))
+        dirty.extend(super().render())
+        return dirty
 
     def music_change(self, value):
         self.game.save.set_setting("music_volume", value)

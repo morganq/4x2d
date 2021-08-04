@@ -24,62 +24,15 @@ Void Keepers - Discovered the void. Keepers understand it only in ritualistic te
 
 ===
 
-name notes
-
-explains what you do
-"star control"
-"starcraft"
-"command and conquer"
-"cosmic conquest"
-"galactic civilizations"
-
-
-describes who you are
-"star guard"
-"master of orion"
-"supreme commander"
-
-
-phrase related to the setting
-"faster than light"
-"red alert"
-"nether earth"
-"dark colony"
-
-
-other
-"sins of a solar empire"
-"homeworld"
-
-
-words:
-star
-deep
-black
-escape
-flare
-gamma
-giant
-nova / supernova
-lightyear
-moons
-orbit
-parsec
-pulsar
-rings of
-sidereal
-cosmic
-matter
-solar
---
-rebel
-resistance
-struggle
-revolt
-beacon
-fugitive
-outcast
-mutineer
-defiant
-
-solar rebellion
+Per-run story:
+ - Hear signal
+ - lvl1 - Sneak attack on alien fleet
+ - lvl4 - Future tech (from Censors)...
+    "Commander, we've intercepted a transmission...
+    the BARYSI NOMADS in this quadrant have been granted FUTURISTIC technology - by an unknown benefactor!
+    DESCRIPTION
+    ...someone out there is desperate for us to fail."
+ - lvl6+ - Time loop planet
+    "Commander, detecting strange behavior on one of the planets in this quadrant...
+    Its atmosphere and lifeforms appear stuck in a time loop! What does it mean?"
+ - lvl11 - Censors

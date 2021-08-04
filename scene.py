@@ -1,5 +1,6 @@
 import states
 
+
 class Scene:
     def __init__(self, game):
         self.game = game
@@ -10,7 +11,7 @@ class Scene:
             self.sm.state.update(dt)
 
     def render(self):
-        pass
+        return []
 
     def take_input(self, inp, event):
         if self.sm:

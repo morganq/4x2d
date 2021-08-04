@@ -1,10 +1,13 @@
-from colors import *
-from spritebase import SpriteBase
-import pygame
-import game
-import random
 import math
+import random
+
+import pygame
+
+import game
+from colors import *
 from helper import clamp
+from spritebase import SpriteBase
+
 
 class Background(SpriteBase):
     def __init__(self, pos, gridsize=20, size=None):

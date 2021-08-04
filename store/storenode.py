@@ -1,7 +1,9 @@
 import game
 from button import Button
 from colors import *
+from line import Line
 from panel import Panel
+from rectangle import Rectangle
 from simplesprite import SimpleSprite
 from text import Text
 from v2 import V2
@@ -25,16 +27,29 @@ class StoreNodeGraphic(SimpleSprite):
 class StoreNodePanel(Panel):
     def __init__(self, store, onclick):
         super().__init__(V2(5,5), store)
+        self.padding = 3 # ??
+        self.store = store
         
-        self.tab = {'text':"Sector %d" % store.coords[0], 'color':PICO_PINK}
+        self.tab = {'text':"Sector %d" % store.coords[0], 'color':(0,0,0,0)}
 
-        self.add(Text("Shop", "small", (0,0), PICO_WHITE, False, multiline_width=100), V2(0,0))
+        w = 145
+
+        self.add(Line(V2(0,0), V2(w,0), PICO_SKIN), (V2(0,0)))
+        self.add(Rectangle(V2(0,0), (82, 16), PICO_SKIN), V2(w - 82,0))
+        self.add(SimpleSprite(V2(0,0), "assets/panel-shop.png"), V2(7,5))
+        
+        self.add(Text("Shop", "small", (0,0), PICO_BLACK, False, multiline_width=100), V2(94,3)) 
+        self.add(Text("Trade Credits\nfor items", "small", (0,0), PICO_WHITE, False, multiline_width=120, center=False), V2(65,25)) 
+
+        self.add(Line(V2(0,0), V2(w,0), PICO_SKIN), (V2(0,52)))
+        self.add(Line(V2(0,0), V2(w,0), PICO_SKIN), (V2(0,54)))
 
         if store.playable or game.DEV:
-            t = "LAUNCH"
+            t = "VISIT"
             if game.Game.inst.input_mode == "joystick":
-                t = "[*x*] LAUNCH"
-            self.add(Button(V2(0,0), t, 'small', lambda:onclick(store), icon="assets/i-colonist.png", color=PICO_PINK), V2(0, 15))
+                t = "[*x*] VISIT"
+            self.add(Button(V2(0,0), t, 'small', lambda:onclick(store), color=PICO_PINK), V2(36, 70))
+            self.add(Line(V2(0,0), V2(w,0), PICO_DARKBLUE), (V2(0,94)))
 
         self.redraw()
 

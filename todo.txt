@@ -1,8 +1,9 @@
-Required for release:
- - test another full run
-
-After release:
+ - "start" animation when level loads
+ - 4th civ
+ - boss
  - explain different ships
- - explain / change 0 population
  - saving progress mid game
+ - asset design tweaks?
  - asset names pass
+ - asset icons
+ - reward icons

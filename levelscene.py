@@ -9,6 +9,7 @@ import pygame
 
 import aliens
 import fleet
+import fleetdiagram
 import flowfield
 import funnotification
 import game
@@ -24,18 +25,20 @@ from asteroid import Asteroid
 from background import Background
 from button import Button
 from civ import Civ, PlayerCiv
+from cloudbackground import CloudBackground
 from colors import *
 from debug import debug_render
 from economy import RESOURCE_COLORS, RESOURCES, Resources
 from hazard import Hazard
 from helper import all_nearby, get_nearest
+from levelbackground import LevelBackground
 from meter import Meter
 from objgrid import ObjGrid
 from planet.planet import Planet
 from resources import resource_path
 from ships.ship import Ship
 from spaceobject import SpaceObject
-from text import FONTS, Text
+from text import FONTS, Text, render_multiline_to
 from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgrades import UPGRADE_CLASSES
 from v2 import V2
@@ -58,6 +61,7 @@ class LevelScene(scene.Scene):
         self._score = 0
         self.is_tutorial = False
         self.update_times = defaultdict(lambda:0)
+        self.asset_buttons = []
 
     @property
     def score(self):
@@ -120,12 +124,19 @@ class LevelScene(scene.Scene):
 
     def create_layers(self):
         self.objgrid = ObjGrid(game.RES[0], game.RES[1], 50)
-        self.background_group = pygame.sprite.Group()
+        self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
-        self.tutorial_group = pygame.sprite.Group()
+        self.tutorial_group = pygame.sprite.LayeredDirty()
 
-        self.background_group.add(Background(V2(0,0)))
+        #self.clouds = CloudBackground(V2(0,0))
+        #self.background_group.add(self.clouds)
+        #self.clouds.generate_image()
+
+        self.background = LevelBackground(V2(0,0))
+        self.background_group.add(self.background)
+        self.fleet_diagram = fleetdiagram.FleetDiagram(V2(0,0))
+        self.game_group.add(self.fleet_diagram)        
 
     def setup_players(self):
         # Me
@@ -168,40 +179,31 @@ class LevelScene(scene.Scene):
                 if delta < dist:
                     dist = delta
             if dist > separation ** 2:
-                if False: #pos.x /2 + (game.RES[1] - pos.y) < game.RES[1] - 100:
-                    size = random.randint(4,7)
-                    if random.random() > 0.5:
-                        pr = Resources(100, 0, 0)
-                    else:
-                        size -= 1
-                        iron = random.randint(7,10)
-                        pr = Resources(iron * 10, (10 - iron) * 10, 0)
+                size = random.randint(2, 6)
+                resources = {'a':0, 'b':0, 'c':0}
+                # One resource
+                ra = random.random()
+                if ra > 0.66:
+                    resources['a'] = 10
+                # Two resource
+                elif ra > 0.2:
+                    resources['a'] = random.randint(5,10)
+                    resources['b'] = 10 - resources['a']
+                # Three
                 else:
-                    size = random.randint(2, 6)
-                    resources = {'a':0, 'b':0, 'c':0}
-                    # One resource
-                    ra = random.random()
-                    if ra > 0.66:
-                        resources['a'] = 10
-                    # Two resource
-                    elif ra > 0.2:
-                        resources['a'] = random.randint(5,10)
-                        resources['b'] = 10 - resources['a']
-                    # Three
-                    else:
-                        resources['a'] = random.randint(1,7)
-                        resources['b'] = random.randint(1, 10 - resources['a'])
-                        resources['c'] = 10 - resources['a'] - resources['b']
-                    rb = random.random()
-                    if rb > 0.6:
-                        pr = Resources(resources['a'] * 10, resources['b'] * 10, resources['c'] * 10)
-                        size += 1
-                    elif rb > 0.25:
-                        pr = Resources(resources['b'] * 10, resources['a'] * 10, resources['c'] * 10)
-                        size -= 1
-                    else:
-                        pr = Resources(resources['c'] * 10, resources['b'] * 10, resources['a'] * 10)
-                        size -= 1
+                    resources['a'] = random.randint(1,7)
+                    resources['b'] = random.randint(1, 10 - resources['a'])
+                    resources['c'] = 10 - resources['a'] - resources['b']
+                rb = random.random()
+                if rb > 0.6:
+                    pr = Resources(resources['a'] * 10, resources['b'] * 10, resources['c'] * 10)
+                    size += 1
+                elif rb > 0.25:
+                    pr = Resources(resources['b'] * 10, resources['a'] * 10, resources['c'] * 10)
+                    size -= 1
+                else:
+                    pr = Resources(resources['c'] * 10, resources['b'] * 10, resources['a'] * 10)
+                    size -= 1
                 self.game_group.add(Planet(self, pos, size, pr))
                 num_planets += 1
             else:
@@ -224,12 +226,6 @@ class LevelScene(scene.Scene):
 
         self.my_civ.resources.on_change(self.on_civ_resource_change)
 
-        self.upgrade_button = Button(V2(game.RES[0] / 2, game.RES[1] - 4), "UPGRADE", "big", self.on_click_upgrade)
-        self.upgrade_button.offset = (0.5, 1)
-        self.upgrade_button._recalc_rect()
-        self.upgrade_button.visible = 0
-        self.ui_group.add(self.upgrade_button)
-
         upy = 80
         self.saved_upgrade_buttons = {}
         for u in self.game.run_info.saved_technologies + self.game.run_info.blueprints:
@@ -239,7 +235,7 @@ class LevelScene(scene.Scene):
             upy += 27
 
         if game.DEV:
-            self.ui_group.add(Button(V2(160, 3), 'Win', 'small', self.dev_win))
+            self.ui_group.add(Button(V2(2, game.RES[1] - 20), 'Win', 'small', self.dev_win))
 
         self.o2_meter = o2meter.O2Meter(V2(game.RES[0] - 68, 2))
         
@@ -285,6 +281,7 @@ class LevelScene(scene.Scene):
 
         self.setup_players()
         self.add_extra_spaceobjects()
+        self.background.generate_image(self.get_objects_initial())
         self.add_ui_elements()    
 
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
@@ -344,7 +341,6 @@ class LevelScene(scene.Scene):
 
     def get_objects(self):
         return self.objgrid.all_objects
-        #return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
 
     def get_objects_in_range(self, pos, range):
         return self.objgrid.get_objects_near(pos, range)
@@ -412,7 +408,7 @@ class LevelScene(scene.Scene):
         if self.time > 300 and not self.my_civ.scarcity:
             self.my_civ.enable_scarcity()
             self.enemy.civ.enable_scarcity()
-            fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
+            fn = funnotification.FunNotification("SCARCITY! Asset costs increased")
             self.ui_group.add(fn)
             
         self.game.run_info.o2 -= dt
@@ -476,30 +472,12 @@ class LevelScene(scene.Scene):
         elapsed = time.time() - t
         self.update_times["collisions"] = elapsed
 
-        if len(self.my_civ.upgrades_stocked) > 0:
-            r = self.my_civ.upgrades_stocked[0]
-            text = "%s" % r.upper()
-            if self.upgrade_button.visible == False or self.upgrade_button.text != text:
-                self.upgrade_button.text = text
-                if self.game.input_mode == "joystick":
-                    self.upgrade_button.joy_button = "[*triangle*]"
-                else:
-                    self.upgrade_button.joy_button = None
-                self.upgrade_button.label = "ASSET"
-                self.upgrade_button.icon = "assets/i-%s.png" % r
-                self.upgrade_button.color = PICO_RED
-                self.upgrade_button._generate_image()
-                self.upgrade_button.fade_in(speed=2)
-        else:
-            if self.upgrade_button.visible:
-                self.upgrade_button.visible = False
-
-        for res_type in self.my_civ.resources.data.keys():
-            num = len([u for u in self.my_civ.upgrades_stocked if u == res_type])
-            if num > 0:
-                self.upgrade_texts[res_type].set_text("%d asset%s available" % (num, "s" if num > 1 else ""))
-            else:
-                self.upgrade_texts[res_type].set_text("")
+        #for res_type in self.my_civ.resources.data.keys():
+        #    num = len([u for u in self.my_civ.upgrades_stocked if u == res_type])
+        #    if num > 0:
+        #        self.upgrade_texts[res_type].set_text("%d asset%s available" % (num, "s" if num > 1 else ""))
+        #    else:
+        #        self.upgrade_texts[res_type].set_text("")
 
         if self.options != "pacifist":
             for enemy in self.enemies:
@@ -515,6 +493,7 @@ class LevelScene(scene.Scene):
         t = time.time()
         self.fleet_managers['my'].update(dt)
         self.fleet_managers['enemy'].update(dt)
+        self.fleet_diagram.generate_image(self)
         self.update_times['fleets'] = time.time() - t
 
         t = time.time()
@@ -524,11 +503,50 @@ class LevelScene(scene.Scene):
         self.update_times['civs'] = time.time() - t
 
         self.update_times['update'] = time.time() - ut
+
+    def update_asset_buttons(self):
+        for i,button in enumerate(self.asset_buttons):
+            button.pos = V2(game.RES[0] / 2 - i * 8 - 30, game.RES[1] - 4)
+            self.ui_group.change_layer(button, -i)
+            if i == 0:
+                button.onclick = self.on_click_upgrade
+                #button.y -= 2
+            else:
+                button.onclick = None
+            
+    def add_asset_button(self, resource):
+        button = Button(V2(game.RES[0] / 2, game.RES[1] - 4), "UPGRADE", "big", None, asset_border=True)
+        text = "%s" % resource.upper()
+        button.text = text
+        if self.game.input_mode == "joystick":
+            button.joy_button = "[*triangle*]"
+        else:
+            button.joy_button = None
+        button.label = "ASSET"
+        button.icon = "assets/i-%s.png" % resource
+        if resource == "iron":
+            button.color = PICO_LIGHTGRAY
+        else:
+            button.color = RESOURCE_COLORS[resource]
+        button._generate_image()        
+        button.offset = (0, 1)
+        button._recalc_rect()
+        button.visible = 1
+        button.layer = 0
+        button.fade_in(2)
+        self.ui_group.add(button) 
+        self.asset_buttons.append(button)  
+        self.update_asset_buttons()    
         
+
+    def pop_asset_button(self):
+        btn = self.asset_buttons.pop(0)
+        self.ui_group.remove(btn)
+        self.update_asset_buttons()
 
     def render(self):
         t = time.time()
-        self.game.screen.fill(PICO_BLACK)
+        #self.game.screen.fill(PICO_BLACK)
         self.update_layers()
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
@@ -558,11 +576,22 @@ class LevelScene(scene.Scene):
 
             self.game.screen.blit(gi, (0,0))
 
-        for s in self.ui_group.sprites():
-            if s.image is None:
-                pass
-                #print(s)
-        self.ui_group.draw(self.game.screen)        
+        # TODO: should be a widget?
+        if self.meters['iron'].width > 120:
+            delta = self.meters['iron'].width - 120
+            rect = self.meters['iron'].rect
+            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + 120, rect.y + rect.height + 1), (rect.x + 120, rect.y + rect.height + 2), 1)
+            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + 120, rect.y + rect.height + 2), (rect.x + rect.width - 1, rect.y + rect.height + 2), 1)
+            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + rect.width - 1, rect.y + rect.height + 1), (rect.x + rect.width - 1, rect.y + rect.height + 2), 1)
+            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + 120 + delta / 2, rect.y + rect.height + 4), (rect.x + 120 + delta / 2 + 3, rect.y + rect.height + 4 + 3), 1)
+            render_multiline_to(
+                self.game.screen,
+                (rect.x + 120 + delta / 2 + 5, rect.y + rect.height + 4),
+                "Large Fleet Upkeep",
+                "tiny", PICO_YELLOW
+            )
+        
+        self.ui_group.draw(self.game.screen)
         self.tutorial_group.draw(self.game.screen)
         if self.debug:
             self.enemy.render(self.game.screen)
@@ -584,6 +613,8 @@ class LevelScene(scene.Scene):
             tri = [V2(0,0), V2(4,4), V2(0,8)]
             pygame.draw.polygon(self.game.screen, color, [(z + V2(game.RES[0] - 12, game.RES[1] - 12)).tuple() for z in tri], 0)
             pygame.draw.polygon(self.game.screen, color, [(z + V2(game.RES[0] - 7, game.RES[1] - 12)).tuple() for z in tri], 0)
+
+        return None
 
 
     def take_input(self, inp, event):

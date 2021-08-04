@@ -172,6 +172,7 @@ class FlowField:
         walked = 0
         p = pos.copy()
         while walked < distance:
-            p += self.get_vector(p, 10) * GRIDSIZE
-            walked += GRIDSIZE
+            step = min(GRIDSIZE, distance)
+            p += self.get_vector(p, 10) * step
+            walked += step
         return p

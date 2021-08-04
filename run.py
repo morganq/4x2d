@@ -63,12 +63,18 @@ class RunInfo:
         random.shuffle(self.reward_pool)
 
     def new_galaxy(self, row, from_links, level):
+        signal = None
         mods = []
+        if row == 1:
+            signal = "sneak_attack"
+
         if row == 4:
             mods = [random.choice(["warp_drive", "big_planet", "ship_shield_far_from_home", "atomic_bomb"])]
+            signal = "future_tech"
 
         if row == 8:
             mods = [random.choice(["battleship"])]
+            signal = "boss"
 
         return {
             'node_type':'galaxy',
@@ -77,7 +83,8 @@ class RunInfo:
             'difficulty': row,
             'level':level,
             'links': from_links,
-            'mods': mods
+            'mods': mods,
+            'signal': signal
         }
 
     def new_store(self, row, from_links):
@@ -112,7 +119,8 @@ class RunInfo:
         self.data = []
         self.generate_reward_pool()
 
-        all_levels = ['belt', 'scatter', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']
+        all_levels = ['belt', 'slash', 'orbs', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']
+        #all_levels = ['orbs'] * 10
         l1 = all_levels[::]
         random.shuffle(l1)
         l2 = all_levels[::]

@@ -170,6 +170,7 @@ class Ship(SpaceObject):
     def set_target(self, target):
         self.chosen_target = target
         self.effective_target = target
+        self.starting_pos = self.pos
 
     def can_land(self, target):
         return (
@@ -363,7 +364,7 @@ class Ship(SpaceObject):
     def enter_state_returning(self):
         nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
         if nearest:        
-            self.effective_target = nearest
+            self.set_target(nearest)
 
     def state_returning(self, dt):
         self.target_velocity = self.scene.flowfield.get_vector(self.pos, self.effective_target, 10) * self.get_cruise_speed()

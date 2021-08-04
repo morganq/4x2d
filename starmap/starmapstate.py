@@ -143,7 +143,10 @@ class StarMapState(states.UIEnabledState):
 
         if input == "confirm":
             if self.current_panel:
-                self.current_panel.get_control_of_type(Button).onclick()
+                try:
+                    self.current_panel.press_confirm()
+                except AttributeError:
+                    pass
             else:
                 if self.joystick_overlay.nearest_obj:
                     self.last_clicked_sprite = self.joystick_overlay.nearest_obj

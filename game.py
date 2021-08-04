@@ -96,27 +96,24 @@ class Game:
                         self.scene.take_input("menu", event)
                     else:
                         self.scene.take_input("other", event)
-                
-                #if event.type == pygame.KEYUP:
-                #    if event.key == pygame.K_SPACE:
-                #        self.game_speed_input = 0
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    event.__dict__['gpos'] = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
                     if event.button == 1: self.scene.take_input("click", event)
                     if event.button == 3: self.scene.take_input("rightclick", event)
 
                 if event.type == pygame.MOUSEBUTTONUP:
-                    event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    event.__dict__['gpos'] = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
                     if event.button == 1: self.scene.take_input("unclick", event)
                     if event.button == 3: self.scene.take_input("unrightclick", event)                    
 
                 if event.type == pygame.MOUSEMOTION:
-                    event.gpos = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
-                    event.grel = V2(event.rel[0] / SCALE, event.rel[1] / SCALE)
+                    event.__dict__['gpos'] = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    event.__dict__['grel'] = V2(event.rel[0] / SCALE, event.rel[1] / SCALE)
                     if event.buttons[0]:
                         self.scene.take_input("mouse_drag", event)
                     else:
+                        pass
                         self.scene.take_input("mouse_move", event)
 
                 bindings = {int(k):v for k,v in self.save.get_setting("controls").items()}
@@ -139,9 +136,7 @@ class Game:
 
                 if event.type == pygame.JOYHATMOTION:
                     delta = V2(event.value[0], -event.value[1])
-                    #if delta.tuple() != self.last_joy_axes:
                     self.scene.take_input("joymotion", {'delta': delta })
-                        #self.last_joy_axes = delta.tuple()
 
                 if event.type == pygame.JOYBUTTONDOWN:
                     try:
@@ -179,9 +174,10 @@ class Game:
         else:
             #self.scale_normal()
             self.scale_xbr()
-        t = pygame.time.get_ticks() - self.frame_time
-        self.frame_time = pygame.time.get_ticks()
-        text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))
+        if DEV:
+            t = pygame.time.get_ticks() - self.frame_time
+            self.frame_time = pygame.time.get_ticks()            
+            text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))
         pygame.display.update()
 
     def start_level(self, level, index):
