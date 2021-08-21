@@ -1,9 +1,19 @@
+ x figure out "hook" and "kicker"
+ - figure out whole narrative structure
+ - implement boss
+ - more intentional difficulty curve
  - "start" animation when level loads
- - 4th civ
- - boss
+ - "victory" animation when you win
+ - what happens when you lose?
+ - make starmap more dynamic, better background, etc.
  - explain different ships
  - saving progress mid game
+ - 4th civ
  - asset design tweaks?
  - asset names pass
  - asset icons
  - reward icons
+
+
+ - limited range fighters, maybe battleship and refuel
+ 

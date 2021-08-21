@@ -13,13 +13,19 @@ OUTLINE_COLOR = PICO_DARKGRAY
 DOT_COLOR = PICO_YELLOW
 
 class FleetDiagram(spritebase.SpriteBase):
-    def __init__(self, pos):
+    def __init__(self, pos, scene):
         super().__init__(pos)
+        self.scene = scene
         self.layer = -2
         self.time = 0
+        self.refresh_time = 0
 
     def update(self, dt):
         self.time += dt
+        self.refresh_time -= dt
+        if self.refresh_time < 0:
+            self.refresh_time = 0.1
+            self.generate_image(self.scene)
         return super().update(dt)
 
     def generate_image(self, scene):

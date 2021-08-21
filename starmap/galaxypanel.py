@@ -53,10 +53,10 @@ class GalaxyPanel(Panel):
         self.add(reward_text, V2(w / 2 - reward_width / 2 + reward_icon.width + 6, 91 - reward_text.height / 2 + 2))
 
         if galaxy.playable or game.DEV:
-            lt = "LAUNCH >"
+            lt = "START >"
             st = "DECODE ?"
             if game.Game.inst.input_mode == "joystick":
-                lt = "[*x*] LAUNCH >"
+                lt = "[*x*] START >"
                 st = "[*square*] DECODE ?"
             self.launch_button = Button(V2(0,0), lt, 'small', lambda:onclick(galaxy), color=PICO_PINK)
             self.signal_button = None

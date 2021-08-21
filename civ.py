@@ -86,7 +86,7 @@ class Civ:
         self.upgrade_limits.gas = self.base_upgrade_limits.gas
 
     def get_upkeep_ratio(self):
-        return clamp(len(self.get_all_combat_ships()) - 0, 0, 15) * 0.075
+        return clamp(len(self.get_all_combat_ships()) - 6, 0, 15) * 0.075
 
     def get_all_combat_ships(self):
         all_ships = []

@@ -145,8 +145,8 @@ class StarMapState(states.UIEnabledState):
             if self.current_panel:
                 try:
                     self.current_panel.press_confirm()
-                except AttributeError:
-                    pass
+                except AttributeError as e:
+                    print(e)
             else:
                 if self.joystick_overlay.nearest_obj:
                     self.last_clicked_sprite = self.joystick_overlay.nearest_obj

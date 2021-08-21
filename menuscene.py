@@ -44,7 +44,7 @@ class MenuScene(scene.Scene):
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         bg = simplesprite.SimpleSprite(V2(0,0), "assets/menubg.png")
-        bg.dirty = 1
+        bg.dirty = 2
         self.background_group.add(bg)
 
         self.selected_item_index = 0
@@ -106,7 +106,7 @@ class MenuScene(scene.Scene):
         dirty.extend(self.game_group.draw(self.game.screen))
         dirty.extend(self.ui_group.draw(self.game.screen))
         dirty.extend(super().render())
-        return dirty
+        return []
 
     def music_change(self, value):
         self.game.save.set_setting("music_volume", value)

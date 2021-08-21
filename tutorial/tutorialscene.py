@@ -84,4 +84,6 @@ class TutorialScene(LevelScene):
         self.flowfield.generate(self)
         self.flowfielddebug = 0
 
+        self.fleet_diagram.generate_image(self)
+
         self.enemy.set_difficulty(1)

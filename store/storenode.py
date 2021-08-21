@@ -48,7 +48,8 @@ class StoreNodePanel(Panel):
             t = "VISIT"
             if game.Game.inst.input_mode == "joystick":
                 t = "[*x*] VISIT"
-            self.add(Button(V2(0,0), t, 'small', lambda:onclick(store), color=PICO_PINK), V2(36, 70))
+            self.button = Button(V2(0,0), t, 'small', lambda:onclick(store), color=PICO_PINK)
+            self.add(self.button, V2(36, 70))
             self.add(Line(V2(0,0), V2(w,0), PICO_DARKBLUE), (V2(0,94)))
 
         self.redraw()
@@ -62,3 +63,7 @@ class StoreNodePanel(Panel):
         
         self.pos = V2(x,y)
         self._reposition_children()        
+
+    def press_confirm(self):
+        if self.button:
+            self.button.onclick()

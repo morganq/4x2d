@@ -136,7 +136,7 @@ class LevelScene(scene.Scene):
 
         self.background = LevelBackground(V2(0,0))
         self.background_group.add(self.background)
-        self.fleet_diagram = fleetdiagram.FleetDiagram(V2(0,0))
+        self.fleet_diagram = fleetdiagram.FleetDiagram(V2(0,0), self)
         self.game_group.add(self.fleet_diagram)        
 
     def setup_players(self):
@@ -247,8 +247,6 @@ class LevelScene(scene.Scene):
         self.o2_meter._generate_image()
         self.ui_group.add(self.o2_meter)    
 
-        self.upgrade_lines = []
-
     def setup_mods(self):
         galaxy = self.game.run_info.get_current_level_galaxy()
         if not galaxy['mods']:
@@ -297,6 +295,8 @@ class LevelScene(scene.Scene):
         self.flowfield = flowfield.FlowFieldMap()
         self.flowfield.generate(self)
         self.flowfielddebug = 0
+
+        #self.fleet_diagram.generate_image(self)
 
         self.enemy.set_difficulty(self.difficulty)
         self.setup_mods()
@@ -561,6 +561,10 @@ class LevelScene(scene.Scene):
         t = time.time()
         #self.game.screen.fill(PICO_BLACK)
         self.update_layers()
+        if game.DEV:
+            for spr in self.background_group.sprites() + self.game_group.sprites() + self.ui_group.sprites():
+                if spr.image is None and spr.visible:
+                    print(spr, "bad image")
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
         if self.debug:

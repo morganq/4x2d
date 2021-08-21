@@ -175,8 +175,8 @@ class Game:
         if SCALE == 1:
             self.scale_normal()
         else:
-            #self.scale_normal()
-            self.scale_xbr()
+            self.scale_normal()
+            #self.scale_xbr()
         if DEV:
             t = pygame.time.get_ticks() - self.frame_time
             self.frame_time = pygame.time.get_ticks()            

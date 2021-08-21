@@ -35,4 +35,15 @@ Per-run story:
  - lvl6+ - Time loop planet
     "Commander, detecting strange behavior on one of the planets in this quadrant...
     Its atmosphere and lifeforms appear stuck in a time loop! What does it mean?"
+ - lvl8 - Something is wrong with the signal
  - lvl11 - Censors
+
+
+0. Distress signal from distant humans
+Pre 1. We're on our way... gotta make it through here. We're undetected, sneak attack! [Civ 1]
+Pre 2. They sent out an alert to their allies! But we have to keep moving on. [Civ 1]
+Pre 3. The whole federation now knows, and will be coming for us. [Civ 2]
+Pre 4. They've been granted some strange new technology, by an unknown force! [Civ 2]
+Pre 5. Nothing
+Pre 6. Entering the inner zone... strange anomolies on planets (time loop)
+Pre 7. 
