@@ -1,8 +1,10 @@
-from spritebase import SpriteBase
 import pygame
+
 import game
 from helper import clamp
+from spritebase import SpriteBase
 from v2 import V2
+
 
 class ScrollPanel(SpriteBase):
     def __init__(self, pos, size):
@@ -24,6 +26,6 @@ class ScrollPanel(SpriteBase):
 
     def scroll(self, pos):
         self.pos = V2(
-            clamp(pos.x, - self._width + game.RES[0], 0),
-            clamp(pos.y, - self._height + game.RES[1], 0)
+            clamp(pos.x, - self._width + game.Game.inst.game_resolution.x, 0),
+            clamp(pos.y, - self._height + game.Game.inst.game_resolution.y, 0)
         )

@@ -112,7 +112,7 @@ class Alien2Tech1Upgrade(Upgrade):
 class Alien2Tech1Upgrade2(Alien2Tech1Upgrade):
     name = "alien2techcontrol"
     resource_type = "ice"
-    stats = Stats(alien_control_mul=-0.25)
+    stats = Stats(alien_control_mul=-0.125)
     
 
 @register_upgrade

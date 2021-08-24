@@ -1,1 +1,1 @@
-[{"type": "my_planet", "pos": [49, 312], "size": 8, "data": {"resources": [10, 0, 0]}}, {"type": "enemy_planet", "pos": [442, 46], "size": 8, "data": {"resources": [10, 0, 0]}}, {"type": "neutral_planet", "pos": [250, 171], "size": 10, "data": {"resources": [10, 0, 0]}}]
+[{"type": "my_planet", "pos": [58, 312], "size": 8, "data": {"resources": [10, 0, 0]}}, {"type": "enemy_planet", "pos": [530, 46], "size": 8, "data": {"resources": [10, 0, 0]}}, {"type": "neutral_planet", "pos": [300, 171], "size": 10, "data": {"resources": [10, 0, 0]}}]

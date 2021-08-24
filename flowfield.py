@@ -15,7 +15,8 @@ class FlowFieldMap:
     def __init__(self) -> None:
         self.fields = {}
         self.gw = int(game.RES[0] / GRIDSIZE)
-        self.gh = int(game.RES[1] / GRIDSIZE)        
+        self.gh = int(game.RES[1] / GRIDSIZE)
+        self.offset = game.Game.inst.game_offset     
 
     def generate(self, scene):
         avoidees = []
@@ -30,7 +31,7 @@ class FlowFieldMap:
         base_grid = self._generate_base_grid(avoidees)
 
         for obj in targetables:
-            self.fields[obj] = FlowField(game.RES, avoidees, obj, base_grid)
+            self.fields[obj] = FlowField(game.RES, self.offset, avoidees, obj, base_grid)
 
     def _generate_base_grid(self, avoidees):
         grid = []
@@ -39,7 +40,7 @@ class FlowFieldMap:
             for gx in range(self.gw):
                 cell = None
                 center = V2(gx * GRIDSIZE + GRIDSIZE / 2, gy * GRIDSIZE + GRIDSIZE / 2)
-                closest, dist = get_nearest(center, avoidees)
+                closest, dist = get_nearest(center + self.offset, avoidees)
                 if closest:
                     extra = EXTRA
                     if isinstance(closest, hazard.Hazard):
@@ -60,8 +61,9 @@ class FlowFieldMap:
 
 # From https://howtorts.github.io/2014/01/04/basic-flow-fields.html
 class FlowField:
-    def __init__(self, size, avoidees, obj, base_grid) -> None:
+    def __init__(self, size, offset, avoidees, obj, base_grid) -> None:
         self.size = size
+        self.offset = offset
         self.base_grid = base_grid
         self.grid = []
         self.gw = int(self.size[0] / GRIDSIZE)
@@ -102,7 +104,7 @@ class FlowField:
                     cell = inf
                 grid[-1].append(cell)
 
-        end = (self.obj.pos / GRIDSIZE).tuple_int()
+        end = ((self.obj.pos - self.offset) / GRIDSIZE).tuple_int()
         to_visit = [end]
         grid[end[1]][end[0]] = 0
 
@@ -155,6 +157,7 @@ class FlowField:
 
     def get_vector(self, pos, radius):
         out = V2(0,0)
+        pos = pos - self.offset
         x1 = int(clamp((pos.x - radius) / GRIDSIZE, 0, self.gw-1))
         x2 = int(clamp((pos.x + radius) / GRIDSIZE, 0, self.gw-1))
         y1 = int(clamp((pos.y - radius) / GRIDSIZE, 0, self.gh-1))
@@ -170,9 +173,14 @@ class FlowField:
 
     def walk_field(self, pos, distance):
         walked = 0
-        p = pos.copy()
+        p = pos - self.offset
+        iterations = 0
         while walked < distance:
             step = min(GRIDSIZE, distance)
-            p += self.get_vector(p, 10) * step
+            p += self.get_vector(p + self.offset, 10) * step
             walked += step
-        return p
+            iterations += 1
+            if iterations > distance * 2:
+                print("walk_field hit way too many iterations, exiting with None")
+                return None
+        return p + self.offset

@@ -82,7 +82,7 @@ class StarMapScene(Scene):
         self.colonist.offset = (0.5,0.5)
         self.game_group.add(self.colonist)
 
-        self.scroll_panel.scroll(-self.colonist.pos + V2(game.RES[0] / 2, game.RES[1] - 50))
+        self.scroll_panel.scroll(-self.colonist.pos + V2(self.game.game_resolution.x / 2, self.game.game_resolution.y - 50))
 
         self.ui_group2.add(text.Text("Credits: %d" % self.game.run_info.credits, "small", V2(3,3), PICO_GREEN,shadow=PICO_BLACK))
 

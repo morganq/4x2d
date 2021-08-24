@@ -22,10 +22,8 @@ import sound
 import states
 import upgradestate
 from asteroid import Asteroid
-from background import Background
 from button import Button
 from civ import Civ, PlayerCiv
-from cloudbackground import CloudBackground
 from colors import *
 from debug import debug_render
 from economy import RESOURCE_COLORS, RESOURCES, Resources
@@ -76,16 +74,17 @@ class LevelScene(scene.Scene):
         pos = None
         while pos is None:
             pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
+            pos += self.game.game_offset
             
-            near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
-            if near_button.collidepoint(*pos.tuple()):
-                pos = None
-                continue
+            #near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
+            #if near_button.collidepoint(*pos.tuple()):
+            #    pos = None
+            #    continue
 
-            near_meters = pygame.Rect(0, 0, 250, 60)
-            if near_meters.collidepoint(*pos.tuple()):
-                pos = None
-                continue
+            #near_meters = pygame.Rect(0, 0, 250, 60)
+            #if near_meters.collidepoint(*pos.tuple()):
+            #    pos = None
+            #    continue
 
             dist = 999999
             for obj in self.get_objects_initial():
@@ -114,17 +113,19 @@ class LevelScene(scene.Scene):
                 elif obj['type'] == "enemy_planet": owner = self.enemy.civ
             if t == "planet":
                 r = [v * 10 for v in obj['data']['resources']]
-                o = Planet(self, V2(*obj['pos']), obj['size'], Resources(*r))
+                pos = V2(*obj['pos'])
+                o = Planet(self, pos + self.game.game_offset, obj['size'], Resources(*r))
                 if owner:
                     o.change_owner(owner)
                 
             elif obj['type'] == "hazard":
-                o = Hazard(self, V2(*obj['pos']), obj['size'])
+                pos = V2(*obj['pos'])
+                o = Hazard(self, pos + self.game.game_offset, obj['size'])
             self.game_group.add(o)
         self.objgrid.generate_grid(self.get_objects_initial())
 
     def create_layers(self):
-        self.objgrid = ObjGrid(game.RES[0], game.RES[1], 50)
+        self.objgrid = ObjGrid(self.game.game_resolution.x, self.game.game_resolution.y, 50)
         self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
@@ -134,7 +135,7 @@ class LevelScene(scene.Scene):
         #self.background_group.add(self.clouds)
         #self.clouds.generate_image()
 
-        self.background = LevelBackground(V2(0,0))
+        self.background = LevelBackground(V2(0,0), self.game.game_resolution)
         self.background_group.add(self.background)
         self.fleet_diagram = fleetdiagram.FleetDiagram(V2(0,0), self)
         self.game_group.add(self.fleet_diagram)        
@@ -159,20 +160,21 @@ class LevelScene(scene.Scene):
         while num_planets < max_planets:
             avg_pos = sum([p.pos for p in self.get_planets()], V2(0,0)) / num_planets
             pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
+            pos += self.game.game_offset
 
             # If we're most of the way through creating planets, and we're on the wrong side of the avg, flip it.
             if num_planets >= max_planets * 1 / 3:
-                if ((avg_pos.x < game.RES[0] / 2 and pos.x < game.RES[0] /2) or
-                    (avg_pos.x > game.RES[0] / 2 and pos.x > game.RES[0] /2)):
-                    pos = V2(game.RES[0] - pos.x, pos.y)
+                if ((avg_pos.x < self.game.game_resolution.x / 2 and pos.x < self.game.game_resolution.x /2) or
+                    (avg_pos.x > self.game.game_resolution.x / 2 and pos.x > self.game.game_resolution.x /2)):
+                    pos = V2(self.game.game_resolution.x - pos.x, pos.y)
             
-            near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
-            if near_button.collidepoint(*pos.tuple()):
-                continue
+            #near_button = pygame.Rect(self.game_resolution.x / 2 - 100, self.game_resolution.y - 60, 200, 60)
+            #if near_button.collidepoint(*pos.tuple()):
+            #    continue
 
-            near_meters = pygame.Rect(0, 0, 250, 60)
-            if near_meters.collidepoint(*pos.tuple()):
-                continue            
+            #near_meters = pygame.Rect(0, 0, 250, 60)
+            #if near_meters.collidepoint(*pos.tuple()):
+            #    continue            
             
             dist = 999999
             for obj in self.get_objects_initial():
@@ -236,9 +238,9 @@ class LevelScene(scene.Scene):
             upy += 27
 
         if game.DEV:
-            self.ui_group.add(Button(V2(game.RES[0] - 50, game.RES[1] - 20), 'Win', 'small', self.dev_win))
+            self.ui_group.add(Button(V2(self.game.game_resolution.x - 50, self.game.game_resolution.y - 20), 'Win', 'small', self.dev_win))
 
-        self.o2_meter = o2meter.O2Meter(V2(game.RES[0] - 68, 2))
+        self.o2_meter = o2meter.O2Meter(V2(self.game.game_resolution.x - 68, 2))
         
         if self.options == "oxygen":
             self.game.run_info.o2 = 0
@@ -506,7 +508,7 @@ class LevelScene(scene.Scene):
 
     def update_asset_buttons(self):
         for i,button in enumerate(self.asset_buttons):
-            button.pos = V2(game.RES[0] / 2 - i * 8 - 30, game.RES[1] - 4)
+            button.pos = V2(self.game.game_resolution.x / 2 - i * 8 - 30, self.game.game_resolution.y - 4)
             self.ui_group.change_layer(button, -i)
             if i == 0:
                 button.onclick = self.on_click_upgrade
@@ -515,7 +517,7 @@ class LevelScene(scene.Scene):
                 button.onclick = None
             
     def add_asset_button(self, resource):
-        button = Button(V2(game.RES[0] / 2, game.RES[1] - 4), "UPGRADE", "big", None, asset_border=True, fixed_width=90)
+        button = Button(V2(self.game.game_resolution.x / 2, self.game.game_resolution.y - 4), "UPGRADE", "big", None, asset_border=True, fixed_width=90)
         text = "%s" % resource.upper()
         button.text = text
         if self.game.input_mode == "joystick":
@@ -578,7 +580,7 @@ class LevelScene(scene.Scene):
             for y,gr in enumerate(ff.grid):
                 for x,gc in enumerate(gr):
                     if gc:
-                        p1 = V2((x + 0.5) * flowfield.GRIDSIZE, (y + 0.5) * flowfield.GRIDSIZE)
+                        p1 = V2((x + 0.5) * flowfield.GRIDSIZE, (y + 0.5) * flowfield.GRIDSIZE) + ff.offset
                         p2 = p1 + gc * flowfield.GRIDSIZE * 0.75
                         pygame.draw.line(gi, (0,0,255), p1.tuple(),p2.tuple())
                         pygame.draw.circle(gi, (0,0,255), p1.tuple(), 1)
@@ -626,10 +628,11 @@ class LevelScene(scene.Scene):
 
         if self.game.game_speed_input > 0:
             color = PICO_BLUE if ((self.time % 2) > 1) else PICO_WHITE
-            pygame.draw.rect(self.game.screen, PICO_BLUE, (0, 0, game.RES[0], game.RES[1]), 1)
+            res = self.game.game_resolution
+            pygame.draw.rect(self.game.screen, PICO_BLUE, (0, 0, res.x, res.y), 1)
             tri = [V2(0,0), V2(4,4), V2(0,8)]
-            pygame.draw.polygon(self.game.screen, color, [(z + V2(game.RES[0] - 12, game.RES[1] - 12)).tuple() for z in tri], 0)
-            pygame.draw.polygon(self.game.screen, color, [(z + V2(game.RES[0] - 7, game.RES[1] - 12)).tuple() for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 12, res.y - 12)).tuple() for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 7, res.y - 12)).tuple() for z in tri], 0)
 
         return None
 

@@ -1,10 +1,12 @@
-from spritebase import SpriteBase
-from colors import *
-from v2 import V2
-from line import ptmax, ptmin
 import pygame
+
 import game
 import sound
+from colors import *
+from line import ptmax, ptmin
+from spritebase import SpriteBase
+from v2 import V2
+
 
 class Arrow(SpriteBase):
     def __init__(self, pt1, pt2, color):
@@ -22,8 +24,7 @@ class Arrow(SpriteBase):
         pt1 = self.pt1.copy()
         pt2 = self.pt2.copy()
 
-        w = game.RES[0] #TODO: wat. 
-        h = game.RES[1]
+        w,h = game.Game.inst.game_resolution.tuple_int()
 
         forward = delta.normalized()
         side = V2(forward.y, -forward.x)
@@ -74,8 +75,7 @@ class OrderArrow(SpriteBase):
 
         self.visible = True
 
-        w = game.RES[0]
-        h = game.RES[1]
+        w,h = game.Game.inst.game_resolution.tuple_int()
 
         forward = delta.normalized()
         side = V2(forward.y, -forward.x)

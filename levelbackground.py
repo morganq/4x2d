@@ -11,19 +11,20 @@ from v2 import V2
 
 
 class LevelBackground(spritebase.SpriteBase):
-    def __init__(self, pos):
+    def __init__(self, pos, size):
         super().__init__(pos)
+        self.size = size
         self.twinkle_timer = 0
         #self._generate_image()
 
     def generate_image(self, objects):
-        self.image = pygame.Surface(game.RES, pygame.SRCALPHA)
+        self.image = pygame.Surface(self.size.tuple(), pygame.SRCALPHA)
         self.image.fill((0,0,0,255))
         bw = 2
-        pygame.draw.rect(self.image, PICO_DARKBLUE, (0,0,game.RES[0], bw))
-        pygame.draw.rect(self.image, PICO_DARKBLUE, (0,game.RES[1]-bw,game.RES[0], bw))
-        pygame.draw.rect(self.image, PICO_DARKBLUE, (0,0,bw,game.RES[1]))
-        pygame.draw.rect(self.image, PICO_DARKBLUE, (game.RES[0]-bw,0,bw,game.RES[1]))
+        pygame.draw.rect(self.image, PICO_DARKBLUE, (0,0,self.size.x, bw))
+        pygame.draw.rect(self.image, PICO_DARKBLUE, (0,self.size.y-bw,self.size.x, bw))
+        pygame.draw.rect(self.image, PICO_DARKBLUE, (0,0,bw,self.size.y))
+        pygame.draw.rect(self.image, PICO_DARKBLUE, (self.size.x-bw,0,bw,self.size.y))
         min_step = 2
         xrange = list(range(min_step, self.image.get_width(), min_step))
         yrange = list(range(min_step, self.image.get_height(), min_step))
@@ -68,6 +69,8 @@ class LevelBackground(spritebase.SpriteBase):
                     length_pct = clamp(math.sin(density / 5)*0.65 + 0.75, 0.125, 1.5)
                     length = round(frequency * length_pct / 8)
                     
+                    color = tuple([int(c / 2) for c in color])
+
                     self.image.set_at((x,y), color)
                     hl = frequency / 2
                     if random.random() < 0.65:
@@ -77,7 +80,7 @@ class LevelBackground(spritebase.SpriteBase):
                         pygame.draw.line(self.image, color, (x,y - hl - length), (x, y - hl + length))     
 
                         if length_pct > 1.35 and random.random() < 0.3:
-                            color = LIGHTEN_COLOR[color]
+                            color = tuple([int(c * 2) for c in color])
                             length //= 2
                             pygame.draw.line(self.image, color, (x + hl - length,y), (x+ hl + length , y))
                             pygame.draw.line(self.image, color, (x,y + hl - length), (x, y + hl + length))
@@ -92,8 +95,8 @@ class LevelBackground(spritebase.SpriteBase):
     #     if self.twinkle_timer < 0:
     #         self.image = self.base_image.copy()
     #         for i in range(3):
-    #             x = random.randint(0, game.RES[0] / 4) * 4
-    #             y = random.randint(0, game.RES[0] / 4) * 4
+    #             x = random.randint(0, self.size.x / 4) * 4
+    #             y = random.randint(0, self.size.x / 4) * 4
     #             self.image.set_at((x,y), PICO_WHITE)
     #         self.twinkle_timer = random.random()
     #     return super().update(dt)

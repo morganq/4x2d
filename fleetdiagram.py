@@ -29,8 +29,8 @@ class FleetDiagram(spritebase.SpriteBase):
         return super().update(dt)
 
     def generate_image(self, scene):
-        self.image = pygame.Surface(game.RES, pygame.SRCALPHA)
-        self._width, self._height = game.RES
+        self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
+        self._width, self._height = self.image.get_size()
 
         jump_dist = 3
 
@@ -50,6 +50,7 @@ class FleetDiagram(spritebase.SpriteBase):
             if (center - p_end).sqr_magnitude() < 30 ** 2:
                 path = [center, p_end]
             else:
+                iterations = 0
                 while (p_current - p_end).sqr_magnitude() > (jump_dist + ship.chosen_target.radius + 3) ** 2:
                     if scene.flowfield.has_field(ship.chosen_target):
                         p_current = scene.flowfield.walk_field(p_current, ship.chosen_target, jump_dist)
@@ -57,6 +58,10 @@ class FleetDiagram(spritebase.SpriteBase):
                         break
                     
                     path.append(p_current)
+                    iterations += 1
+                    if iterations > 1000:
+                        print("fleet diagram way too many iterations! giving up")
+                        break
 
             if path:
                 closest_dist, closest = min([((p - (center + ship.velocity.normalized() * jump_dist * 2)).sqr_magnitude(), p) for p in path])

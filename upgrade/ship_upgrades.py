@@ -1,3 +1,5 @@
+import random
+
 import ships
 from productionorder import ProductionOrder
 
@@ -367,7 +369,7 @@ class Bombers3Upgrade(Upgrade):
 
     def apply(self, to):
         p = ProductionOrder("bomber", 3, 60)
-        to.add_production(p)                
+        to.add_production(p)
         to.owning_civ.earn_resource("gas", 75)        
 
 @register_upgrade
@@ -376,22 +378,18 @@ class HangarProduction1Upgrade(Upgrade):
     resource_type = "ice"
     category = "ships"
     title = "Specialized Manufacturing"
-    description = "Train [^1] ship at each hangar, over [30 seconds]"
+    description = "Train [^1] [Fighter], [^1] [Interceptor], and [^1] [Bomber] over 60 seconds at random planets"
     icon = "ship_default"
     cursor = None
     family = {'tree':'hangarprod', 'parents':[]}
 
     def apply(self, to):
-        for planet in to.scene.get_civ_planets(to):
-            for building in planet.buildings:
-                if building['building'].upgrade.name == "b_hangar1":
-                    planet.add_production(ProductionOrder("fighter", 1, 30))
-                elif building['building'].upgrade.name == "b_hangar2a":
-                    planet.add_production(ProductionOrder("interceptor", 1, 30))
-                elif building['building'].upgrade.name == "b_hangar2b":
-                    planet.add_production(ProductionOrder("bomber", 1, 30))
-                elif building['building'].upgrade.name == "b_hangar3":
-                    planet.add_production(ProductionOrder("battleship", 1, 30))
+        p = random.choice(to.scene.get_civ_planets(to))
+        p.add_production(ProductionOrder("fighter", 1, 20))
+        p = random.choice(to.scene.get_civ_planets(to))
+        p.add_production(ProductionOrder("interceptor", 1, 40))
+        p = random.choice(to.scene.get_civ_planets(to))
+        p.add_production(ProductionOrder("bomber", 1, 60))
 
 @register_upgrade
 class HangarProduction2Upgrade(Upgrade):
@@ -399,7 +397,7 @@ class HangarProduction2Upgrade(Upgrade):
     resource_type = "ice"
     category = "ships"
     title = "Specialized Manufacturing II"
-    description = "Train [^1] ship [^instantly] at each hangar"
+    description = "Train [^1] [Fighter], [^1] [Interceptor], and [^1] [Bomber] instantly at random planets"
     icon = "ship_default"
     cursor = None
     family = {'tree':'hangarprod', 'parents':['hangarprod1']}
@@ -407,16 +405,12 @@ class HangarProduction2Upgrade(Upgrade):
     infinite = True
 
     def apply(self, to):
-        for planet in to.scene.get_civ_planets(to):
-            for building in planet.buildings:
-                if building['building'].upgrade.name == "b_hangar1":
-                    planet.add_production(ProductionOrder("fighter", 1, 1))
-                elif building['building'].upgrade.name == "b_hangar2a":
-                    planet.add_production(ProductionOrder("interceptor", 1, 1))
-                elif building['building'].upgrade.name == "b_hangar2b":
-                    planet.add_production(ProductionOrder("bomber", 1, 1))
-                elif building['building'].upgrade.name == "b_hangar3":
-                    planet.add_production(ProductionOrder("battleship", 1, 1))                 
+        p = random.choice(to.scene.get_civ_planets(to))
+        p.add_production(ProductionOrder("fighter", 1, 0.2))
+        p = random.choice(to.scene.get_civ_planets(to))
+        p.add_production(ProductionOrder("interceptor", 1, 0.4))
+        p = random.choice(to.scene.get_civ_planets(to))
+        p.add_production(ProductionOrder("bomber", 1, 0.6))            
 
 
 ### GAS ####

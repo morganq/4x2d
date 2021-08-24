@@ -37,8 +37,9 @@ class Bomber(Fighter):
         super().__init__(scene, pos, owning_civ)
         
         self.set_sprite_sheet("assets/bomber.png", 12)
-        self.can_create_colonist = False
+        self.can_create_colonist = True
         self.num_dodges = 0
+        self.last_shot_at = None
 
     def get_dodges_left(self):
         return self.get_stat("bomber_dodge_num") - self.num_dodges
@@ -52,12 +53,12 @@ class Bomber(Fighter):
             damage_curve = [1, 1.5, 1.9, 2.2]
             mods['damage_base'] *= damage_curve[self.scene.game.run_info.ship_levels["bomber"] - 1]
         mods['raze_chance'] = self.get_stat("bomber_raze_chance")
-        mods['raze_make_colonist'] = self.get_stat('bomber_colonist')
         mods['color'] = PICO_PINK
         return mods
 
     def fire(self, at):
         towards = (at.pos - self.pos).normalized()
+        self.last_shot_at = at
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
@@ -72,24 +73,20 @@ class Bomber(Fighter):
         for i in range(10):
             pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-            self.scene.game_group.add(p)    
-
-    def set_target(self, target):
-        if target.owning_civ and target.owning_civ != self.owning_civ:
-            self.can_create_colonist = True
-        return super().set_target(target)           
+            self.scene.game_group.add(p)             
 
     def update(self, dt):
         if (
-            isinstance(self.effective_target, planet.planet.Planet) and
-            self.effective_target.health <= 0 and
+            isinstance(self.chosen_target, planet.planet.Planet) and
+            self.chosen_target.health <= 0 and
+            self.chosen_target == self.last_shot_at and
             self.can_create_colonist and
             self.get_stat("bomber_colonist")
         ):
             s = ships.colonist.Colonist(self.scene, self.pos, self.owning_civ)
             s.set_pop(1)
-            s.set_target(self.effective_target)
-            self.shooter.scene.game_group.add(s)
+            s.set_target(self.chosen_target)
+            self.scene.game_group.add(s)
             self.can_create_colonist = False
         return super().update(dt)
 

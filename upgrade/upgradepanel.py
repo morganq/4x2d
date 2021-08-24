@@ -62,7 +62,7 @@ class UpgradePanel(Panel):
         self.redraw()
 
     def position_nicely(self, scene):
-        self.pos = V2(game.RES[0] / 2 - self._width / 2, game.RES[1] / 2 - self._height / 2)
+        self.pos = V2(game.Game.inst.game_resolution.x / 2 - self._width / 2, game.Game.inst.game_resolution.y / 2 - self._height / 2)
         self._reposition_children()
 
     def hover_update(self, hovering, button):

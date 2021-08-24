@@ -44,6 +44,13 @@ class MenuScene(scene.Scene):
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         bg = simplesprite.SimpleSprite(V2(0,0), "assets/menubg.png")
+        scaled_img = pygame.Surface(self.game.game_resolution.tuple_int(), pygame.SRCALPHA)
+        sw = self.game.game_resolution.x
+        sh = self.game.game_resolution.y
+        pygame.transform.scale(bg.image, (sw, sh), scaled_img)
+        bg.image = scaled_img
+        bg._width, bg._height = self.game.game_resolution.tuple_int()
+        bg._recalc_rect()
         bg.dirty = 2
         self.background_group.add(bg)
 
@@ -51,9 +58,10 @@ class MenuScene(scene.Scene):
         
         self.items = {}
 
+        x = 340 * (self.game.game_resolution.x / game.RES[0])
         y = 45
         dy = 35
-        self.items['continue'] = text.Text("CONTINUE", "small", V2(320, y), multiline_width=200, onhover=lambda v:self.onhover(0,v), onclick=self.click_continue)
+        self.items['continue'] = text.Text("CONTINUE", "small", V2(x, y), multiline_width=200, onhover=lambda v:self.onhover(0,v), onclick=self.click_continue)
         if self.game.save.run_state:
             jumps = len(self.game.save.run_state['path'])-1
             if jumps == 1:
@@ -63,14 +71,14 @@ class MenuScene(scene.Scene):
         else:
             self.items['continue'].visible = False
             self.items['continue'].selectable = False
-        self.items['new'] = text.Text("NEW GAME", "small", V2(320, y + dy * 1), onhover=lambda v:self.onhover(1,v), onclick=self.click_new)
-        self.items['tutorial'] = text.Text("TUTORIAL", "small", V2(320, y + dy * 2), onhover=lambda v:self.onhover(2,v), onclick=self.click_tutorial)
-        self.items['controls'] = text.Text("CONTROLS", "small", V2(320, y + dy * 3), onhover=lambda v:self.onhover(3,v), onclick=self.click_controls)
-        self.items['music'] = text.Text("MUSIC", "small", V2(320, y + dy * 4))
-        self.items['sound'] = text.Text("SOUND", "small", V2(320, y + dy * 5))
-        self.items['resolution'] = text.Text("RESOLUTION", "small", V2(320, y + dy * 6), onhover=lambda v:self.onhover(6,v), onclick=self.click_resolution)
-        self.items['credits'] = text.Text("CREDITS", "small", V2(320, y + dy * 7), onhover=lambda v:self.onhover(7,v))
-        self.items['exit'] = text.Text("EXIT", "small", V2(320, y + dy * 8), onhover=lambda v:self.onhover(8,v), onclick=sys.exit)
+        self.items['new'] = text.Text("NEW GAME", "small", V2(x, y + dy * 1), onhover=lambda v:self.onhover(1,v), onclick=self.click_new)
+        self.items['tutorial'] = text.Text("TUTORIAL", "small", V2(x, y + dy * 2), onhover=lambda v:self.onhover(2,v), onclick=self.click_tutorial)
+        self.items['controls'] = text.Text("CONTROLS", "small", V2(x, y + dy * 3), onhover=lambda v:self.onhover(3,v), onclick=self.click_controls)
+        self.items['music'] = text.Text("MUSIC", "small", V2(x, y + dy * 4))
+        self.items['sound'] = text.Text("SOUND", "small", V2(x, y + dy * 5))
+        self.items['resolution'] = text.Text("RESOLUTION", "small", V2(x, y + dy * 6), onhover=lambda v:self.onhover(6,v), onclick=self.click_resolution)
+        self.items['credits'] = text.Text("CREDITS", "small", V2(x, y + dy * 7), onhover=lambda v:self.onhover(7,v))
+        self.items['exit'] = text.Text("EXIT", "small", V2(x, y + dy * 8), onhover=lambda v:self.onhover(8,v), onclick=sys.exit)
         
         self.item_names = list(self.items.keys())
 
@@ -78,11 +86,11 @@ class MenuScene(scene.Scene):
             self.ui_group.add(item)
         self.update_selection()
 
-        self.music_meter = Slider(V2(370, y + dy * 4), 100, 0, 10, onchange=self.music_change)
+        self.music_meter = Slider(V2(x + 50, y + dy * 4), 100, 0, 10, onchange=self.music_change)
         self.ui_group.add(self.music_meter)
-        self.sound_meter = Slider(V2(370,  y + dy * 5), 100, 0, 10, onchange=self.sound_change)
+        self.sound_meter = Slider(V2(x + 50,  y + dy * 5), 100, 0, 10, onchange=self.sound_change)
         self.ui_group.add(self.sound_meter)        
-        self.resolution_display = text.Text("1x1", "small", (400,  y + dy * 6))
+        self.resolution_display = text.Text("1x1", "small", (x + 80,  y + dy * 6))
         self.ui_group.add(self.resolution_display)
         self.update_settings()
         #sound.play_music("overworld")

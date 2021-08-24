@@ -4,6 +4,7 @@ import sys
 
 import pygame
 import xbrz
+from pygame.transform import scale
 
 import allupgradesscene
 import buildingcreatorscene
@@ -28,7 +29,7 @@ from v2 import V2
 
 DEV = len(sys.argv) > 1 and sys.argv[1] == "dev"
 SCALE = 2
-RES = (500,360)
+RES = (600,360)
 OBJ = {
 }
 class Game:
@@ -38,13 +39,14 @@ class Game:
         pygame.mixer.pre_init(buffer=256)
         pygame.init()
         self.save = save
-        self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
+        modes = pygame.display.list_modes()
+        print(modes)
+        self.set_resolution(V2(1440,900), True)
         pygame.display.set_caption("Hostile Quadrant")
         sound.init()
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
         self.last_joy_axes = None
         #sound.play_music("game")
-        self.screen = pygame.Surface(RES, pygame.SRCALPHA)
         self.run_info = run.RunInfo()
         self.input_mode = 'mouse'
         if len(sys.argv) > 1:
@@ -73,6 +75,18 @@ class Game:
 
         self.frame_time = 0
         Game.inst = self
+
+    def set_resolution(self, resolution, fullscreen = False):
+        global SCALE
+        flags = 0
+        if fullscreen:
+            flags = flags | pygame.FULLSCREEN | pygame.HWSURFACE | pygame.SCALED
+        self.full_resolution = resolution.copy()
+        SCALE = int(min(self.full_resolution.x / RES[0], self.full_resolution.y / RES[1]))
+        self.scaled_screen = pygame.display.set_mode(self.full_resolution.tuple(), flags=flags)
+        self.game_resolution = V2(*(self.full_resolution / SCALE).tuple_int())
+        self.screen = pygame.Surface(self.game_resolution.tuple_int(), pygame.SRCALPHA)
+        self.game_offset = V2((self.game_resolution.x - RES[0]) / 2,(self.game_resolution.y - RES[1]) / 2)
 
     def run(self):
         clock = pygame.time.Clock()
@@ -162,8 +176,8 @@ class Game:
     def scale_xbr(self):
         sc = pygame.Surface(self.screen.get_size(), depth=32)
         factor = SCALE
-        buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, RES[0], RES[1], xbrz.ColorFormat.RGB)
-        surf = pygame.image.frombuffer(buf2, (RES[0] * factor, RES[1] * factor), "RGBX")
+        buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, self.game_resolution.x, self.game_resolution.y, xbrz.ColorFormat.RGB)
+        surf = pygame.image.frombuffer(buf2, (self.game_resolution.x * factor, self.game_resolution.y * factor), "RGBX")
         self.scaled_screen.blit(surf, (0,0))
 
     def scale_normal(self):
@@ -175,8 +189,8 @@ class Game:
         if SCALE == 1:
             self.scale_normal()
         else:
-            self.scale_normal()
-            #self.scale_xbr()
+            #self.scale_normal()
+            self.scale_xbr()
         if DEV:
             t = pygame.time.get_ticks() - self.frame_time
             self.frame_time = pygame.time.get_ticks()            

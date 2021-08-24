@@ -1,10 +1,11 @@
+import sound
 from colors import PICO_LIGHTGRAY, PICO_PINK, PICO_YELLOW
+from line import Line
+from ships.all_ships import register_ship
 from ships.fighter import Fighter
 from ships.ship import Ship
-from line import Line
 from v2 import V2
-import sound
-from ships.all_ships import register_ship
+
 
 @register_ship
 class Alien2ControlShip(Fighter):
@@ -23,7 +24,7 @@ class Alien2ControlShip(Fighter):
         self.tether_time = 0
 
     def get_max_tether_time(self):
-        return 4 * (1 + self.get_stat("alien_control_mul"))
+        return max(8 * (1 + self.get_stat("alien_control_mul")),2)
         
     def fire(self, at):
         if not isinstance(at, Ship):

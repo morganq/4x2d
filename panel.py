@@ -29,14 +29,14 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
         if self.panel_for:
             x = self.panel_for.x - self._width / 2
             y = self.panel_for.y - self._height / 2
-            if x > game.RES[0] / 2:
+            if x > game.Game.inst.game_resolution.x / 2:
                 x = self.panel_for.x - self.panel_for._width / 2 - self._width - 10
             else:
                 x = self.panel_for.x + self.panel_for._width / 2 + 10
-            y = clamp(y, 2, game.RES[1] - self._height - 2 - 40)
+            y = clamp(y, 2, game.Game.inst.game_resolution.y - self._height - 2 - 40)
         else:
-            x = game.RES[0] / 2 - self._width / 2
-            y = game.RES[1] / 2 - self._height / 2
+            x = game.Game.inst.game_resolution.x / 2 - self._width / 2
+            y = game.Game.inst.game_resolution.y / 2 - self._height / 2
         self.pos = V2(x,y)
         self._reposition_children()
 

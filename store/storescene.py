@@ -117,11 +117,17 @@ class StoreScene(Scene):
     def build_shop(self):
         self.buttons = []
         self.ui_group.empty()
-        t = Text("Shop (MOCKUP)", "big", V2(250, 10), PICO_BLACK, multiline_width=300)
+        t = Text("Shop (MOCKUP)", "big", V2(250, 10) + self.game.game_offset, PICO_BLACK, multiline_width=300)
         t.offset = (0.5, 0)
         self.ui_group.add(t)
 
-        self.credits_text = Text("Your Credits: %d" % self.game.run_info.credits, "big", V2(250, 30), PICO_GREEN, multiline_width=300)
+        self.credits_text = Text(
+            "Your Credits: %d" % self.game.run_info.credits,
+            "big",
+            V2(250, 30) + self.game.game_offset,
+            PICO_GREEN,
+            multiline_width=300
+        )
         self.credits_text.offset = (0.5, 0)
         self.ui_group.add(self.credits_text)        
 
@@ -133,7 +139,7 @@ class StoreScene(Scene):
                 'blueprint':'Blueprints',
                 'levelup':'Level Up'
             }[row['offer_type']]
-            t = Text(name, "small", V2(250, y - 15), PICO_BLACK, multiline_width=200)
+            t = Text(name, "small", V2(250, y - 15) + self.game.game_offset, PICO_BLACK, multiline_width=200)
             t.offset = (0.5, 0)
             self.ui_group.add(t)
             fn = {
@@ -151,7 +157,7 @@ class StoreScene(Scene):
         if self.game.input_mode == "joystick":
             t = "[*circle*] Exit Shop"
             bx = 330
-        self.ui_group.add(Button(V2(bx, 325), t, "big", self.on_exit))
+        self.ui_group.add(Button(V2(bx, 325) + self.game.game_offset, t, "big", self.on_exit))
 
     def update(self, dt):
         for spr in self.ui_group.sprites():
@@ -193,7 +199,7 @@ class StoreScene(Scene):
             else:
                 title = u.title
             sib = StoreItemButton(
-                V2(i * 160 + 15, y),
+                V2(i * 160 + 15, y) + self.game.game_offset,
                 elem,
                 title,
                 "Unlock this Tech for all future encounters.",
@@ -215,7 +221,7 @@ class StoreScene(Scene):
         price = 60
         elem = SimpleSprite(V2(0,0), "assets/i-o2.png")
         sib = StoreItemButton(
-            V2(175, y),
+            V2(175, y) + self.game.game_offset,
             elem,
             "Oxygen - 600", "Gain +600 seconds of Oxygen.",
             price,
@@ -253,7 +259,7 @@ class StoreScene(Scene):
             else:
                 title = u.title
             sib = StoreItemButton(
-                V2(i * 160 + 15, y),
+                V2(i * 160 + 15, y) + self.game.game_offset,
                 elem,
                 title,
                 "Unlock this Building for all future encounters.",
@@ -276,7 +282,7 @@ class StoreScene(Scene):
         elem = SimpleSprite(V2(0,0), "assets/i-%s.png" % ship)
         price = 100
         sib = StoreItemButton(
-            V2(175, y),
+            V2(175, y) + self.game.game_offset,
             elem,
             "%s Level %d" % (ship.title(), self.game.run_info.ship_levels[ship] + 1),
             "Improve health and damage of all %ss" % ship.title(),
