@@ -39,14 +39,16 @@ class LoadingScene(Scene):
         galaxy = self.game.run_info.get_current_level_galaxy()
         alien_code = galaxy['alien']
         alien_obj = alien.ALIENS[alien_code]
-        nametext = Text(alien_obj.title, "huge", (30, 31), multiline_width=500, center=False)
+        nametext = Text(alien_obj.title, "huge", V2(50, 31) + self.game.game_offset, multiline_width=500, center=False)
         self.group.add(nametext)
-        self.group.add(Text("ALIEN FORCES", "big", (30, 15), PICO_LIGHTGRAY, multiline_width=300, center=False))
-        self.loading_text = Text("Loading...", "small", (game.RES[0] - 70, 325), center=False)
+        self.group.add(Text("ALIEN FORCES", "big", V2(50, 15) + self.game.game_offset, PICO_LIGHTGRAY, multiline_width=300, center=False))
+        self.loading_text = Text("Loading...", "small", V2(game.RES[0] - 70, 375) + self.game.game_offset, center=False)
         self.loading_text.offset = (0.5, 0)
         self.group.add(self.loading_text)
 
-        self.group.add(SimpleSprite((0, 65), "assets/%sgraphic.png" % alien_code))
+        portrait = SimpleSprite(V2(50, 65) + self.game.game_offset, "assets/%sgraphic.png" % alien_code)
+        pygame.draw.rect(portrait.image, PICO_BLACK, (0,0,portrait.width, portrait.height), 1)
+        self.group.add(portrait)
 
         
         if galaxy['difficulty'] > 1:
@@ -55,19 +57,19 @@ class LoadingScene(Scene):
                 wp = tw + 20
                 x = wp * i + game.RES[0] / 2 - wp
                 img = pygame.image.load(resource_path(tip[0]))
-                s = SimpleSprite((x, 165), img)
+                s = SimpleSprite(V2(x, 165) + self.game.game_offset, img)
                 s.offset = (0.5, 0)
                 self.group.add(s)
-                self.group.add(Text(tip[1], "small", (x - 60, 240), multiline_width=120, center=False))
+                self.group.add(Text(tip[1], "small", V2(x - 60, 240) + self.game.game_offset, multiline_width=120, center=False))
         else:
-            quote = Text(alien_obj.get_quote(), "pixolde", V2(game.RES[0] / 2, 230), PICO_YELLOW, multiline_width=400)
+            quote = Text(alien_obj.get_quote(), "pixolde", V2(game.RES[0] / 2, 230) + self.game.game_offset, PICO_YELLOW, multiline_width=400)
             quote.offset = (0.5, 0)
             self.group.add(quote)
 
         if galaxy['mods']:
-            self.group.add(SimpleSprite(V2(11, 322), "assets/exclamation.png"))
-            self.group.add(Text("WARNING", "small", V2(29, 320), PICO_YELLOW, multiline_width=400, center=False))
-            self.group.add(Text(MOD_STRINGS[galaxy['mods'][0]], "small", V2(29, 330), PICO_WHITE, multiline_width=400, center=False))
+            self.group.add(SimpleSprite(V2(11, 322) + self.game.game_offset, "assets/exclamation.png"))
+            self.group.add(Text("WARNING", "small", V2(29, 320) + self.game.game_offset, PICO_YELLOW, multiline_width=400, center=False))
+            self.group.add(Text(MOD_STRINGS[galaxy['mods'][0]], "small", V2(29, 330) + self.game.game_offset, PICO_WHITE, multiline_width=400, center=False))
 
         self.sm = Machine(UIEnabledState(self))
 
@@ -79,7 +81,7 @@ class LoadingScene(Scene):
             t = "Start"
             if self.game.input_mode == "joystick":
                 t = "[*x*] Start"
-            b = Button((game.RES[0] - 80, 320), t, "big", self.on_click_start)
+            b = Button(V2(game.RES[0] - 80, 320) + self.game.game_offset, t, "big", self.on_click_start)
             b.x -= b.width / 2
             self.ui_group.add(b)
             self.loading_text.kill()

@@ -18,7 +18,7 @@ class RunInfo:
         self.bonus_population = 0
         self.bonus_fighters = 0
         self.rerolls = 3
-        self.o2 = 3600
+        self.o2 = 60 * 60 * 1.5 # 1.5 hrs
         self.credits = 20
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'interceptor':1, 'bomber':1, 'battleship': 1}

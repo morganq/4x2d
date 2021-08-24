@@ -75,7 +75,7 @@ class GalaxyPanel(Panel):
         y = self.panel_for.y - self._height / 2
         x = self.panel_for.apparent_pos.x + self.panel_for._width / 2 + 10
         offset = 0
-        if x > game.RES[0] / 2:
+        if x > game.Game.inst.game_resolution.x / 2:
             offset = -self.width * 1.5 + 0
         
         self.pos = V2(self.panel_for.x + self.panel_for._width / 2 + 10 + offset,y)

@@ -26,7 +26,5 @@ proposal: 600 x 360
 1440 x 900 - 2.4 x 2.5
 1280 x 720 - 2.1 x 2
 
-
-Get rid of hanger upgrade and replace with 1 fighter, 1 bomber, 1 interceptor
-Oxygen amt might be bad - maybe also give oxygen rewards?
+Maybe give oxygen rewards?
 

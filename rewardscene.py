@@ -36,10 +36,10 @@ class RewardSelector(SpriteBase):
 class RewardState(states.UIEnabledState):
     is_basic_joystick_panel = True
     def enter(self):
-        self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 50), PICO_BLUE, multiline_width=480, offset=(0.5,0)))
-        self.scene.ui_group.add(Text(self.description, 'big', V2(game.RES[0] / 2, 90), PICO_WHITE, multiline_width=380, offset=(0.5,0)))
+        self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 50) + self.scene.game.game_offset, PICO_BLUE, multiline_width=480, offset=(0.5,0)))
+        self.scene.ui_group.add(Text(self.description, 'big', V2(game.RES[0] / 2, 90) + self.scene.game.game_offset, PICO_WHITE, multiline_width=380, offset=(0.5,0)))
 
-        self.confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50), "Confirm", "big", self.on_confirm)
+        self.confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50) + self.scene.game.game_offset, "Confirm", "big", self.on_confirm)
         self.confirm_button.offset = (0.5,0.5)
         self.scene.ui_group.add(self.confirm_button)
         return super().enter()
@@ -128,7 +128,7 @@ class MemoryCrystalRewardState(RewardState):
         selected_technologies = selected_technologies[0:4]
         l = len(selected_technologies)
         for i,technology in enumerate(selected_technologies):
-            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11)
+            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11) + self.scene.game.game_offset
             icon = upgradeicon.UpgradeIcon(p, technology, self.select_technology, True)
             self.icons[technology] = icon
             self.scene.ui_group.add(icon)
@@ -179,7 +179,7 @@ class BlueprintRewardState(RewardState):
         selected_buildings = selected_buildings[0:4]
         l = len(selected_buildings)
         for i,building in enumerate(selected_buildings):
-            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11)
+            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11) + self.scene.game.game_offset
             icon = upgradeicon.UpgradeIcon(p, building, self.select_building, True)
             self.icons[building] = icon
             self.scene.ui_group.add(icon)
