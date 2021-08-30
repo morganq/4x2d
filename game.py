@@ -14,6 +14,7 @@ import leveleditorscene
 import levelscene
 import menuscene
 import optimize
+import planetgenscene
 import run
 import simplesprite
 import sound
@@ -41,7 +42,8 @@ class Game:
         self.save = save
         modes = pygame.display.list_modes()
         print(modes)
-        self.set_resolution(V2(1440,900), True)
+        #self.set_resolution(V2(1920, 1080), True)
+        self.set_resolution(V2(1220, 800), False)
         pygame.display.set_caption("Hostile Quadrant")
         sound.init()
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
@@ -61,8 +63,9 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             elif sys.argv[1] == "game":
-                print("GAME")
                 self.scene = levelscene.LevelScene(self, "choke", "alien1", 3)
+            elif sys.argv[1] == "planet":
+                self.scene = planetgenscene.PlanetGenScene(self)
             else:
                 self.scene = menuscene.MenuScene(self)
         else:

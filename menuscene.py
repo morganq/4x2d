@@ -1,4 +1,5 @@
 import math
+import random
 import sys
 
 import pygame
@@ -7,6 +8,7 @@ import controlsscene
 import creditsscene
 import framesprite
 import game
+import menubackground
 import save
 import scene
 import simplesprite
@@ -15,6 +17,7 @@ import states
 import text
 import tutorial.introscene
 from colors import *
+from helper import clamp
 from run import RunInfo
 from slider import Slider
 from starmap import starmapscene
@@ -38,21 +41,47 @@ class MenuState(states.UIEnabledState):
         controls.append([self.scene.items['exit']])
         return controls
 
+class Parallaxed:
+    def __init__(self, obj, degree):
+        self.obj = obj
+        self.degree = degree
+        self.end_pos = self.obj.pos
+
+    def update(self, time):
+        t = clamp(time / 3.5, 0, 1)
+        tz = (math.cos(t * 3.14159) * -0.5 + 0.5) ** 0.5
+        delta = V2(0, 300) * self.degree * (1-tz)
+        self.obj.pos = self.end_pos + delta
+
 class MenuScene(scene.Scene):
     def start(self):
         self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
-        bg = simplesprite.SimpleSprite(V2(0,0), "assets/menubg.png")
-        scaled_img = pygame.Surface(self.game.game_resolution.tuple_int(), pygame.SRCALPHA)
-        sw = self.game.game_resolution.x
-        sh = self.game.game_resolution.y
-        pygame.transform.scale(bg.image, (sw, sh), scaled_img)
-        bg.image = scaled_img
-        bg._width, bg._height = self.game.game_resolution.tuple_int()
-        bg._recalc_rect()
-        bg.dirty = 2
-        self.background_group.add(bg)
+        self.parallax = []
+        self.stars = []
+        for i in range(120):
+            s = framesprite.FrameSprite(V2(random.randint(0, self.game.game_resolution.x),random.randint(-30, self.game.game_resolution.y)), "assets/bgstar.png", 11)
+            s.frame = 4 + random.randint(0,1)
+            self.background_group.add(s)
+            self.parallax.append(Parallaxed(s, 0.05))
+            self.stars.append(s)
+        for i in range(60):
+            s = framesprite.FrameSprite(V2(random.randint(0, self.game.game_resolution.x),random.randint(-60, self.game.game_resolution.y)), "assets/bgstar.png", 11)
+            s.frame = 2 + random.randint(0,1)
+            self.background_group.add(s)
+            self.parallax.append(Parallaxed(s, 0.1))   
+            self.stars.append(s)         
+        for i in range(20):
+            s = framesprite.FrameSprite(V2(random.randint(0, self.game.game_resolution.x),random.randint(-100, self.game.game_resolution.y)), "assets/bgstar.png", 11)
+            s.frame = 0 + random.randint(0,1)
+            self.background_group.add(s)
+            self.parallax.append(Parallaxed(s, 0.2)) 
+            self.stars.append(s)           
+
+        self.bg = menubackground.MenuBackground(V2(-80,40), True)
+        self.background_group.add(self.bg)
+        self.parallax.append(Parallaxed(self.bg, 1))
 
         self.selected_item_index = 0
         
@@ -105,12 +134,25 @@ class MenuScene(scene.Scene):
             self.update_selection()
 
     def update(self, dt):
-        self.time += dt
+        self.time += min(dt,0.1)
+        self.bg.update(dt)
+        for para in self.parallax:
+            para.update(self.time)
+
+        for i in range(10):
+            s = random.choice(self.stars)
+            s.frame = int(s.frame / 2) * 2 + random.randint(0,1)
         super().update(dt)
 
     def render(self):   
+        self.game.screen.fill(PICO_BLACK)
+        # for i in range(16, self.game.game_resolution.x, 32):
+        #     pygame.draw.line(self.game.screen, PICO_DARKBLUE, (i, 0), (i, self.game.game_resolution.y))
+        # for i in range(16, self.game.game_resolution.y, 32):
+        #     pygame.draw.line(self.game.screen, PICO_DARKBLUE, (0, i), (self.game.game_resolution.x, i))            
         dirty = []
         dirty.extend(self.background_group.draw(self.game.screen))
+        self.game.screen.blit(self.bg.wobble_image, self.bg.pos.tuple_int())
         dirty.extend(self.game_group.draw(self.game.screen))
         dirty.extend(self.ui_group.draw(self.game.screen))
         dirty.extend(super().render())

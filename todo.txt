@@ -1,3 +1,8 @@
+Finish menu scene resolution
+
+ - fixed delta time (iteration)?
+
+
  x figure out "hook" and "kicker"
  - figure out whole narrative structure
  - implement boss

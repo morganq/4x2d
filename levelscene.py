@@ -42,6 +42,7 @@ from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgrades import UPGRADE_CLASSES
 from v2 import V2
 
+TICK_TIME = 0.05
 
 class LevelScene(scene.Scene):
     def __init__(self, game, levelfile, alienrace, difficulty, options=None):
@@ -61,6 +62,8 @@ class LevelScene(scene.Scene):
         self.is_tutorial = False
         self.update_times = defaultdict(lambda:0)
         self.asset_buttons = []
+
+        self.update_remainder_time = 0
 
     @property
     def score(self):
@@ -402,16 +405,35 @@ class LevelScene(scene.Scene):
         #sound.play_music('game')  
 
     def update(self, dt):
+        self.game_speed = round((self.game.game_speed_input * 3) + 1)
+        # This is correct way to do things, but we need to optimize more for this to work
+        #game_dt = dt * self.game_speed        
+        self.update_remainder_time += dt
+        num_updates = int(self.update_remainder_time / TICK_TIME)
+        for i in range(num_updates):
+            self.update_game(TICK_TIME * self.game_speed)
+            self.update_remainder_time -= TICK_TIME
+
+        self.update_ui(dt)
+
+    def update_ui(self, dt):
+        for sprite in self.ui_group.sprites():
+            sprite.update(dt)        
+
+        for res_type in self.my_civ.upgrade_limits.data.keys():
+            ratio = self.my_civ.upgrade_limits.data[res_type] / self.my_civ.base_upgrade_limits.data[res_type]
+            self.upgrade_texts[res_type].x = 120 * ratio + 20
+            self.meters[res_type].set_width(120 * ratio)
+            self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
+            self.meters[res_type].value = self.my_civ.resources.data[res_type]            
+
+    def update_game(self, dt):
         ut = time.time()
         self.update_times = defaultdict(lambda:0)
-        base_dt = dt
-        self.game_speed = round((self.game.game_speed_input * 3) + 1)
-        dt *= self.game_speed
         if self.paused:
             self.sm.state.paused_update(dt)
-            for sprite in self.ui_group.sprites():
-                sprite.update(base_dt)
             return        
+
         self.time += dt
 
         if self.time > 300 and not self.my_civ.scarcity:
@@ -443,12 +465,6 @@ class LevelScene(scene.Scene):
             if not self.get_civ_planets(self.enemy.civ):
                 self.paused = True
                 self.sm.transition(levelstates.VictoryState(self))
-        
-        for sprite in self.ui_group.sprites():
-            t = time.time()
-            sprite.update(base_dt)
-            elapsed = time.time() - t
-            self.update_times[type(sprite)] += elapsed
 
         for sprite in self.game_group.sprites() + self.background_group.sprites():
             t = time.time()
@@ -484,13 +500,6 @@ class LevelScene(scene.Scene):
         if self.options != "pacifist":
             for enemy in self.enemies:
                 enemy.update(dt)
-
-        for res_type in self.my_civ.upgrade_limits.data.keys():
-            ratio = self.my_civ.upgrade_limits.data[res_type] / self.my_civ.base_upgrade_limits.data[res_type]
-            self.upgrade_texts[res_type].x = 120 * ratio + 20
-            self.meters[res_type].set_width(120 * ratio)
-            self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
-            self.meters[res_type].value = self.my_civ.resources.data[res_type]
         
         t = time.time()
         self.fleet_managers['my'].update(dt)
