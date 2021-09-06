@@ -48,11 +48,16 @@ class Building:
         pygame.draw.polygon(surface, color, [pt.tuple() for pt in final_pts], 0)
 
 
-    def draw_foreground(self, surface, offset, angle):
-        for points, color in self.shapes:
+    def draw_foreground(self, surface, offset, angle, construction=0):
+        ind = int((1 - construction / 3) * len(self.shapes))
+        for i, (points, color) in enumerate(self.shapes[0:ind]):
+            if construction > 0 and i == ind - 1:
+                color = PICO_WHITE
             self.draw_shape(surface, points, color, offset, angle)
 
-    def draw_outline(self, surface, color, offset, angle, expand=False):
+    def draw_outline(self, surface, color, offset, angle, expand=False, construction=0):
+        if construction > 0 and ((construction * 9) % 1) > 0.5:
+            color = PICO_WHITE
         for points, _ in self.shapes:
             self.draw_shape(surface, points, color, offset + V2(-1,0), angle, expand)
             self.draw_shape(surface, points, color, offset + V2(+1,0), angle, expand)

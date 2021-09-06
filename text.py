@@ -24,7 +24,7 @@ for font in FONTS.values():
 
 class Text(spritebase.SpriteBase):
     type = None
-    def __init__(self, text, size, pos, color = PICO_WHITE, border=False, multiline_width = 80, center = True, shadow=False, offset = None, onclick = None, onhover = None):
+    def __init__(self, text, size, pos, color = PICO_WHITE, border=False, multiline_width = 80, center = True, shadow=False, offset = None, onclick = None, onhover = None, flash_color = None):
         spritebase.SpriteBase.__init__(self, pos)
         self._text = text
         self.size = size
@@ -36,6 +36,11 @@ class Text(spritebase.SpriteBase):
         self.offset = offset or (0,0)
         self.onclick = onclick
         self.onhover = onhover
+        self.flash_time = 0
+        self.flash_color = flash_color
+        if flash_color:
+            self.flash_color = flash_color
+            self.flash_time = 0.125
         if self.onclick or self.onhover:
             self.selectable = True
         self.set_text(text)
@@ -45,7 +50,10 @@ class Text(spritebase.SpriteBase):
         self.update_image()
 
     def update_image(self):
-        text_image = render_multiline(self._text, self.size, self.color, self.multiline_width, self.center)
+        color = self.color
+        if self.flash_time > 0:
+            color = self.flash_color
+        text_image = render_multiline(self._text, self.size, color, self.multiline_width, self.center)
         w, h = text_image.get_size()
         if self.shadow:
             h += 1
@@ -63,6 +71,13 @@ class Text(spritebase.SpriteBase):
         self._width = w
         self._height = h
         self._recalc_rect()
+
+    def update(self, dt):
+        if self.flash_time > 0:
+            self.flash_time -= dt
+            if self.flash_time <= 0:
+                self.update_image()
+        return super().update(dt)
 
     def on_mouse_enter(self, pos):
         if self.onhover:

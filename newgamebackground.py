@@ -7,6 +7,7 @@ import game
 import text
 from colors import *
 from helper import clamp, get_nearest_pos, nearest_order_pos
+from resources import resource_path
 from spritebase import SpriteBase
 from v2 import V2
 
@@ -52,7 +53,7 @@ class NewGameBackground(SpriteBase):
         self.path_flashing = False
         self.path_flash_time = 0
 
-        self.readout_text = open("readout.txt").read()
+        self.readout_text = open(resource_path("assets/readout.txt")).read()
         self.readout_line = 0
         self.readout_time = -8
         self._generate_image(0.05)

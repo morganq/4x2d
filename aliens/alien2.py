@@ -181,6 +181,7 @@ class Alien2(alien.Alien):
     DEFEND_DURATION = 3
     EXPAND_NUM_NEAREST = 1
     EXPAND_DURATION = 10
+    COLOR = PICO_YELLOW
 
     quotes = [
     ]

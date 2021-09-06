@@ -42,7 +42,7 @@ class LoadingScene(Scene):
         nametext = Text(alien_obj.title, "huge", V2(50, 31) + self.game.game_offset, multiline_width=500, center=False)
         self.group.add(nametext)
         self.group.add(Text("ALIEN FORCES", "big", V2(50, 15) + self.game.game_offset, PICO_LIGHTGRAY, multiline_width=300, center=False))
-        self.loading_text = Text("Loading...", "small", V2(game.RES[0] - 70, 375) + self.game.game_offset, center=False)
+        self.loading_text = Text("Loading...", "small", V2(game.RES[0] - 70, 326) + self.game.game_offset, center=False)
         self.loading_text.offset = (0.5, 0)
         self.group.add(self.loading_text)
 
@@ -78,7 +78,7 @@ class LoadingScene(Scene):
             self.levelscene = levelscene.LevelScene(
                 self.game,
                 self.galaxy.level,
-                self.galaxy.alien,
+                self.galaxy.alien.name,
                 self.galaxy.difficulty,
                 self.galaxy.difficulty,
                 self.galaxy.spec['name'],
@@ -90,7 +90,7 @@ class LoadingScene(Scene):
             if self.game.input_mode == "joystick":
                 t = "[*x*] Start"
             b = Button(V2(game.RES[0] - 80, 320) + self.game.game_offset, t, "big", self.on_click_start)
-            b.x -= b.width / 2
+            b.offset = (0.5, 0)
             self.ui_group.add(b)
             self.loading_text.kill()
         return super().update(dt)

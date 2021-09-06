@@ -121,23 +121,23 @@ class UpgradeState(UIEnabledState):
         if cursor == "allied_planet":
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-planet-cursor.png")
             self.hover_filter = self.filter_my_planets
-            self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+            self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
         elif cursor == "allied_fleet":
             self.scene.fleet_managers['my'].generate_selectable_objects()
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-fleet-cursor.png")
             self.hover_filter = self.filter_my_fleets
-            self.selection_info_text = text.Text("Select one of your Fleets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+            self.selection_info_text = text.Text("Select one of your Fleets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
         elif cursor == "point":
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
             self.hover_filter = self.filter_only_ui
-            self.selection_info_text = text.Text("Select a point", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+            self.selection_info_text = text.Text("Select a point", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
         elif cursor == "nearby":
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
             self.range = RangeIndicator(self.selected_targets[0].pos, self.NEARBY_RANGE, PICO_LIGHTGRAY)
             self.scene.ui_group.add(self.range)
             self.extras.append(self.range)
             self.hover_filter = self.filter_only_ui
-            self.selection_info_text = text.Text("Select a point nearby", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+            self.selection_info_text = text.Text("Select a point nearby", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
 
         self.cursor_icon.offset = (0.5, 0.5)
         self.cursor_icon._recalc_rect()

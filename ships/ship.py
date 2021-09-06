@@ -193,7 +193,7 @@ class Ship(SpaceObject):
         self.state = state
 
     def update(self, dt):
-        if not self.updated_color and self.SHIP_NAME in ['fighter', 'interceptor', 'bomber', 'battleship'] and self.owning_civ.is_enemy:
+        if not self.updated_color:
             self.update_color()
             self.updated_color = True
         self.time += dt
@@ -443,7 +443,11 @@ class Ship(SpaceObject):
         self.update_color()
 
     def update_color(self):
-        new_color = PICO_GREEN if self.owning_civ == self.scene.my_civ else PICO_RED
+        #new_color = PICO_GREEN if self.owning_civ == self.scene.my_civ else PICO_RED
+        new_color = self.owning_civ.color
+        # Could optimize by doing 2 masks - color mask and black mask
+        #mask = pygame.mask.from_surface(self._sheet)
+        #self._sheet = mask.to_surface(setcolor = (*self.owning_civ.color,255), unsetcolor=(0,0,0,0))
 
         for x in range(self._sheet.get_width()):
             for y in range(self._sheet.get_height()):

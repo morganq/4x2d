@@ -7,6 +7,7 @@ import pygame
 import game
 from colors import *
 from helper import clamp
+from resources import resource_path
 from spritebase import SpriteBase
 from v2 import V2
 
@@ -81,7 +82,7 @@ class MenuBackground(SpriteBase):
         
         self.is_menu = is_menu
         if is_menu:
-            data = json.load(open("menu_motion.json"))
+            data = json.load(open(resource_path("assets/menu_motion.json")))
             self.motion_field = [[V2(*p) for p in row] for row in data]
         else:
             self._generate_motion_field()
@@ -375,7 +376,7 @@ class MenuBackground(SpriteBase):
     def save(self):
         print(self.chosen_colors)
         motion = [[p.tuple() for p in row] for row in self.motion_field]
-        json.dump(motion, open("menu_motion.json", "w"))
+        json.dump(motion, open(resource_path("assets/menu_motion.json"), "w"))
 
     def _shade(self):
         self.shading = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)

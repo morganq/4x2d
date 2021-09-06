@@ -4,9 +4,13 @@ Finish menu scene resolution
  x figure out "hook" and "kicker"
  x figure out whole narrative structure
  x "start" animation when level loads
+ x different color aliens
  - make buildings look cool
+ x buildings flash in
  x colorblind issue with player colors + different alien colors
- - somehow pop out selectable objects in upgrade targeting
+ x somehow pop out selectable objects in upgrade targeting
+ - "research" help menu, plus achievements that unlock them.
+ - something better when you acquire upgrade
  - make starmap more dynamic, better background, etc.
  - implement narrative constraints in run info
  - "victory" animation when you win

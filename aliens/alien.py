@@ -19,6 +19,7 @@ class Alien:
         self.scene = scene
         self.civ = civ
         self.civ.alien = self
+        self.civ.color = self.COLOR
         self.resource_priority = 'grow'
         self.resource_priority_funs = {
             'grow':self.priority_grow,

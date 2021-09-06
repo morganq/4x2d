@@ -80,6 +80,10 @@ class Planet(SpaceObject):
 
         self.needs_panel_update = False
 
+        ## Building juice ##
+        self.building_construction_time = 0
+        self.last_building = None
+
         self._generate_base_frames()
         self.frame = 0        
         self.time = 0
@@ -171,7 +175,7 @@ class Planet(SpaceObject):
         frame = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
 
         border_radius = 3 if border else 1
-        color = self.owning_civ.color if self.owning_civ else PICO_YELLOW
+        color = self.owning_civ.color if self.owning_civ else PICO_LIGHTGRAY
         if self.owning_civ and not self.owning_civ.is_enemy:
             pygame.draw.circle(frame, color, (cx,cy), radius + border_radius + 2, 1)
 
@@ -194,7 +198,11 @@ class Planet(SpaceObject):
 
         for building in self.buildings:
             offset = V2.from_angle(building['angle'] + self.base_angle) * radius + V2(cx, cy)
-            building['building'].draw_outline(frame, color, offset, building['angle'] + self.base_angle,expand=border)
+            b = building['building']
+            c = 0
+            if b == self.last_building and self.building_construction_time > 0:
+                c = self.building_construction_time
+            b.draw_outline(frame, color, offset, building['angle'] + self.base_angle, expand=border, construction = c)
 
         # Foreground
         #pygame.draw.circle(frame, PICO_GREYPURPLE, (cx,cy), radius)
@@ -204,7 +212,14 @@ class Planet(SpaceObject):
 
         for building in self.buildings:
             offset = V2.from_angle(building['angle'] + self.base_angle) * radius + V2(cx, cy)
-            building['building'].draw_foreground(frame, offset, building['angle'] + self.base_angle)
+            b = building['building']
+            c = 0
+            if b == self.last_building and self.building_construction_time > 0:
+                c = self.building_construction_time            
+            b.draw_foreground(frame, offset, building['angle'] + self.base_angle, construction=c)
+
+        if self.building_construction_time > 2.75:
+            pygame.draw.circle(frame, PICO_WHITE, (cx,cy), radius)
 
         return frame
 
@@ -463,6 +478,11 @@ class Planet(SpaceObject):
         for b in self.buildings:
             b['building'].update(self, dt)
 
+        if self.building_construction_time > 0:
+            self.building_construction_time -= dt
+            self._generate_base_frames()
+            self._generate_frames()
+
         # Detect enemies
         threats = self.get_threats()
         if threats:
@@ -641,6 +661,8 @@ class Planet(SpaceObject):
             angle = random.random() * 6.2818
         b = upgrade.building()
         self.buildings.append({"building":b, "angle":angle})
+        self.last_building = b
+        self.building_construction_time = 3        
         self._generate_base_frames()
         self._generate_frames()
         self.needs_panel_update = True 

@@ -1,3 +1,4 @@
+from colors import PICO_BROWN, PICO_SKIN
 from helper import clamp
 from planet import building as buildings
 from productionorder import ProductionOrder
@@ -146,6 +147,7 @@ class Alien1(alien.Alien):
     name = "alien1"
     EXPAND_NUM_NEAREST = 3
     title = "BARYSI NOMADS"
+    COLOR = PICO_BROWN
 
     quotes = [
         "\"Every vein and shard in this system belongs to us.\""

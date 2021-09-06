@@ -29,6 +29,7 @@ from civ import Civ, PlayerCiv
 from colors import *
 from debug import debug_render
 from economy import RESOURCE_COLORS, RESOURCES, Resources
+from explosion import Explosion
 from hazard import Hazard
 from helper import all_nearby, get_nearest
 from levelbackground import LevelBackground
@@ -150,6 +151,9 @@ class LevelScene(scene.Scene):
         self.homeworld.population = 3 + self.game.run_info.bonus_population
         self.homeworld.ships['fighter'] = 1 + self.game.run_info.bonus_fighters
 
+        self.radar = Explosion(self.homeworld.pos, [PICO_GREEN], 1.25, self.game.game_resolution.x)
+        self.ui_group.add(self.radar)
+
         # Alien
         p = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.enemy.civ))[0]
         p.population = 5
@@ -255,7 +259,7 @@ class LevelScene(scene.Scene):
 
         self.stage_name = stagename.StageName(V2(0, 100), self.stage_num, self.title, self.description)
         self.ui_group.add(self.stage_name)
-        self.stage_name.kill()
+        #self.stage_name.kill()
 
         self.pause_sprite = pauseoverlay.PauseOverlay()
         self.pause_sprite.layer = 5
@@ -285,7 +289,10 @@ class LevelScene(scene.Scene):
 
     def load(self):
         self.create_layers()
-        AlienClass = aliens.alien.ALIENS[self.game.run_info.get_current_level_galaxy()['alien']]
+        civ_name = self.game.run_info.get_current_level_galaxy()['alien']
+        if self.alienrace:
+            civ_name = self.alienrace
+        AlienClass = aliens.alien.ALIENS[civ_name]
         self.enemies = [AlienClass(self, Civ(self))]
         self.enemy = self.enemies[0]        
         
@@ -430,6 +437,18 @@ class LevelScene(scene.Scene):
     def update_ui(self, dt):
         for sprite in self.ui_group.sprites():
             sprite.update(dt)        
+
+        if self.radar:
+            for spr in self.game_group.sprites():
+                if True: #isinstance(spr, Planet) or isinstance(spr, Asteroid):
+                    delta = spr.pos - self.radar.pos
+                    if delta.sqr_magnitude() < self.radar.size ** 2:
+                        spr.visible = True
+                    else:
+                        spr.visible = False
+            if self.radar.time > 1.25:
+                self.radar.kill()
+                self.radar = None
 
         for res_type in self.my_civ.upgrade_limits.data.keys():
             ratio = self.my_civ.upgrade_limits.data[res_type] / self.my_civ.base_upgrade_limits.data[res_type]
@@ -650,6 +669,8 @@ class LevelScene(scene.Scene):
             )
         
         self.pause_sprite.visible = self.paused
+        if self.stage_name.time < 2 and self.stage_name.alive():
+            self.pause_sprite.visible = False
         self.ui_group.draw(self.game.screen)
         self.tutorial_group.draw(self.game.screen)
         if self.debug:

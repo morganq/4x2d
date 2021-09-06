@@ -1,5 +1,6 @@
 import random
 
+from colors import PICO_ORANGE
 from helper import clamp
 from planet import building as buildings
 from productionorder import ProductionOrder
@@ -135,6 +136,7 @@ class Alien3(alien.Alien):
     DEFEND_DURATION = 15
     EXPAND_NUM_NEAREST = 2
     EXPAND_DURATION = 12
+    COLOR = PICO_ORANGE
 
     quotes = [
         "\"Has it called you here? Will you face the void?\""

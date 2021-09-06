@@ -1,8 +1,11 @@
+import math
+
 import pygame
+
+from helper import clamp
 from particle import Particle
 from spritebase import SpriteBase
-from helper import clamp
-import math
+
 
 class Explosion(SpriteBase):
     def __init__(self, pos, colors, lifetime, max_size, scale_fn=None, line_width=1.5):
@@ -35,6 +38,7 @@ class Explosion(SpriteBase):
         temp.blit(self.image, (0,0))
         innersize = clamp(size - self.line_width, 0, 999)
         pygame.draw.circle(temp, (0,0,0,0), (self.max_size, self.max_size), innersize, 0)
+        self.size = size
         self.image = temp
 
     def update(self, dt):

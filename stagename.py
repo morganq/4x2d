@@ -9,7 +9,7 @@ from helper import clamp
 from spritebase import SpriteBase
 from v2 import V2
 
-START_TIME = 0.5
+START_TIME = 2.0
 FINISH_TIME = 0.25
 KILL_TIME = 8
 

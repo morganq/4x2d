@@ -16,7 +16,7 @@ class Civ:
     name = None
     def __init__(self, scene):
         self.scene = scene
-        self.color = PICO_RED
+        self.color = PICO_WHITE
         self.is_enemy = True        
         self.resources = economy.Resources()
         self.frozen = economy.Resources(0,0,0)

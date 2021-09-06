@@ -102,7 +102,7 @@ class SpriteBase(pygame.sprite.DirtySprite):
     def update(self, dt):
         for k in self._timers.keys():
             self._timers[k] += dt
-        if self.image is None:
+        if self.image is None and self.visible:
             print("no image!", self)
 
     def collide(self, other):
