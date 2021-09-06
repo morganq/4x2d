@@ -143,8 +143,7 @@ class UIEnabledState(State):
             if input == "confirm":
                 self.joystick_overlay.confirm()  
 
-    def mouse_input(self, input, event):
-        handled = False
+    def get_selectable_sprites(self):
         all_sprites = []
         all_sprites.extend(
             sorted(self.scene.ui_group.sprites()[::], key=lambda x:x.layer, reverse=True)
@@ -152,7 +151,11 @@ class UIEnabledState(State):
         all_sprites.extend(
             sorted(self.scene.game_group.sprites()[::], key=lambda x:x.layer, reverse=True)
         )
-        selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]
+        return [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]        
+
+    def mouse_input(self, input, event):
+        handled = False
+        selectable_sprites = self.get_selectable_sprites()
         is_mouse_event = False
         if input in ["mouse_move", "mouse_drag", "click", "unclick"]:
             is_mouse_event = True

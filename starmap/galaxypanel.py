@@ -60,7 +60,7 @@ class GalaxyPanel(Panel):
                 st = "[*square*] DECODE ?"
             self.launch_button = Button(V2(0,0), lt, 'small', lambda:onclick(galaxy), color=PICO_PINK)
             self.signal_button = None
-            if self.galaxy.signal:
+            if False and self.galaxy.signal:
                 self.add(self.launch_button, V2(w - self.launch_button.width - 5, 121))
                 self.signal_button = Button(V2(0,0), st, 'small', lambda:onsignal(galaxy), color=PICO_BLUE)
                 self.add(self.signal_button, V2(5, 121))                

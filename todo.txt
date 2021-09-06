@@ -1,16 +1,18 @@
 Finish menu scene resolution
 
- - fixed delta time (iteration)?
-
-
+ x fixed delta time (iteration)?
  x figure out "hook" and "kicker"
- - figure out whole narrative structure
+ x figure out whole narrative structure
+ x "start" animation when level loads
+ - make buildings look cool
+ x colorblind issue with player colors + different alien colors
+ - somehow pop out selectable objects in upgrade targeting
+ - make starmap more dynamic, better background, etc.
+ - implement narrative constraints in run info
+ - "victory" animation when you win
  - implement boss
  - more intentional difficulty curve
- - "start" animation when level loads
- - "victory" animation when you win
  - what happens when you lose?
- - make starmap more dynamic, better background, etc.
  - explain different ships
  - saving progress mid game
  - 4th civ
@@ -18,9 +20,10 @@ Finish menu scene resolution
  - asset names pass
  - asset icons
  - reward icons
+ - every shop has o2
 
 
- - limited range fighters, maybe battleship and refuel
+ ? limited range fighters, maybe battleship and refuel
  
 
 proposal: 600 x 360

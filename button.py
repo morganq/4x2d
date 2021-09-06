@@ -8,7 +8,7 @@ from spritebase import SpriteBase
 from v2 import V2
 
 SIZE_PADDING = {'tiny':3, 'small':4, 'medium':5, 'big':7, 'huge':10}
-HEIGHTS = {'tiny':5, 'small':10, 'medium':16, 'big':10, 'huge':15}
+HEIGHTS = {'tiny':5, 'small':10, 'medium':16, 'big':10, 'huge':29}
 
 class Button(SpriteBase, FadeInMixin):
     def __init__(self, pos, text, size, onclick, image_path=None, label=None, icon=None, color=PICO_BLUE, asset_border = False, fixed_width = None):

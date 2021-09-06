@@ -91,6 +91,9 @@ class V2:
     def tuple_int(self):
         return (int(self.x), int(self.y))
 
+    def tuple_round(self):
+        return (round(self.x), round(self.y))
+
     def max(self, max_mag):
         if self.sqr_magnitude() > max_mag ** 2:
             return self.normalized() * max_mag

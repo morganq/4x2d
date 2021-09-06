@@ -34,7 +34,7 @@ class StarMapScene(Scene):
         self.tutorial_group = pygame.sprite.Group()
         self.sm = states.Machine(StarMapState(self))
 
-        self.background_group.add(Background(V2(0,0), 10, size=(1150,1500)))        
+        self.background_group.add(Background(V2(0,0), 30, size=(1150,1500)))        
         self.scroll_panel = ScrollPanel(V2(0,0),(1100,1250))
 
         run_path = self.game.run_info.path
@@ -48,7 +48,7 @@ class StarMapScene(Scene):
                 obj = None
                 if column['node_type'] == 'galaxy':
                     alien = ALIENS[column['alien']]
-                    obj = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], column['signal'], r == len(run_path))
+                    obj = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], column, column['signal'], r == len(run_path))
                     if len(run_path) <= r:
                         if r < len(self.game.run_info.data) - 1:
                             reward_icon = SimpleSprite(V2(x, y), "assets/%s.png" % column['rewards'][0])

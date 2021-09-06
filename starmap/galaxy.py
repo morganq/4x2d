@@ -60,7 +60,7 @@ def generate_galaxy_art(radius, also_hover = False):
 
     squash = random.random() * 0.7 + 0.3
     rotate = random.random() * 6.2818
-    num_spirals = max(int(radius / 4.25 * (random.random() * 0.25 + 2.5)),3)
+    num_spirals = max(int(radius / 5.25 * (random.random() * 0.25 + 2.5)),3)
     if num_spirals == 4: # Antifa 
         num_spirals += 1
     curviness = (1.25 / (num_spirals) + 0.05) + random.random()* 0.2 - 0.1
@@ -76,6 +76,8 @@ def generate_galaxy_art(radius, also_hover = False):
         [PICO_WHITE, PICO_YELLOW, PICO_GREEN, PICO_DARKGREEN, PICO_DARKBLUE],
         [PICO_WHITE, PICO_LIGHTGRAY, PICO_GREYPURPLE, PICO_DARKGRAY, PICO_DARKBLUE]
     ])
+    
+    palette = [PICO_WHITE, random.choice(LIGHTS), random.choice(MEDS), random.choice(DARKS), random.choice(DARKS)]
 
     if also_hover:
         image2 = pygame.Surface((w,h), pygame.SRCALPHA)
@@ -96,7 +98,7 @@ def generate_galaxy_art(radius, also_hover = False):
 
 
 class Galaxy(SpriteBase):
-    def __init__(self, pos, coords, alien, rewards, difficulty, level, signal, playable):
+    def __init__(self, pos, coords, alien, rewards, difficulty, level, spec, signal, playable):
         super().__init__(pos)
         self.offset = (0.5, 0.5)
         self._generate_image()
@@ -107,6 +109,7 @@ class Galaxy(SpriteBase):
         self.level = level
         self.signal = signal
         self.playable = playable
+        self.spec = spec
         
         self.selectable = True
         self.selection_radius = self._width // 2
@@ -119,7 +122,7 @@ class Galaxy(SpriteBase):
         
 
     def _generate_image(self):
-        self.default_image, self.hover_image = generate_galaxy_art(random.randint(8,15), True)
+        self.default_image, self.hover_image = generate_galaxy_art(random.randint(16,25), True)
         self.image = self.default_image
         self._width, self._height = self.default_image.get_size()
         self._recalc_rect()

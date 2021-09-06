@@ -16,9 +16,11 @@ import game
 import levelstates
 import o2meter
 import optimize
+import pauseoverlay
 import scene
 import simplesprite
 import sound
+import stagename
 import states
 import upgradestate
 from asteroid import Asteroid
@@ -45,7 +47,7 @@ from v2 import V2
 TICK_TIME = 0.05
 
 class LevelScene(scene.Scene):
-    def __init__(self, game, levelfile, alienrace, difficulty, options=None):
+    def __init__(self, game, levelfile, alienrace, difficulty, stage_num, title, description, options=None):
         scene.Scene.__init__(self, game)
         self.options = options
         self.animation_timer = 0
@@ -53,6 +55,9 @@ class LevelScene(scene.Scene):
         self.levelfile = levelfile
         self.alienrace = alienrace
         self.difficulty = difficulty
+        self.stage_num = stage_num
+        self.title = title
+        self.description = description
 
         self.paused = False
         self.game_speed = 1.0
@@ -133,10 +138,6 @@ class LevelScene(scene.Scene):
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         self.tutorial_group = pygame.sprite.LayeredDirty()
-
-        #self.clouds = CloudBackground(V2(0,0))
-        #self.background_group.add(self.clouds)
-        #self.clouds.generate_image()
 
         self.background = LevelBackground(V2(0,0), self.game.game_resolution)
         self.background_group.add(self.background)
@@ -252,6 +253,14 @@ class LevelScene(scene.Scene):
         self.o2_meter._generate_image()
         self.ui_group.add(self.o2_meter)    
 
+        self.stage_name = stagename.StageName(V2(0, 100), self.stage_num, self.title, self.description)
+        self.ui_group.add(self.stage_name)
+        self.stage_name.kill()
+
+        self.pause_sprite = pauseoverlay.PauseOverlay()
+        self.pause_sprite.layer = 5
+        self.ui_group.add(self.pause_sprite)        
+
     def setup_mods(self):
         galaxy = self.game.run_info.get_current_level_galaxy()
         if not galaxy['mods']:
@@ -301,7 +310,7 @@ class LevelScene(scene.Scene):
         self.flowfield.generate(self)
         self.flowfielddebug = 0
 
-        #self.fleet_diagram.generate_image(self)
+        self.fleet_diagram.generate_image(self)
 
         self.enemy.set_difficulty(self.difficulty)
         self.setup_mods()
@@ -391,7 +400,7 @@ class LevelScene(scene.Scene):
         return [s for s in self.get_objects() if isinstance(s, Asteroid)]
 
     def get_starting_state(self):
-        return levelstates.PlayState(self)
+        return levelstates.BeginState(self)
 
     def initialize_state(self):
         self.sm = states.Machine(self.get_starting_state())
@@ -405,15 +414,17 @@ class LevelScene(scene.Scene):
         #sound.play_music('game')  
 
     def update(self, dt):
+        dt = min(dt,0.1)
         self.game_speed = round((self.game.game_speed_input * 3) + 1)
         # This is correct way to do things, but we need to optimize more for this to work
         #game_dt = dt * self.game_speed        
-        self.update_remainder_time += dt
-        num_updates = int(self.update_remainder_time / TICK_TIME)
-        for i in range(num_updates):
-            self.update_game(TICK_TIME * self.game_speed)
-            self.update_remainder_time -= TICK_TIME
+        #self.update_remainder_time += dt
+        #num_updates = int(self.update_remainder_time / TICK_TIME)
+        #for i in range(num_updates):
+        #    self.update_game(TICK_TIME * self.game_speed)
+        #    self.update_remainder_time -= TICK_TIME
 
+        self.update_game(dt * self.game_speed)
         self.update_ui(dt)
 
     def update_ui(self, dt):
@@ -466,12 +477,42 @@ class LevelScene(scene.Scene):
                 self.paused = True
                 self.sm.transition(levelstates.VictoryState(self))
 
-        for sprite in self.game_group.sprites() + self.background_group.sprites():
+        for sprite in self.background_group.sprites():
             t = time.time()
             sprite.update(dt)
             elapsed = time.time() - t
             self.update_times[type(sprite)] += elapsed
 
+        # damnit... issue is double collisions etc.
+        #self.update_remainder_time += dt
+        #ticks = int(self.update_remainder_time // TICK_TIME)
+        #print("ticks", ticks)
+        #for i in range(ticks):
+        #    self.update_remainder_time -= TICK_TIME
+        #    self.update_game_objects(TICK_TIME)
+        #    self.update_collisions(TICK_TIME)
+        self.update_game_objects(dt)
+        self.update_collisions(dt)
+
+        if self.options != "pacifist":
+            for enemy in self.enemies:
+                enemy.update(dt)
+        
+        t = time.time()
+        self.fleet_managers['my'].update(dt)
+        self.fleet_managers['enemy'].update(dt)
+        self.fleet_diagram.generate_image(self)
+        self.update_times['fleets'] = time.time() - t
+
+        t = time.time()
+        self.my_civ.update(dt)
+        for enemy in self.enemies:
+            enemy.civ.update(dt)
+        self.update_times['civs'] = time.time() - t
+
+        self.update_times['update'] = time.time() - ut
+
+    def update_collisions(self, dt):
         t = time.time()
         # Collisions
         colliders = [s for s in self.get_objects() if s.collidable]
@@ -497,23 +538,12 @@ class LevelScene(scene.Scene):
         elapsed = time.time() - t
         self.update_times["collisions"] = elapsed
 
-        if self.options != "pacifist":
-            for enemy in self.enemies:
-                enemy.update(dt)
-        
-        t = time.time()
-        self.fleet_managers['my'].update(dt)
-        self.fleet_managers['enemy'].update(dt)
-        self.fleet_diagram.generate_image(self)
-        self.update_times['fleets'] = time.time() - t
-
-        t = time.time()
-        self.my_civ.update(dt)
-        for enemy in self.enemies:
-            enemy.civ.update(dt)
-        self.update_times['civs'] = time.time() - t
-
-        self.update_times['update'] = time.time() - ut
+    def update_game_objects(self, dt):
+        for sprite in self.game_group.sprites():
+            t = time.time()
+            sprite.update(dt)
+            elapsed = time.time() - t
+            self.update_times[type(sprite)] += elapsed
 
     def update_asset_buttons(self):
         for i,button in enumerate(self.asset_buttons):
@@ -578,7 +608,7 @@ class LevelScene(scene.Scene):
                     print(spr, "bad image")
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
-        if self.debug:
+        if self.debug and False:
             for k,v in self.fleet_managers.items():
                 for fleet in v.current_fleets:
                     fleet.debug_render(self.game.screen)
@@ -619,6 +649,7 @@ class LevelScene(scene.Scene):
                 "tiny", PICO_YELLOW
             )
         
+        self.pause_sprite.visible = self.paused
         self.ui_group.draw(self.game.screen)
         self.tutorial_group.draw(self.game.screen)
         if self.debug:
@@ -630,7 +661,7 @@ class LevelScene(scene.Scene):
         #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))
         if self.debug:
             pass
-            #print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))
+            print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))
 
         if game.DEV:
             FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 20, 20), "%d" % self.time, (128,255,128,180))

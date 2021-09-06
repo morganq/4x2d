@@ -40,10 +40,25 @@ Per-run story:
 
 
 0. Distress signal from distant humans
-Pre 1. We're on our way... gotta make it through here. We're undetected, sneak attack! [Civ 1]
-Pre 2. They sent out an alert to their allies! But we have to keep moving on. [Civ 1]
-Pre 3. The whole federation now knows, and will be coming for us. [Civ 2]
-Pre 4. They've been granted some strange new technology, by an unknown force! [Civ 2]
-Pre 5. Nothing
-Pre 6. Entering the inner zone... strange anomolies on planets (time loop)
-Pre 7. 
+1. "Part 1 - Surprise Attack" - We're on our way... gotta make it through here. We're undetected, sneak attack! [Civ 1]
+2. "Part 2 - Alert!" - They sent out an alert to their allies! But we have to keep moving on. [Civ 1]
+3. "Part 3 - Reinforcements" - The whole federation now knows, and will be coming for us. [Civ 2]
+4. "Part 4 - Strange Technology" - They've been granted some strange new technology, by an unknown force! [Civ 2]
+5. "Part 5 - Breakthrough" - Nearing the inner zone [Civ 3]
+6. "Part 6 - Time Loop" - Entered the inner zone... strange anomalies on planets (time loop) [Any Civ]
+7. "Part 7 - Stronghold" - [Any Civ]
+8. "Part 8 - Prison" - [Any Civ]
+9. "Part 9 - Outpost" - [Boss]
+
+New Game -> "Are you sure?" if continue...
+New Game Screen
+ First:
+   "Commander! We've picked up a distress signal... it's humans!"
+   Tutorial button
+   Start button
+ Later:
+   "Commander! Another distress signal!"
+   Tutorial button (small)
+   Start button
+   Starting game options...
+Star Map

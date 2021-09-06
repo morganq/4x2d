@@ -33,6 +33,22 @@ from upgrade.upgrades import UPGRADE_CLASSES
 from v2 import V2
 
 
+class BeginState(State):
+    def __init__(self, scene):
+        self.time = 0
+        super().__init__(scene)
+
+    def update(self, dt):
+        self.scene.paused = True
+        return super().update(dt)
+
+    def paused_update(self, dt):
+        self.time += dt
+        if not self.scene.stage_name.alive():
+            self.scene.sm.transition(PlayState(self.scene))
+            self.scene.paused = False
+        return super().update(dt)
+
 class PlayState(UIEnabledState):
     def __init__(self, scene):
         super().__init__(scene)

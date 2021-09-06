@@ -102,6 +102,7 @@ class UpgradePanel(Panel):
                     if len(row) > 1:
                         pos = V2(self.width - 75 + cy * 37, 0)
                     icon = UpgradeIcon(pos + V2(self.x - 4, self.y + 50 + rx * 50), upg.name, None, True)
+                    icon.layer = 11
                     self.joystick_controls[rx].append(icon)
                     game.Game.inst.scene.ui_group.add(icon)
                     self.tree_children.append(icon)
@@ -121,6 +122,7 @@ class UpgradePanel(Panel):
                     pygame.draw.rect(self.image, PICO_GREEN, (pos.x - self.pos.x - 1, pos.y - self.pos.y, 28, 28), 2)
                 if u.infinite:
                     inf = FrameSprite(pos + V2(22,23), "assets/infinite.png", 8)
+                    inf.layer = 12
                     if u.name in game.Game.inst.scene.my_civ.researched_upgrade_names:
                         inf.frame = 1
                     else:

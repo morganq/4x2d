@@ -13,6 +13,7 @@ import introscene
 import leveleditorscene
 import levelscene
 import menuscene
+import newgamescene
 import optimize
 import planetgenscene
 import run
@@ -63,9 +64,11 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             elif sys.argv[1] == "game":
-                self.scene = levelscene.LevelScene(self, "choke", "alien1", 3)
+                self.scene = levelscene.LevelScene(self, "choke", "alien1", 3, 3, "Testing", "This is a test string for the description")
             elif sys.argv[1] == "planet":
                 self.scene = planetgenscene.PlanetGenScene(self)
+            elif sys.argv[1] == "new":
+                self.scene = newgamescene.NewGameScene(self)
             else:
                 self.scene = menuscene.MenuScene(self)
         else:
@@ -194,7 +197,7 @@ class Game:
         else:
             #self.scale_normal()
             self.scale_xbr()
-        if DEV:
+        if True:
             t = pygame.time.get_ticks() - self.frame_time
             self.frame_time = pygame.time.get_ticks()            
             text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))

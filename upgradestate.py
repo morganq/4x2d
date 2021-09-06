@@ -114,44 +114,38 @@ class UpgradeState(UIEnabledState):
             self.scene.ui_group.add(self.joystick_overlay)
             self.joystick_overlay.set_button_options(["[*x*] Select"])
 
+        res = self.scene.game.game_resolution
+
         if self.panel:
             self.panel.kill()
         if cursor == "allied_planet":
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-planet-cursor.png")
-            self.cursor_icon.offset = (0.5, 0.5)
-            self.cursor_icon._recalc_rect()
-            self.scene.ui_group.add(self.cursor_icon)
             self.hover_filter = self.filter_my_planets
-            self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
-            self.scene.ui_group.add(self.selection_info_text)
+            self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
         elif cursor == "allied_fleet":
             self.scene.fleet_managers['my'].generate_selectable_objects()
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-fleet-cursor.png")
-            self.cursor_icon.offset = (0.5, 0.5)
-            self.cursor_icon._recalc_rect()
-            self.scene.ui_group.add(self.cursor_icon)
             self.hover_filter = self.filter_my_fleets
-            self.selection_info_text = text.Text("Select one of your Fleets to apply upgrade", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
-            self.scene.ui_group.add(self.selection_info_text)
+            self.selection_info_text = text.Text("Select one of your Fleets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
         elif cursor == "point":
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
-            self.cursor_icon.offset = (0.5, 0.5)
-            self.cursor_icon._recalc_rect()
-            self.scene.ui_group.add(self.cursor_icon)
             self.hover_filter = self.filter_only_ui
-            self.selection_info_text = text.Text("Select a point", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
-            self.scene.ui_group.add(self.selection_info_text)
+            self.selection_info_text = text.Text("Select a point", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
         elif cursor == "nearby":
             self.cursor_icon = SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
-            self.cursor_icon.offset = (0.5, 0.5)
-            self.cursor_icon._recalc_rect()
-            self.scene.ui_group.add(self.cursor_icon)
             self.range = RangeIndicator(self.selected_targets[0].pos, self.NEARBY_RANGE, PICO_LIGHTGRAY)
             self.scene.ui_group.add(self.range)
             self.extras.append(self.range)
             self.hover_filter = self.filter_only_ui
-            self.selection_info_text = text.Text("Select a point nearby", "big", V2(170, 150), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
-            self.scene.ui_group.add(self.selection_info_text)                     
+            self.selection_info_text = text.Text("Select a point nearby", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK)
+
+        self.cursor_icon.offset = (0.5, 0.5)
+        self.cursor_icon._recalc_rect()
+        self.scene.ui_group.add(self.cursor_icon)
+        self.selection_info_text.offset = (0.5,0.5)
+        self.selection_info_text.layer = 15    
+        self.scene.ui_group.add(self.selection_info_text)                             
+        self.scene.pause_sprite.set_exceptions([s for s in self.scene.game_group.sprites() if self.hover_filter(s)])
 
     def on_select(self, upgrade):
         if isinstance(upgrade.cursor, list):

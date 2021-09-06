@@ -75,7 +75,15 @@ class LoadingScene(Scene):
 
     def update(self, dt):
         if not self.loaded and self.rendered:
-            self.levelscene = levelscene.LevelScene(self.game, self.galaxy.level, self.galaxy.alien, self.galaxy.difficulty)
+            self.levelscene = levelscene.LevelScene(
+                self.game,
+                self.galaxy.level,
+                self.galaxy.alien,
+                self.galaxy.difficulty,
+                self.galaxy.difficulty,
+                self.galaxy.spec['name'],
+                self.galaxy.spec['description']
+                )
             self.levelscene.start()
             self.loaded = True
             t = "Start"

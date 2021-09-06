@@ -1,0 +1,250 @@
+import math
+import random
+
+import pygame
+
+import game
+import text
+from colors import *
+from helper import clamp, get_nearest_pos, nearest_order_pos
+from spritebase import SpriteBase
+from v2 import V2
+
+
+class NewGameBackground(SpriteBase):
+    def __init__(self, pos):
+        super().__init__(pos)
+
+        res = game.Game.inst.game_resolution
+        self.background = pygame.Surface(res.tuple_int(), pygame.SRCALPHA)
+        self.background.fill(PICO_DARKGREEN)
+        self.signal_spot = V2(res.x - 280, 57)
+        self.jumps = []
+        while len(self.jumps) < 20:
+            pt = V2(random.randint(res.x // 8, res.x * 7 // 8), random.randint(100, res.y - 110))
+            nearest,dist = get_nearest_pos(pt, self.jumps)
+            if dist > 40 ** 2:
+                self.jumps.append(pt)
+        self.jumps.sort(key=lambda j:j.x / 4 + j.y, reverse=True)
+        self.initial_spot = V2(280, res.y - 80)
+        self.jumps.append(self.signal_spot)
+        self.time = 0
+        self.signal_data = [(0,0,0)]
+        self.current_signal_freq = 0
+        self.current_signal_mag = 0
+        for i in range(60):
+            if random.random() < 0.25:
+                self.signal_data.append((random.random() + 0.3, random.random(),random.random()))
+            else:
+                self.signal_data.append(self.signal_data[-1])
+
+        self.current_path = [self.initial_spot]
+        self.current_path_pt = self.initial_spot
+        self.path_flashing = False
+        self.path_flash_time = 0
+        self._generate_image(0.05)
+
+    def _generate_image(self,dt):
+        self.image = self.background.copy()
+
+        res = game.Game.inst.game_resolution
+
+        ## GRID ##
+        grid_t = 0.5#(self.time / 6) % 1
+        for i in range(int(grid_t * 32), res.x, 32):
+            pygame.draw.line(self.image, PICO_LIGHTGRAY, (i, 0), (i, res.y), 1)
+        for i in range(int(grid_t * 32), res.y, 32):
+            pygame.draw.line(self.image, PICO_LIGHTGRAY, (0, i), (res.x, i), 1)
+
+
+        ## JUMPS ##
+        jumps_t = clamp(self.time / 2 - 1,0,1)
+        jumps_i = int(jumps_t * len(self.jumps))
+
+        letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        for i,jump in enumerate(self.jumps):
+            if i < jumps_i:
+                xg = (jump.x - 16) // 32 * 32 + 16
+                yg = (jump.y - 16) // 32 * 32 + 16
+                x_grid = (jump.x - 16) // 32
+                y_grid = (jump.y - 16) // 32
+                pygame.draw.rect(self.image, PICO_BLUE, (xg+2,yg+2,33,33), 1)
+                text.render_multiline_to(self.image, (xg + 4, yg-2), "%s%d" % (letters[x_grid % 26], y_grid), 'tiny', PICO_BLUE)
+
+        for i,jump in enumerate(self.jumps[0:jumps_i]):
+            #poly = [V2(-1, -1), V2(1, -1), V2(1,1), V2(-1,1)]
+            #poly = [V2.from_angle(p.to_polar()[1] + self.time / 2 + i) * 5 + jump for p in poly]
+            width = 1
+            if jump in self.current_path:
+                width = 0
+            #pygame.draw.polygon(self.image, PICO_GREEN, [p.tuple() for p in poly], width)
+            pygame.draw.circle(self.image, PICO_BLACK, jump.tuple_int(), 3, width)
+
+        
+        ## DISTRESS SIGNAL ##
+        signal_t = self.time % 1
+        pygame.draw.circle(self.image, PICO_WHITE, self.signal_spot.tuple_int(), 5, 0)
+        signal_circle_color = PICO_WHITE
+        if signal_t > 0.66:
+            signal_circle_color = PICO_GREEN
+        pygame.draw.circle(self.image, signal_circle_color, self.signal_spot.tuple_int(), 5 + signal_t * 19, 1)
+
+        radar_t = (self.time / 4) % 1
+        #pygame.draw.circle(self.image, PICO_GREEN, self.initial_spot.tuple_int(), radar_t * 500, 1)
+
+        ## SHIP ##
+        poly = [self.initial_spot + V2(0, -6), self.initial_spot + V2(6, 6), self.initial_spot + V2(-6, 6)]
+        pygame.draw.polygon(self.image, PICO_GREEN, [p.tuple_int() for p in poly], 0)            
+
+        ## WAVEFORM ##
+        wave_x = res.x - 210 - 10
+        m_t = math.cos(clamp(self.time,0,1) * 3.14159) * -0.5 + 0.5
+        msg_rect = (wave_x, 10, 210, 80 * m_t)
+        pygame.draw.rect(self.image, PICO_DARKBLUE, msg_rect, 0)
+        pygame.draw.rect(self.image, PICO_YELLOW, msg_rect, 1)
+        if self.time > 1:
+            pts = []
+            adj = 0.1
+            msg_index = int((self.time * 10) % len(self.signal_data))
+            signal_freq, signal_mag, extra = self.signal_data[msg_index]
+            self.current_signal_mag = signal_mag * adj + self.current_signal_mag * (1 - adj)
+            self.current_signal_freq = signal_freq * adj + self.current_signal_freq * (1 - adj)
+            for x in range(0, 200, 1):
+                dx = x ** (extra / 2 + 1)
+                mag = self.current_signal_mag
+                if extra < 0.3:
+                    mag = math.cos(x * extra * 0.1)
+                if extra > 0.9:
+                    mag = 3
+                y = clamp(math.sin(dx * 0.25 * self.current_signal_freq + self.time * 15 + signal_freq) * 35 * mag + 50,15,85)
+                pts.append((int(res.x - 210 - 5 + x),int(y)))
+            pygame.draw.lines(self.image, PICO_BLUE, False, pts, 1)
+        text.render_multiline_to(self.image, (wave_x + 5, 14), "SIGNAL", "small", PICO_YELLOW)
+
+        ## PATH ##
+        if self.time > 4:
+            delta = self.current_path_pt - self.current_path[-1]
+            if delta.sqr_magnitude() < 4 ** 2:
+                jumps_left = list(set(self.jumps) - set(self.current_path))
+                nearest = nearest_order_pos(self.current_path_pt, jumps_left)[0:4]
+                if nearest:
+                    random.shuffle(nearest)
+                    self.current_path.append(nearest[0])
+
+            color = PICO_GREEN
+            if self.path_flashing:
+                self.path_flash_time -= dt
+                if (self.path_flash_time * 4) % 1 >0.5:
+                    color = PICO_DARKGREEN
+            else:
+                towards = self.current_path[-1] - self.current_path_pt
+                dist = towards.magnitude()
+                self.current_path_pt += towards.normalized() * 200 * dt / clamp(((dist / 50) + 0.25), 0.15, 2)
+
+            lines = self.current_path[0:-1] + [self.current_path_pt]
+            
+            if color == PICO_GREEN:
+                #pygame.draw.lines(self.image, color, False, [p.tuple_int() for p in lines], 2)
+                done = False
+                i = 1
+                pt = self.current_path[0]
+                while not done:
+                    towards = (self.current_path[i] - pt)
+                    if towards.sqr_magnitude() < 8 ** 2:
+                        pt = self.current_path[i].copy()
+                        i += 1
+                        
+                    if i >= len(self.current_path) - 1:
+                        towards = (self.current_path_pt - pt)
+                        if towards.sqr_magnitude() < 8 ** 2:
+                            done = True
+                            break
+
+                    towards = (self.current_path[i] - pt)
+
+                    pt += towards.normalized() * 5
+                    #pygame.draw.circle(self.image, color, pt.tuple_int(), 1, 0)
+                    pygame.draw.rect(self.image, color, (pt.x - 1, pt.y - 1, 2, 2), 0)
+
+            if len(self.current_path) > 7 and not self.path_flashing:
+                self.path_flashing = True
+                self.path_flash_time = 1
+
+            if self.path_flashing and self.path_flash_time < 0:
+                self.path_flashing = False
+                self.current_path = [self.initial_spot]
+                self.current_path_pt = self.initial_spot
+
+        ## INDICATOR ##
+        p1 = self.signal_spot + V2(1, -1) * 5
+        p2 = self.signal_spot + V2(1,-1) * (45 - m_t * 30) + V2(0,1)
+        p3 = V2(wave_x, p2.y)
+        pygame.draw.line(self.image, PICO_YELLOW, p1.tuple_int(), p2.tuple_int())
+        pygame.draw.line(self.image, PICO_YELLOW, p2.tuple_int(), p3.tuple_int())
+
+        ## BUTTONS ##
+
+            
+
+    def update(self, dt):
+        self.time += dt
+        self._generate_image(dt)
+        return super().update(dt)
+
+os.system("rm -rf ./dist")
+os.system("pyinstaller -w -n \"%s\" -i assets/icon.icns --osx-bundle-identifier com.example.test main.py" % NAME)
+os.system("mkdir %s/assets" % CONTENTS)
+os.system("mkdir %s/assets/buildings" % CONTENTS)
+os.system("mkdir %s/assets/upgrades" % CONTENTS)
+os.system("mkdir %s/assets/sounds" % CONTENTS)
+os.system("mkdir %s/levels" % CONTENTS)
+os.system("cp assets/*.png %s/assets/" % CONTENTS)
+os.system("cp assets/buildings/*.json %s/assets/buildings/" % CONTENTS)
+os.system("cp assets/upgrades/*.png %s/assets/upgrades/" % CONTENTS)
+os.system("cp assets/sounds/*.wav %s/assets/sounds/" % CONTENTS)
+os.system("cp assets/*.ttf %s/assets/" % CONTENTS)
+os.system("cp assets/*.wav %s/assets/" % CONTENTS)
+os.system("cp assets/*.ogg %s/assets/" % CONTENTS)
+os.system("cp levels/*.json %s/levels/" % CONTENTS)
+
+class Fleet:
+    def __init__(self, ships):
+        self.ships = ships
+        self.selectable_object = None
+
+    def is_waiting(self):
+        average_time = sum(s.waiting_time for s in self.ships) / len(self.ships)
+        if average_time >= 6:
+            return True
+        return False
+
+    def mode_state(self):
+        states = defaultdict(lambda:0)
+        for s in self.ships:
+            states[s.state] += 1
+        return max([(b,a) for a,b in states.items()])[1]
+
+    def get_size_info(self):
+        average = V2(0,0)
+        min_x, min_y = 999,999
+        max_x, max_y = 0,0 
+        for ship in self.ships:
+            average += ship.pos / len(self.ships)
+            min_x = min(min_x, ship.pos.x)
+            min_y = min(min_y, ship.pos.y)
+            max_x = max(max_x, ship.pos.x)
+            max_y = max(max_y, ship.pos.y)
+        radius = max(max_x - average.x, average.x - min_x, max_y - average.y, average.y - min_y)
+        radius = max(radius, 5)
+        return (average, radius)
+
+    def debug_render(self, surface):
+        average, radius = self.get_size_info()
+        pygame.draw.circle(surface, (255,0,0), average.tuple_int(), radius, 1)
+
+    def generate_selectable_object(self):
+        average, radius = self.get_size_info()
+        radius = max(radius, 8)
+        scene = self.ships[0].scene
+        self.selectable_object = FleetSelectable(scene, average, radius, self.ships[0].owning_civ, self)
+        scene.game_group.add(self.selectable_object)

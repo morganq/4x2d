@@ -16,6 +16,7 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
         self.panel_for = panel_for
         self._controls = []
         self.padding = 9
+        self.layer = 10
         self._background_offset = V2(0,0)
 
         self.tab = None
@@ -46,6 +47,7 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
         spritebase.SpriteBase.kill(self)
 
     def add(self, control, pos):
+        control.layer = self.layer + 1
         self._controls.append({'control':control,'pos':pos})
 
     def remove(self, control):

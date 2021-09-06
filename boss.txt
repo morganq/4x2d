@@ -1,0 +1,5 @@
+for difficulty: long and multi-stage fight
+
+- Time prison objects (planet-like). Every <x> time, they freeze everything around them permanently. Destroy to stop the effect and free everything.
+- Win this part 1, and mothership arrives to reverse a number of planets' deaths and restore them.
+- Reviver ships. Revives all nearby x seconds after the last unit dies. Doesn't fly all they way to target, but sort of floats around

@@ -1,20 +1,23 @@
-from panel import Panel
+import pygame
+
 from colors import *
+from panel import Panel
 from text import Text
 from v2 import V2
-import pygame
+
 
 class TooltipPanel(Panel):
     def __init__(self, title, description):
         Panel.__init__(self, (5,5), None)
+        self.layer = 13
         t = Text(title, "small", (0,0), PICO_WHITE, False, multiline_width=500)
-        t.layer = 3
+        t.layer = 14
         self.add(t, V2(0,0))
         t = Text(description, "small", (0,0), PICO_LIGHTGRAY, False, multiline_width=160, center=False)
-        t.layer = 3
+        t.layer = 14
         t._height -= 4
         self.add(t, V2(0,15))
-        self.layer = 2
+        
         self.bump_out = 0
         self.max_bump = 3
         self.redraw()

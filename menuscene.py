@@ -9,6 +9,7 @@ import creditsscene
 import framesprite
 import game
 import menubackground
+import newgamescene
 import save
 import scene
 import simplesprite
@@ -186,8 +187,7 @@ class MenuScene(scene.Scene):
         self.game.scene.start()        
 
     def click_new(self):
-        self.game.run_info = RunInfo()
-        self.game.scene = starmapscene.StarMapScene(self.game)
+        self.game.scene = newgamescene.NewGameScene(self.game)
         self.game.scene.start()             
 
     def click_controls(self):

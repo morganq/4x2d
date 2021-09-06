@@ -172,6 +172,22 @@ class Planet(SpaceObject):
 
         border_radius = 3 if border else 1
         color = self.owning_civ.color if self.owning_civ else PICO_YELLOW
+        if self.owning_civ and not self.owning_civ.is_enemy:
+            pygame.draw.circle(frame, color, (cx,cy), radius + border_radius + 2, 1)
+
+        if self.owning_civ and self.owning_civ.is_enemy:
+            num_spikes = 8 #clamp(radius + 12, 16, 24)
+            pts = []
+            for i in range(num_spikes * 2 + 1):
+                theta = i * 6.2818 / (num_spikes * 2)
+                rad = radius + border_radius + 2
+                if i % 2 == 1:
+                    #pygame.draw.circle(frame, color, (V2.from_angle(theta) * (rad-2) + V2(cx + 0,cy + 0)).tuple_round(), 1, 0)
+                    rad = radius + border_radius - 1
+                pts.append((V2.from_angle(theta) * rad + V2(cx,cy)).tuple_int())
+
+            #pygame.draw.lines(frame, color, False, pts, 1)
+            pygame.draw.polygon(frame, color, pts, 0)
 
         # Border
         pygame.draw.circle(frame, color, (cx,cy), radius + border_radius)

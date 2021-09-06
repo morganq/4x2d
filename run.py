@@ -9,6 +9,19 @@ RUN_INFO_SERIALIZE_FIELDS = [
     'bonus_credits', 'ship_levels', 'score'
 ]
 
+LEVEL_TITLES = {
+    0: {'name':'This is a bug', 'description':'This is a bug'},
+    1: {'name':'Surprise Attack', 'description':'We\'ve entered the system undetected - a promising start to our mission.'},
+    2: {'name':'Alert!', 'description':'They\'ve issued an alert to the federation. Let\'s make quick work of this before reinforcements are prepared.'},
+    3: {'name':'Reinforcements', 'description':'Get ready, it seems the whole sector knows we\'re here!'},
+    4: {'name':'Strange Technology', 'description':'They have some strange new technology... where did they get that?'},
+    5: {'name':'Breakthrough', 'description':'We are nearing the Inner Ring, what lies beyond the belt?'},
+    6: {'name':'Discovery', 'description':'We\'re detecting a temporal anomoly on one of these planets - it\s locked in a time loop!'},
+    7: {'name':'Stronghold', 'description':'The distress signal is not far off now. But the enemy\'s defenses are only improving.'},
+    8: {'name':'Second Guess', 'description':'What if we\'re flying into a trap?'},
+    9: {'name':'Outpost', 'description':'This is it.'},
+}
+
 class RunInfo:
     def __init__(self, data = None):
         self.data = data or self.generate_run()
@@ -62,11 +75,9 @@ class RunInfo:
         self.reward_pool.extend(['level_battleship'] * 2)
         random.shuffle(self.reward_pool)
 
-    def new_galaxy(self, row, from_links, level):
+    def new_galaxy(self, row, from_links, level, alien):
         signal = None
         mods = []
-        if row == 1:
-            signal = "sneak_attack"
 
         if row == 4:
             mods = [random.choice(["warp_drive", "big_planet", "ship_shield_far_from_home", "atomic_bomb"])]
@@ -78,13 +89,15 @@ class RunInfo:
 
         return {
             'node_type':'galaxy',
-            'alien': random.choice(['alien1', 'alien2', 'alien3']),
+            'alien': alien,
             'rewards': [self.reward_pool.pop()],
             'difficulty': row,
             'level':level,
             'links': from_links,
             'mods': mods,
-            'signal': signal
+            'signal': signal,
+            'name':LEVEL_TITLES[row]['name'],
+            'description':LEVEL_TITLES[row]['description']
         }
 
     def new_store(self, row, from_links):
@@ -119,6 +132,9 @@ class RunInfo:
         self.data = []
         self.generate_reward_pool()
 
+        aliens = ['alien1', 'alien2', 'alien3']
+        random.shuffle(aliens)
+
         all_levels = ['belt', 'slash', 'orbs', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']
         #all_levels = ['orbs'] * 10
         l1 = all_levels[::]
@@ -142,7 +158,15 @@ class RunInfo:
                 else:
                     from_links = [column, column + 1]
 
-                node = self.new_galaxy(row, from_links, level)
+                if row == 0 or row == 1:
+                    alien = aliens[0]
+                elif row == 2 or row == 3:
+                    alien = aliens[1]
+                elif row == 4:
+                    alien = aliens[2]
+                else:
+                    alien = random.choice(aliens)
+                node = self.new_galaxy(row, from_links, level, alien)
                 self.data[-1].append(node)
 
         self.prune_path()
