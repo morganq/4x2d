@@ -13,7 +13,7 @@ from tutorial.tutorialmessage import TutorialMessage
 
 class TutorialScene(LevelScene):
     def __init__(self, game):
-        super().__init__(game, None, None, 1)
+        super().__init__(game, None, None, 1, 1, "", "")
         self.tut_text_number = 0
         self.is_tutorial = True
 
@@ -87,3 +87,5 @@ class TutorialScene(LevelScene):
         self.fleet_diagram.generate_image(self)
 
         self.enemy.set_difficulty(1)
+        self.stage_name.kill()
+        self.radar = None

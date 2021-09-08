@@ -45,10 +45,9 @@ class BeginState(State):
 
     def paused_update(self, dt):
         self.time += dt
-        if self.time > 2:
-            if not self.scene.stage_name.alive():
-                self.scene.sm.transition(PlayState(self.scene))
-                self.scene.paused = False
+        if not self.scene.stage_name.alive():
+            self.scene.sm.transition(PlayState(self.scene))
+            self.scene.paused = False
         return super().update(dt)
 
 class PlayState(UIEnabledState):

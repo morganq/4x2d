@@ -224,6 +224,8 @@ class LevelScene(scene.Scene):
             pos = self.random_object_pos()
             self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))
 
+
+
     def add_ui_elements(self):
         self.meters = {}
         self.upgrade_texts = {}
@@ -264,6 +266,7 @@ class LevelScene(scene.Scene):
         self.pause_sprite = pauseoverlay.PauseOverlay()
         self.pause_sprite.layer = 5
         self.ui_group.add(self.pause_sprite)        
+        self.game.game_speed_input = 0
 
     def setup_mods(self):
         galaxy = self.game.run_info.get_current_level_galaxy()
@@ -321,6 +324,14 @@ class LevelScene(scene.Scene):
 
         self.enemy.set_difficulty(self.difficulty)
         self.setup_mods()
+
+        # Add the time loops
+        planets = [s for s in self.get_objects_initial() if isinstance(s, Planet) and s.owning_civ == None and s.time_loop == False]
+        if planets:
+            planets.sort(key=lambda x:x.pos.x)
+            for i in range(1):
+                p = planets.pop(int(len(planets) / 2))
+                p.set_time_loop()
 
         if self.options == "surround":
             for planet in self.get_civ_planets(None):

@@ -88,6 +88,7 @@ class MenuBackground(SpriteBase):
             self._generate_motion_field()
 
         self._generate_image(PICO_WHITE, 150)
+        self.wobble_image = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
         self.time = 0
         self.bands = []
         self.wobble_lines = []

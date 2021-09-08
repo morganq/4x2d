@@ -41,14 +41,14 @@ class IntroScene(scene.Scene):
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         self.sm = states.Machine(states.UIEnabledState(self))
-        self.bg = simplesprite.SimpleSprite(V2(0,0), "assets/intro1.png")
+        self.bg = simplesprite.SimpleSprite(self.game.game_offset + V2(50,0), "assets/intro1.png")
         self.background_group.add(self.bg)
         self.stage = 0
 
         self.time = 0
         self.tutorial_speed = 1
         self.tut = TutorialMessage("")
-        self.tut.pos = V2(game.RES[0] / 2 - 172, game.RES[1] - 54)
+        self.tut.pos = V2(game.RES[0] / 2 - 172, self.game.game_resolution.y - 54)
         self.tut._reposition_children()
         self.ui_group.add(self.tut)
         self.tut.add_all_to_group(self.ui_group)    
@@ -126,6 +126,7 @@ class IntroScene(scene.Scene):
         return super().take_input(inp, event)
 
     def render(self):
+        self.game.screen.fill(PICO_BLACK)
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
         self.ui_group.draw(self.game.screen)        

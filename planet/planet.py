@@ -12,6 +12,7 @@ import ships.fighter
 import ships.interceptor
 import sound
 from colors import *
+from framesprite import FrameSprite
 from funnotification import FunNotification
 from helper import all_nearby, clamp, get_nearest
 from icontext import IconText
@@ -20,6 +21,8 @@ from ships.all_ships import SHIPS_BY_NAME
 from spaceobject import SpaceObject
 from v2 import V2
 
+from planet import timeloop
+from planet.rewindparticle import RewindParticle
 from planet.shipcounter import ShipCounter
 
 from .planetart import generate_planet_art
@@ -84,6 +87,11 @@ class Planet(SpaceObject):
         self.building_construction_time = 0
         self.last_building = None
 
+        ## Time loop ##
+        self.time_loop = False
+        self.time_loop_time = 60
+        self.last_production = None
+
         self._generate_base_frames()
         self.frame = 0        
         self.time = 0
@@ -115,6 +123,12 @@ class Planet(SpaceObject):
 
     def __str__(self) -> str:
         return "<Planet %s>" % str(self.pos)
+
+    def set_time_loop(self):
+        self.time_loop = True
+        self.time_loop_sprite = timeloop.TimeLoop(self.pos + V2(0, 0), "assets/timeloop.png", 13)
+        self.time_loop_sprite.offset = (0.5, 0.5)
+        self.scene.ui_group.add(self.time_loop_sprite)        
 
     @property
     def population(self): return self._population
@@ -433,6 +447,15 @@ class Planet(SpaceObject):
             prod.number_mul = prod_amt_mul
             prod.update(self, dt * prod_rate)
         self.production = [p for p in self.production if not p.done]
+
+        # Time loop
+        if self.time_loop:
+            self.time_loop_time -= dt
+            if self.time_loop_time < 0:
+                self.time_loop_time += 60
+                if self.last_production:
+                    self.add_ship(self.last_production)
+                self.scene.ui_group.add(RewindParticle(self.pos, self.radius))
 
         # Ship destruction
         

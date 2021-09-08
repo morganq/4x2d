@@ -9,6 +9,8 @@ Finish menu scene resolution
  x buildings flash in
  x colorblind issue with player colors + different alien colors
  x somehow pop out selectable objects in upgrade targeting
+ - time loop
+ - make sure planet panel updates properly
  - "research" help menu, plus achievements that unlock them.
  - something better when you acquire upgrade
  - make starmap more dynamic, better background, etc.

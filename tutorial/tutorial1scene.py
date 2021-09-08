@@ -15,12 +15,12 @@ from tutorial.tutorialscene import TutorialScene
 
 class Tutorial1Scene(TutorialScene):
     def load_level(self, levelfile):
-        p1 = Planet(self, V2(200, 220), 7, Resources(70,20,10))
+        p1 = Planet(self, V2(300, 220) + self.game.game_offset, 7, Resources(70,20,10))
         p1.change_owner(self.my_civ)
         self.homeworld = p1
         self.game_group.add(p1)
 
-        p2 = Planet(self, V2(300, 120), 3, Resources(100,0,0))
+        p2 = Planet(self, V2(400, 120) + self.game.game_offset, 3, Resources(100,0,0))
         p2.change_owner(self.enemy.civ)
         p2.visible = False
         p2.selectable = False
@@ -30,7 +30,7 @@ class Tutorial1Scene(TutorialScene):
         for i in range(6):
             theta = i * -0.65
             pos = V2.from_angle(theta) * (50 + random.random() * 80) + self.homeworld.pos
-            a = Asteroid(self, pos, Resources(40, 0, 0))
+            a = Asteroid(self, pos + self.game.game_offset, Resources(40, 0, 0))
             self.game_group.add(a)
 
         self.objgrid.generate_grid(self.get_objects_initial())
@@ -106,7 +106,7 @@ class Tutorial1Scene(TutorialScene):
         if len(self.get_civ_planets(self.enemy.civ)) == 0 and self.tut_text_number <= 7:
             for ship in self.get_civ_ships(self.my_civ):
                 ship.set_state("returning")
-            s = Colonist(self, V2(110, 110), self.my_civ)
+            s = Colonist(self, self.homeworld.pos + V2(-90, -90), self.my_civ)
             s.set_pop(3)
             s.set_target(self.homeworld)
             self.game_group.add(s)

@@ -173,8 +173,11 @@ class Game:
 
             dt = clock.tick() / 1000.0
 
+            s1 = self.scene
             self.scene.update(dt)
-            self.render()
+            s2 = self.scene
+            if s1 == s2: # Skip render if we changed scenes in the middle of an update. Things could go wrong. 
+                self.render()
             #optimize.print_memos()
             optimize.reset_frame_memos()
 

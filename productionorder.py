@@ -17,9 +17,11 @@ class ProductionOrder:
         if self.time > next_prod_time:
             self.time -= next_prod_time
             planet.add_ship(self.ship_type)
+            planet.last_production = self.ship_type
             self.made += 1
             if self.made >= self.number * self.number_mul:
                 self.done = True
+
 
 class PermanentHangarProductionOrder(ProductionOrder):
     def __init__(self, time):

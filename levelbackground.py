@@ -9,6 +9,7 @@ from colors import *
 from helper import clamp, get_nearest
 from v2 import V2
 
+COLOR_FADE = 0.7
 
 class LevelBackground(spritebase.SpriteBase):
     def __init__(self, pos, size):
@@ -69,7 +70,7 @@ class LevelBackground(spritebase.SpriteBase):
                     length_pct = clamp(math.sin(density / 5)*0.65 + 0.75, 0.125, 1.5)
                     length = round(frequency * length_pct / 8)
                     
-                    color = tuple([int(c / 2) for c in color])
+                    color = tuple([int(c * COLOR_FADE) for c in color])
 
                     self.image.set_at((x,y), color)
                     hl = frequency / 2
@@ -80,7 +81,7 @@ class LevelBackground(spritebase.SpriteBase):
                         pygame.draw.line(self.image, color, (x,y - hl - length), (x, y - hl + length))     
 
                         if length_pct > 1.35 and random.random() < 0.3:
-                            color = tuple([int(c * 2) for c in color])
+                            color = tuple([int(c / COLOR_FADE) for c in color])
                             length //= 2
                             pygame.draw.line(self.image, color, (x + hl - length,y), (x+ hl + length , y))
                             pygame.draw.line(self.image, color, (x,y + hl - length), (x, y + hl + length))

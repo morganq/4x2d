@@ -92,7 +92,7 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
                 icon_offset = icon.get_width() + 4
 
             tab_foreground = PICO_BLACK
-            if sum(self.tab['color']) < 128 * 3:
+            if sum(self.tab['color']) < 90 * 3:
                 tab_foreground = PICO_WHITE
             tab_text = text.render_multiline(self.tab['text'], 'small', tab_foreground)
             tab_width = tab_text.get_size()[0] + 8 + icon_offset            
