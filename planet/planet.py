@@ -52,9 +52,7 @@ class Planet(SpaceObject):
         self.rotation = random.random() * 6.2818
         self.rotation = 0
         self.rotate_speed = random.random() * 0.5 + 0.125
-        self.art = generate_planet_art(
-                self.get_radius(),
-                self.resources.iron, self.resources.ice, self.resources.gas)
+        self.generate_base_art()
         self.resource_timers = economy.Resources(0,0,0)
         self.owning_civ = None
         self.buildings = []
@@ -124,6 +122,11 @@ class Planet(SpaceObject):
     def __str__(self) -> str:
         return "<Planet %s>" % str(self.pos)
 
+    def generate_base_art(self):
+        self.art = generate_planet_art(
+                self.get_radius(),
+                self.resources.iron, self.resources.ice, self.resources.gas)        
+
     def set_time_loop(self):
         self.time_loop = True
         self.time_loop_sprite = timeloop.TimeLoop(self.pos + V2(0, 0), "assets/timeloop.png", 13)
@@ -140,9 +143,7 @@ class Planet(SpaceObject):
         return len(self.buildings) < 8 and self.get_stat("prevent_buildings") == 0
 
     def regenerate_art(self):
-        self.art = generate_planet_art(
-                self.get_radius(),
-                self.resources.iron, self.resources.ice, self.resources.gas)
+        self.generate_base_art()
         self._generate_base_frames()
 
     def is_alive(self):
@@ -519,7 +520,11 @@ class Planet(SpaceObject):
         #self._generate_frames()
 
         self.upgrade_update(dt)
+        self.special_update(dt)
         super().update(real_dt)
+
+    def special_update(self, dt):
+        pass
 
     def upgrade_update(self, dt):
         if self.get_stat("unstable_reaction") > 0:

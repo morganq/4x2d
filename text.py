@@ -65,6 +65,12 @@ class Text(spritebase.SpriteBase):
             h += 2
             w += 2
             self.image = pygame.Surface((w,h), pygame.SRCALPHA)
+            border_image = render_multiline(self._text, self.size, self.border, self.multiline_width, self.center)
+            self.image.blit(border_image, (0,1))
+            self.image.blit(border_image, (2,1))
+            self.image.blit(border_image, (1,0))
+            self.image.blit(border_image, (1,2))
+            self.image.blit(text_image, (1,1))            
         else:
             self.image = text_image
         

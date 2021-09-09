@@ -43,7 +43,8 @@ class LEObject(SpriteBase):
             'my_planet':PICO_GREEN,
             'enemy_planet':PICO_RED,
             'neutral_planet':PICO_YELLOW,
-            'hazard':PICO_LIGHTGRAY
+            'hazard':PICO_LIGHTGRAY,
+            'crystal':PICO_BLUE
         }[self.obj_type]
 
         pygame.draw.circle(self.image, color, (w/2,h/2), self.radius, 0)
@@ -72,7 +73,7 @@ class LevelEditorScene(Scene):
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
 
-        self.background = LevelBackground(V2(0,0))
+        self.background = LevelBackground(V2(0,0), self.game.game_resolution)
         self.background.generate_image([])
         self.background_group.add(self.background)
 
@@ -102,6 +103,7 @@ class LevelEditorScene(Scene):
             if event.key == pygame.K_w: self.current_object_type = "neutral_planet"
             if event.key == pygame.K_e: self.current_object_type = "enemy_planet"
             if event.key == pygame.K_r: self.current_object_type = "hazard"
+            if event.key == pygame.K_t: self.current_object_type = "crystal"
             if event.key >= pygame.K_0 and event.key <= pygame.K_9:
                 val = (event.key - pygame.K_0)
                 if event.key == pygame.K_0: val = 10

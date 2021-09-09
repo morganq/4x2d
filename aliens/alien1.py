@@ -55,6 +55,7 @@ class Alien1FighterProductionUpgradeIce(Alien1FighterProductionUpgrade):
     alien = True
     alien_name = 'alien1'
     infinite = True
+    alien_min_level = 4
 
     def apply(self, to):
         p = ProductionOrder("alien1warpship", 3, 10)
@@ -72,6 +73,7 @@ class Alien1FighterProductionUpgrade(Upgrade):
     alien = True
     alien_name = 'alien1'
     infinite = True
+    alien_min_level = 7
 
     def apply(self, to):
         if to.owning_civ.alien.difficulty > 1:
@@ -105,6 +107,8 @@ class Alien1Tech2Upgrade(Upgrade):
     alien = True
     alien_name = 'alien1'
     infinite = True
+
+    alien_min_level = 4
 
 @register_upgrade
 class Alien1TechUpgradeGas(Alien1Tech1Upgrade):
@@ -184,8 +188,9 @@ class Alien1(alien.Alien):
         self.EXPAND_DURATION = 10
 
         my_planet = self.scene.get_civ_planets(self.civ)[0]
-        my_planet.add_ship("alien1warpship")
-        my_planet.add_ship("alien1warpship")
+        if self.difficulty >= 4:
+            my_planet.add_ship("alien1warpship")
+            my_planet.add_ship("alien1warpship")
         my_planet.add_building(Alien1HomeDefenseUpgrade)
 
         self.starting_num_planets = len(self.scene.get_civ_planets(self.civ))
@@ -271,6 +276,21 @@ class Alien1(alien.Alien):
 
     def get_defend_chance(self, my_planet, target):
         return 0
+
+    def get_max_attackers(self):
+        curve = {
+            1: 0,
+            2: 3,
+            3: 4,
+            4: 4,
+            5: 5,
+            6: 7,
+        }.get(self.difficulty, 999)        
+
+        if self.difficulty > 1 and self.time > 300:
+            curve *= 2
+
+        return curve
 
     def get_attacking_ships(self):
         return ['alien1fighter', 'alien1battleship']

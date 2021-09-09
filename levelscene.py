@@ -23,6 +23,7 @@ import sound
 import stagename
 import states
 import upgradestate
+from aliens import bosstimecrystal
 from asteroid import Asteroid
 from button import Button
 from civ import Civ, PlayerCiv
@@ -130,6 +131,13 @@ class LevelScene(scene.Scene):
             elif obj['type'] == "hazard":
                 pos = V2(*obj['pos'])
                 o = Hazard(self, pos + self.game.game_offset, obj['size'])
+            elif obj['type'] == "crystal":
+                pos = V2(*obj['pos'])
+                r = [v * 10 for v in obj['data']['resources']]
+                o = bosstimecrystal.TimeCrystal(self, pos + self.game.game_offset, 2, Resources(*r))       
+                o.change_owner(self.enemy.civ)         
+            else:
+                print(obj)
             self.game_group.add(o)
         self.objgrid.generate_grid(self.get_objects_initial())
 
@@ -326,12 +334,13 @@ class LevelScene(scene.Scene):
         self.setup_mods()
 
         # Add the time loops
-        planets = [s for s in self.get_objects_initial() if isinstance(s, Planet) and s.owning_civ == None and s.time_loop == False]
-        if planets:
-            planets.sort(key=lambda x:x.pos.x)
-            for i in range(1):
-                p = planets.pop(int(len(planets) / 2))
-                p.set_time_loop()
+        if self.difficulty >= 6:
+            planets = [s for s in self.get_objects_initial() if isinstance(s, Planet) and s.owning_civ == None and s.time_loop == False]
+            if planets:
+                planets.sort(key=lambda x:x.pos.x)
+                for i in range(1):
+                    p = planets.pop(int(len(planets) / 2))
+                    p.set_time_loop()
 
         if self.options == "surround":
             for planet in self.get_civ_planets(None):
@@ -531,7 +540,7 @@ class LevelScene(scene.Scene):
         t = time.time()
         self.fleet_managers['my'].update(dt)
         self.fleet_managers['enemy'].update(dt)
-        self.fleet_diagram.generate_image(self)
+        #self.fleet_diagram.generate_image(self)
         self.update_times['fleets'] = time.time() - t
 
         t = time.time()
@@ -692,8 +701,13 @@ class LevelScene(scene.Scene):
 
         #FONTS['small'].render_to(self.game.screen, (5,game.RES[1] - 25), "%d" % self.time, (255,255,255,255))
         if self.debug:
-            pass
-            print("\n".join(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]))
+            for i,s in enumerate(["%s:%.1f" % (a,b * 1000) for a,b in self.update_times.items()]):
+                FONTS['tiny'].render_to(self.game.screen, (30, 100 + i * 8), s, (128,255,128,180))
+
+            FONTS['tiny'].render_to(self.game.screen, (30, 50),
+                "diagram: %.1f MAX, %.1f MEAN" % (self.fleet_diagram.max_debug_time * 1000, self.fleet_diagram.mean_debug_time * 1000),
+                (128,255,255,180)
+            )
 
         if game.DEV:
             FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 20, 20), "%d" % self.time, (128,255,128,180))

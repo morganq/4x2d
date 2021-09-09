@@ -79,11 +79,11 @@ class RunInfo:
         signal = None
         mods = []
 
-        if row == 4:
+        if row == 5:
             mods = [random.choice(["warp_drive", "big_planet", "ship_shield_far_from_home", "atomic_bomb"])]
             signal = "future_tech"
 
-        if row == 8:
+        if row == 9:
             mods = [random.choice(["battleship"])]
             signal = "boss"
 
@@ -102,8 +102,9 @@ class RunInfo:
 
     def new_store(self, row, from_links):
         offerings = []
-        offer_types = ['memory', 'blueprint', 'o2', 'levelup']
+        offer_types = ['memory', 'blueprint', 'levelup']
         random.shuffle(offer_types)
+        offer_types.insert(2, 'o2')
         for i in range(3):
             offer_type = offer_types.pop()
             offering = {'offer_type':offer_type}
@@ -143,7 +144,7 @@ class RunInfo:
         random.shuffle(l2)
         levels = l1 + l2
 
-        height = 9
+        height = 10
         for row in range(height):
             level = levels.pop()
             self.data.append([])

@@ -1,4 +1,5 @@
 import math
+import time
 from os import close
 
 import pygame
@@ -20,15 +21,25 @@ class FleetDiagram(spritebase.SpriteBase):
         self.time = 0
         self.refresh_time = 0
 
+        # debug
+        self.debug_times = []
+        self.mean_debug_time = 0
+        self.max_debug_time = 0
+
     def update(self, dt):
         self.time += dt
         self.refresh_time -= dt
         if self.refresh_time < 0:
             self.refresh_time = 0.1
-            self.generate_image(self.scene)
+            #self.generate_image(self.scene)
+            self.debug_times = self.debug_times[-100:]
+            if self.debug_times:
+                self.mean_debug_time = sum(self.debug_times) / max(len(self.debug_times),1)
+                self.max_debug_time = max(self.debug_times)
         return super().update(dt)
 
     def generate_image(self, scene):
+        t1 = time.time()
         self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
         self._width, self._height = self.image.get_size()
 
@@ -39,6 +50,8 @@ class FleetDiagram(spritebase.SpriteBase):
         for fleet in fleets:
             path = []
             ship = fleet.ships[0]
+            if not ship.chosen_target:
+                continue
             if fleet.mode_state() == 'waiting':
                 pygame.draw.circle(self.image, OUTLINE_COLOR, ship.chosen_target.pos.tuple(), ship.chosen_target.radius + 15, 3)
                 continue       
@@ -86,3 +99,5 @@ class FleetDiagram(spritebase.SpriteBase):
                             self.image.set_at(point.tuple_int(), DOT_COLOR)
                     
         self._recalc_rect()
+        t2 = time.time()
+        self.debug_times.append((t2-t1))

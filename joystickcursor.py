@@ -28,7 +28,7 @@ class JoystickCursor(SpriteBase):
         self._generate_image()
 
     def _generate_image(self):
-        self.image = pygame.Surface((game.RES[0], game.RES[1]), pygame.SRCALPHA)
+        self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
 
         pygame.draw.circle(self.image, PICO_PINK, self.cursor_pos.tuple(), 7, 1)
         pygame.draw.circle(self.image, PICO_WHITE, self.cursor_pos.tuple(), 2, 0)
@@ -52,7 +52,7 @@ class JoystickCursor(SpriteBase):
                 p2 = self.nearest_obj.apparent_pos + dn * (self.nearest_obj.radius + 4)
                 pygame.draw.line(self.image, PICO_PINK, p1.tuple(), p2.tuple(), 1)
 
-        self._width, self._height = game.RES
+        self._width, self._height = self.image.get_size()
 
     def joystick_delta(self, delta):
         self.joystick_state = delta
@@ -62,7 +62,8 @@ class JoystickCursor(SpriteBase):
         self.update_hover()
 
     def update(self, dt):
-        self.cursor_pos = (self.cursor_pos + self.joystick_state * dt * 350).rect_contain(0, 0, game.RES[0], game.RES[1])
+
+        self.cursor_pos = (self.cursor_pos + self.joystick_state * dt * 350).rect_contain(0, 0, game.Game.inst.game_resolution.x, game.Game.inst.game_resolution.y)
         self.scene.game.last_joystick_pos = self.cursor_pos
         self.options_text.pos = self.cursor_pos + V2(8, -8)
         self._generate_image()
@@ -106,7 +107,7 @@ class JoystickPanelCursor(SpriteBase):
             self.visible = False
 
     def _generate_image(self):
-        self.image = pygame.Surface((game.RES[0], game.RES[1]), pygame.SRCALPHA)
+        self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
 
         c = self.get_current_control()
         rect = (
@@ -128,7 +129,7 @@ class JoystickPanelCursor(SpriteBase):
         ]
         pygame.draw.polygon(self.image, color, pts, 0)
 
-        self._width, self._height = game.RES
+        self._width, self._height = self.image.get_size()
 
     def kill(self):
         if self.hovering and self.hovering.alive():

@@ -62,3 +62,28 @@ New Game Screen
    Start button
    Starting game options...
 Star Map
+
+
+=====
+game difficulty
+Hades
+ - 4 levels, encounters share enemy types in a level, later encounters have a few more enemies, but it's hard because of the health bar.
+ - enemies in level 1 are very basic, level 3 have specific shield things, level 4 poison mechanic...
+
+Quake
+ - introduces harder enemies later in the game. and more encounters with combinations of enemy types
+
+FTL
+ - enemies have more features later in the game
+
+==
+9 levels
+1 = fighters only, no attack, no civ special
+2 = fighters only
+3 = forced shop
+4 = fighters and level 2 ship
+5 = fighters and level 2 ship, + secret tech
+6 = fighters and level 2 ship + time loop they start with
+7 = all ships, more planets + time loop
+8 = all ships, more planets + time loop
+9 = boss

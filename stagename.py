@@ -22,6 +22,8 @@ class StageName(SpriteBase):
         self.time = 0
         self.layer = 20
         self.visible = False
+        self.close_time = KILL_TIME - FINISH_TIME
+        self.visible_time = START_TIME + 0.25
         self._generate_image()
 
     def _generate_image(self):

@@ -9,14 +9,18 @@ Finish menu scene resolution
  x buildings flash in
  x colorblind issue with player colors + different alien colors
  x somehow pop out selectable objects in upgrade targeting
- - time loop
+ x time loop
  - make sure planet panel updates properly
  - "research" help menu, plus achievements that unlock them.
  - something better when you acquire upgrade
  - make starmap more dynamic, better background, etc.
  - implement narrative constraints in run info
- - "victory" animation when you win
+ x "victory" animation when you win
  - implement boss
+   - implement time crystal planets
+   - implement two stage levelscene
+   - implement reviver mothership
+   - implement tutorial for what you gotta do
  - more intentional difficulty curve
  - what happens when you lose?
  - explain different ships

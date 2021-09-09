@@ -1,5 +1,5 @@
 - resolutions seem odd, make them more standard sizes
-* no lol
+* ok
 - I would recommend adding a click-for-next-screen type approach to the tutorials rather than timing. That is more accessible for slower readers
 * yes
 - I think clicking and dragging should be an option to send your units to another planet. I would prefer clicking once and having the options to then click the planet I want to attack and that will trigger the number of fighters menu. (after playing a bit I don't know how much this matters, I got used to it pretty quickly)

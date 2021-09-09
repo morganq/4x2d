@@ -29,11 +29,11 @@ class Explosion(SpriteBase):
 
 
     def generate_image(self):
-        t = self.time / self.lifetime
+        t = min(self.time / self.lifetime,1)
         ci = clamp(int(len(self.colors) * t), 0, len(self.colors) - 1)
         size = self.scale_fn(t) * self.max_size
         temp = pygame.Surface((self.max_size * 2, self.max_size * 2), pygame.SRCALPHA)
-        if t < 1:
+        if t <= 1:
             pygame.draw.circle(temp, self.colors[ci], (self.max_size, self.max_size), size, 0)
         temp.blit(self.image, (0,0))
         innersize = clamp(size - self.line_width, 0, 999)

@@ -157,7 +157,7 @@ class StoreScene(Scene):
         if self.game.input_mode == "joystick":
             t = "[*circle*] Exit Shop"
             bx = 330
-        self.ui_group.add(Button(V2(bx, 375) + self.game.game_offset, t, "big", self.on_exit))
+        self.ui_group.add(Button(V2(bx, 325) + self.game.game_offset, t, "big", self.on_exit))
 
     def update(self, dt):
         for spr in self.ui_group.sprites():

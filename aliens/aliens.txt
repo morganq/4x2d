@@ -13,16 +13,25 @@ alien ideas:
  - ?: shield blocks the first damage, with cooldown
 
 
- - Alien 1: TERRAFORM | Basic fighter ship, blast radius ship tethered to planet, battleship with slow warp
+ - Alien 1: TERRAFORM 
+ 1. Basic fighter ship + rate of fire
+ 2. blast radius ship tethered to planet
+ 3. battleship with slow warp
  * theme is ground/"earth", ecology, planetary
  * chunky, minerally-looking.. maybe like marble-ish?
  * name: Barysi Nomads
 
- - Alien 2: INTIMIDATE (no prod or building on that planet) | Slow higher health fighter, Boarding/conversion ship, Mothership that is constructed in pieces
+ - Alien 2: INTIMIDATE (no prod or building on that planet) | 
+ 1. Slow, fewer, higher health fighter + speed
+ 2. Boarding/conversion ship
+ 3. Mothership that is constructed in pieces
  * theme is robots and hacking
  * name: The Network
 
- - Alien 3: VOID | Basic fighter, Ship that is stealth in creep until it attacks, big ship with creep radius
+ - Alien 3: VOID | 
+ 1. Basic fighter + nothing?
+ 2. Ship that is stealth in creep until it attacks
+ 3. big ship with creep radius
  * theme is void
  * lizard-y things?
  * name: Void Cult

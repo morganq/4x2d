@@ -1,6 +1,7 @@
+from collections import defaultdict
+
 from colors import *
 from stats import Stats
-from collections import defaultdict
 
 UPGRADES = {
     'iron':defaultdict(list),
@@ -26,6 +27,8 @@ class Upgrade:
     family = None
     alien = False
     alien_name = None
+    alien_min_level = 0 # Minimum level this is researchable
+    
     def apply(self, to):
         pass
 
@@ -39,6 +42,4 @@ def register_upgrade(cls):
     ALL_UPGRADE_CLASSES.append(cls)
     return cls
 
-from upgrade import building_upgrades
-from upgrade import ship_upgrades
-from upgrade import tech_upgrades
+from upgrade import building_upgrades, ship_upgrades, tech_upgrades

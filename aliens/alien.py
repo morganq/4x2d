@@ -60,7 +60,11 @@ class Alien:
         pass  
 
     def pick_upgrade_target(self, up):
-        return random.choice([p for p in self.scene.get_civ_planets(self.civ)])                
+        avail = [p for p in self.scene.get_civ_planets(self.civ) if p.is_buildable()]
+        if avail:
+            return random.choice(avail)
+        else:
+            return None
 
     def count_ships(self, civ):
         ships = 0
@@ -103,13 +107,18 @@ class Alien:
                     'tech':'tech'
                 }[self.resource_priority]
                 up = UPGRADE_CLASSES[offered[choice]]
-            if up.category == 'tech':
-                up().apply(self.civ)
-            else:
-                target = self.pick_upgrade_target(up)
-                up().apply(target)
 
-            print("alien researched %s" % up.name)
+            if self.difficulty >= up.alien_min_level:
+                if up.category == 'tech':
+                    up().apply(self.civ)
+                else:
+                    target = self.pick_upgrade_target(up)
+                    if target is not None: # If we have none avail... who cares, just skip this upgrade.
+                        up().apply(target)
+
+                print("alien researched %s" % up.name)
+            else:
+                print("alien wanted to research %s but it's not allowed at this level" % up.name)
             
             self.civ.upgrades_stocked.pop(0)
             self.civ.researched_upgrade_names.add(up.name)
@@ -194,7 +203,9 @@ class Alien:
         self.civ.base_stats['mining_rate'] = 0.75 #-0.5 + ((difficulty - 1) / 6)
         #self.civ.base_stats['max_ships_mul'] = min(-0.55 + (difficulty - 1) / 10,0)
         self.civ.base_stats['max_ships_per_planet'] = int((difficulty + 5) / 2)
-        extra_planets = difficulty // 2
+        extra_planets = 0
+        if difficulty == 7: extra_planets = 1
+        if difficulty == 8: extra_planets = 2
         extra_pops = difficulty // 2
         my_planet = self.scene.get_civ_planets(self.civ)[0]
         my_planet.population += extra_pops

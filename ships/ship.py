@@ -61,7 +61,7 @@ class Ship(SpaceObject):
             STATE_CRUISING:{'update':self.state_cruising, 'enter':self.enter_state_cruising},
             STATE_WAITING:{'update':self.state_waiting, 'exit':self.exit_state_waiting},
             STATE_RETURNING:{'update':self.state_returning, 'enter':self.enter_state_returning},
-            STATE_STUNNED:{'update':self.state_stunned, 'enter':self.enter_state_stunned, 'exit':self.exit_state_stunned}
+            STATE_STUNNED:{'update':self.state_stunned, 'enter':self.enter_state_stunned, 'exit':self.exit_state_stunned},
         }
         self.state = None
 
@@ -444,14 +444,16 @@ class Ship(SpaceObject):
 
     def update_color(self):
         #new_color = PICO_GREEN if self.owning_civ == self.scene.my_civ else PICO_RED
-        new_color = self.owning_civ.color
+        color = self.owning_civ.color
+        self.set_color(color)
+
+    def set_color(self, color):
         # Could optimize by doing 2 masks - color mask and black mask
         #mask = pygame.mask.from_surface(self._sheet)
-        #self._sheet = mask.to_surface(setcolor = (*self.owning_civ.color,255), unsetcolor=(0,0,0,0))
-
+        #self._sheet = mask.to_surface(setcolor = (*self.owning_civ.color,255), unsetcolor=(0,0,0,0))        
         for x in range(self._sheet.get_width()):
             for y in range(self._sheet.get_height()):
                 color = tuple(self._sheet.get_at((x,y)))
                 if color[3] >= 128 and color[0:3] != PICO_BLACK:
-                    self._sheet.set_at((x,y), new_color)
+                    self._sheet.set_at((x,y), color)
         self._update_image()

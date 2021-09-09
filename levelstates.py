@@ -26,6 +26,7 @@ from rangeindicator import RangeIndicator
 from resources import resource_path
 from selector import Selector
 from simplesprite import SimpleSprite
+from stagename import StageName
 from states import State, UIEnabledState
 from upgrade.upgradebutton import UpgradeButton
 from upgrade.upgradepanel import UpgradePanel
@@ -47,8 +48,19 @@ class BeginState(State):
         self.time += dt
         if not self.scene.stage_name.alive():
             self.scene.sm.transition(PlayState(self.scene))
-            self.scene.paused = False
         return super().update(dt)
+
+    def exit(self):
+        self.scene.paused = False
+        return super().exit()
+
+    def take_input(self, input, event):
+        if input == "click" and self.time > self.scene.stage_name.visible_time:
+            self.scene.stage_name.time = max(self.scene.stage_name.time, self.scene.stage_name.close_time)
+            #self.scene.stage_name.kill()
+            #self.scene.sm.transition(PlayState(self.scene))
+
+        return super().take_input(input, event)
 
 class PlayState(UIEnabledState):
     def __init__(self, scene):
@@ -489,11 +501,10 @@ class GameOverState(State):
 class VictoryState(State):
     def enter(self):
         self.scene.ui_group.empty()
-        #t = text.Text("Click to continue", "medium", V2(250, 200), PICO_WHITE, multiline_width=200)
-        #t.offset = (0.5,0)
-        #self.scene.ui_group.add(t)
 
-        self.scene.ui_group.add(FunNotification("VICTORY!"))
+        sn = StageName(V2(0,100), self.scene.stage_num, "Victory!", "We've taken full control of this sector!")
+        sn.time = 1.75
+        self.scene.ui_group.add(sn)
 
         self.scene.game.run_info.bonus_credits += 30
         for r in self.scene.my_civ.upgrades_stocked:
@@ -507,17 +518,28 @@ class VictoryState(State):
         self.scene.game.run_info.score += int(self.scene.score) + speed_bonus
 
         self.scene.game.run_info.choose_path(*self.scene.game.run_info.next_path_segment)
+        self.time = 0
+        self.scene.paused = True
 
         return super().enter()
 
+    def paused_update(self, dt):
+        self.time += dt
+        if self.time > 6.5:
+            self.end()
+        return super().paused_update(dt)
+
+    def end(self):
+        self.scene.game.scene = rewardscene.RewardScene(
+            self.scene.game,
+            [u.name for u in self.scene.my_civ.upgrades],
+            [u for u in self.scene.my_civ.researched_upgrade_names if UPGRADE_CLASSES[u].category == 'buildings'],
+        )
+        self.scene.game.scene.start()
+
     def take_input(self, input, event):
-        if input == "action" or input == "click" or input == "confirm":
-            self.scene.game.scene = rewardscene.RewardScene(
-                self.scene.game,
-                [u.name for u in self.scene.my_civ.upgrades],
-                [u for u in self.scene.my_civ.researched_upgrade_names if UPGRADE_CLASSES[u].category == 'buildings'],
-            )
-            self.scene.game.scene.start()
+        if self.time > 2 and (input == "action" or input == "click" or input == "confirm"):
+            self.end()
 
                                 
 

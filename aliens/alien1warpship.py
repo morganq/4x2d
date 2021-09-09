@@ -1,9 +1,10 @@
-from colors import PICO_LIGHTGRAY, PICO_RED
-from ships.fighter import Fighter
-from helper import get_nearest
 import line
-from v2 import V2
+from colors import PICO_LIGHTGRAY, PICO_RED
+from helper import get_nearest
 from ships.all_ships import register_ship
+from ships.fighter import Fighter
+from v2 import V2
+
 
 @register_ship
 class Alien1WarpShip(Fighter):
@@ -46,7 +47,7 @@ class Alien1WarpShip(Fighter):
 
     def update(self, dt):
         self.update_lines()
-        if (self.tethered_to.owning_civ != self.owning_civ):
+        if (self.tethered_to.owning_civ != self.owning_civ) or not self.tethered_to.alive():
             self.kill()
             
         if (self.tethered_to.pos - self.pos).sqr_magnitude() > self.TETHER_LENGTH ** 2:
