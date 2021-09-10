@@ -328,7 +328,13 @@ class Ship(SpaceObject):
             return
 
         if self.scene.flowfield.has_field(self.effective_target):
-            self.target_velocity = self.scene.flowfield.get_vector(self.pos, self.effective_target, 10) * self.get_cruise_speed()
+            towards_flow = self.scene.flowfield.get_vector(self.pos, self.effective_target, 0)
+            towards_center = towards_flow
+            if self.fleet and len(self.fleet.path) > 2:
+                towards_center = (self.fleet.path[2] - self.pos).normalized()
+            ratio = 0.8
+            self.target_velocity = (towards_flow * ratio + towards_center * (1 - ratio)) * self.get_cruise_speed()
+
         else:
             delta = self.effective_target.pos - self.pos
             self.target_velocity = delta.normalized() * self.get_cruise_speed()            

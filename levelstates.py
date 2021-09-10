@@ -203,10 +203,6 @@ class PlayState(UIEnabledState):
             if inp == "other" and event.key == pygame.K_u:
                 self.scene.sm.transition(upgradestate.DevAnyUpgradeState(self.scene))
 
-            if inp == "other" and event.key == pygame.K_s:
-                name = input("ship name> ")
-                self.scene.get_civ_planets(self.scene.my_civ)[0].add_ship(name)
-
         if inp == "menu":
             self.scene.sm.transition(PauseState(self.scene))
 

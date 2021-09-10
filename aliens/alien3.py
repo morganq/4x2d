@@ -54,7 +54,7 @@ class Alien3FighterProductionUpgrade2(Alien3FighterProductionUpgrade1):
     resource_type = "ice"
     category = "ships"
     title = "Alien Bomber Production"
-    description = "[^1] [Bomber] Over 10 seconds"
+    description = "[^2] [Bombers] Over 60 seconds"
     icon = "fighters6"
     requires = None
     alien = True
@@ -63,7 +63,7 @@ class Alien3FighterProductionUpgrade2(Alien3FighterProductionUpgrade1):
     alien_min_level = 4
 
     def apply(self, to):
-        to.add_production(ProductionOrder("alien3bomber", 1, 10))
+        to.add_production(ProductionOrder("alien3bomber", 2, 60))
 
 @register_upgrade
 class Alien3FighterProductionUpgrade3(Alien3FighterProductionUpgrade1):

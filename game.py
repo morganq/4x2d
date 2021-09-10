@@ -71,6 +71,10 @@ class Game:
                 self.scene = planetgenscene.PlanetGenScene(self)
             elif sys.argv[1] == "new":
                 self.scene = newgamescene.NewGameScene(self)
+            elif sys.argv[1] == "perf":
+                global DEV
+                DEV = True
+                self.scene = levelscene.LevelScene(self, "choke", "alien3", 3, 3, "", "", options='performance')
             else:
                 self.scene = menuscene.MenuScene(self)
         else:

@@ -269,7 +269,8 @@ class LevelScene(scene.Scene):
 
         self.stage_name = stagename.StageName(V2(0, 100), self.stage_num, self.title, self.description)
         self.ui_group.add(self.stage_name)
-        #self.stage_name.kill()
+        if self.title == "":
+            self.stage_name.kill()
 
         self.pause_sprite = pauseoverlay.PauseOverlay()
         self.pause_sprite.layer = 5
@@ -346,6 +347,17 @@ class LevelScene(scene.Scene):
             for planet in self.get_civ_planets(None):
                 planet.change_owner(self.enemy.civ)
             self.enemy.civ.resources.set_resource("gas", 220)
+
+        if self.options == "performance":
+            from aliens.alien1fighter import Alien1Fighter
+            for i in range(30):
+                #civ = self.my_civ if i % 2 == 0 else self.enemy.civ
+                civ = self.enemy.civ
+                p = V2(random.randint(50, self.game.game_resolution.x-50), random.randint(50, self.game.game_resolution.y-50))
+                s = Alien1Fighter(self, p, civ)
+                self.game_group.add(s)
+                random_planet = random.choice(self.get_planets())
+                s.set_target(self.homeworld)
 
         if self.options == "rich":
             self.my_civ.resources.set_resource("iron", 1150)

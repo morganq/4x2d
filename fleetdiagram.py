@@ -30,8 +30,8 @@ class FleetDiagram(spritebase.SpriteBase):
         self.time += dt
         self.refresh_time -= dt
         if self.refresh_time < 0:
-            self.refresh_time = 0.1
-            #self.generate_image(self.scene)
+            self.refresh_time = 0
+            self.generate_image(self.scene)
             self.debug_times = self.debug_times[-100:]
             if self.debug_times:
                 self.mean_debug_time = sum(self.debug_times) / max(len(self.debug_times),1)
@@ -48,56 +48,22 @@ class FleetDiagram(spritebase.SpriteBase):
         fleets = scene.fleet_managers['my'].current_fleets[::]
         fleets.extend(scene.fleet_managers['enemy'].current_fleets[::])
         for fleet in fleets:
-            path = []
-            ship = fleet.ships[0]
-            if not ship.chosen_target:
+            if not fleet.target:
                 continue
             if fleet.mode_state() == 'waiting':
-                pygame.draw.circle(self.image, OUTLINE_COLOR, ship.chosen_target.pos.tuple(), ship.chosen_target.radius + 15, 3)
+                pygame.draw.circle(self.image, OUTLINE_COLOR, fleet.target.pos.tuple(), fleet.target.radius + 15, 3)
                 continue       
-            if fleet.mode_state == 'dogfighting':
-                continue
-            center = fleet.get_size_info()[0]
-            p_end = ship.chosen_target.pos
-            p_current = ship.starting_pos
-            if (center - p_end).sqr_magnitude() < 30 ** 2:
-                path = [center, p_end]
-            else:
-                iterations = 0
-                while (p_current - p_end).sqr_magnitude() > (jump_dist + ship.chosen_target.radius + 3) ** 2:
-                    if scene.flowfield.has_field(ship.chosen_target):
-                        p_current = scene.flowfield.walk_field(p_current, ship.chosen_target, jump_dist)
-                    else:
-                        break
-                    
-                    path.append(p_current)
-                    iterations += 1
-                    if iterations > 1000:
-                        print("fleet diagram way too many iterations! giving up")
-                        break
+            #if fleet.mode_state == 'dogfighting':
+            #    continue
+            center = fleet.pos
 
-            if path:
-                closest_dist, closest = min([((p - (center + ship.velocity.normalized() * jump_dist * 2)).sqr_magnitude(), p) for p in path])
-                last_point = None
-                past_fleet = False
-                for i,point in enumerate(path):
-                    if point == closest:
-                        past_fleet = True
-                    if last_point and past_fleet:
-                        size = 3
-                        pygame.draw.line(self.image, OUTLINE_COLOR, last_point.tuple_int(), point.tuple_int(), size)
-                    last_point = point
+            if len(fleet.path) > 1:
+                pygame.draw.lines(self.image, OUTLINE_COLOR, False, [p.tuple_int() for p in fleet.path], 3)
 
-                past_fleet = False
-                ci = int((self.time * 2) % 2)
-                for i,point in enumerate(path):
-                    if point == closest:
-                        past_fleet = True
-                    if past_fleet:
-                        color = PICO_BLACK
-                        if i % 2 == ci:
-                            self.image.set_at(point.tuple_int(), DOT_COLOR)
-                    
+            for step in fleet.path:
+                self.image.set_at(step.tuple_int(), DOT_COLOR)
+        
+
         self._recalc_rect()
         t2 = time.time()
         self.debug_times.append((t2-t1))

@@ -1,4 +1,6 @@
+import time
 from collections import defaultdict
+from sys import path
 
 import pygame
 
@@ -10,7 +12,11 @@ from rangeindicator import RangeIndicator
 from spaceobject import SpaceObject
 from v2 import V2
 
-FLEET_RADIUS = 30
+FLEET_RADIUS = 20
+SAME_FLEET_RADIUS = 10
+PATH_STEPS_PER_FRAME = 20
+PATH_STEP_SIZE = 5
+NEAR_PATH_DIST = 40
 
 class FleetSelectable(SpaceObject):
     def __init__(self, scene, pos, radius, owning_civ, fleet):
@@ -54,12 +60,50 @@ class FleetManager:
             fleet.selectable_object = None
 
     def update(self, dt):
-        self.current_fleets = generate_fleets(self.scene, self.civ)
+        # Generate new fleets for this frame
+        t1 = time.time()
+        new_fleets = generate_fleets(self.scene, self.civ)
+        t2 = time.time()
+        
+        # For path continuity, we want to figure out which old fleets are the same as which new fleets
+        new_fleets_by_target = defaultdict(list)
+        for fleet in new_fleets:
+            new_fleets_by_target[fleet.target].append(fleet)
+
+        if self.current_fleets:
+            old_fleets_by_target = defaultdict(list)
+            for fleet in self.current_fleets:
+                old_fleets_by_target[fleet.target].append(fleet)
+
+            # We can now try to match the fleets
+            for target in old_fleets_by_target.keys():
+                a = new_fleets_by_target.get(target, [])
+                b = old_fleets_by_target[target]
+                for new_fleet in a:
+                    for old_fleet in b:
+                        if (new_fleet.pos - old_fleet.pos).sqr_magnitude() < SAME_FLEET_RADIUS ** 2:
+                            new_fleet.path = old_fleet.path[::]
+        
+        self.current_fleets = new_fleets
         self.ship_fleets = {}
         for fleet in self.current_fleets:
+            fleet.update(dt)
             for ship in fleet.ships:
                 ship.fleet = fleet
                 self.ship_fleets[ship] = fleet           
+
+        t3 = time.time()
+        #print(len(self.current_fleets))
+        # Take path steps
+        incomplete_fleets = [f for f in self.current_fleets if not f.path_done]
+        if incomplete_fleets:
+            steps_per_fleet = max(int(PATH_STEPS_PER_FRAME / len(incomplete_fleets)), 1)
+            for fleet in incomplete_fleets:
+                fleet.develop_path(steps_per_fleet)
+
+        t4 = time.time()
+        #print("%.1fms / %.1fms / %.1fms" % ((t2-t1) * 1000, (t3-t2) * 1000, (t4-t3) * 1000))
+
 
     def recall_fleet(self, fleet):
         nearest, dist = helper.get_nearest(fleet.ships[0].pos, self.scene.get_civ_planets(fleet.ships[0].owning_civ))
@@ -76,8 +120,7 @@ class FleetManager:
 
     def point_recall(self, point):
         for fleet in self.current_fleets:
-            p, r = fleet.get_size_info()
-            if (point - p).sqr_magnitude() < (r + 5) ** 2:
+            if (point - fleet.pos).sqr_magnitude() < (fleet.radius + 5) ** 2:
                 self.recall_fleet(fleet)
 
     def update_fleet_markers(self, point):
@@ -86,16 +129,20 @@ class FleetManager:
 
         self.fleet_markers = []
         for fleet in self.current_fleets:
-            p, r = fleet.get_size_info()
-            if (point - p).sqr_magnitude() < (r + 5) ** 2:
-                m = RangeIndicator(p, r + 3, PICO_DARKGREEN, 2, 2)
+            if (point - fleet.pos).sqr_magnitude() < (fleet.radius + 5) ** 2:
+                m = RangeIndicator(fleet.pos, fleet.radius + 3, PICO_DARKGREEN, 2, 2)
                 self.scene.ui_group.add(m)
                 self.fleet_markers.append(m)
 
 class Fleet:
-    def __init__(self, ships):
+    def __init__(self, scene, ships, target):
+        self.scene = scene
         self.ships = ships
+        self.target = target
         self.selectable_object = None
+        self.pos, self.radius = self.get_size_info()
+        self.path = [self.pos]
+        self.path_done = False
 
     def is_waiting(self):
         average_time = sum(s.waiting_time for s in self.ships) / len(self.ships)
@@ -108,6 +155,19 @@ class Fleet:
         for s in self.ships:
             states[s.state] += 1
         return max([(b,a) for a,b in states.items()])[1]
+
+    def develop_path(self, num_steps):
+        for i in range(num_steps):
+            if (self.path[-1] - self.target.pos).sqr_magnitude() < (PATH_STEP_SIZE * 2) ** 2:
+                self.path_done = True
+                return
+            if self.scene.flowfield.has_field(self.target):
+                new_pt = self.scene.flowfield.walk_field(self.path[-1], self.target, PATH_STEP_SIZE)
+            else:
+                delta = self.target.pos - self.pos
+                new_pt = self.path[-1] + delta.normalized() * PATH_STEP_SIZE
+            self.path.append(new_pt)
+
 
     def get_size_info(self):
         average = V2(0,0)
@@ -123,24 +183,49 @@ class Fleet:
         radius = max(radius, 5)
         return (average, radius)
 
+    def update(self, dt):
+        self.pos, self.radius = self.get_size_info()
+        nearest = 99999999999
+        path_end = 0
+        for i, pt in enumerate(self.path):
+            delta = pt - self.pos
+            dsq = delta.sqr_magnitude()
+            if dsq > NEAR_PATH_DIST ** 2:
+                continue
+            if dsq > nearest:
+                path_end = i - 1
+                break
+            nearest = dsq
+        if path_end > 0 and path_end < len(self.path) - 1:
+            self.path = self.path[path_end:]
+
     def debug_render(self, surface):
-        average, radius = self.get_size_info()
-        pygame.draw.circle(surface, (255,0,0), average.tuple_int(), radius, 1)
+        pygame.draw.circle(surface, (255,0,0), self.pos.tuple_int(), self.radius, 1)
 
     def generate_selectable_object(self):
-        average, radius = self.get_size_info()
-        radius = max(radius, 8)
-        scene = self.ships[0].scene
-        self.selectable_object = FleetSelectable(scene, average, radius, self.ships[0].owning_civ, self)
-        scene.game_group.add(self.selectable_object)
-        
+        radius = max(self.radius, 8)
+        self.selectable_object = FleetSelectable(self.scene, self.pos, radius, self.ships[0].owning_civ, self)
+        self.scene.game_group.add(self.selectable_object)
 
     def __str__(self):
         return ', '.join([str(s.pos.tuple_int()) for s in self.ships])
 
 def generate_fleets(scene, civ):
-    fleets = []
     ships = scene.get_civ_ships(civ)
+    ships_by_target = defaultdict(list)
+    for ship in ships:
+        ships_by_target[ship.chosen_target].append(ship)
+    
+    all_clusters = []
+    for target, ships in ships_by_target.items():
+        all_clusters.extend(get_clusters(scene, ships))
+
+    return all_clusters
+
+
+def get_clusters(scene, ships):
+    fleets = []
+    
     for ship in ships:
         fleetless = True
         for fleet in fleets:
@@ -151,7 +236,8 @@ def generate_fleets(scene, civ):
                     fleetless = False
                     break
         if fleetless:
-            fleets.append(Fleet([ship]))
+            f = Fleet(scene, [ship], ship.chosen_target)
+            fleets.append(f)
     
     # merge fleets
     i = 0

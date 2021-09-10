@@ -49,7 +49,7 @@ class Alien1FighterProductionUpgradeIce(Alien1FighterProductionUpgrade):
     resource_type = "ice"
     category = "ships"
     title = "Alien Warpship Production"
-    description = "[^1] [Warpship] Over 10 seconds"
+    description = "[^2] [Warpship] Over 60 seconds"
     icon = "fighters6"
     requires = None
     alien = True
@@ -58,7 +58,7 @@ class Alien1FighterProductionUpgradeIce(Alien1FighterProductionUpgrade):
     alien_min_level = 4
 
     def apply(self, to):
-        p = ProductionOrder("alien1warpship", 3, 10)
+        p = ProductionOrder("alien1warpship", 2, 60)
         to.add_production(p)
 
 @register_upgrade
