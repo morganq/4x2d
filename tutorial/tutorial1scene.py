@@ -78,21 +78,22 @@ class Tutorial1Scene(TutorialScene):
         if self.my_civ.num_upgrades > 0:
             if self.game.input_mode == "joystick":
                 self.set_tutorial_text(
-                    "Nice work. You have enough iron now to acquire a new Asset! Press [*triangle*]. Get Assets to improve your planets, build ships, or unlock new technologies.",
+                    "Nice work. You have enough iron now to acquire a new Upgrade! Press [*triangle*]. Get Upgrades to improve your planets, build ships, or unlock new technologies.",
                     4,
                     offset=V2(0, -50)
                 )
             else:
                 self.set_tutorial_text(
-                    "Nice work. You have enough iron now to acquire a new Asset! Get Assets to improve your planets, build ships, or unlock new technologies.",
+                    "Nice work. You have enough iron now to acquire a new Upgrade! Get Upgrades to improve your planets, build ships, or unlock new technologies.",
                     4,
                     offset=V2(0, -50)
                 )
             if self.tutorial_panel.shown_time > 14:
                 if self.game.input_mode == "joystick":
-                    self.set_tutorial_text("Click the Asset button below to acquire a new Asset.", 5,offset=V2(0, -50))
+                    self.set_tutorial_text("Press [*triangle*] to acquire a new Upgrade.", 5,offset=V2(0, -50))
                 else:
-                    self.set_tutorial_text("Press [*triangle*] to acquire a new Asset.", 5,offset=V2(0, -50))
+                    self.set_tutorial_text("Click the Upgrade button below.", 5,offset=V2(0, -50))
+                    
 
         if isinstance(self.sm.state, UpgradeState):
             self.set_tutorial_text("", 6)
@@ -110,19 +111,19 @@ class Tutorial1Scene(TutorialScene):
             s.set_pop(3)
             s.set_target(self.homeworld)
             self.game_group.add(s)
-            self.set_tutorial_text("We're going to need workers to colonize the planet. Workers also mine resources automatically. Here comes a friendly worker ship now.", 8)
+            self.set_tutorial_text("We're going to need workers to take control of the planet. Workers also mine resources automatically. Here comes a friendly worker ship now.", 8)
 
         if self.homeworld.population > 1:
             if self.tut_text_number <= 8:
                 self.set_tutorial_text("Now that you have workers on this planet, mining will begin and worker population will slowly grow.", 9)
             elif self.tut_text_number == 9 and self.tutorial_panel.shown_time > 10:
-                self.set_tutorial_text("Workers mine all the types of resources on the planet. For this planet, that means mainly iron, but also some ice and gas. Each resource has its own unique pool of Assets.", 10)
+                self.set_tutorial_text("Workers mine all the types of resources on the planet. For this planet, that means mainly iron, but also some ice and gas. Each resource has its own unique pool of Upgrades.", 10)
             elif self.tut_text_number == 10 and self.tutorial_panel.shown_time > 12:
                 self.set_tutorial_text("The more planets you control, the more mining you'll be able to do. Take over the other planet by sending workers to it.", 11)
 
             
         if len(self.get_civ_planets(self.my_civ)) == 2:
-            self.set_tutorial_text("Excellent! Defeating the federation comes down to making smart decisions: choosing your Assets, colonizing planets, and dispatching ships to destroy the enemy.", 12)
+            self.set_tutorial_text("Excellent! Defeating the federation comes down to making smart decisions: choosing your Upgrades, controlling planets, and dispatching ships to destroy the enemy.", 12)
             if self.tut_text_number == 12 and self.tutorial_panel.shown_time > 15:
                 self.set_tutorial_text("Good luck!!", 13)
             if self.tut_text_number == 13 and self.tutorial_panel.shown_time > 5:

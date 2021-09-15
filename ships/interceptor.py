@@ -88,6 +88,7 @@ class Interceptor(Fighter):
     def fire(self, at):
         self.bullets_chambered = 3
         self.firing_target = at
+        self.fast_fire_timer = 0
         self.special_fire(at)
 
     def update(self, dt):

@@ -2,6 +2,7 @@ import math
 import random
 from collections import defaultdict
 
+import bullet
 import economy
 import explosion
 import pygame
@@ -510,10 +511,7 @@ class Planet(SpaceObject):
         # Detect enemies
         threats = self.get_threats()
         if threats:
-            for ship_name in self.ships.keys():
-                if ship_name not in ['bomber']:
-                    for i in range(self.ships[ship_name]):
-                        self.emit_ship(ship_name, {"to":random.choice(threats)})
+            self.defend_planet_against(threats)
 
         
         #self.rotation += self.rotate_speed * dt * 3
@@ -708,7 +706,7 @@ class Planet(SpaceObject):
             self.unstable_reaction = 0
         return super().on_health_changed(old, new)
 
-    def take_damage(self, damage, origin):
+    def take_damage(self, damage, origin=None):
         if self.get_stat("damage_iron"):
             self.owning_civ.earn_resource("iron", self.get_stat("damage_iron"), where=self)
         pre_health = self.health
@@ -718,8 +716,18 @@ class Planet(SpaceObject):
             self.add_population(-1)
             self.add_ship("fighter")
 
+        if origin and isinstance(origin, bullet.Bullet):
+            if origin.shooter and isinstance(origin.shooter, ships.ship.Ship):
+                self.defend_planet_against([origin.shooter])
+
         return_val = super().take_damage(damage, origin=origin)
         return return_val
+
+    def defend_planet_against(self, threats):
+        for ship_name in self.ships.keys():
+            if ship_name not in ['bomber']:
+                for i in range(self.ships[ship_name]):
+                    self.emit_ship(ship_name, {"to":random.choice(threats)})
 
     def blow_up_buildings(self):
         for building in self.buildings:

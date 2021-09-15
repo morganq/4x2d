@@ -11,6 +11,7 @@ from explosion import Explosion
 from planet.planet import Planet
 from pygame.transform import threshold
 from resources import resource_path
+from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from v2 import V2
 
@@ -26,6 +27,23 @@ class TimeCrystal(Planet):
         self.countdown = text.Text("", "tiny", self.pos + V2(0,-4), PICO_YELLOW, border=PICO_BLACK)
         self.countdown.offset = (0.5, 0.5)
         self.scene.ui_group.add(self.countdown)
+
+
+    def generate_stranded_ships(self):
+        stranded_ships = ['fighter', 'colonist', 'fighter', 'colonist']
+        if random.random() > 0.5:
+            stranded_ships.append('bomber')
+        else:
+            stranded_ships.append('interceptor')
+        theta = random.random() * 6.2818
+        for ship in stranded_ships:
+            p = self.pos + V2.from_angle(theta) * random.randint(18,32)
+            s = SHIPS_BY_NAME[ship](self.scene, p, self.scene.my_civ)
+            if ship == 'colonist':
+                s.set_pop(random.randint(2,5))
+            self.scene.game_group.add(s)
+            self.freeze(s)
+            theta += random.random() + 0.1        
 
     def generate_base_art(self):
         w = h = self.radius * 2
@@ -56,19 +74,18 @@ class TimeCrystal(Planet):
         if self.exp:
             for s in self.scene.get_civ_ships(self.scene.my_civ):
                 if (s.pos - self.exp.pos).sqr_magnitude() < self.exp.size ** 2:
-                    self.frozen_ships.append(s)
-                    self.scene.game_group.remove(s)
-                    replica = self.make_frozen_sprite(s)
-                    self.frozen_replicas.append(replica)
-                    self.scene.game_group.add(replica)
+                    self.freeze(s)
             if not self.exp.alive():
                 self.exp = None
 
-        if self.freeze_timer > 70 and self.freeze_timer < 80:
-            self.kill()
-
         return super().special_update(dt)
 
+    def freeze(self, s):
+        self.frozen_ships.append(s)
+        self.scene.game_group.remove(s)
+        replica = self.make_frozen_sprite(s)
+        self.frozen_replicas.append(replica)
+        self.scene.game_group.add(replica)
 
     def make_frozen_sprite(self, ship):
         outline_mask = pygame.mask.from_surface(ship.image, 127)
@@ -80,6 +97,10 @@ class TimeCrystal(Planet):
         s = SimpleSprite(ship.pos, surf)
         s.offset = (0.5,0.5)
         return s
+
+    def on_die(self):
+        super().on_die()
+        self.kill()
 
     def kill(self):
         for ship in self.frozen_ships:

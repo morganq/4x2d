@@ -37,7 +37,8 @@ class Colonist(Ship):
         return (
             other == self.effective_target and
             isinstance(other, planet. Planet) and
-            (other.owning_civ == None or other.owning_civ == self.owning_civ)
+            (other.owning_civ == None or other.owning_civ == self.owning_civ) and
+            other.alive()
         )
 
     def collide(self, other):

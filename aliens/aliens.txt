@@ -20,6 +20,7 @@ alien ideas:
  * theme is ground/"earth", ecology, planetary
  * chunky, minerally-looking.. maybe like marble-ish?
  * name: Barysi Nomads
+ * lessons: 1. dealing with defensive ships. 2. dealing with AOE. 3. dealing with full galaxy warp
 
  - Alien 2: INTIMIDATE (no prod or building on that planet) | 
  1. Slow, fewer, higher health fighter + speed
@@ -27,6 +28,7 @@ alien ideas:
  3. Mothership that is constructed in pieces
  * theme is robots and hacking
  * name: The Network
+ * lessons: 1. must expand to deal with intimidate. 2. combatting supervisor ship. 3. destroying the mothership in progress
 
  - Alien 3: VOID | 
  1. Basic fighter + nothing?
@@ -35,6 +37,15 @@ alien ideas:
  * theme is void
  * lizard-y things?
  * name: Void Cult
+ * lessons: 1. dealing with bombers. 
  
  - Alien 4: Power Crystal (moves to different planets powering up units there. attack it to force it away) | 
  * name: Gemini Empire
+
+
+Boss challenges
+ - whack a mole with time crystals
+ - dodging around the mothership
+ - fighters: double shot, more hp, fewer
+ - tier 2: they dodge, have aoe weapon
+ - tier 3: laser beam, long range

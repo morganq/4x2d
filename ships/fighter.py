@@ -189,11 +189,14 @@ class Fighter(Ship):
             if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
                 self.fire_timer = 0
                 self.fire(self.effective_target)
+                self.target_heading = None
 
         # Need to get close to the enemy
         delta = self.effective_target.pos - self.pos
-        if delta.sqr_magnitude() > self.get_weapon_range() ** 2:
+        if delta.sqr_magnitude() > self.get_weapon_range() ** 2: # Too far
             dir = delta.normalized()
+        elif delta.sqr_magnitude() < (self.get_weapon_range() / 2) ** 2: # Too close
+            dir = -delta.normalized()
         elif self.fire_timer > 0.65: # If we're close and about to fire
             dir = delta.normalized()
             self.target_heading = dir.to_polar()[1]
@@ -201,7 +204,6 @@ class Fighter(Ship):
             _, a = (-delta).to_polar()
             a += self.combat_dodge_direction * 3.14159 / 2
             dir = V2.from_angle(a)           
-            self.target_heading = None
 
         # Need to stay close to starting spot
         delta = self.dogfight_initial_pos - self.pos

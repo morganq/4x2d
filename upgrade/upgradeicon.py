@@ -29,6 +29,8 @@ def generate_upgrade_image(upgrade):
     image.blit(category_icon, (0,0))
     return image
 
+
+# TODO: tooltip position
 class UpgradeIcon(SpriteBase):
     def __init__(self, pos, upgrade_name, onclick = None, tooltip = False):
         super().__init__(pos)

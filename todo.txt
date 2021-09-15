@@ -5,22 +5,25 @@ Finish menu scene resolution
  x figure out whole narrative structure
  x "start" animation when level loads
  x different color aliens
- - make buildings look cool
  x buildings flash in
  x colorblind issue with player colors + different alien colors
  x somehow pop out selectable objects in upgrade targeting
  x time loop
+  - another pass on alien assets + features
+ - implement boss
+   x implement time crystal planets
+   - implement new alien
+   - implement two stage levelscene
+   - implement reviver mothership
+   - implement tutorial for what you gotta do 
+ - show tips against aliens based on what ships are available to them
+ - make buildings look cool 
  - make sure planet panel updates properly
  - "research" help menu, plus achievements that unlock them.
  - something better when you acquire upgrade
  - make starmap more dynamic, better background, etc.
  - implement narrative constraints in run info
  x "victory" animation when you win
- - implement boss
-   - implement time crystal planets
-   - implement two stage levelscene
-   - implement reviver mothership
-   - implement tutorial for what you gotta do
  - more intentional difficulty curve
  - what happens when you lose?
  - explain different ships
@@ -30,19 +33,9 @@ Finish menu scene resolution
  - asset names pass
  - asset icons
  - reward icons
- - every shop has o2
+ - make ships switch target if they're hit and they're attacking a ship that can't fire back
 
 
  ? limited range fighters, maybe battleship and refuel
- 
-
-proposal: 600 x 360
-
-1920 x 1080 - 3.2 x 3.0
-1366 x 768 - 2.3 x 2.1
-1536 x 864 - 2.6 x 2.4
-1440 x 900 - 2.4 x 2.5
-1280 x 720 - 2.1 x 2
 
 Maybe give oxygen rewards?
-

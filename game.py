@@ -53,6 +53,8 @@ class Game:
         self.run_info = run.RunInfo()
         self.input_mode = 'mouse'
         if len(sys.argv) > 1:
+            global DEV
+            DEV = True            
             if sys.argv[1] == "draw":
                 self.scene = buildingcreatorscene.BuildingCreatorScene(self)
             elif sys.argv[1] == "editor":
@@ -66,14 +68,12 @@ class Game:
             elif sys.argv[1] == "game":
                 self.scene = levelscene.LevelScene(self, "choke", "alien3", 3, 3, "Testing", "This is a test string for the description")
             elif sys.argv[1] == "boss":
-                self.scene = levelscene.LevelScene(self, "boss", "alien1", 9, 9, "Boss", "It's the boss")
+                self.scene = levelscene.LevelScene(self, "boss", "boss", 9, 9, "Boss", "It's the boss")
             elif sys.argv[1] == "planet":
                 self.scene = planetgenscene.PlanetGenScene(self)
             elif sys.argv[1] == "new":
                 self.scene = newgamescene.NewGameScene(self)
             elif sys.argv[1] == "perf":
-                global DEV
-                DEV = True
                 self.scene = levelscene.LevelScene(self, "choke", "alien3", 3, 3, "", "", options='performance')
             else:
                 self.scene = menuscene.MenuScene(self)

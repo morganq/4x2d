@@ -13,6 +13,7 @@ import fleetdiagram
 import flowfield
 import funnotification
 import game
+import levelcontroller
 import levelstates
 import o2meter
 import optimize
@@ -23,7 +24,7 @@ import sound
 import stagename
 import states
 import upgradestate
-from aliens import bosstimecrystal
+from aliens import bosslevelcontroller, bosstimecrystal
 from asteroid import Asteroid
 from button import Button
 from civ import Civ, PlayerCiv
@@ -62,6 +63,7 @@ class LevelScene(scene.Scene):
         self.description = description
 
         self.paused = False
+        self.cinematic = False
         self.game_speed = 1.0
         self.time = 0
         self.debug = False
@@ -71,6 +73,7 @@ class LevelScene(scene.Scene):
         self.asset_buttons = []
 
         self.update_remainder_time = 0
+        self.level_controller = None
 
     @property
     def score(self):
@@ -136,6 +139,7 @@ class LevelScene(scene.Scene):
                 r = [v * 10 for v in obj['data']['resources']]
                 o = bosstimecrystal.TimeCrystal(self, pos + self.game.game_offset, 2, Resources(*r))       
                 o.change_owner(self.enemy.civ)         
+                o.generate_stranded_ships()
             else:
                 print(obj)
             self.game_group.add(o)
@@ -313,6 +317,11 @@ class LevelScene(scene.Scene):
         else:
             self.load_level("choke")
 
+        if self.difficulty == 9:
+            self.level_controller = bosslevelcontroller.BossLevelController(self)
+        else:
+            self.level_controller = levelcontroller.LevelController(self)
+
         self.setup_players()
         self.add_extra_spaceobjects()
         self.background.generate_image(self.get_objects_initial())
@@ -387,7 +396,8 @@ class LevelScene(scene.Scene):
         self.saved_upgrade_buttons[upgrade.name].kill()
 
     def dev_win(self):
-        self.sm.transition(levelstates.VictoryState(self))        
+        for planet in self.get_civ_planets(self.enemy.civ):
+            planet.take_damage(99999, origin=None)
 
     def on_civ_resource_change(self, res_type, val):
         pass
@@ -454,7 +464,8 @@ class LevelScene(scene.Scene):
 
     def update(self, dt):
         dt = min(dt,0.1)
-        self.game_speed = round((self.game.game_speed_input * 3) + 1)
+        if not self.cinematic:
+            self.game_speed = round((self.game.game_speed_input * 3) + 1)
         # This is correct way to do things, but we need to optimize more for this to work
         #game_dt = dt * self.game_speed        
         #self.update_remainder_time += dt
@@ -498,10 +509,13 @@ class LevelScene(scene.Scene):
 
         self.time += dt
 
+        if self.level_controller:
+            self.level_controller.update(dt)
+
         if self.time > 300 and not self.my_civ.scarcity:
             self.my_civ.enable_scarcity()
             self.enemy.civ.enable_scarcity()
-            fn = funnotification.FunNotification("SCARCITY! Asset costs increased")
+            fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
             self.ui_group.add(fn)
             
         self.game.run_info.o2 -= dt
@@ -515,18 +529,6 @@ class LevelScene(scene.Scene):
         t = time.time()
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
         self.update_times["objgrid"] = time.time() - t
-
-        
-        if not self.is_tutorial:
-            # Detect defeat
-            if not self.get_civ_planets(self.my_civ):
-                self.paused = True
-                self.sm.transition(levelstates.GameOverState(self))
-            
-            # Detect victory
-            if not self.get_civ_planets(self.enemy.civ):
-                self.paused = True
-                self.sm.transition(levelstates.VictoryState(self))
 
         for sprite in self.background_group.sprites():
             t = time.time()
@@ -545,7 +547,7 @@ class LevelScene(scene.Scene):
         self.update_game_objects(dt)
         self.update_collisions(dt)
 
-        if self.options != "pacifist":
+        if not self.cinematic:
             for enemy in self.enemies:
                 enemy.update(dt)
         
@@ -614,7 +616,7 @@ class LevelScene(scene.Scene):
             button.joy_button = "[*triangle*]"
         else:
             button.joy_button = None
-        button.label = "ASSET"
+        button.label = "UPGRADE"
         button.icon = "assets/i-%s.png" % resource
         color = RESOURCE_COLORS[resource]
         if resource == "iron":
@@ -686,7 +688,7 @@ class LevelScene(scene.Scene):
             self.game.screen.blit(gi, (0,0))
 
         # TODO: should be a widget?
-        if self.meters['iron'].width > 120:
+        if self.meters['iron'].width > 120 and not self.cinematic:
             delta = self.meters['iron'].width - 120
             rect = self.meters['iron'].rect
             pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + 120, rect.y + rect.height + 1), (rect.x + 120, rect.y + rect.height + 2), 1)
@@ -703,8 +705,10 @@ class LevelScene(scene.Scene):
         self.pause_sprite.visible = self.paused
         if self.stage_name.time < 2 and self.stage_name.alive():
             self.pause_sprite.visible = False
-        self.ui_group.draw(self.game.screen)
-        self.tutorial_group.draw(self.game.screen)
+
+        if not self.cinematic:
+            self.ui_group.draw(self.game.screen)
+            self.tutorial_group.draw(self.game.screen)
         if self.debug:
             self.enemy.render(self.game.screen)
             debug_render(self.game.screen, self)
@@ -724,9 +728,17 @@ class LevelScene(scene.Scene):
         if game.DEV:
             FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 20, 20), "%d" % self.time, (128,255,128,180))
 
-        if self.game.game_speed_input > 0:
+        res = self.game.game_resolution
+        if self.cinematic:
+            surf = pygame.Surface(res.tuple(), pygame.SRCALPHA)
+            pygame.draw.rect(surf, PICO_DARKBLUE, (0,0,res.x,40), 0)
+            pygame.draw.rect(surf, PICO_DARKBLUE, (0,res.y-40,res.x,40), 0)
+            #surf.set_alpha(160)
+            self.game.screen.blit(surf, (0,0))
+
+        if self.game_speed > 1:
             color = PICO_BLUE if ((self.time % 2) > 1) else PICO_WHITE
-            res = self.game.game_resolution
+            
             pygame.draw.rect(self.game.screen, PICO_BLUE, (0, 0, res.x, res.y), 1)
             tri = [V2(0,0), V2(4,4), V2(0,8)]
             pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 12, res.y - 12)).tuple() for z in tri], 0)

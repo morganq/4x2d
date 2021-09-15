@@ -22,11 +22,12 @@ class UpgradePanel(Panel):
         Panel.__init__(self, pos, None)
         self.resource = resource
         self.padding = 15
-        self.tab = {"text":"Asset: %s" % self.resource.title(), "color":economy.RESOURCE_COLORS[self.resource], "icon":"assets/i-upgrade.png"}
+        self.tab = {"text":"Upgrade: %s" % self.resource.title(), "color":economy.RESOURCE_COLORS[self.resource], "icon":"assets/i-upgrade.png"}
         self.tree_children = []
 
-        self.add(Text("Pick Your Asset", "big", V2(0,0), multiline_width=250), V2(0,0))
+        self.add(Text("Pick Your Upgrade", "big", V2(0,0), multiline_width=250), V2(0,0))
         self.header_ys = []
+        self.header_xs = []
 
         y = 30
         # need fn for closure
@@ -36,11 +37,13 @@ class UpgradePanel(Panel):
             self.add(b, V2(0,y + 12))
             return b
 
-        cts = {'buildings':'Base Construction', 'ships':'Ship Production', 'tech':'Technology'}
+        cts = {'buildings':'Construct Building', 'ships':'Order Ships', 'tech':'Research Technology'}
 
         for category,uname in offered_upgrades.items():
             self.header_ys.append(y + 7)
-            self.add(Text(cts[category], "small", V2(0,0), upgrades.UPGRADE_CATEGORY_COLORS[category], multiline_width=150), V2(10,y))
+            t = Text(cts[category], "small", V2(0,0), upgrades.UPGRADE_CATEGORY_COLORS[category], multiline_width=150)
+            self.add(t, V2(10,y))
+            self.header_xs.append(t.width + 10 + 2)
             if uname:
                 b = add_button(uname)
                 y += 20 + b.height
@@ -139,17 +142,17 @@ class UpgradePanel(Panel):
         y1, y2, y3 = self.header_ys
         pygame.draw.line(self.image, PICO_LIGHTGRAY, (x0, y0 + y1), (x0 + 7, y0 + y1))
         pygame.draw.line(self.image, PICO_LIGHTGRAY, (x0, y0 + y1), (x0, y0 + y1 + 5))
-        pygame.draw.line(self.image, PICO_LIGHTGRAY, (x0 + 101, y0 + y1), (x0 + 254 - self.padding, y0 + y1))
+        pygame.draw.line(self.image, PICO_LIGHTGRAY, (x0 + self.header_xs[0], y0 + y1), (x0 + 254 - self.padding, y0 + y1))
         pygame.draw.line(self.image, PICO_LIGHTGRAY, (x0 + 254 - self.padding, y0 + y1), (x0 + 254 - self.padding, y0 + y1 + 5))
 
         pygame.draw.line(self.image, PICO_GREEN, (x0, y0 + y2), (x0 + 7, y0 + y2))
         pygame.draw.line(self.image, PICO_GREEN, (x0, y0 + y2), (x0, y0 + y2+5))
-        pygame.draw.line(self.image, PICO_GREEN, (x0 + 87, y0 + y2), (x0 + 254 - self.padding, y0 + y2))
+        pygame.draw.line(self.image, PICO_GREEN, (x0 + self.header_xs[1], y0 + y2), (x0 + 254 - self.padding, y0 + y2))
         pygame.draw.line(self.image, PICO_GREEN, (x0 + 254 - self.padding, y0 + y2), (x0 + 254 - self.padding, y0 + y2+5))    
 
         pygame.draw.line(self.image, PICO_ORANGE, (x0, y0 + y3), (x0 + 7, y0 + y3))
         pygame.draw.line(self.image, PICO_ORANGE, (x0, y0 + y3), (x0, y0 + y3+5))
-        pygame.draw.line(self.image, PICO_ORANGE, (x0 + 68, y0 + y3), (x0 + 254 - self.padding, y0 + y3))
+        pygame.draw.line(self.image, PICO_ORANGE, (x0 + self.header_xs[2], y0 + y3), (x0 + 254 - self.padding, y0 + y3))
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + 254 - self.padding, y0 + y3), (x0 + 254 - self.padding, y0 + y3+5))
 
         pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 85, 32, 78, 160))

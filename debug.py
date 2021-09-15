@@ -36,5 +36,8 @@ def debug_render(screen, scene):
     text.FONTS['tiny'].render_to(surf, (250, 5), ["feeling safe","in fear"][scene.enemy.fear_attack], (255,128,255,120))
             
 
+    for fleet in scene.fleet_managers['my'].current_fleets:
+        pygame.draw.circle(surf, (255,0,0,128), fleet.pos.tuple_int(), fleet.radius, 1)
+
     #surf.set_alpha(50)
     screen.blit(surf, (0,0))

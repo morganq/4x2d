@@ -62,6 +62,23 @@ class BeginState(State):
 
         return super().take_input(input, event)
 
+class CinematicState(State):
+    def enter(self):
+        self.scene.cinematic = True
+        self.scene.game.game_speed_input = 0
+        #self.hidden_ui = []
+        #for spr in self.scene.ui_group.sprites():
+        #    if spr.visible:
+        #        self.hidden_ui.append(spr)
+        #        spr.visible = False
+        return super().enter()
+
+    def exit(self):
+        self.scene.cinematic = False
+        #for spr in self.hidden_ui:
+        #    spr.visible = True
+        return super().exit()
+
 class PlayState(UIEnabledState):
     def __init__(self, scene):
         super().__init__(scene)

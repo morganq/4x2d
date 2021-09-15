@@ -33,6 +33,7 @@ class Alien:
         self.time = 0
         self.fear_attack = False
         self.redistribute_timer = 0
+        self.near_winning = False
 
     def get_build_order_steps(self):
         return []
@@ -123,11 +124,17 @@ class Alien:
             self.civ.upgrades_stocked.pop(0)
             self.civ.researched_upgrade_names.add(up.name)
             self.civ.upgrades.append(up)
-            self.civ.clear_offers()            
+            self.civ.clear_offers()     
+               
         if self.duration_edge(self.EXPAND_DURATION):
             self.update_expansion()
-        if self.duration_edge(self.ATTACK_DURATION):
+
+        attack_duration = self.ATTACK_DURATION
+        if self.near_winning:
+            attack_duration = 1
+        if self.duration_edge(attack_duration):
             self.update_attack()
+
         if self.duration_edge(self.DEFEND_DURATION):
             self.update_defend()
 
@@ -142,6 +149,13 @@ class Alien:
         if self.redistribute_timer <= 0:
             self.redistribute_excess_ships()
         self.redistribute_timer -= dt
+
+        if self.duration_edge(5) and self.time > 90:
+            if len(self.scene.get_civ_planets(self.civ)) > len(self.scene.get_civ_planets(self.scene.my_civ)) + 1:
+                print("Near winning!")
+                self.near_winning = True
+            else:
+                self.near_winning = False
 
     def redistribute_excess_ships(self):
         all_my_planets = self.scene.get_civ_planets(self.civ)
@@ -206,6 +220,7 @@ class Alien:
         extra_planets = 0
         if difficulty == 7: extra_planets = 1
         if difficulty == 8: extra_planets = 2
+        if difficulty == 9: extra_planets = 4
         extra_pops = difficulty // 2
         my_planet = self.scene.get_civ_planets(self.civ)[0]
         my_planet.population += extra_pops

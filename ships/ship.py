@@ -3,6 +3,7 @@ import random
 
 import bullet
 import explosion
+import game
 import helper
 import particle
 import planet
@@ -212,14 +213,23 @@ class Ship(SpaceObject):
 
         # Try to get to the target velocity
         velocity_adjust_total = self.target_velocity - self.velocity
-        velocity_adjust_frame = velocity_adjust_total.normalized() * dt * self.get_thrust_accel()
-        if velocity_adjust_frame.sqr_magnitude() > velocity_adjust_total.sqr_magnitude():
-            self.velocity = self.target_velocity
+
+        # We want to reduce thrust if we're trying to thrust away from our heading
+        angle_thrust_adjust = 1
+        velocity_adjust_final = velocity_adjust_total.normalized()
+        current_heading_vec = V2.from_angle(self.angle)
+        dp = velocity_adjust_final.dot(current_heading_vec)
+        if dp < 0: # dot product < 0 means that the two vectors are facing away from eachother.
+            angle_thrust_adjust = 0.5
+
+        velocity_adjust_frame = velocity_adjust_final * dt * self.get_thrust_accel() * angle_thrust_adjust
+        if velocity_adjust_frame.sqr_magnitude() > velocity_adjust_total.sqr_magnitude() * angle_thrust_adjust:
+            self.velocity = self.target_velocity * angle_thrust_adjust
         else:
             self.velocity += velocity_adjust_frame
 
-        if self.velocity.sqr_magnitude() > self.get_max_speed() ** 2:
-            self.velocity = self.velocity.normalized() * self.get_max_speed()
+        if self.velocity.sqr_magnitude() > (self.get_max_speed() * angle_thrust_adjust) ** 2:
+            self.velocity = self.velocity.normalized() * self.get_max_speed() * angle_thrust_adjust
 
         # Set angle based on velocity
         if self.target_heading is None:
@@ -246,6 +256,17 @@ class Ship(SpaceObject):
             dsf = dsq - nearest.radius ** 2
             delta = (nearest.pos - self.pos).normalized()
             self.velocity += -delta * (50 / math.sqrt(max(dsf,1))) * dt
+
+
+        # Stay away from the edges of the world
+        if self.pos.x < 5:
+            self.velocity.x += dt * self.get_thrust_accel() * 2
+        if self.pos.y < 5:
+            self.velocity.y += dt * self.get_thrust_accel() * 2
+        if self.pos.x > game.Game.inst.game_resolution.x - 5:
+            self.velocity.x -= dt * self.get_thrust_accel() * 2
+        if self.pos.y > game.Game.inst.game_resolution.y - 5:
+            self.velocity.y -= dt * self.get_thrust_accel() * 2                        
 
         self.pos += self.velocity * dt
         self.health_bar.pos = self.pos + V2(0, -6)
@@ -330,14 +351,14 @@ class Ship(SpaceObject):
         if self.scene.flowfield.has_field(self.effective_target):
             towards_flow = self.scene.flowfield.get_vector(self.pos, self.effective_target, 0)
             towards_center = towards_flow
-            if self.fleet and len(self.fleet.path) > 2:
+            if self.fleet and len(self.fleet.path) > 2 and len(self.fleet.ships) > 1:
                 towards_center = (self.fleet.path[2] - self.pos).normalized()
-            ratio = 0.8
+            ratio = 0.5
             self.target_velocity = (towards_flow * ratio + towards_center * (1 - ratio)) * self.get_cruise_speed()
 
         else:
             delta = self.effective_target.pos - self.pos
-            self.target_velocity = delta.normalized() * self.get_cruise_speed()            
+            self.target_velocity = delta.normalized() * self.get_cruise_speed()
 
         # Warp
         if self.get_stat("warp_drive"):

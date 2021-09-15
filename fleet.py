@@ -12,8 +12,8 @@ from rangeindicator import RangeIndicator
 from spaceobject import SpaceObject
 from v2 import V2
 
-FLEET_RADIUS = 20
-SAME_FLEET_RADIUS = 10
+FLEET_RADIUS = 25
+SAME_FLEET_RADIUS = 15
 PATH_STEPS_PER_FRAME = 20
 PATH_STEP_SIZE = 5
 NEAR_PATH_DIST = 40
