@@ -64,6 +64,8 @@ class FleetManager:
         t1 = time.time()
         new_fleets = generate_fleets(self.scene, self.civ)
         t2 = time.time()
+        for fleet in new_fleets:
+            fleet.update_size_info()        
         
         # For path continuity, we want to figure out which old fleets are the same as which new fleets
         new_fleets_by_target = defaultdict(list)
@@ -81,10 +83,17 @@ class FleetManager:
                 b = old_fleets_by_target[target]
                 for new_fleet in a:
                     for old_fleet in b:
+                        #print("comparing", new_fleet, old_fleet)
                         if (new_fleet.pos - old_fleet.pos).sqr_magnitude() < SAME_FLEET_RADIUS ** 2:
+                            #print("same fleet found!", new_fleet, old_fleet)
                             new_fleet.path = old_fleet.path[::]
+                            new_fleet.path_done = old_fleet.path_done
+                            break
+                    else:
+                        pass
+                        #print("no matching fleet")
         
-        self.current_fleets = new_fleets
+        self.current_fleets = new_fleets[::]
         self.ship_fleets = {}
         for fleet in self.current_fleets:
             fleet.update(dt)
@@ -167,6 +176,7 @@ class Fleet:
                 delta = self.target.pos - self.pos
                 new_pt = self.path[-1] + delta.normalized() * PATH_STEP_SIZE
             self.path.append(new_pt)
+        print(num_steps, len(self.path))
 
 
     def get_size_info(self):
@@ -183,8 +193,11 @@ class Fleet:
         radius = max(radius, 5)
         return (average, radius)
 
-    def update(self, dt):
+    def update_size_info(self):
         self.pos, self.radius = self.get_size_info()
+
+    def update(self, dt):
+        self.update_size_info()
         nearest = 99999999999
         path_end = 0
         for i, pt in enumerate(self.path):
@@ -208,7 +221,8 @@ class Fleet:
         self.scene.game_group.add(self.selectable_object)
 
     def __str__(self):
-        return ', '.join([str(s.pos.tuple_int()) for s in self.ships])
+        return "p %s, r %s, t %s" % (self.pos, self.radius, str(self.target))
+        #return ', '.join([str(s.pos.tuple_int()) for s in self.ships])
 
 def generate_fleets(scene, civ):
     ships = scene.get_civ_ships(civ)
@@ -233,6 +247,7 @@ def get_clusters(scene, ships):
                 delta = ship2.pos-ship.pos
                 if delta.sqr_magnitude() < FLEET_RADIUS ** 2 and ship.chosen_target == ship2.chosen_target:
                     fleet.ships.append(ship)
+                    #fleet.update_size_info()
                     fleetless = False
                     break
         if fleetless:
@@ -249,6 +264,7 @@ def get_clusters(scene, ships):
             if len(f1.intersection(f2)) > 0: # overlap means they share ships
                 #print([s.debug_id for s in f1],[s.debug_id for s in f2])
                 fleets[i].ships = list(f1.union(f2))
+                #fleets[i].update_size_info()
                 fleets.pop(j)
             else:
                 j += 1

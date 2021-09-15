@@ -366,7 +366,7 @@ class LevelScene(scene.Scene):
                 s = Alien1Fighter(self, p, civ)
                 self.game_group.add(s)
                 random_planet = random.choice(self.get_planets())
-                s.set_target(self.homeworld)
+                s.set_target(random_planet)
 
         if self.options == "rich":
             self.my_civ.resources.set_resource("iron", 1150)
