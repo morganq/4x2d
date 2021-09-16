@@ -227,7 +227,7 @@ class Fighter(Ship):
 
     ### Siege ###
     def state_siege(self, dt):
-        if self.DOGFIGHTS:
+        if self.DOGFIGHTS and not self.cinematic_no_combat:
             threats = self.get_threats()
             if threats:
                 self.set_state(STATE_DOGFIGHT)
@@ -277,7 +277,7 @@ class Fighter(Ship):
 
     ### Cruising ###
     def state_cruising(self, dt):
-        if self.DOGFIGHTS:
+        if self.DOGFIGHTS and not self.cinematic_no_combat:
             threats = self.get_threats()
             if threats:
                 self.set_state(STATE_DOGFIGHT)
@@ -306,7 +306,7 @@ class Fighter(Ship):
 
     ### Waiting ###
     def state_waiting(self, dt):
-        if self.DOGFIGHTS:
+        if self.DOGFIGHTS and not self.cinematic_no_combat:
             threats = self.get_threats()
             if threats:
                 self.set_state(STATE_DOGFIGHT)

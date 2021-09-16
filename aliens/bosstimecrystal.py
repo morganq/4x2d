@@ -43,7 +43,7 @@ class TimeCrystal(Planet):
                 s.set_pop(random.randint(2,5))
             self.scene.game_group.add(s)
             self.freeze(s)
-            theta += random.random() + 0.1        
+            theta += random.random() + 0.1
 
     def generate_base_art(self):
         w = h = self.radius * 2

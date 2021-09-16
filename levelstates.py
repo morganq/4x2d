@@ -12,6 +12,7 @@ import starmap
 import text
 import upgrade
 import upgradestate
+from aliens import bossmothership
 from anyupgradepanel import AnyUpgradePanel
 from arrow import OrderArrow
 from asteroid import Asteroid
@@ -120,7 +121,7 @@ class PlayState(UIEnabledState):
             if self.hover_sprite and self.dragging_from_sprite != self.hover_sprite:
                 target_selection = self.hover_sprite.get_selection_info()
                 if target_selection:
-                    if target_selection['type'] == 'planet':
+                    if target_selection['type'] in ['planet', 'boss']:
                         self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite))
                         self.hover_sprite.on_mouse_exit(V2(0,0))
                         self.hover_sprite = None
@@ -130,7 +131,8 @@ class PlayState(UIEnabledState):
                         self.scene.sm.transition(OrderShipsState(self.scene, self.dragging_from_sprite, self.hover_sprite))
                         self.hover_sprite.on_mouse_exit(V2(0,0))
                         self.hover_sprite = None
-                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)                        
+                        pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)          
+
 
     def update(self, dt):
         if self.scene.game.input_mode == "joystick":
@@ -196,7 +198,7 @@ class PlayState(UIEnabledState):
                 if self.hover_sprite:
                     dragging_to_sprite = self.hover_sprite
                     sel = dragging_to_sprite.get_selection_info()
-                    if not sel or sel['type'] not in ['planet', 'asteroid']:
+                    if not sel or sel['type'] not in ['planet', 'asteroid', 'boss']:
                         dragging_to_sprite = None
                 self.arrow.setup(self.dragging_from_sprite, self.dragging_to, dragging_to_sprite)
                 if self.arrow.visible:
@@ -237,7 +239,7 @@ class PlayState(UIEnabledState):
         return isinstance(x, planet.planet.Planet) or isinstance(x, upgrade.upgradeicon.UpgradeIcon)
 
     def target_joy_hover_filter(self, x):
-        return isinstance(x, planet.planet.Planet) or isinstance(x, Asteroid)
+        return isinstance(x, planet.planet.Planet) or isinstance(x, Asteroid) or isinstance(x, bossmothership.BossMothership)
 
     def joystick_update(self, dt):
         all_sprites = []

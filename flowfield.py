@@ -17,6 +17,10 @@ class FlowFieldMap:
         self.gw = int(game.RES[0] / GRIDSIZE)
         self.gh = int(game.RES[1] / GRIDSIZE)
         self.offset = game.Game.inst.game_offset     
+        self._base_grid = None
+        self._avoidees = None
+        self._field_in_progress = None
+        self.boss = None
 
     def generate(self, scene):
         avoidees = []
@@ -29,6 +33,8 @@ class FlowFieldMap:
                 avoidees.append(obj)
 
         base_grid = self._generate_base_grid(avoidees)
+        self._base_grid = base_grid
+        self._avoidees = avoidees
 
         for obj in targetables:
             self.fields[obj] = FlowField(game.RES, self.offset, avoidees, obj, base_grid)
@@ -49,6 +55,7 @@ class FlowFieldMap:
                         cell = closest
                 grid[-1].append(cell)  
         return grid      
+        
 
     def get_vector(self, pos, target, radius):
         return self.fields[target].get_vector(pos, radius)
@@ -59,9 +66,42 @@ class FlowFieldMap:
     def has_field(self, target):
         return target in self.fields
 
+    def update(self, dt):
+        if self.boss:
+            nearest_dist = 99999999999
+            nearest_field = None
+            for obj, field in self.fields.items():
+                delta = obj.pos - self.boss.pos
+                dsq = delta.sqr_magnitude()
+                if dsq < nearest_dist:
+                    nearest_dist = dsq
+                    nearest_field = field
+            self.field_nearest_boss = nearest_field
+
+            #print("--")
+            if self.boss not in self.fields:
+                self.fields[self.boss] = FlowField(game.RES, self.offset, self._avoidees, obj, self._base_grid)
+                #print("Making complete boss field")
+            if self._field_in_progress is None:
+                self._field_in_progress = FlowField(game.RES, self.offset, self._avoidees, obj, self._base_grid, staged_calculation=True)
+                #print("Making staged boss field")
+            else:
+                if not self._field_in_progress.fully_calculated:
+                    #print("Stepping boss field")
+                    self._field_in_progress.step_calculation()
+                if self._field_in_progress.fully_calculated:
+                    #print("Calculation complete")
+                    self.fields[self.boss] = self._field_in_progress
+                    self._field_in_progress = None
+
+        else:
+            self.field_nearest_boss = None
+
+
+
 # From https://howtorts.github.io/2014/01/04/basic-flow-fields.html
 class FlowField:
-    def __init__(self, size, offset, avoidees, obj, base_grid) -> None:
+    def __init__(self, size, offset, avoidees, obj, base_grid, staged_calculation=False) -> None:
         self.size = size
         self.offset = offset
         self.base_grid = base_grid
@@ -70,7 +110,12 @@ class FlowField:
         self.gh = int(self.size[1] / GRIDSIZE)
         self.avoidees = avoidees
         self.obj = obj
-        self._generate_field()
+        self.fully_calculated = True
+        if staged_calculation:
+            self.fully_calculated = False
+            self._calc_it = self._step_calculation()
+        else:
+            self._generate_field()
 
     def _get_neighbors(self, x, y):
         n = []   
@@ -120,14 +165,20 @@ class FlowField:
 
         return grid
         
+    def step_calculation(self):
+        try:
+            next(self._calc_it)
+        except StopIteration:
+            self.fully_calculated = True
 
-    def _generate_field(self):
-        
+
+    def _step_calculation(self):
         self.grid = []
         for gy in range(self.gh):
             self.grid.append([])
             for gx in range(self.gw):
                 self.grid[-1].append(None)
+        yield 1
 
         dgrid = self._generate_dijkstra_grid()
 	
@@ -154,6 +205,13 @@ class FlowField:
 
                     if min is not None:
                         self.grid[y][x] = (V2(*min) - V2(x,y))#.normalized() # maybe do it here?
+            if x % (self.gw // 8) == 0:
+                yield x
+        yield 4
+
+    def _generate_field(self):
+        for calc in self._step_calculation():
+            pass
 
     def get_vector(self, pos, radius):
         out = V2(0,0)

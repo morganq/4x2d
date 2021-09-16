@@ -3,6 +3,8 @@ import random
 import helper
 import pygame
 from colors import *
+from healthy import Healthy
+from laserparticle import LaserParticle
 from particle import Particle
 from ships.all_ships import SHIPS_BY_NAME
 from ships.battleship import Battleship
@@ -31,9 +33,16 @@ class BossMothership(SpaceObject):
         self.emitted_ships = False
         self.max_speed = 6
         self.owning_civ = self.scene.enemy.civ
+        self.jumped = False
+        self.selectable = True
+        self.collision_radius = 12
+        self.collidable = True
 
         self.emit = []
         self.emit_timer = 0
+
+        self.health_bar.stay = True
+        self.health_bar.visible = True
 
     def brake(self, dt):
         if self.velocity.sqr_magnitude() > 0:
@@ -45,6 +54,28 @@ class BossMothership(SpaceObject):
 
     def update(self, dt):
         self.time += dt
+
+        if self.time > 1.0 and not self.jumped:
+            self.jumped = True
+            bad_location = True
+            i = 0
+            while bad_location:
+                np = V2(self.scene.game.game_resolution.x * 0.75, self.scene.game.game_resolution.y * 0.45) + V2.random_angle() * random.random() * (50 + i * 10)
+                print(np)
+                _, dsq = helper.get_nearest(np, self.scene.get_planets())
+                if dsq > 50 ** 2:
+                    bad_location = False
+                i += 1
+            delta = np - self.pos
+            dn = delta.normalized()
+            side = V2(dn.y, -dn.x)
+            for i in range(12):
+                color = random.choice([PICO_RED, PICO_RED, PICO_ORANGE, PICO_YELLOW, PICO_WHITE])
+                z = random.randint(-12, 12)
+                l1 = LaserParticle(self.pos + side * z/2, np - dn * (10 - abs(z)) + side * z, color, random.random())
+                self.scene.game_group.add(l1)
+            self.pos = np
+
         self.frame = int(self.time * 3) % 15
         if self.state == self.STATE_CINEMATIC_TRAVELING:
             self.target_planet, sqdist = helper.get_nearest(self.pos, self.planets_to_revive)
@@ -54,12 +85,16 @@ class BossMothership(SpaceObject):
                     self.state = self.STATE_CINEMATIC_POPULATING
                     self.emit = ['bosscolonist', 'bossfighter', 'bossfighter', 'bosslaser']
                     self.emit_timer = 5.0
-                    evac_target = random.choice(self.scene.get_civ_planets(self.scene.my_civ))
-                    for ship, amt in self.target_planet.ships.items():
-                        for i in range(amt):
-                            self.target_planet.emit_ship(ship, {"to":evac_target})
-                    if self.target_planet.population:
-                        self.target_planet.emit_ship("colonist", {"to":evac_target, "num":self.target_planet.population})
+                    if self.target_planet.owning_civ == self.scene.my_civ:
+                        possible_evacs = self.scene.get_civ_planets(self.scene.my_civ)
+                        possible_evacs.remove(self.target_planet)
+                        if possible_evacs:
+                            evac_target = helper.get_nearest(self.target_planet, possible_evacs)[0]
+                            for ship, amt in self.target_planet.ships.items():
+                                for i in range(amt):
+                                    self.target_planet.emit_ship(ship, {"to":evac_target})
+                            if self.target_planet.population:
+                                self.target_planet.emit_ship("colonist", {"to":evac_target, "num":self.target_planet.population})
                     return
                 towards_planet = self.scene.flowfield.get_vector(self.pos, self.target_planet, 5)
                 self.velocity += towards_planet * dt * ACCEL
@@ -95,7 +130,6 @@ class BossMothership(SpaceObject):
             self.velocity = self.velocity.normalized() * self.max_speed
 
         self.pos += self.velocity * dt
-
             
         return super().update(dt)
 
@@ -144,3 +178,6 @@ class BossMothership(SpaceObject):
         self._recalc_rect()
         self._update_image()
 
+
+    def get_selection_info(self):
+        return {'type':'boss'}

@@ -398,6 +398,9 @@ class LevelScene(scene.Scene):
     def dev_win(self):
         for planet in self.get_civ_planets(self.enemy.civ):
             planet.take_damage(99999, origin=None)
+            planet.change_owner(self.my_civ)
+            planet.add_population(3)
+            planet.add_ship("fighter")
 
     def on_civ_resource_change(self, res_type, val):
         pass
@@ -556,6 +559,8 @@ class LevelScene(scene.Scene):
         self.fleet_managers['enemy'].update(dt)
         #self.fleet_diagram.generate_image(self)
         self.update_times['fleets'] = time.time() - t
+
+        self.flowfield.update(dt)
 
         t = time.time()
         self.my_civ.update(dt)

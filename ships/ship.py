@@ -92,6 +92,9 @@ class Ship(SpaceObject):
         # Alien stuff
         self.tether_target = False
 
+        # Cinematic stuff
+        self.cinematic_no_combat = False
+
         # Stuff that has to come at the end
         self.set_health(self.get_max_health())
         self.set_state(STATE_CRUISING)
