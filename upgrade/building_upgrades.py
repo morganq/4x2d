@@ -190,11 +190,15 @@ class Defense1Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Reflector"
-    description = "Gain a [^50] health reflector shield (does not regenerate)"
+    description = "[^+2 pop]. Gain a [^50] health reflector shield (does not regenerate)"
     icon = "reflectorshield"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':[]}
     building = ReflectorBuilding
+
+    def apply(self, to):
+        super().apply(to)
+        to.add_population(2)
 
 @register_upgrade
 class Defense2aUpgrade(AddBuildingUpgrade):
@@ -202,12 +206,16 @@ class Defense2aUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Resilient Ecosystem"
-    description = "[^+100%] health and [^+5] health regeneration per second"
+    description = "[^+2 pop]. [^+100%] health and [^+5] health regeneration per second"
     icon = "resilientecosystem"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
     building = make_simple_stats_building(stats=Stats(planet_health_mul=1, regen=2), shape="lifesupport")
     requires = ('b_defense1',)
+
+    def apply(self, to):
+        super().apply(to)
+        to.add_population(2)
 
 @register_upgrade
 class Defense2bUpgrade(AddBuildingUpgrade):

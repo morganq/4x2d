@@ -27,12 +27,14 @@ class BossLevelController(levelcontroller.LevelController):
                 self.phase = PHASE_2
                 self.scene.game_speed = 1
                 self.scene.sm.transition(levelstates.PlayState(self.scene))
-                #for ship in self.scene.get_ships():
-                #    ship.cinematic_no_combat = False
+                for p in self.scene.get_planets():
+                    p.cinematic_disable = False
 
             # Make ships go into cinematic mode so they don't fight.
             for ship in self.scene.get_ships():
                 ship.cinematic_no_combat = True
+            for p in self.scene.get_planets():
+                p.cinematic_disable = True                
 
     def detect_victory(self):
         if self.phase == PHASE_1:

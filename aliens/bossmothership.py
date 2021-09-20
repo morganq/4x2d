@@ -6,6 +6,8 @@ from colors import *
 from healthy import Healthy
 from laserparticle import LaserParticle
 from particle import Particle
+from planet import planet
+from rangeindicator import RangeIndicator
 from ships.all_ships import SHIPS_BY_NAME
 from ships.battleship import Battleship
 from spaceobject import SpaceObject
@@ -14,6 +16,7 @@ from v2 import V2
 REVIVING_PLANET_CLOSE_RANGE = 50
 ACCEL = 4
 BRAKE = 6
+REINCARNATE_RANGE = 85
 
 
 class BossMothership(SpaceObject):
@@ -37,12 +40,21 @@ class BossMothership(SpaceObject):
         self.selectable = True
         self.collision_radius = 12
         self.collidable = True
+        self.wander_time = 0
+        self.wander_center = V2(0,0)
+        self.wander_point = V2(0,0)
 
         self.emit = []
+        self.ships_on_board = ['bossfighter','bossfighter','bossfighter','bossfighter','bossfighter','bossfighter','bosslaser','bosslaser','bosslaser']
+        random.shuffle(self.ships_on_board)
         self.emit_timer = 0
+
+        self.travel_target = None
+        self.wait_time = 5
 
         self.health_bar.stay = True
         self.health_bar.visible = True
+        self.range_indicator = None
 
     def brake(self, dt):
         if self.velocity.sqr_magnitude() > 0:
@@ -51,6 +63,17 @@ class BossMothership(SpaceObject):
                 self.velocity += brake
             else:
                 self.velocity = V2(0,0)
+
+    def wander(self, dt):
+        self.wander_time -= dt
+        if self.wander_time < 0:
+            self.wander_time = 5
+            self.wander_point = self.wander_center + V2.random_angle() * random.random() * 30
+        delta = self.wander_point - self.pos
+        if delta.sqr_magnitude() < 10 ** 2 or self.wander_time < 1:
+            self.brake(dt)
+        else:
+            self.velocity += delta.normalized() * ACCEL * dt
 
     def update(self, dt):
         self.time += dt
@@ -83,7 +106,14 @@ class BossMothership(SpaceObject):
                 #delta = self.target_planet.pos - self.pos
                 if sqdist < REVIVING_PLANET_CLOSE_RANGE ** 2:
                     self.state = self.STATE_CINEMATIC_POPULATING
-                    self.emit = ['bosscolonist', 'bossfighter', 'bossfighter', 'bosslaser']
+                    self.emit = ['bosscolonist']
+                    num = 2
+                    if len(self.planets_to_revive) == len(self.ships_on_board):
+                        num = 1
+                    if len(self.planets_to_revive) > len(self.ships_on_board):
+                        num = 0   
+                    for i in range(num):
+                        self.emit.append(self.ships_on_board.pop(0))
                     self.emit_timer = 5.0
                     if self.target_planet.owning_civ == self.scene.my_civ:
                         possible_evacs = self.scene.get_civ_planets(self.scene.my_civ)
@@ -109,6 +139,8 @@ class BossMothership(SpaceObject):
                         self.state = self.STATE_CINEMATIC_TRAVELING
                     else:
                         self.state = self.STATE_GAME_WAITING
+                        self.range_indicator = RangeIndicator(self.pos, REINCARNATE_RANGE, PICO_ORANGE, 1, 5)
+                        self.scene.ui_group.add(self.range_indicator)
             else:
                 if self.emit_timer < 0:
                     if self.target_planet.owning_civ == self.scene.my_civ:
@@ -124,12 +156,47 @@ class BossMothership(SpaceObject):
                     pass
         
         if self.state == self.STATE_GAME_WAITING:
-            self.brake(dt)
+            self.wander(dt)
+            self.wait_time -= dt
+            if self.wait_time < 0:
+                self.state = self.STATE_GAME_TRAVELING
+                self.travel_target = None
+
+        if self.state == self.STATE_GAME_TRAVELING:
+            if not self.travel_target:
+                # Pick only fleets targeting a neutral or player planet
+                fleets = [
+                    f for f in self.scene.fleet_managers['enemy'].current_fleets
+                    if f.target.owning_civ != self.owning_civ and isinstance(f.target, planet.Planet)
+                ]
+                if fleets:
+                    self.travel_target = random.choice(fleets).target
+                else:
+                    self.state = self.STATE_GAME_WAITING
+                    self.wait_time = 5
+                    self.wander_center = self.pos.copy()
+            if self.travel_target:
+                delta = self.travel_target.pos - self.pos
+                if delta.sqr_magnitude() > (REINCARNATE_RANGE - 10) ** 2:
+                    accel = self.scene.flowfield.get_vector(self.pos, self.travel_target, 10) * ACCEL
+                    self.velocity += accel * dt
+                else:
+                    self.state = self.STATE_GAME_WAITING
+                    self.wander_center = self.pos.copy()
+                    self.wait_time = 30
+
+        objs = self.scene.get_planets() + self.scene.get_hazards()
+        nearest, dsq = helper.get_nearest(self.pos, objs)
+        if dsq < 40 ** 2:
+            delta = nearest.pos - self.pos
+            self.velocity += -delta.normalized() * ACCEL / 2 * dt
 
         if self.velocity.sqr_magnitude() > self.max_speed ** 2:
             self.velocity = self.velocity.normalized() * self.max_speed
 
         self.pos += self.velocity * dt
+        if self.range_indicator:
+            self.range_indicator.pos = self.pos
             
         return super().update(dt)
 

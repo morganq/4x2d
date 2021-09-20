@@ -113,6 +113,9 @@ class Planet(SpaceObject):
         self.upgrade_indicators = defaultdict(lambda:None)
         self.created_upgrade_indicators = defaultdict(lambda:None)
 
+        # extra
+        self.cinematic_disable = False
+
         # opt
         self._timers['opt_time'] = random.random()
 
@@ -509,14 +512,11 @@ class Planet(SpaceObject):
             self._generate_frames()
 
         # Detect enemies
-        threats = self.get_threats()
-        if threats:
-            self.defend_planet_against(threats)
-
-        
-        #self.rotation += self.rotate_speed * dt * 3
-        #self._generate_frames()
-
+        if not self.cinematic_disable:
+            threats = self.get_threats()
+            if threats:
+                self.defend_planet_against(threats)
+                
         self.upgrade_update(dt)
         self.special_update(dt)
         super().update(real_dt)
