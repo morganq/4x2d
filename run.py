@@ -6,7 +6,7 @@ from upgrade.upgrades import UPGRADE_CLASSES
 RUN_INFO_SERIALIZE_FIELDS = [
     'data', 'path', 'saved_technologies', 'blueprints',
     'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
-    'bonus_credits', 'ship_levels', 'score'
+    'bonus_credits', 'ship_levels', 'score', 'reward_list'
 ]
 
 LEVEL_TITLES = {
@@ -36,7 +36,7 @@ class RunInfo:
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0
-
+        self.reward_list = ["blueprint", "level_battleship", "jump_drive", "life_support"]
         self.next_path_segment = (0,0)
 
     def serialize(self):
@@ -79,6 +79,8 @@ class RunInfo:
         signal = None
         mods = []
 
+        rewards = [self.reward_pool.pop()]
+
         if row == 5:
             mods = [random.choice(["warp_drive", "big_planet", "ship_shield_far_from_home", "atomic_bomb"])]
             signal = "future_tech"
@@ -86,11 +88,12 @@ class RunInfo:
         if row == 9:
             mods = [random.choice(["battleship"])]
             signal = "boss"
+            rewards = []
 
         return {
             'node_type':'galaxy',
             'alien': alien,
-            'rewards': [self.reward_pool.pop()],
+            'rewards': rewards,
             'difficulty': row,
             'level':level,
             'links': from_links,
@@ -144,7 +147,7 @@ class RunInfo:
         random.shuffle(l2)
         levels = l1 + l2
 
-        height = 10
+        height = 9
         for row in range(height):
             level = levels.pop()
             self.data.append([])
@@ -169,6 +172,10 @@ class RunInfo:
                     alien = random.choice(aliens)
                 node = self.new_galaxy(row, from_links, level, alien)
                 self.data[-1].append(node)
+
+        # Signal at the end
+        node = self.new_galaxy(height, [0], "boss", "boss")
+        self.data.append([node])
 
         self.prune_path()
         self.add_stores()
@@ -248,7 +255,7 @@ class RunInfo:
                 store_nums.append(stores)
             return store_nums
 
-        store_row_places = [3, 5, 7]
+        store_row_places = [3, 4, 7]
         random.shuffle(store_row_places)
         for i in range(3):
             iterations = 0

@@ -1,11 +1,13 @@
+import random
+
 import pygame
 import pygame.gfxdraw
-from resources import resource_path
-from v2 import V2
-import random
-from helper import clamp
 from colors import *
+from helper import clamp
+from resources import resource_path
 from spritebase import SpriteBase
+from v2 import V2
+
 
 class StarPath(SpriteBase):
     def __init__(self, pos1, pos2, travelled = False, current = False):
@@ -39,19 +41,18 @@ class StarPath(SpriteBase):
 
         extra = 2 if self.current else 1
 
-        for i in range(steps + extra):
-            p = (i - steps / 2) * direction * 8 + center + ((time_offset + 1 - extra) * 8) * direction
-            color = PICO_BROWN
-            if self.travelled:
-                color = PICO_GREEN
-            radius = 3
-            if self.current:
-                color = PICO_LIGHTGRAY
-                x = distance / 2 - 10 - (center - p).magnitude()
-                radius = clamp(x / 3,1,3)
-            pygame.draw.circle(self.image, color, p.tuple_int(),radius, 1)
 
-        # pygame.draw.rect(self.image, PICO_PINK, (0,0,w,h), 1)
+        color = PICO_ORANGE
+        if self.travelled:
+            color = PICO_GREEN
+        if self.current:
+            color = PICO_WHITE
+
+        pygame.draw.line(self.image, color,
+            (center - direction * (distance - 28) / 2).tuple_int(),
+            (center + direction * (distance - 28) / 2).tuple_int(),
+            2
+        )
 
         self._width = w
         self._height = h

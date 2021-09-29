@@ -74,6 +74,7 @@ class JumpDriveRewardState(RewardState):
 
     def on_confirm(self):
         self.scene.game.run_info.bonus_fighters += 2
+        self.scene.game.run_info.reward_list.append({"name":"jump_drive"})
         return super().on_confirm()
 
 class LevelUpRewardState(RewardState):
@@ -85,6 +86,7 @@ class LevelUpRewardState(RewardState):
 
     def on_confirm(self):
         self.scene.game.run_info.ship_levels[self.ship_type] = min(self.scene.game.run_info.ship_levels[self.ship_type] + 1, 3)
+        self.scene.game.run_info.reward_list.append({"name":"level_%s" % self.ship_type})
         return super().on_confirm()        
 
 class LifeSupportRewardState(RewardState):
@@ -95,6 +97,7 @@ class LifeSupportRewardState(RewardState):
 
     def on_confirm(self):
         self.scene.game.run_info.bonus_population += 2
+        self.scene.game.run_info.reward_list.append({"name":"life_support"})
         return super().on_confirm()
 
 class MemoryCrystalRewardState(RewardState):
@@ -146,6 +149,7 @@ class MemoryCrystalRewardState(RewardState):
         if self.selected == None:
             return
         self.scene.game.run_info.saved_technologies.append(self.selected.name)
+        self.scene.game.run_info.reward_list.append({"name":"memory_crystal"})
         return super().on_confirm()
 
 class BlueprintRewardState(RewardState):
@@ -197,6 +201,7 @@ class BlueprintRewardState(RewardState):
         if self.selected == None:
             return
         self.scene.game.run_info.blueprints.append(self.selected.name)
+        self.scene.game.run_info.reward_list.append({"name":"blueprint"})
         return super().on_confirm()        
 
 class RewardScene(Scene):
