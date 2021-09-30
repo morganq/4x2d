@@ -26,6 +26,10 @@ class SpriteBase(pygame.sprite.DirtySprite):
         self.collision_radius = 0
         self._timers = {}
         self._scrolled_offset = V2(0,0)
+        self._event_handlers = []
+
+    def on(self, event_name, callback):
+        self._event_handlers.append({'event':event_name, 'callback':callback})
 
     def _recalc_rect(self):
         self.rect = pygame.Rect(
@@ -91,11 +95,25 @@ class SpriteBase(pygame.sprite.DirtySprite):
         self._pos = V2(self._pos.x, value)
         self._recalc_rect()
 
-    def on_mouse_exit(self, pos): pass
-    def on_mouse_enter(self, pos): pass
-    def on_mouse_down(self, pos): pass
-    def on_mouse_up(self, pos): pass
-    def on_drag(self, pos): pass
+    def dispatch_event(self, name, data):
+        for cb in self._event_handlers:
+            if cb['event'] == name:
+                cb['callback'](self, data)
+
+    def on_mouse_exit(self, pos):
+        self.dispatch_event("mouse_exit", pos)
+
+    def on_mouse_enter(self, pos):
+        self.dispatch_event("mouse_enter", pos)
+
+    def on_mouse_down(self, pos):
+        self.dispatch_event("mouse_down", pos)
+
+    def on_mouse_up(self, pos):
+        self.dispatch_event("mouse_up", pos)
+
+    def on_drag(self, pos):
+        self.dispatch_event("drag", pos)
 
     def get_selection_info(self): return None
 

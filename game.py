@@ -86,6 +86,7 @@ class Game:
         self.last_joystick_pos = V2(200,200)
 
         self.frame_time = 0
+        self.fps_limited_pause = False
         Game.inst = self
 
     def set_resolution(self, resolution, fullscreen = False):
@@ -177,7 +178,10 @@ class Game:
                 #    self.scene.take_input("joyup", event)
                 #    print(event)
 
-            dt = clock.tick() / 1000.0
+            max_framerate = 60
+            if self.fps_limited_pause:
+                pygame.time.wait(20)
+            dt = clock.tick(max_framerate) / 1000.0
 
             s1 = self.scene
             self.scene.update(dt)

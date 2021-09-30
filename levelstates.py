@@ -566,6 +566,7 @@ class PauseState(UIEnabledState):
         self.panel.position_nicely(self.scene)
         self.panel.fade_in()
         self.panel.add_all_to_group(self.scene.ui_group)
+        self.scene.game.fps_limited_pause = True
 
         return super().enter()
 
@@ -576,10 +577,12 @@ class PauseState(UIEnabledState):
         self.scene.sm.transition(PlayState(self.scene))
 
     def on_quit(self):
+        self.scene.game.fps_limited_pause = False
         self.scene.game.scene = menuscene.MenuScene(self.scene.game)
         self.scene.game.scene.start()
 
     def exit(self):
         self.scene.paused = False
+        self.scene.game.fps_limited_pause = False
         self.panel.kill()
         return super().exit()

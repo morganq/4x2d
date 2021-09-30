@@ -23,9 +23,8 @@ MOD_STRINGS = {
 }
 
 class LoadingScene(Scene):
-    def __init__(self, game, galaxy):
+    def __init__(self, game):
         super().__init__(game)
-        self.galaxy = galaxy
         self.rendered = False
         self.loaded = False
         self.levelscene = None
@@ -37,6 +36,7 @@ class LoadingScene(Scene):
         self.ui_group = pygame.sprite.LayeredDirty()
 
         galaxy = self.game.run_info.get_current_level_galaxy()
+        self.galaxy = galaxy
         alien_code = galaxy['alien']
         alien_obj = alien.ALIENS[alien_code]
         nametext = Text(alien_obj.title, "huge", V2(50, 31) + self.game.game_offset, multiline_width=500, center=False)
@@ -77,12 +77,12 @@ class LoadingScene(Scene):
         if not self.loaded and self.rendered:
             self.levelscene = levelscene.LevelScene(
                 self.game,
-                self.galaxy.level,
-                self.galaxy.alien.name,
-                self.galaxy.difficulty,
-                self.galaxy.difficulty,
-                self.galaxy.spec['name'],
-                self.galaxy.spec['description']
+                self.galaxy['level'],
+                self.galaxy['alien'],
+                self.galaxy['difficulty'],
+                self.galaxy['difficulty'],
+                self.galaxy['name'],
+                self.galaxy['description']
                 )
             self.levelscene.start()
             self.loaded = True

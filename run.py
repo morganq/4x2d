@@ -36,7 +36,7 @@ class RunInfo:
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0
-        self.reward_list = ["blueprint", "level_battleship", "jump_drive", "life_support"]
+        self.reward_list = []
         self.next_path_segment = (0,0)
 
     def serialize(self):
@@ -91,6 +91,7 @@ class RunInfo:
             rewards = []
 
         return {
+            'sector':row,
             'node_type':'galaxy',
             'alien': alien,
             'rewards': rewards,
@@ -126,6 +127,7 @@ class RunInfo:
             offerings.append(offering)
 
         return {
+            'sector':row,
             'node_type':'store',
             'offerings':offerings,
             'links': from_links
@@ -133,6 +135,20 @@ class RunInfo:
 
 
     def generate_run(self):
+        for i in range(10):
+            data = self._generate_run()
+            max_cols = max([len(r) for r in data])
+            if max_cols < 3 or max_cols > 4:
+                continue
+            avg_cols = sum([len(r) for r in data]) / len(data)
+            if avg_cols < 2.1:
+                continue
+            if avg_cols > 2.4:
+                continue
+            break
+        return data
+
+    def _generate_run(self):
         self.data = []
         self.generate_reward_pool()
 
@@ -255,7 +271,7 @@ class RunInfo:
                 store_nums.append(stores)
             return store_nums
 
-        store_row_places = [3, 4, 7]
+        store_row_places = [3, 4, 8]
         random.shuffle(store_row_places)
         for i in range(3):
             iterations = 0
@@ -280,8 +296,6 @@ class RunInfo:
                     done = False
                     self.data[row][col] = old_node
             store_row_places.pop()
-
-                
 
 
 def get_neighbors(graph, node):

@@ -1,3 +1,5 @@
+import random
+
 import game
 import pygame
 import spritebase
@@ -21,6 +23,16 @@ class StarmapBackground(spritebase.SpriteBase):
         pygame.draw.rect(self.image, PICO_DARKGREEN, (0,0,res.x, res.y-180))
         pygame.draw.rect(self.image, PICO_DARKBLUE, (360,0,res.x-360, res.y-180))
         pygame.draw.line(self.image, PICO_DARKBLUE, (358,0), (358, res.y-180))
+
+        for i in range(200):
+            color = PICO_LIGHTGRAY
+            if random.random() < 0.25:
+                color = PICO_WHITE
+            
+            if random.random() < 0.1:
+                pygame.draw.circle(self.image, color, (random.randint(0, res.x), random.randint(0,res.y-180)), 1, 0)
+            else:
+                self.image.set_at((random.randint(0, res.x), random.randint(0,res.y-180)), color)
 
         y = 220
 

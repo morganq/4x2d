@@ -24,7 +24,9 @@ class NewGameScene(scene.Scene):
         self.launch = None
         self.time = 0
 
-        self.back = button.Button(V2(5, 5), "BACK", "big", self.on_back, color=PICO_ORANGE)
+        backtext = "BACK"
+        if self.game.input_mode == "joystick": backtext = "[*circle*] BACK"
+        self.back = button.Button(V2(5, 5), backtext, "big", self.on_back, color=PICO_ORANGE)
         self.ui_group.add(self.back)
 
         self.msg = tutorialmessage.TutorialMessage("")
@@ -46,13 +48,22 @@ class NewGameScene(scene.Scene):
             self.msg.pos = V2(self.game.game_resolution.x / 2 - self.msg.width / 2, self.game.game_resolution.y - self.msg.height - 5)
             self.msg.fade_in()
         if self.time > 4 and not self.launch:
-            self.launch = button.Button(V2(self.game.game_resolution.x / 2, self.game.game_resolution.y / 2), "LAUNCH", "huge", self.on_launch, color=PICO_ORANGE)
+            launchtext = "LAUNCH"
+            if self.game.input_mode == "joystick": launchtext = "[*x*] LAUNCH"
+            self.launch = button.Button(V2(self.game.game_resolution.x / 2, self.game.game_resolution.y / 2), launchtext, "huge", self.on_launch, color=PICO_ORANGE)
             self.launch.offset = (0.5, 0.5)
             self.ui_group.add(self.launch)            
         self.bg.update(dt)
         for spr in self.ui_group.sprites():
             spr.update(dt)
         return super().update(dt)
+
+    def take_input(self, inp, event):
+        if inp == "confirm":
+            self.on_launch()
+        if inp == "back":
+            self.on_back()
+        return super().take_input(inp, event)
 
     def render(self):   
         self.game.screen.fill(PICO_BLACK)

@@ -35,6 +35,28 @@ REWARD_ICONS_ORDER = {
     'level_battleship':7,
 }
 
+class NodeSprite(SimpleSprite):
+    def __init__(self, run_info, node_pos, pos, img=None):
+        super().__init__(pos, img=img)
+        self.run_info = run_info
+        self.node_pos = node_pos
+        self.selectable = self.is_pickable()
+
+    def get_node(self):
+        return self.run_info.data[self.node_pos[0]][self.node_pos[1]]
+
+    def is_pickable(self):
+        sector, index = self.node_pos
+        node = self.run_info.data[sector][index]
+        last_beaten_node_pos = self.run_info.path[-1]
+        from_node_positions = [(node['sector'] - 1, index) for index in node['links']]
+        return (
+            last_beaten_node_pos in from_node_positions
+        )
+
+    def is_travelled(self):
+        return self.node_pos in self.run_info.path
+
 class RewardWithBackground(SpriteBase):
     def __init__(self, pos, reward_name):
         super().__init__(pos)
@@ -51,22 +73,20 @@ class RewardWithBackground(SpriteBase):
         self.image.blit(self.icon_sheet, (0,0), (frame_x, 0, 23, 23))
 
 
-
-
 class StarMapScene(Scene):
     def __init__(self, game):
         super().__init__(game)
 
     def start(self):
+        self.time = 0
         self.game.save.set_run_state(self.game.run_info)
         self.game.save.save()
         
         self.background_group = pygame.sprite.Group()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
-        self.ui_group2 = pygame.sprite.LayeredDirty()
+        self.display_group = pygame.sprite.LayeredDirty()
         self.tutorial_group = pygame.sprite.Group()
-        self.sm = states.Machine(StarMapState(self))
 
         rewards_width = len(self.game.run_info.reward_list) * 23 + 140
 
@@ -76,6 +96,7 @@ class StarMapScene(Scene):
         res = self.game.game_resolution
         
         self.grid = []
+        self.nodes = []
         x = 30
         max_per_row = max([len(row) for row in self.game.run_info.data])
         for r,row in enumerate(self.game.run_info.data):
@@ -93,7 +114,7 @@ class StarMapScene(Scene):
                         img = "assets/si-alien-mod.png"
                     if r == len(self.game.run_info.data) - 1:
                         img = "assets/si-signal.png"
-                    obj = SimpleSprite(V2(x,y), img)
+                    obj = NodeSprite(self.game.run_info, (r,i), V2(x,y), img)
                     obj.offset = (0.5,0.5)
                     if column['rewards']:
                         reward = FrameSprite(V2(x + 7,y + 15), "assets/reward_icons.png", 23)
@@ -101,7 +122,7 @@ class StarMapScene(Scene):
                         reward.offset = (0.5,0.5)    
 
                 elif column['node_type'] == 'store':
-                    obj = SimpleSprite(V2(x,y), "assets/si-shop.png")
+                    obj = NodeSprite(self.game.run_info, (r,i), V2(x,y), "assets/si-shop.png")
                     obj.offset = (0.5,0.5)
                     #obj = StoreNodeGraphic(V2(x,y), column['offerings'], (r,i), r == len(run_path))
 
@@ -109,22 +130,19 @@ class StarMapScene(Scene):
                 for j in column['links']:
                     p2 = obj.pos
                     p1 = self.grid[-2][j].pos
-                    travelled = (
-                        len(run_path) > r and
-                        tuple(run_path[r]) == (r, i) and
-                        tuple(run_path[r-1]) == (r-1, j)
-                    )
-                    path = StarPath(p1,p2,travelled, tuple(run_path[-1]) == (r-1, j))
+                    prev_obj = self.grid[-2][j]
+                    path = StarPath(p1,p2,obj.is_travelled() and prev_obj.is_travelled(), obj.is_pickable() and prev_obj.is_travelled())
                     self.game_group.add(path)
-                if r > 0:
+                if not obj.is_travelled():
+                    self.nodes.append(obj)
                     self.game_group.add(obj)
                     if reward:
-                        self.game_group.add(reward)
+                        self.ui_group.add(reward)
 
             x += 60
 
         p = self.grid[run_path[-1][0]][run_path[-1][1]].pos
-        self.colonist = AnimRotSprite(p, 'assets/colonist.png', 12)
+        self.colonist = SimpleSprite(p, 'assets/si-player.png')
         self.colonist.offset = (0.5,0.5)
         self.game_group.add(self.colonist)
         t1 = text.Text("Credits: %d" % self.game.run_info.credits, "small", V2(res.x / 2 + rewards_width / 2 - 8, 217), PICO_BLACK)
@@ -135,7 +153,7 @@ class StarMapScene(Scene):
             self.ui_group.add(t2)
             rx = t2.x + 60
             for r in self.game.run_info.reward_list:
-                reward = RewardWithBackground(V2(rx, 221), r)
+                reward = RewardWithBackground(V2(rx, 221), r['name'])
                 reward.offset = (0.5,0.5)  
                 self.game_group.add(reward)          
                 rx += 23
@@ -143,8 +161,11 @@ class StarMapScene(Scene):
             t1.offset = (0.5, 0)
             t1.x = res.x/2
 
+        self.sm = states.Machine(StarMapState(self))
+
     def update(self, dt):
-        self.colonist.angle += dt
+        self.time += dt
+        self.colonist.offset = (V2.from_angle(self.time * 3) * 0.05 + V2(0.5,0.5)).tuple()
         for s in self.game_group.sprites() + self.ui_group.sprites():
             s.update(dt)
 
@@ -155,6 +176,6 @@ class StarMapScene(Scene):
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
         self.ui_group.draw(self.game.screen)
-        self.ui_group2.draw(self.game.screen)
+        self.display_group.draw(self.game.screen)
         self.tutorial_group.draw(self.game.screen)
         return super().render()
