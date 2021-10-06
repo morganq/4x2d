@@ -6,12 +6,13 @@ from spritebase import SpriteBase
 
 
 class Slider(SpriteBase):
-    def __init__(self, pos, meter_width, min, max, onchange=None):
+    def __init__(self, pos, meter_width, min, max, onchange=None, value=None):
         SpriteBase.__init__(self, pos)
         self.meter_width = meter_width
         self.min = min
         self.max = max
-        self.value = self.min
+        if value is None: self.value = self.min
+        else: self.value = value
         self.selectable = True
         self.onchange = onchange
         self._generate_image()

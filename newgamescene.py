@@ -61,7 +61,7 @@ class NewGameScene(scene.Scene):
     def take_input(self, inp, event):
         if inp == "confirm":
             self.on_launch()
-        if inp == "back":
+        if inp == "back" or inp == "menu":
             self.on_back()
         return super().take_input(inp, event)
 

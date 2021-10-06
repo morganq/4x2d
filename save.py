@@ -6,7 +6,8 @@ from run import RunInfo
 DEFAULT_SETTINGS = {
     'music_volume': 5,
     'sound_volume': 5,
-    'scale': 2,
+    'resolution':None,
+    'fullscreen':True,
     'showed_credits': False,
     'controls':{
         1:"confirm",

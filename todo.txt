@@ -1,41 +1,37 @@
-Finish menu scene resolution
+** Alpha **
+other menu graphics
 
- x fixed delta time (iteration)?
- x figure out "hook" and "kicker"
- x figure out whole narrative structure
- x "start" animation when level loads
- x different color aliens
- x buildings flash in
- x colorblind issue with player colors + different alien colors
- x somehow pop out selectable objects in upgrade targeting
- x time loop
-  - another pass on alien assets + features
- - implement boss
-   x implement time crystal planets
-   - implement new alien
-   - implement two stage levelscene
-   - implement reviver mothership
-   - implement tutorial for what you gotta do 
+implement boss
+ x implement time crystal planets
+ x implement new alien
+ x implement two stage levelscene
+ - implement reviver mothership
+ - implement tutorial for what you gotta do 
+ 
+improve pathfinding display or logic
+
+another pass on alien assets + features
+aliens use only subset of their ships based on difficulty
  - show tips against aliens based on what ships are available to them
- - make buildings look cool 
- - make sure planet panel updates properly
- - "research" help menu, plus achievements that unlock them.
- - something better when you acquire upgrade
- - make starmap more dynamic, better background, etc.
- - implement narrative constraints in run info
- x "victory" animation when you win
- - more intentional difficulty curve
- - what happens when you lose?
- - explain different ships
- - saving progress mid game
- - 4th civ
- - asset design tweaks?
- - asset names pass
- - asset icons
- - reward icons
- - make ships switch target if they're hit and they're attacking a ship that can't fire back
+make sure planet panel updates properly
+time loop on last few levels
+more intentional difficulty curve (?)
+what happens when you lose?
+
+* music? 
+
+
+** Beta **
+"research" help menu, plus achievements that unlock them.
+make buildings look cool 
+asset icons
+asset design tweaks?
+asset names pass
+something better when you acquire upgrade
+explain different ships
+saving progress mid game
+4th civ
+make ships switch target if they're hit and they're attacking a ship that can't fire back
 
 
  ? limited range fighters, maybe battleship and refuel
-
-Maybe give oxygen rewards?

@@ -56,10 +56,11 @@ class BeginState(State):
         return super().exit()
 
     def take_input(self, input, event):
-        if input == "click" and self.time > self.scene.stage_name.visible_time:
+        if (input == "click" or input == "confirm") and self.time > self.scene.stage_name.visible_time:
             self.scene.stage_name.time = max(self.scene.stage_name.time, self.scene.stage_name.close_time)
             #self.scene.stage_name.kill()
             #self.scene.sm.transition(PlayState(self.scene))
+
 
         return super().take_input(input, event)
 
@@ -504,7 +505,7 @@ class GameOverState(State):
             self.scene.ui_group.add(t1)
             self.scene.ui_group.add(t2)
 
-        self.scene.game.save.set_run_state(None)
+        self.scene.game.end_run()
 
         return super().enter()
 
@@ -578,8 +579,8 @@ class PauseState(UIEnabledState):
 
     def on_quit(self):
         self.scene.game.fps_limited_pause = False
-        self.scene.game.scene = menuscene.MenuScene(self.scene.game)
-        self.scene.game.scene.start()
+        self.scene.game.end_run()
+        self.scene.game.set_scene("menu")
 
     def exit(self):
         self.scene.paused = False

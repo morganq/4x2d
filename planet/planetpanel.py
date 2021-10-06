@@ -5,6 +5,7 @@ from economy import RESOURCE_COLORS, RESOURCES
 from line import Line
 from panel import Panel
 from piechart import PieChart
+from rectangle import Rectangle
 from simplesprite import SimpleSprite
 from text import Text
 from upgrade.upgradeicon import UpgradeIcon
@@ -28,10 +29,26 @@ class PlanetPanel(Panel):
                 is_mine = True
 
         self.tab = {'text':'%s Planet' % (owner,), 'color':color, 'icon':'assets/i-planet.png'}
-        self.add(Text("Health: %d/%d" % (planet.health, planet.get_max_health()), "small", (0,0), PICO_WHITE, False, multiline_width=120), V2(0,0))
-        self.add(Text("Resources", "small", (0,0), PICO_WHITE, False), V2(0,15))
-        
-        y = 30
+        y = 0
+
+        if is_mine and planet.is_zero_pop():
+            t = Text("0 Pop = No Growth!", "small", (0,0), PICO_BLACK, multiline_width=120)
+            self.add(Rectangle(V2(0,0), (t.width + 2, 12), PICO_YELLOW), V2(0,y-1))
+            self.add(t, V2(1,y + 1))
+            y += 17
+
+        if is_mine and planet.has_extra_ships():
+            t = Text("Too many ships!", "small", (0,0), PICO_BLACK, multiline_width=120)
+            self.add(Rectangle(V2(0,0), (t.width + 2, 12), PICO_YELLOW), V2(0,y-1))
+            self.add(t, V2(1,y + 1))
+            y += 17
+
+        self.add(Text("Health: %d/%d" % (planet.health, planet.get_max_health()), "small", (0,0), PICO_WHITE, False, multiline_width=120), V2(0,y))
+        y += 15
+        self.add(Text("Resources", "small", (0,0), PICO_WHITE, False), V2(0,y))
+        y += 15        
+
+        chart_y = y - 15
         chart_data = {}
         for r in RESOURCES:
             pr = getattr(planet.resources, r)
@@ -42,7 +59,7 @@ class PlanetPanel(Panel):
                 y += 15
                 chart_data[RESOURCE_COLORS[r]] = pr
       
-        self.add(PieChart((0,0), chart_data), V2(70, 10))
+        self.add(PieChart((0,0), chart_data), V2(70, chart_y))
 
         y = max(y + 7, 41)
         self.add(Line(V2(0,0), V2(96, 0), PICO_WHITE),V2(0, y))

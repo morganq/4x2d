@@ -50,6 +50,7 @@ class RunInfo:
         r = RunInfo("placeholder")
         for key in RUN_INFO_SERIALIZE_FIELDS:
             setattr(r, key, obj[key])
+        r.path = [tuple(s) for s in r.path]
         return r
 
     def choose_path(self, row, column):

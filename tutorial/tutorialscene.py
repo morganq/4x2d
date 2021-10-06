@@ -31,9 +31,9 @@ class TutorialScene(LevelScene):
         if text:
             self.tutorial_panel.set_text(text)
             if offset:
-                self.tutorial_panel.pos = V2(game.RES[0] / 2 - 172, game.RES[1] - 54) + offset
+                self.tutorial_panel.pos = V2(self.game.game_resolution.x / 2 - 172, self.game.game_resolution.y - 54) + offset
             else:
-                self.tutorial_panel.pos = V2(game.RES[0] / 2 - 172, game.RES[1] - 54)
+                self.tutorial_panel.pos = V2(self.game.game_resolution.x / 2 - 172, self.game.game_resolution.y - 54)
             self.tutorial_panel._reposition_children()                
             self.tutorial_panel.set_visible(True)
             self.tutorial_panel.fade_in()
@@ -67,7 +67,7 @@ class TutorialScene(LevelScene):
         self.add_ui_elements()
 
         self.tutorial_panel = TutorialMessage(" ")
-        self.tutorial_panel.pos = V2(game.RES[0] / 2 - 172, game.RES[1] - 54)
+        self.tutorial_panel.pos = V2(self.game.game_resolution.x / 2 - 172, self.game.game_resolution.y - 54)
         self.ui_group.add(self.tutorial_panel)
         self.tutorial_panel.add_all_to_group(self.ui_group)
         self.tutorial_panel._reposition_children()

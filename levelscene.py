@@ -24,7 +24,7 @@ import sound
 import stagename
 import states
 import upgradestate
-from aliens import bosslevelcontroller, bosstimecrystal
+from aliens import bosslevelcontroller, bossmothership, bosstimecrystal
 from asteroid import Asteroid
 from button import Button
 from civ import Civ, PlayerCiv
@@ -425,6 +425,9 @@ class LevelScene(scene.Scene):
     def get_enemy_planets(self, civ):
         return [s for s in self.get_objects() if isinstance(s,Planet) and s.owning_civ and s.owning_civ != civ]        
 
+    def get_special_enemies_in_range(self, civ, pos, range):
+        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,bossmothership.BossMothership) and s.owning_civ != civ]
+
     def get_ships(self):
         return [s for s in self.get_objects() if isinstance(s,Ship)]
     
@@ -435,7 +438,7 @@ class LevelScene(scene.Scene):
         return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ != civ]
 
     def get_enemy_ships_in_range(self, civ, pos, range):
-        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ != civ]        
+        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ != civ]
 
     def get_enemy_objects(self, civ):
         return [s for s in self.get_objects() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]

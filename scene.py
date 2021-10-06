@@ -16,3 +16,6 @@ class Scene:
     def take_input(self, inp, event):
         if self.sm:
             self.sm.state.take_input(inp, event)
+
+    def on_display_resize(self, size):
+        pass

@@ -15,6 +15,7 @@ import levelscene
 import menuscene
 import newgamescene
 import optimize
+import optionsscene
 import planetgenscene
 import run
 import simplesprite
@@ -30,7 +31,6 @@ from starmap import starmapscene
 from v2 import V2
 
 DEV = len(sys.argv) > 1 and sys.argv[1] == "dev"
-SCALE = 2
 RES = (600,360)
 OBJ = {
 }
@@ -41,10 +41,13 @@ class Game:
         pygame.mixer.pre_init(buffer=256)
         pygame.init()
         self.save = save
-        modes = pygame.display.list_modes()
-        print(modes)
-        #self.set_resolution(V2(1920, 1080), True)
-        self.set_resolution(V2(1220, 800), False)
+
+        resolution = self.save.get_setting("resolution")
+        if resolution == None:
+            resolution = self.get_available_resolutions()[0]        
+            self.save.set_setting("resolution", resolution)
+            self.save.save()
+        self.set_resolution(V2(*resolution), self.save.get_setting("fullscreen"))
         pygame.display.set_caption("Hostile Quadrant")
         sound.init()
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
@@ -85,21 +88,32 @@ class Game:
         self.game_speed_input = 0
         self.last_joystick_pos = V2(200,200)
 
+        self.menu_bg_cache_obj = None
+
         self.frame_time = 0
         self.fps_limited_pause = False
         Game.inst = self
 
-    def set_resolution(self, resolution, fullscreen = False):
-        global SCALE
+    def set_resolution(self, resolution, fullscreen = False, resizable = False):
+        print("set_resolution", resolution, fullscreen, resizable)
         flags = 0
         if fullscreen:
-            flags = flags | pygame.FULLSCREEN | pygame.HWSURFACE | pygame.SCALED
+            flags = flags | pygame.FULLSCREEN | pygame.HWSURFACE
+        if resizable:
+            flags = flags | pygame.RESIZABLE
         self.full_resolution = resolution.copy()
-        SCALE = int(min(self.full_resolution.x / RES[0], self.full_resolution.y / RES[1]))
+        self.scale = int(min(self.full_resolution.x / RES[0], self.full_resolution.y / RES[1]))
         self.scaled_screen = pygame.display.set_mode(self.full_resolution.tuple(), flags=flags)
-        self.game_resolution = V2(*(self.full_resolution / SCALE).tuple_int())
+        self.game_resolution = V2(*(self.full_resolution / self.scale).tuple_int())
         self.screen = pygame.Surface(self.game_resolution.tuple_int(), pygame.SRCALPHA)
         self.game_offset = V2((self.game_resolution.x - RES[0]) / 2,(self.game_resolution.y - RES[1]) / 2)
+
+    def make_resizable(self, resizable):
+        self.set_resolution(
+            V2(*self.save.get_setting("resolution")),
+            self.save.get_setting("fullscreen"),
+            resizable
+        )
 
     def run(self):
         clock = pygame.time.Clock()
@@ -110,6 +124,9 @@ class Game:
             for event in pygame.event.get():
                 if event.type == sound.MUSIC_ENDEVENT:
                     sound.end_of_music()
+
+                if event.type == pygame.VIDEORESIZE:
+                    self.scene.on_display_resize(V2(event.w, event.h))
 
                 if event.type == pygame.QUIT:
                     running = False
@@ -128,18 +145,18 @@ class Game:
                         self.scene.take_input("other", event)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    event.__dict__['gpos'] = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
                     if event.button == 1: self.scene.take_input("click", event)
                     if event.button == 3: self.scene.take_input("rightclick", event)
 
                 if event.type == pygame.MOUSEBUTTONUP:
-                    event.__dict__['gpos'] = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
+                    event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
                     if event.button == 1: self.scene.take_input("unclick", event)
                     if event.button == 3: self.scene.take_input("unrightclick", event)                    
 
                 if event.type == pygame.MOUSEMOTION:
-                    event.__dict__['gpos'] = V2(event.pos[0] / SCALE, event.pos[1] / SCALE)
-                    event.__dict__['grel'] = V2(event.rel[0] / SCALE, event.rel[1] / SCALE)
+                    event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
+                    event.__dict__['grel'] = V2(event.rel[0] / self.scale, event.rel[1] / self.scale)
                     if event.buttons[0]:
                         self.scene.take_input("mouse_drag", event)
                     else:
@@ -182,6 +199,8 @@ class Game:
             if self.fps_limited_pause:
                 pygame.time.wait(20)
             dt = clock.tick(max_framerate) / 1000.0
+            # limit delta
+            dt = min(dt, 0.1)
 
             s1 = self.scene
             self.scene.update(dt)
@@ -194,7 +213,7 @@ class Game:
 
     def scale_xbr(self):
         sc = pygame.Surface(self.screen.get_size(), depth=32)
-        factor = SCALE
+        factor = self.scale
         buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, self.game_resolution.x, self.game_resolution.y, xbrz.ColorFormat.RGB)
         surf = pygame.image.frombuffer(buf2, (self.game_resolution.x * factor, self.game_resolution.y * factor), "RGBX")
         self.scaled_screen.blit(surf, (0,0))
@@ -205,7 +224,7 @@ class Game:
     def render(self):
         self.scaled_screen.fill((128,128,128,255))
         self.scene.render()
-        if SCALE == 1:
+        if self.scale == 1:
             self.scale_normal()
         else:
             #self.scale_normal()
@@ -217,6 +236,10 @@ class Game:
             #print(t)
         pygame.display.update()
 
+    def get_available_resolutions(self):
+        reses = sorted(list(set(pygame.display.list_modes())), reverse=True)
+        return reses
+
     def start_level(self, level, index):
         self.playing_level_index = index
         self.scene = levelscene.LevelScene(self, level)
@@ -226,16 +249,15 @@ class Game:
         self.scene = menuscene.MenuScene(self)
         self.scene.start()
 
-    def update_scale(self, scale):
-        global SCALE
-        SCALE = scale
-        self.scaled_screen = pygame.display.set_mode((RES[0] * SCALE, RES[1] * SCALE))
-
-    def set_scene(self, scene_name):
+    def set_scene(self, scene_name, *args):
         self.scene = {
-            'menu':menuscene.MenuScene(self)
-        }[scene_name]
+            'menu':menuscene.MenuScene,
+            'options':optionsscene.OptionsScene
+        }[scene_name](self, *args)
         self.scene.start()
+
+    def end_run(self):
+        self.save.set_run_state(None)
 
     def is_xbox(self):
         if self.joysticks:

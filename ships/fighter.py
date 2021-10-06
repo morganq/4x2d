@@ -125,6 +125,7 @@ class Fighter(Ship):
             return self.opt_threats
 
         enemies = self.scene.get_enemy_ships_in_range(self.owning_civ, self.pos, self.THREAT_RANGE_DEFAULT * 2)
+        enemies.extend(self.scene.get_special_enemies_in_range(self.owning_civ, self.pos, self.THREAT_RANGE_DEFAULT * 2))
         threat_range = self.THREAT_RANGE_DEFAULT
         self.opt_threats = [
             e for e in enemies

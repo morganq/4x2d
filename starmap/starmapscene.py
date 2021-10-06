@@ -1,3 +1,4 @@
+import button
 import game
 import pygame
 import states
@@ -90,25 +91,31 @@ class StarMapScene(Scene):
 
         rewards_width = len(self.game.run_info.reward_list) * 23 + 140
 
-        self.background_group.add(starmapbackground.StarmapBackground(V2(0,0), rewards_width))
+        self.background = starmapbackground.StarmapBackground(V2(0,0), rewards_width)
+        self.background_group.add(self.background)
+
+        backtext = "BACK"
+        if self.game.input_mode == "joystick": backtext = "[*circle*] BACK"
+        self.back = button.Button(V2(5, 5), backtext, "big", self.on_back, color=PICO_LIGHTGRAY)
+        self.ui_group.add(self.back)        
 
         run_path = self.game.run_info.path
         res = self.game.game_resolution
         
         self.grid = []
         self.nodes = []
-        x = 30
+        x = 30 + self.game.game_offset.x
+        base_y = self.background.center_y / 2
         max_per_row = max([len(row) for row in self.game.run_info.data])
         for r,row in enumerate(self.game.run_info.data):
             self.grid.append([])
             for i,column in enumerate(row):
                 scaling = 54 - (max_per_row * 8)
-                y = 110 - scaling * (len(row) - 1) + (scaling * 2) * i
+                y = base_y - scaling * (len(row) - 1) + (scaling * 2) * i
                 obj = None
                 reward = None
                 if column['node_type'] == 'galaxy':
                     alien = ALIENS[column['alien']]
-                    #obj = Galaxy(V2(x,y), (r,i), alien, column['rewards'], column['difficulty'], column['level'], column, column['signal'], r == len(run_path))
                     img = "assets/si-alien.png"
                     if column['mods']:
                         img = "assets/si-alien-mod.png"
@@ -124,7 +131,6 @@ class StarMapScene(Scene):
                 elif column['node_type'] == 'store':
                     obj = NodeSprite(self.game.run_info, (r,i), V2(x,y), "assets/si-shop.png")
                     obj.offset = (0.5,0.5)
-                    #obj = StoreNodeGraphic(V2(x,y), column['offerings'], (r,i), r == len(run_path))
 
                 self.grid[-1].append(obj)
                 for j in column['links']:
@@ -145,15 +151,16 @@ class StarMapScene(Scene):
         self.colonist = SimpleSprite(p, 'assets/si-player.png')
         self.colonist.offset = (0.5,0.5)
         self.game_group.add(self.colonist)
-        t1 = text.Text("Credits: %d" % self.game.run_info.credits, "small", V2(res.x / 2 + rewards_width / 2 - 8, 217), PICO_BLACK)
+        ry = self.background.center_y
+        t1 = text.Text("Credits: %d" % self.game.run_info.credits, "small", V2(res.x / 2 + rewards_width / 2 - 8, ry - 3), PICO_BLACK)
         t1.offset = (1, 0)
         self.ui_group.add(t1)
         if self.game.run_info.reward_list:
-            t2 = text.Text("Acquired:", "small", V2(res.x / 2 - rewards_width / 2 + 8, 217), PICO_BLACK)
+            t2 = text.Text("Acquired:", "small", V2(res.x / 2 - rewards_width / 2 + 8, ry - 3), PICO_BLACK)
             self.ui_group.add(t2)
             rx = t2.x + 60
             for r in self.game.run_info.reward_list:
-                reward = RewardWithBackground(V2(rx, 221), r['name'])
+                reward = RewardWithBackground(V2(rx, ry + 1), r['name'])
                 reward.offset = (0.5,0.5)  
                 self.game_group.add(reward)          
                 rx += 23
@@ -170,6 +177,9 @@ class StarMapScene(Scene):
             s.update(dt)
 
         super().update(dt)
+
+    def on_back(self):
+        self.game.set_scene("menu")
 
     def render(self):
         self.game.screen.fill(PICO_BLACK)

@@ -17,6 +17,7 @@ FONTS = {
     'big':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 20),
     'huge':pygame.freetype.Font(resource_path("assets/m12.ttf"), 30),
     'pixolde':pygame.freetype.Font(resource_path("assets/Pixolde-Italic.ttf"), 16),
+    'logo':pygame.freetype.Font(resource_path("assets/conthrax-sb.ttf"), 40)
 }
 
 for font in FONTS.values():
@@ -130,7 +131,7 @@ def get_groups(line, inside_group=None):
         x += 1
     return groups
 
-HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26, 'bm_army':12, 'pixolde':16}
+HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26, 'bm_army':12, 'pixolde':16, 'logo':50}
 
 SYMBOLS = {
     '*left*':"assets/mouse_left.png",
@@ -153,6 +154,9 @@ SYMBOLS_XBOX = {
 }
 
 def render_multiline(text, size, color, wrap_width=None, center=True):
+    return render_multiline_extra(text, size, color, wrap_width, center)[0]
+
+def render_multiline_extra(text, size, color, wrap_width=None, center=True):
     f = FONTS[size]
     if wrap_width is not None:
         words = text.split(" ")
@@ -226,8 +230,8 @@ def render_multiline(text, size, color, wrap_width=None, center=True):
     if max_x < text_surf.get_width():
         ret_surf = pygame.Surface((max_x, text_surf.get_height()), pygame.SRCALPHA)
         ret_surf.blit(text_surf, (0,0))
-        return ret_surf
-    return text_surf
+        return (ret_surf, None)
+    return (text_surf, None)
 
 if __name__ == "__main__":
     print(get_groups("hello [world] how is [it] going?"))

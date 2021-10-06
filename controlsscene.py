@@ -41,8 +41,7 @@ class ControlsScene(Scene):
         if self.control_index >= len(self.control_prompts):
             self.game.save.set_setting("controls", self.bindings)
             self.game.save.save()
-            self.game.scene = menuscene.MenuScene(self.game)
-            self.game.scene.start()
+            self.game.set_scene("options")
         else:
             self.control_text.set_text(self.control_prompts[self.control_index][0])
 
@@ -52,6 +51,9 @@ class ControlsScene(Scene):
                 print(event.button)
                 self.bindings[int(event.button)] = self.control_prompts[self.control_index][1]
                 self.set_next_control_prompt()
+            else:
+                if inp == "back":
+                    self.game.set_scene("options")
         except:
             pass
             

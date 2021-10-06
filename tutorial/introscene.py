@@ -48,7 +48,7 @@ class IntroScene(scene.Scene):
         self.time = 0
         self.tutorial_speed = 1
         self.tut = TutorialMessage("")
-        self.tut.pos = V2(game.RES[0] / 2 - 172, self.game.game_resolution.y - 54)
+        self.tut.pos = V2(self.game.game_resolution.x / 2 - 172, self.game.game_resolution.y - 54)
         self.tut._reposition_children()
         self.ui_group.add(self.tut)
         self.tut.add_all_to_group(self.ui_group)    

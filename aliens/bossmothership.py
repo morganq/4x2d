@@ -52,6 +52,7 @@ class BossMothership(SpaceObject):
         self.travel_target = None
         self.wait_time = 5
 
+        self.set_health(500)
         self.health_bar.stay = True
         self.health_bar.visible = True
         self.range_indicator = None

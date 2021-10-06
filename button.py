@@ -41,6 +41,7 @@ class Button(SpriteBase, FadeInMixin):
             self._generate_text_image(hover)
 
     def _generate_text_image(self, hover=False):
+        print("gen", hover)
         color = self.color
         text_color = PICO_WHITE
         if sum(color) > 180 * 3:
@@ -118,6 +119,6 @@ class Button(SpriteBase, FadeInMixin):
     def on_mouse_down(self, pos):
         if self.onclick:
             self.onclick()
-            self._generate_image(False)
+            self._generate_image(True)
             super().on_mouse_down(pos)
             return True

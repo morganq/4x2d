@@ -11,6 +11,15 @@ class PausePanel(panel.Panel):
         self.add(text.Text("- Paused -", "big", V2(0,0), multiline_width=120), V2(0,0))
 
         self.add(button.Button(V2(0,0), "Resume", "small", on_resume), V2(0, 40))
-        self.add(button.Button(V2(0,0), "Save and Quit", "small", on_quit), V2(0, 60))
+        self.on_quit = on_quit
+        self.quit_button = button.Button(V2(0,0), "Give Up", "small", self.verify_quit)
+        self.add(self.quit_button, V2(0, 60))
 
         self.redraw()
+
+    def verify_quit(self):
+        if self.quit_button.text == "Give Up":
+            self.quit_button.text = "Really Give Up?"
+            self.quit_button._generate_image(True)
+        else:
+            self.on_quit()

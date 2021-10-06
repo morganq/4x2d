@@ -17,6 +17,7 @@ class Tutorial1Scene(TutorialScene):
     def load_level(self, levelfile):
         p1 = Planet(self, V2(300, 220) + self.game.game_offset, 7, Resources(70,20,10))
         p1.change_owner(self.my_civ)
+        p1.hide_warnings = True
         self.homeworld = p1
         self.game_group.add(p1)
 
@@ -30,7 +31,7 @@ class Tutorial1Scene(TutorialScene):
         for i in range(6):
             theta = i * -0.65
             pos = V2.from_angle(theta) * (50 + random.random() * 80) + self.homeworld.pos
-            a = Asteroid(self, pos + self.game.game_offset, Resources(40, 0, 0))
+            a = Asteroid(self, pos, Resources(40, 0, 0))
             self.game_group.add(a)
 
         self.objgrid.generate_grid(self.get_objects_initial())

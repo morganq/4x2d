@@ -11,7 +11,7 @@ import text
 from button import Button
 from colors import *
 from elements import digitalpointer, typewriter
-from helper import get_nearest
+from helper import clamp, get_nearest
 from loadingscene import LoadingScene
 from store.storenode import StoreNodeGraphic, StoreNodePanel
 from store.storescene import StoreScene
@@ -43,7 +43,9 @@ class StarMapState(states.UIEnabledState):
         self.joy_current_confirm_button = None
         pickable_nodes = [n for n in self.scene.nodes if n.is_pickable()]
         pickable_nodes.sort(key=lambda x:x.y)
+        print("pickable")
         for node in pickable_nodes:
+            print(node)
             node.on("mouse_down", self.node_click)
             node.on("mouse_enter", self.node_hover)
             node.on("mouse_exit", self.node_unhover)
@@ -88,18 +90,17 @@ class StarMapState(states.UIEnabledState):
 
     def take_input(self, input, event):
         super().take_input(input, event)
-        if input == "menu":
-            self.scene.game.scene = menuscene.MenuScene(self.scene.game)
-            self.scene.game.scene.start()
+        if input == "menu" or input == "back":
+            self.scene.game.set_scene("menu")
                 
     def on_joy_direction_press(self, direction):
         node = self.joy_controls_order[self.joy_node_index]
         node.on_mouse_exit(V2(0,0))            
         if direction == 'up':        
-            self.joy_node_index = (self.joy_node_index - 1) % len(self.joy_controls_order)
+            self.joy_node_index = clamp(self.joy_node_index - 1, 0, len(self.joy_controls_order)-1)
             node = self.joy_controls_order[self.joy_node_index]
         if direction == 'down':
-            self.joy_node_index = (self.joy_node_index + 1) % len(self.joy_controls_order)
+            self.joy_node_index = clamp(self.joy_node_index + 1, 0, len(self.joy_controls_order)-1)
             node = self.joy_controls_order[self.joy_node_index]
         node.on_mouse_enter(V2(0,0))
         node.on_mouse_down(V2(0,0))
@@ -127,21 +128,21 @@ class StarMapState(states.UIEnabledState):
 
     def create_nodeless_display(self):
         res = self.scene.game.game_resolution
-        t = typewriter.Typewriter("^ Pick your next jump ^", "big", V2(res.x / 2, 320), PICO_DARKGRAY, multiline_width=500)
+        t = typewriter.Typewriter("^ Pick your next jump ^", "big", V2(res.x / 2, self.scene.background.center_y + 60), PICO_DARKGRAY, multiline_width=500)
         t.offset = (0.5, 0.5)
         self.scene.ui_group.add(t)
         self.display_objs = [t]
 
     def create_encounter_display(self, node):
         res = self.scene.game.game_resolution
-        t1 = typewriter.Typewriter("Sector %d - [!Hostile]" % node['sector'], "big", V2(60, 275), PICO_WHITE, multiline_width=500)
+        t1 = typewriter.Typewriter("Sector %d - [!Hostile]" % node['sector'], "big", V2(60, self.scene.background.center_y + 55), PICO_WHITE, multiline_width=500)
         self.scene.ui_group.add(t1)
 
-        t2 = typewriter.Typewriter("Enemy: ???", "small", V2(60, 295), PICO_WHITE, multiline_width=500)
+        t2 = typewriter.Typewriter("Enemy: ???", "small", V2(60, self.scene.background.center_y + 75), PICO_WHITE, multiline_width=500)
         self.scene.ui_group.add(t2) 
 
         rew = rewardscene.REWARDS[node['rewards'][0]]['title']
-        t3 = typewriter.Typewriter("Reward: %s" % rew, "small", V2(60, 308), PICO_WHITE, multiline_width=500)
+        t3 = typewriter.Typewriter("Reward: %s" % rew, "small", V2(60, self.scene.background.center_y + 88), PICO_WHITE, multiline_width=500)
         self.scene.ui_group.add(t3)                
 
         btext = "LAUNCH"

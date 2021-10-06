@@ -10,6 +10,7 @@ class StarmapBackground(spritebase.SpriteBase):
     def __init__(self, pos, rewards_width = 100):
         super().__init__(pos)
         self.rewards_width = rewards_width
+        self.center_y = round(game.Game.inst.game_resolution.y * 3 / 5)
         self._generate_image()
 
 
@@ -20,9 +21,12 @@ class StarmapBackground(spritebase.SpriteBase):
         self.image = pygame.Surface(res.tuple_int(), pygame.SRCALPHA)
         self.image.fill(PICO_BLACK) 
 
-        pygame.draw.rect(self.image, PICO_DARKGREEN, (0,0,res.x, res.y-180))
-        pygame.draw.rect(self.image, PICO_DARKBLUE, (360,0,res.x-360, res.y-180))
-        pygame.draw.line(self.image, PICO_DARKBLUE, (358,0), (358, res.y-180))
+        x = game.Game.inst.game_offset.x
+        lx = x + 360
+
+        pygame.draw.rect(self.image, PICO_DARKGREEN, (0,0,lx, self.center_y))
+        pygame.draw.rect(self.image, PICO_DARKBLUE, (lx,0,res.x-lx, self.center_y))
+        pygame.draw.line(self.image, PICO_DARKBLUE, (lx-2,0), (lx-2, self.center_y))
 
         for i in range(200):
             color = PICO_LIGHTGRAY
@@ -30,11 +34,11 @@ class StarmapBackground(spritebase.SpriteBase):
                 color = PICO_WHITE
             
             if random.random() < 0.1:
-                pygame.draw.circle(self.image, color, (random.randint(0, res.x), random.randint(0,res.y-180)), 1, 0)
+                pygame.draw.circle(self.image, color, (random.randint(0, res.x), random.randint(0,self.center_y)), 1, 0)
             else:
-                self.image.set_at((random.randint(0, res.x), random.randint(0,res.y-180)), color)
+                self.image.set_at((random.randint(0, res.x), random.randint(0,self.center_y)), color)
 
-        y = 220
+        y = self.center_y
 
         poly = [
             (res.x / 2 - self.rewards_width/2 + 4, y-8),

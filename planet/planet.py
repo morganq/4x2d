@@ -19,6 +19,7 @@ from helper import all_nearby, clamp, get_nearest
 from icontext import IconText
 from line import IndicatorLine, Line
 from ships.all_ships import SHIPS_BY_NAME
+from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
 from v2 import V2
 
@@ -121,6 +122,13 @@ class Planet(SpaceObject):
 
         self.shipcounter = ShipCounter(self)
         self.scene.ui_group.add(self.shipcounter)
+
+        # warning
+        self.warning = FrameSprite(self.pos + V2(-21, -21), "assets/triangle.png", 11)
+        self.scene.ui_group.add(self.warning)
+        self.warning.visible = False
+        self.hide_warnings = False
+
         self.set_health(self.get_max_health())        
 
     def __str__(self) -> str:
@@ -149,6 +157,12 @@ class Planet(SpaceObject):
     def regenerate_art(self):
         self.generate_base_art()
         self._generate_base_frames()
+
+    def is_zero_pop(self):
+        return self._population == 0
+
+    def has_extra_ships(self):
+        return sum(self.ships.values()) > self.get_max_ships()
 
     def is_alive(self):
         return self.alive() # pygame alive
@@ -331,6 +345,14 @@ class Planet(SpaceObject):
         self.time += dt
         if self.time < 1:
             self.set_health(self.get_max_health())
+
+        self.warning.visible = (
+            (self.is_zero_pop() or self.has_extra_ships()) and 
+            (self.owning_civ and not self.owning_civ.is_enemy) and
+            not self.hide_warnings
+        )
+        if self.warning.visible:
+            self.warning.frame = int((self.time * 2) % 2)
 
         # Emit ships which are queued
         if self.emit_ships_queue:
