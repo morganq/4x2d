@@ -27,6 +27,8 @@ class BossLevelController(levelcontroller.LevelController):
                 self.phase = PHASE_2
                 self.scene.game_speed = 1
                 self.scene.sm.transition(levelstates.PlayState(self.scene))
+                self.mothership.health_bar.visible = True
+                self.mothership.health_bar.stay = True
                 for p in self.scene.get_planets():
                     p.cinematic_disable = False
 
@@ -46,3 +48,9 @@ class BossLevelController(levelcontroller.LevelController):
                 self.scene.game_group.add(self.mothership)
                 all_planets_by_x = sorted(self.scene.get_planets(), key=lambda p:p.x, reverse=True)
                 self.mothership.planets_to_revive = all_planets_by_x[0:len(all_planets_by_x) // 2]
+
+        if self.phase == PHASE_2:
+            if self.mothership.health <= 0:
+                self.mothership.kill()
+                self.scene.paused = True
+                self.scene.sm.transition(levelstates.VictoryState(self.scene))

@@ -81,7 +81,7 @@ class Colonist(Ship):
     def on_warp(self):
         if random.random() < self.get_stat("warp_drive_pop_chance"):
             self.population += 1
-            if self.owning_civ == self.scene.my_civ:
+            if self.owning_civ == self.scene.player_civ:
                 it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
                 it.pos = self.pos + V2(0, -10) - V2(it.width, it.height) * 0.5
                 self.scene.ui_group.add(it)            

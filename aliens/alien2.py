@@ -87,7 +87,7 @@ class Alien2FighterProductionUpgrade3(Alien2FighterProductionUpgrade1):
             found_ship.frame += 1
             if found_ship.frame == 2:
                 found_ship.constructed = True
-                target = random.choice(to.scene.get_civ_planets(to.scene.my_civ))
+                target = random.choice(to.scene.get_civ_planets(to.scene.player_civ))
                 found_ship.set_target(target)
         else:
             pos = to.pos + V2.random_angle() * (to.radius + 20)
@@ -196,8 +196,7 @@ class Alien2(alien.Alien):
 
     @classmethod
     def get_quote(kls):
-        s = "\"DEVICE TALLY\nAYE: %d,%d,%d\nNAY: %d\nThe Network has chosen: violence.\""
-        return s % (random.randint(1,6), random.randint(101,999), random.randint(101,999), random.randint(4,9))
+        s = "\"Factory Default Signal. Change Me!\""
 
     def __init__(self, scene, civ):
         super().__init__(scene, civ)
@@ -230,7 +229,7 @@ class Alien2(alien.Alien):
             if self.attack_to:
                 self.attack_to.upgradeable = True
             self.attack_from = random.choice(self.scene.get_civ_planets(self.civ))
-            self.attack_to = random.choice(self.scene.get_civ_planets(self.scene.my_civ))
+            self.attack_to = random.choice(self.scene.get_civ_planets(self.scene.player_civ))
 
             # Don't do the curse too early or at beginning difficulty
             if self.difficulty > 1 and self.time > 60:

@@ -207,9 +207,9 @@ class Fighter(Ship):
             dir = V2.from_angle(a)           
 
         # Need to stay close to starting spot
-        delta = self.dogfight_initial_pos - self.pos
-        if delta.sqr_magnitude() > 30 ** 2:
-            dir = delta.normalized()
+        #delta = self.dogfight_initial_pos - self.pos
+        #if delta.sqr_magnitude() > 30 ** 2:
+        #    dir = delta.normalized()
 
         self.target_velocity = dir * self.get_max_speed()
 
@@ -239,6 +239,7 @@ class Fighter(Ship):
             if self.effective_target and isinstance(self.effective_target, planet.planet.Planet):
                 self.set_state(STATE_WAITING)
             else:
+                print("returning from siege")
                 self.set_state(STATE_RETURNING)
             return
 

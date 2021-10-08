@@ -116,7 +116,7 @@ class UpgradePanel(Panel):
             for name,pos in positions.items():
                 u = upgrades.UPGRADE_CLASSES[name]
                 color = PICO_LIGHTGRAY
-                if game.Game.inst.scene.my_civ.prereqs_met(name):
+                if game.Game.inst.scene.player_civ.prereqs_met(name):
                     color = PICO_GREEN
                 for parent in u.family['parents']:
                     pp = positions[parent]
@@ -126,7 +126,7 @@ class UpgradePanel(Panel):
                 if u.infinite:
                     inf = FrameSprite(pos + V2(22,23), "assets/infinite.png", 8)
                     inf.layer = 12
-                    if u.name in game.Game.inst.scene.my_civ.researched_upgrade_names:
+                    if u.name in game.Game.inst.scene.player_civ.researched_upgrade_names:
                         inf.frame = 1
                     else:
                         inf.frame = 0

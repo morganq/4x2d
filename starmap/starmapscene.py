@@ -42,6 +42,8 @@ class NodeSprite(SimpleSprite):
         self.run_info = run_info
         self.node_pos = node_pos
         self.selectable = self.is_pickable()
+        if game.DEV:
+            self.selectable = True
 
     def get_node(self):
         return self.run_info.data[self.node_pos[0]][self.node_pos[1]]

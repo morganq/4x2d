@@ -87,7 +87,7 @@ class RunInfo:
             signal = "future_tech"
 
         if row == 9:
-            mods = [random.choice(["battleship"])]
+            mods = []
             signal = "boss"
             rewards = []
 

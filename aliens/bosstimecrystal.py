@@ -38,7 +38,7 @@ class TimeCrystal(Planet):
         theta = random.random() * 6.2818
         for ship in stranded_ships:
             p = self.pos + V2.from_angle(theta) * random.randint(18,32)
-            s = SHIPS_BY_NAME[ship](self.scene, p, self.scene.my_civ)
+            s = SHIPS_BY_NAME[ship](self.scene, p, self.scene.player_civ)
             if ship == 'colonist':
                 s.set_pop(random.randint(2,5))
             self.scene.game_group.add(s)
@@ -72,7 +72,7 @@ class TimeCrystal(Planet):
         self.countdown.set_text("%d" % math.ceil(self.freeze_timer))
 
         if self.exp:
-            for s in self.scene.get_civ_ships(self.scene.my_civ):
+            for s in self.scene.get_civ_ships(self.scene.player_civ):
                 if (s.pos - self.exp.pos).sqr_magnitude() < self.exp.size ** 2:
                     self.freeze(s)
             if not self.exp.alive():

@@ -118,7 +118,7 @@ class PlayState(UIEnabledState):
 
     def release_drag(self):
         # Just made an order
-        if self.dragging_from_sprite and self.dragging_from_sprite.get_selection_info() and self.dragging_from_sprite.owning_civ == self.scene.my_civ:
+        if self.dragging_from_sprite and self.dragging_from_sprite.get_selection_info() and self.dragging_from_sprite.owning_civ == self.scene.player_civ:
             if self.hover_sprite and self.dragging_from_sprite != self.hover_sprite:
                 target_selection = self.hover_sprite.get_selection_info()
                 if target_selection:
@@ -151,7 +151,7 @@ class PlayState(UIEnabledState):
             isinstance(self.hover_sprite, planet.planet.Planet) and 
             not self.current_panel
         ):
-            if self.hover_sprite.owning_civ == self.scene.my_civ:
+            if self.hover_sprite.owning_civ == self.scene.player_civ:
                 options = "[*left*] Planet Info\n[*drag*] Order Ships"
             else:
                 options = "[*left*] Planet Info"
@@ -191,7 +191,7 @@ class PlayState(UIEnabledState):
 
         if self.dragging_from_sprite:
             selection_info = self.dragging_from_sprite.get_selection_info()
-            if selection_info and selection_info['type'] == 'planet' and self.dragging_from_sprite.owning_civ == self.scene.my_civ:
+            if selection_info and selection_info['type'] == 'planet' and self.dragging_from_sprite.owning_civ == self.scene.player_civ:
                 if not self.arrow:
                     self.arrow = OrderArrow()
                     self.scene.ui_group.add(self.arrow)
@@ -263,7 +263,7 @@ class PlayState(UIEnabledState):
 
         if self.joy_controls_state == "default":
             if isinstance(nearest, planet.planet.Planet):
-                if nearest.owning_civ == self.scene.my_civ:
+                if nearest.owning_civ == self.scene.player_civ:
                     self.joystick_overlay.set_button_options(["[*x*] Planet Info", "[*square*] Order Ships"])
                 else:
                     self.joystick_overlay.set_button_options(["[*x*] Planet Info"])
@@ -295,7 +295,7 @@ class PlayState(UIEnabledState):
         if game.DEV and input == "cheat1":
             self.scene.sm.transition(VictoryState(self.scene))
 
-        if input == "special" and len(self.scene.my_civ.upgrades_stocked) > 0:
+        if input == "special" and len(self.scene.player_civ.upgrades_stocked) > 0:
             self.scene.on_click_upgrade()
 
         if input == "confirm":
@@ -351,7 +351,7 @@ class PlayState(UIEnabledState):
         if input == "action":
             if self.joy_controls_state == "default":
                 spr = self.joystick_overlay.nearest_obj
-                if spr and spr.owning_civ == self.scene.my_civ:
+                if spr and spr.owning_civ == self.scene.player_civ:
                     self.joy_controls_state = "arrow"
                     self.arrow = OrderArrow()
                     self.scene.ui_group.add(self.arrow)
@@ -383,7 +383,7 @@ class PlayState(UIEnabledState):
                     self.release_drag()
         else:
             sel = self.key_picked_sprite.get_selection_info()
-            if sel and sel['type'] == 'planet' and self.key_picked_sprite.owning_civ == self.scene.my_civ:
+            if sel and sel['type'] == 'planet' and self.key_picked_sprite.owning_civ == self.scene.player_civ:
                 if input == 'action':
                     self.dragging_from_sprite = self.key_picked_sprite
                     return
@@ -523,7 +523,7 @@ class VictoryState(State):
         self.scene.ui_group.add(sn)
 
         self.scene.game.run_info.bonus_credits += 30
-        for r in self.scene.my_civ.upgrades_stocked:
+        for r in self.scene.player_civ.upgrades_stocked:
             if r == "iron": self.scene.game.run_info.bonus_credits += 5
             elif r == "ice": self.scene.game.run_info.bonus_credits += 10
             elif r == "gas": self.scene.game.run_info.bonus_credits += 15
@@ -548,8 +548,8 @@ class VictoryState(State):
     def end(self):
         self.scene.game.scene = rewardscene.RewardScene(
             self.scene.game,
-            [u.name for u in self.scene.my_civ.upgrades],
-            [u for u in self.scene.my_civ.researched_upgrade_names if UPGRADE_CLASSES[u].category == 'buildings'],
+            [u.name for u in self.scene.player_civ.upgrades],
+            [u for u in self.scene.player_civ.researched_upgrade_names if UPGRADE_CLASSES[u].category == 'buildings'],
         )
         self.scene.game.scene.start()
 

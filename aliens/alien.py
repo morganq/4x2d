@@ -6,6 +6,11 @@ from aliens import buildorder
 
 ALIENS = {}
 
+
+# New update
+# figure out where we are in the BO
+# 
+
 class Alien:
     EXPAND_DURATION = 10
     EXPAND_NUM_NEAREST = 2
@@ -34,6 +39,63 @@ class Alien:
         self.fear_attack = False
         self.redistribute_timer = 0
         self.near_winning = False
+
+    # Expand: figure out a target planet and a source planet, then send ships
+    def execute_expand(self, target_type = None):
+        all_potential_targets = self.scene.get_civ_planets(None)
+        sorted_targets = all_potential_targets[::]
+
+        # Find a target
+        if target_type == buildorder.BOExpand.TARGET_TYPE_NEAR_HOME:
+            sorted_targets.sort(key=lambda p:(p.pos - self.civ.homeworld.pos).sqr_magnitude())
+
+        elif target_type == buildorder.BOExpand.TARGET_TYPE_NEAR_ENEMY:
+            sorted_targets.sort(key=lambda p:(p.pos - self.scene.player_civ.homeworld.pos).sqr_magnitude())
+
+        elif target_type == buildorder.BOExpand.TARGET_TYPE_MIDDLE:
+            def key(p):
+                # Middle = smallest delta between near me and near enemy distances.
+                d1 = (p.pos - self.scene.player_civ.homeworld.pos).sqr_magnitude()
+                d2 = (p.pos - self.civ.homeworld.pos).sqr_magnitude()
+                return abs(d1 - d2)
+            sorted_targets.sort(key=key)
+
+        elif target_type == buildorder.BOExpand.TARGET_TYPE_RANDOM:
+            random.shuffle(sorted_targets)
+
+        # TODO: add a bit of randomness?
+        target = sorted_targets[0]
+
+        # Sort potential expand-from planets
+        all_potential_sources = self.scene.get_civ_planets(self.civ)
+        all_potential_sources = [p for p in all_potential_sources if p.population > 1]
+        sorted_sources = all_potential_sources[::]
+        sorted_sources.sort(key=lambda p:(p.pos - target.pos).sqr_magnitude())
+
+        # TODO: randomness?
+        source = sorted_sources[0]
+        self.send_expansion_party(source, target)
+
+    # Send some pop on a colonist ship and possibly send some defenders
+    def send_expansion_party(self, source, target):
+        if random.random() < 0.33:
+            pop = random.randint(1, max(source.population // 2,1))
+        else:
+            pop = 1
+        source.emit_ship(self.get_colonist(), {'to':target, 'num':pop})
+
+        if random.random() < 0.5:
+            ships = self.get_planet_ship_instances(source)
+            num_to_send = random.randint(1, max(len(ships) // 2,1))
+            for s in ships[0:num_to_send]:
+                source.emit(s, {'to':target})
+
+    def get_planet_ship_instances(self, planet):
+        ships = []
+        for name in planet.ships.keys():
+            for i in range(planet.ships[name]):
+                ships.append(name)
+        return ships
 
     def get_build_order_steps(self):
         return []
@@ -82,7 +144,7 @@ class Alien:
             return
 
         mine = self.count_ships(self.civ)
-        enemys = self.count_ships(self.scene.my_civ)
+        enemys = self.count_ships(self.scene.player_civ)
         if enemys > mine * 1.33:
             self.fear_attack = True
         else:
@@ -151,7 +213,7 @@ class Alien:
         self.redistribute_timer -= dt
 
         if self.duration_edge(5) and self.time > 90:
-            if len(self.scene.get_civ_planets(self.civ)) > len(self.scene.get_civ_planets(self.scene.my_civ)) + 1:
+            if len(self.scene.get_civ_planets(self.civ)) > len(self.scene.get_civ_planets(self.scene.player_civ)) + 1:
                 print("Near winning!")
                 self.near_winning = True
             else:
@@ -275,7 +337,7 @@ class Alien:
     def count_attacking_ships(self):
         c = 0
         for ship in self.scene.get_civ_ships(self.civ):
-            if ship.SHIP_BONUS_NAME == "colonist" and ship.chosen_target.owning_civ == self.scene.my_civ:
+            if ship.SHIP_BONUS_NAME == "colonist" and ship.chosen_target.owning_civ == self.scene.player_civ:
                 c += 1
         for planet in self.scene.get_civ_planets(self.civ):
             for ship_type, emit_data in planet.emit_ships_queue:

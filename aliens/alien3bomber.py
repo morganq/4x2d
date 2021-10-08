@@ -23,10 +23,10 @@ class Alien3Bomber(Bomber, Alien3Mixin):
         return shield    
 
     def near_enemies(self):
-        obj, dsq = get_nearest(self.pos, self.scene.get_civ_ships(self.scene.my_civ))
+        obj, dsq = get_nearest(self.pos, self.scene.get_civ_ships(self.scene.player_civ))
         if dsq < 30 ** 2:
             return True
-        obj, dsq = get_nearest(self.pos, self.scene.get_civ_planets(self.scene.my_civ))
+        obj, dsq = get_nearest(self.pos, self.scene.get_civ_planets(self.scene.player_civ))
         if dsq < 50 ** 2:
             return True            
         return False

@@ -44,7 +44,7 @@ class TutorialScene(LevelScene):
 
     def setup_players(self):
         # Me
-        self.homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.my_civ))[0]
+        self.homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.player_civ))[0]
 
         # Alien
         p = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.enemy.civ))[0]
@@ -62,7 +62,7 @@ class TutorialScene(LevelScene):
         self.load_level(None)
 
         self.setup_players()
-        self.my_civ.upkeep_enabled = False
+        self.player_civ.upkeep_enabled = False
         self.background.generate_image(self.get_objects_initial())
         self.add_ui_elements()
 
@@ -76,7 +76,7 @@ class TutorialScene(LevelScene):
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
 
         self.fleet_managers = {
-            'my':fleet.FleetManager(self, self.my_civ),
+            'my':fleet.FleetManager(self, self.player_civ),
             'enemy':fleet.FleetManager(self, self.enemy.civ)
         }
 

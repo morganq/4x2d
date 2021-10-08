@@ -17,6 +17,6 @@ class LevelController:
             self.scene.sm.transition(levelstates.VictoryState(self.scene))
 
     def detect_defeat(self):
-        if not self.scene.get_civ_planets(self.scene.my_civ):
+        if not self.scene.get_civ_planets(self.scene.player_civ):
             self.scene.paused = True
             self.scene.sm.transition(levelstates.GameOverState(self.scene))        

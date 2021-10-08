@@ -16,7 +16,7 @@ from tutorial.tutorialscene import TutorialScene
 class Tutorial1Scene(TutorialScene):
     def load_level(self, levelfile):
         p1 = Planet(self, V2(300, 220) + self.game.game_offset, 7, Resources(70,20,10))
-        p1.change_owner(self.my_civ)
+        p1.change_owner(self.player_civ)
         p1.hide_warnings = True
         self.homeworld = p1
         self.game_group.add(p1)
@@ -46,10 +46,10 @@ class Tutorial1Scene(TutorialScene):
 
     def load(self):
         super().load()
-        self.my_civ.base_upgrade_limits.iron = 230
+        self.player_civ.base_upgrade_limits.iron = 230
         self.o2_meter.kill()
 
-        self.my_civ.offered_upgrades = {
+        self.player_civ.offered_upgrades = {
             'buildings':'b_defense1',
             'ships':'s_basicfighters1',
             'tech':'t_mechanics1'
@@ -63,7 +63,7 @@ class Tutorial1Scene(TutorialScene):
                 self.set_tutorial_text("Press [*x*] on your planet to see its status and resources. Press [*square*] to order ships from a planet and send one to an asteroid.", 1)
             else:
                 self.set_tutorial_text("Click your planet to see its status and resources. Drag from your planet to an asteroid to order a fighter to attack.", 1)
-        ships = self.get_civ_ships(self.my_civ)
+        ships = self.get_civ_ships(self.player_civ)
         if self.time_edge(20, dt) and len(ships) == 0:
             if self.game.input_mode == "joystick":
                 self.set_tutorial_text("Try pressing [*square*] with your cursor on your planet, then moving the cursor to an asteroid.", 2)
@@ -76,7 +76,7 @@ class Tutorial1Scene(TutorialScene):
                 self.set_tutorial_text("Once you've given orders to a fleet of ships, they will follow them until complete. You can also press [*circle*] on a fleet to cancel their orders.", 3.5)
             else:
                 self.set_tutorial_text("Once you've given orders to a fleet of ships, they will follow them until complete. You can also right-click on a fleet to cancel their orders.", 3.5)
-        if self.my_civ.num_upgrades > 0:
+        if self.player_civ.num_upgrades > 0:
             if self.game.input_mode == "joystick":
                 self.set_tutorial_text(
                     "Nice work. You have enough iron now to acquire a new Upgrade! Press [*triangle*]. Get Upgrades to improve your planets, build ships, or unlock new technologies.",
@@ -99,16 +99,16 @@ class Tutorial1Scene(TutorialScene):
         if isinstance(self.sm.state, UpgradeState):
             self.set_tutorial_text("", 6)
 
-        if len(self.my_civ.researched_upgrade_names) > 0 and self.tut_text_number < 7:
+        if len(self.player_civ.researched_upgrade_names) > 0 and self.tut_text_number < 7:
             self.set_tutorial_text("We can also use our fighters to damage the enemy. Destroy their colony on that planet!", 7)
             self.alien_homeworld.ships['alien1fighter'] = 1
             self.alien_homeworld.visible = True
             self.alien_homeworld.selectable = True
 
         if len(self.get_civ_planets(self.enemy.civ)) == 0 and self.tut_text_number <= 7:
-            for ship in self.get_civ_ships(self.my_civ):
+            for ship in self.get_civ_ships(self.player_civ):
                 ship.set_state("returning")
-            s = Colonist(self, self.homeworld.pos + V2(-90, -90), self.my_civ)
+            s = Colonist(self, self.homeworld.pos + V2(-90, -90), self.player_civ)
             s.set_pop(3)
             s.set_target(self.homeworld)
             self.game_group.add(s)
@@ -123,7 +123,7 @@ class Tutorial1Scene(TutorialScene):
                 self.set_tutorial_text("The more planets you control, the more mining you'll be able to do. Take over the other planet by sending workers to it.", 11)
 
             
-        if len(self.get_civ_planets(self.my_civ)) == 2:
+        if len(self.get_civ_planets(self.player_civ)) == 2:
             self.set_tutorial_text("Excellent! Defeating the federation comes down to making smart decisions: choosing your Upgrades, controlling planets, and dispatching ships to destroy the enemy.", 12)
             if self.tut_text_number == 12 and self.tutorial_panel.shown_time > 15:
                 self.set_tutorial_text("Good luck!!", 13)

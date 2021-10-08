@@ -104,7 +104,7 @@ class StoreState(states.UIEnabledState):
 class StoreScene(Scene):
     def __init__(self, game, store):
         super().__init__(game)
-        self.offerings = store.offerings
+        self.offerings = store['offerings']
         self.bought = set()
 
     def start(self):

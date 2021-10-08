@@ -99,6 +99,8 @@ class Ship(SpaceObject):
         self.set_health(self.get_max_health())
         self.set_state(STATE_CRUISING)
 
+        self.debug_ratio = 0
+
         # opt
         self._timers['opt_time'] = random.random()
         self.opt_fleet_forces = V2(0,0)
@@ -277,7 +279,7 @@ class Ship(SpaceObject):
 
         self.special_stat_update(dt)
 
-        if self.scene.game.run_info.o2 <= 0 and self.owning_civ == self.scene.my_civ:
+        if self.scene.game.run_info.o2 <= 0 and self.owning_civ == self.scene.player_civ:
             self.health -= self.get_max_health() / 60 * dt
 
         super().update(dt)
@@ -354,9 +356,14 @@ class Ship(SpaceObject):
         if self.scene.flowfield.has_field(self.effective_target):
             towards_flow = self.scene.flowfield.get_vector(self.pos, self.effective_target, 0)
             towards_center = towards_flow
+            distance = 1
             if self.fleet and len(self.fleet.path) > 2 and len(self.fleet.ships) > 1:
+                distance = (self.fleet.path[2] - self.pos).magnitude()
                 towards_center = (self.fleet.path[2] - self.pos).normalized()
             ratio = 0.5
+            
+            ratio = helper.clamp(20 / (distance + 1), 0, 1)
+            self.debug_ratio = ratio
             self.target_velocity = (towards_flow * ratio + towards_center * (1 - ratio)) * self.get_cruise_speed()
 
         else:
@@ -473,17 +480,18 @@ class Ship(SpaceObject):
         self.update_color()
 
     def update_color(self):
-        #new_color = PICO_GREEN if self.owning_civ == self.scene.my_civ else PICO_RED
+        #new_color = PICO_GREEN if self.owning_civ == self.scene.player_civ else PICO_RED
         color = self.owning_civ.color
         self.set_color(color)
 
     def set_color(self, color):
-        # Could optimize by doing 2 masks - color mask and black mask
-        #mask = pygame.mask.from_surface(self._sheet)
-        #self._sheet = mask.to_surface(setcolor = (*self.owning_civ.color,255), unsetcolor=(0,0,0,0))        
-        for x in range(self._sheet.get_width()):
-            for y in range(self._sheet.get_height()):
-                color = tuple(self._sheet.get_at((x,y)))
-                if color[3] >= 128 and color[0:3] != PICO_BLACK:
-                    self._sheet.set_at((x,y), color)
+
+        outline_mask = pygame.mask.from_surface(self._sheet, 127)
+        surf = outline_mask.to_surface(setcolor=(*PICO_BLACK,255), unsetcolor=(0,0,0,0))      
+
+        color_mask = pygame.mask.from_threshold(self._sheet, (*PICO_RED,255), (2,2,2,255))
+        surf2 = color_mask.to_surface(setcolor=(*color,255), unsetcolor=(0,0,0,0))
+        surf.blit(surf2,(0,0))
+        self._sheet = surf
+
         self._update_image()

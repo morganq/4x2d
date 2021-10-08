@@ -42,6 +42,10 @@ class BOAttack(BuildOrderStep):
 
 class BOExpand(BuildOrderStep):
     name = "expand"
+    TARGET_TYPE_NEAR_HOME = "near_home"
+    TARGET_TYPE_NEAR_ENEMY = "near_enemy"
+    TARGET_TYPE_MIDDLE = "middle"
+    TARGET_TYPE_RANDOM = "random"
     def __init__(self, time, target_type=None):
         super().__init__(time)
         self.target_type = target_type

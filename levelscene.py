@@ -54,7 +54,7 @@ class LevelScene(scene.Scene):
         scene.Scene.__init__(self, game)
         self.options = options
         self.animation_timer = 0
-        self.my_civ = PlayerCiv(self)
+        self.player_civ = PlayerCiv(self)
         self.levelfile = levelfile
         self.alienrace = alienrace
         self.difficulty = difficulty
@@ -122,12 +122,14 @@ class LevelScene(scene.Scene):
             owner = None
             if obj['type'].endswith("planet"):
                 t = "planet"
-                if obj['type'] == "my_planet": owner = self.my_civ
+                if obj['type'] == "my_planet": owner = self.player_civ
                 elif obj['type'] == "enemy_planet": owner = self.enemy.civ
             if t == "planet":
                 r = [v * 10 for v in obj['data']['resources']]
                 pos = V2(*obj['pos'])
                 o = Planet(self, pos + self.game.game_offset, obj['size'], Resources(*r))
+                if owner and not owner.homeworld:
+                    owner.homeworld = obj
                 if owner:
                     o.change_owner(owner)
                 
@@ -159,7 +161,7 @@ class LevelScene(scene.Scene):
 
     def setup_players(self):
         # Me
-        self.homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.my_civ))[0]
+        self.homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.player_civ))[0]
         self.homeworld.population = 3 + self.game.run_info.bonus_population
         self.homeworld.ships['fighter'] = 1 + self.game.run_info.bonus_fighters
 
@@ -241,15 +243,15 @@ class LevelScene(scene.Scene):
     def add_ui_elements(self):
         self.meters = {}
         self.upgrade_texts = {}
-        for i,r in enumerate(self.my_civ.resources.data.keys()):
-            self.meters[r] = Meter(V2(19,3 + i * 14), 120, 9, RESOURCE_COLORS[r], self.my_civ.upgrade_limits.data[r])
+        for i,r in enumerate(self.player_civ.resources.data.keys()):
+            self.meters[r] = Meter(V2(19,3 + i * 14), 120, 9, RESOURCE_COLORS[r], self.player_civ.upgrade_limits.data[r])
             self.meters[r].stay = True
             self.ui_group.add(simplesprite.SimpleSprite(V2(6,2 + i * 14), "assets/i-%s.png" % r))
             self.ui_group.add(self.meters[r])
             self.upgrade_texts[r] = Text("", "small", V2(144, 4 + i * 14), multiline_width=200)
             self.ui_group.add(self.upgrade_texts[r])
 
-        self.my_civ.resources.on_change(self.on_civ_resource_change)
+        self.player_civ.resources.on_change(self.on_civ_resource_change)
 
         upy = 80
         self.saved_upgrade_buttons = {}
@@ -330,7 +332,7 @@ class LevelScene(scene.Scene):
         self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
 
         self.fleet_managers = {
-            'my':fleet.FleetManager(self, self.my_civ),
+            'my':fleet.FleetManager(self, self.player_civ),
             'enemy':fleet.FleetManager(self, self.enemy.civ)
         }
 
@@ -360,7 +362,7 @@ class LevelScene(scene.Scene):
         if self.options == "performance":
             from aliens.alien1fighter import Alien1Fighter
             for i in range(30):
-                #civ = self.my_civ if i % 2 == 0 else self.enemy.civ
+                #civ = self.player_civ if i % 2 == 0 else self.enemy.civ
                 civ = self.enemy.civ
                 p = V2(random.randint(50, self.game.game_resolution.x-50), random.randint(50, self.game.game_resolution.y-50))
                 s = Alien1Fighter(self, p, civ)
@@ -369,12 +371,12 @@ class LevelScene(scene.Scene):
                 s.set_target(random_planet)
 
         if self.options == "rich":
-            self.my_civ.resources.set_resource("iron", 1150)
-            self.my_civ.resources.set_resource("ice", 1150)
-            self.my_civ.resources.set_resource("gas", 1150) 
+            self.player_civ.resources.set_resource("iron", 1150)
+            self.player_civ.resources.set_resource("ice", 1150)
+            self.player_civ.resources.set_resource("gas", 1150) 
 
         if self.options == "gas":
-            self.my_civ.resources.set_resource("gas", 1150)                                        
+            self.player_civ.resources.set_resource("gas", 1150)                                        
 
         if self.options == "fighters":
             for i in range(20):
@@ -398,7 +400,7 @@ class LevelScene(scene.Scene):
     def dev_win(self):
         for planet in self.get_civ_planets(self.enemy.civ):
             planet.take_damage(99999, origin=None)
-            planet.change_owner(self.my_civ)
+            planet.change_owner(self.player_civ)
             planet.add_population(3)
             planet.add_ship("fighter")
 
@@ -433,6 +435,9 @@ class LevelScene(scene.Scene):
     
     def get_my_ships(self, civ):
         return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ == civ]
+
+    def get_my_ships_in_range(self, civ, pos, range):
+        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ == civ]
 
     def get_enemy_ships(self, civ):
         return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ != civ]
@@ -499,12 +504,12 @@ class LevelScene(scene.Scene):
                 self.radar.kill()
                 self.radar = None
 
-        for res_type in self.my_civ.upgrade_limits.data.keys():
-            ratio = self.my_civ.upgrade_limits.data[res_type] / self.my_civ.base_upgrade_limits.data[res_type]
+        for res_type in self.player_civ.upgrade_limits.data.keys():
+            ratio = self.player_civ.upgrade_limits.data[res_type] / self.player_civ.base_upgrade_limits.data[res_type]
             self.upgrade_texts[res_type].x = 120 * ratio + 20
             self.meters[res_type].set_width(120 * ratio)
-            self.meters[res_type].max_value = self.my_civ.upgrade_limits.data[res_type]
-            self.meters[res_type].value = self.my_civ.resources.data[res_type]            
+            self.meters[res_type].max_value = self.player_civ.upgrade_limits.data[res_type]
+            self.meters[res_type].value = self.player_civ.resources.data[res_type]            
 
     def update_game(self, dt):
         ut = time.time()
@@ -518,8 +523,8 @@ class LevelScene(scene.Scene):
         if self.level_controller:
             self.level_controller.update(dt)
 
-        if self.time > 300 and not self.my_civ.scarcity:
-            self.my_civ.enable_scarcity()
+        if self.time > 300 and not self.player_civ.scarcity:
+            self.player_civ.enable_scarcity()
             self.enemy.civ.enable_scarcity()
             fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
             self.ui_group.add(fn)
@@ -566,7 +571,7 @@ class LevelScene(scene.Scene):
         self.flowfield.update(dt)
 
         t = time.time()
-        self.my_civ.update(dt)
+        self.player_civ.update(dt)
         for enemy in self.enemies:
             enemy.civ.update(dt)
         self.update_times['civs'] = time.time() - t

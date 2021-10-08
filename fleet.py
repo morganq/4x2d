@@ -6,6 +6,7 @@ import pygame
 
 import helper
 import ships
+from aliens import bossmothership
 from button import Button
 from colors import PICO_DARKGREEN, PICO_GREEN
 from rangeindicator import RangeIndicator
@@ -100,6 +101,17 @@ class FleetManager:
             for ship in fleet.ships:
                 ship.fleet = fleet
                 self.ship_fleets[ship] = fleet           
+
+            # If this is targeting the boss, need to recreate the path every frame
+            needs_repath = isinstance(fleet.target, bossmothership.BossMothership)
+            # If the fleet is too far from where it's supposed to be, recreate.
+            if (fleet.pos - fleet.path[0]).sqr_magnitude() > 10 ** 2:
+                needs_repath = True
+            
+            if needs_repath:
+                fleet.path = [fleet.pos]
+                fleet.path_done = False
+                fleet.develop_path(999)
 
         t3 = time.time()
         #print(len(self.current_fleets))

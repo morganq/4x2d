@@ -41,11 +41,12 @@ class StarMapState(states.UIEnabledState):
         self.joy_controls_order = []
         self.joy_node_index = 0
         self.joy_current_confirm_button = None
+        
         pickable_nodes = [n for n in self.scene.nodes if n.is_pickable()]
+        if game.DEV:
+            pickable_nodes = [n for n in self.scene.nodes]
         pickable_nodes.sort(key=lambda x:x.y)
-        print("pickable")
         for node in pickable_nodes:
-            print(node)
             node.on("mouse_down", self.node_click)
             node.on("mouse_enter", self.node_hover)
             node.on("mouse_exit", self.node_unhover)
@@ -77,7 +78,7 @@ class StarMapState(states.UIEnabledState):
 
     def click_store(self):
         sound.play("click1")
-        self.scene.game.run_info.choose_path(self.current_node.node_pos)
+        self.scene.game.run_info.choose_path(*self.current_node.node_pos)
         self.scene.game.scene = StoreScene(self.scene.game, self.current_node.get_node())
         self.scene.game.scene.start()
 
@@ -122,7 +123,7 @@ class StarMapState(states.UIEnabledState):
             self.create_nodeless_display()
         elif node_sprite.get_node()['node_type'] == 'galaxy':
             self.create_encounter_display(node_sprite.get_node())
-        elif node_sprite.get_node()['node_type'] == 'shop':
+        elif node_sprite.get_node()['node_type'] == 'store':
             self.create_shop_display(node_sprite.get_node())
 
 
@@ -134,16 +135,21 @@ class StarMapState(states.UIEnabledState):
         self.display_objs = [t]
 
     def create_encounter_display(self, node):
+        self.display_objs = []
         res = self.scene.game.game_resolution
         t1 = typewriter.Typewriter("Sector %d - [!Hostile]" % node['sector'], "big", V2(60, self.scene.background.center_y + 55), PICO_WHITE, multiline_width=500)
         self.scene.ui_group.add(t1)
+        self.display_objs.append(t1)
 
         t2 = typewriter.Typewriter("Enemy: ???", "small", V2(60, self.scene.background.center_y + 75), PICO_WHITE, multiline_width=500)
         self.scene.ui_group.add(t2) 
+        self.display_objs.append(t2)
 
-        rew = rewardscene.REWARDS[node['rewards'][0]]['title']
-        t3 = typewriter.Typewriter("Reward: %s" % rew, "small", V2(60, self.scene.background.center_y + 88), PICO_WHITE, multiline_width=500)
-        self.scene.ui_group.add(t3)                
+        if node['rewards']:
+            rew = rewardscene.REWARDS[node['rewards'][0]]['title']
+            t3 = typewriter.Typewriter("Reward: %s" % rew, "small", V2(60, self.scene.background.center_y + 88), PICO_WHITE, multiline_width=500)
+            self.scene.ui_group.add(t3)                
+            self.display_objs.append(t3)
 
         btext = "LAUNCH"
         if self.scene.game.input_mode == "joystick":
@@ -153,7 +159,21 @@ class StarMapState(states.UIEnabledState):
         b.fade_in()
         self.scene.ui_group.add(b)
         self.joy_current_confirm_button = b
-        self.display_objs = [t1,t2,t3,b]
+        self.display_objs.append(b)
+        
 
     def create_shop_display(self, node):
-        pass
+        res = self.scene.game.game_resolution
+
+        t1 = typewriter.Typewriter("Sector %d - [^Shop]" % node['sector'], "big", V2(60, self.scene.background.center_y + 55), PICO_WHITE, multiline_width=500)
+        self.scene.ui_group.add(t1)
+
+        btext = "SHOP"
+        if self.scene.game.input_mode == "joystick":
+            btext = "[*x*] SHOP"
+        b = Button(V2(res.x - 30, res.y - 30), btext, "huge", self.click_store)
+        b.offset = (1, 1)
+        b.fade_in()
+        self.scene.ui_group.add(b)
+        self.joy_current_confirm_button = b
+        self.display_objs = [t1,b]

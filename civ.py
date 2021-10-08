@@ -35,6 +35,8 @@ class Civ:
         self.upkeep_enabled = True
         self.upkeep_timer = 0
 
+        self.homeworld = None
+
         # Analytics
         self.num_upgrades = 0
         self.collection_rate_history = []

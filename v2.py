@@ -73,6 +73,9 @@ class V2:
         """Return the vector's components in polar coordinates."""
         return self.__abs__(), math.atan2(self.y, self.x)
 
+    def get_angle(self):
+        return math.atan2(self.y, self.x)
+
     def magnitude(self):
         return abs(self)
 

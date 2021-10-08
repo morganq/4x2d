@@ -36,8 +36,8 @@ class UpgradeState(UIEnabledState):
     def enter(self):
         sound.play("panel")
         self.scene.paused = True
-        resource = self.scene.my_civ.upgrades_stocked[0]
-        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
+        resource = self.scene.player_civ.upgrades_stocked[0]
+        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
@@ -50,14 +50,14 @@ class UpgradeState(UIEnabledState):
         return (
             x.get_selection_info() and
             x.get_selection_info()['type'] == 'planet' and
-            x.owning_civ == self.scene.my_civ and 
+            x.owning_civ == self.scene.player_civ and 
             x.upgradeable and
             x.is_buildable()
         )
 
     def filter_my_fleets(self, x):
         return (
-            x.get_selection_info() and x.get_selection_info()['type'] == 'fleet' and x.owning_civ == self.scene.my_civ
+            x.get_selection_info() and x.get_selection_info()['type'] == 'fleet' and x.owning_civ == self.scene.player_civ
         )
 
     def get_joystick_cursor_controls(self):
@@ -81,9 +81,9 @@ class UpgradeState(UIEnabledState):
             extra.kill()
         self.extras = []        
         if not cancel:
-            self.scene.my_civ.upgrades_stocked.pop(0)
-            self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
-            self.scene.my_civ.clear_offers()
+            self.scene.player_civ.upgrades_stocked.pop(0)
+            self.scene.player_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+            self.scene.player_civ.clear_offers()
             sound.play("upgrade2")
             self.scene.pop_asset_button()
         if self.panel:
@@ -93,11 +93,11 @@ class UpgradeState(UIEnabledState):
         self.scene.sm.transition(levelstates.PlayState(self.scene))
 
     def on_reroll(self):
-        self.scene.my_civ.clear_offers()
+        self.scene.player_civ.clear_offers()
         self.panel.kill()
         self.scene.game.run_info.rerolls -= 1
-        resource = self.scene.my_civ.upgrades_stocked[0]
-        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
+        resource = self.scene.player_civ.upgrades_stocked[0]
+        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
@@ -157,8 +157,8 @@ class UpgradeState(UIEnabledState):
 
         if self.current_cursor == None:
             self.pending_upgrade = upgrade
-            self.scene.my_civ.upgrades.append(upgrade)
-            upgrade().apply(self.scene.my_civ)
+            self.scene.player_civ.upgrades.append(upgrade)
+            upgrade().apply(self.scene.player_civ)
             self.scene.ui_group.add(FunNotification(self.pending_upgrade.title, None))
             self.finish()
         else:
@@ -201,7 +201,7 @@ class UpgradeState(UIEnabledState):
             if input == "click" and self.hover_sprite:
                 sel = self.hover_sprite.get_selection_info()
                 if sel:
-                    if self.current_cursor == "allied_planet" and sel['type'] == "planet" and self.hover_sprite.owning_civ == self.scene.my_civ:
+                    if self.current_cursor == "allied_planet" and sel['type'] == "planet" and self.hover_sprite.owning_civ == self.scene.player_civ:
                         self.selected_targets.append(self.hover_sprite)
                         self.next_selection_step()
                         return
@@ -251,7 +251,7 @@ class UpgradeState(UIEnabledState):
             if spr:
                 sel = spr.get_selection_info()
                 if sel:
-                    if self.current_cursor == "allied_planet" and sel['type'] == "planet" and spr.owning_civ == self.scene.my_civ:
+                    if self.current_cursor == "allied_planet" and sel['type'] == "planet" and spr.owning_civ == self.scene.player_civ:
                         self.selected_targets.append(spr)
                         self.next_selection_step()
                         return
@@ -301,8 +301,8 @@ class UpgradeState(UIEnabledState):
 
         self.cursor_type = None
         self.pending_upgrade = None
-        resource = self.scene.my_civ.upgrades_stocked[0]
-        self.panel = UpgradePanel(V2(0,0), self.scene.my_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
+        resource = self.scene.player_civ.upgrades_stocked[0]
+        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
@@ -346,7 +346,7 @@ class DevAnyUpgradeState(UpgradeState):
             extra.kill()
         self.extras = []        
         if not cancel:
-            self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+            self.scene.player_civ.researched_upgrade_names.add(self.pending_upgrade.name)
         if self.panel:
             self.panel.kill()
         self.scene.sm.transition(levelstates.PlayState(self.scene))        
@@ -376,7 +376,7 @@ class SavedUpgradeState(UpgradeState):
         self.extras = []        
         if not cancel:
             self.scene.invalidate_saved_upgrade(self.pending_upgrade)
-            self.scene.my_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+            self.scene.player_civ.researched_upgrade_names.add(self.pending_upgrade.name)
         self.scene.sm.transition(levelstates.PlayState(self.scene))
 
     def on_back(self):

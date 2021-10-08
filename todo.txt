@@ -1,18 +1,17 @@
 ** Alpha **
 other menu graphics
 
+after blow up crystal, recall
+indicator is gone for order panel
+recall ships when mothership arrives
+sometimes can't target mothership?
+
 implement boss
- x implement time crystal planets
- x implement new alien
- x implement two stage levelscene
- - implement reviver mothership
  - implement tutorial for what you gotta do 
- 
-improve pathfinding display or logic
+ - what to do when win
 
 another pass on alien assets + features
-aliens use only subset of their ships based on difficulty
- - show tips against aliens based on what ships are available to them
+better alien tips against aliens based on what ships are available to them
 make sure planet panel updates properly
 time loop on last few levels
 more intentional difficulty curve (?)

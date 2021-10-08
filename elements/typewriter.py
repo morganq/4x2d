@@ -4,12 +4,12 @@ from helper import clamp
 
 
 class Typewriter(text.Text):
-    def __init__(self, text, size, pos, color=PICO_WHITE, rate=20, border=False, multiline_width=80, center=False, shadow=False, offset=None, onclick=None, onhover=None, flash_color=None):
+    def __init__(self, text, size, pos, color=PICO_WHITE, rate=20, time_offset=0, border=False, multiline_width=80, center=False, shadow=False, offset=None, onclick=None, onhover=None, flash_color=None):
         super().__init__(text, size, pos, color=color, border=border, multiline_width=multiline_width, center=center, shadow=shadow, offset=offset, onclick=onclick, onhover=onhover, flash_color=flash_color)
         self.final_surf = self.image
         self.set_text("")
         self.base_text = text
-        self.time = 0
+        self.time = time_offset
         self.rate = rate
 
     def update(self, dt):

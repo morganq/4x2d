@@ -10,7 +10,9 @@ from planet import planet
 from rangeindicator import RangeIndicator
 from ships.all_ships import SHIPS_BY_NAME
 from ships.battleship import Battleship
+from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
+from spritebase import SpriteBase
 from v2 import V2
 
 REVIVING_PLANET_CLOSE_RANGE = 50
@@ -18,12 +20,27 @@ ACCEL = 4
 BRAKE = 6
 REINCARNATE_RANGE = 85
 
+class Soul(SimpleSprite):
+    def __init__(self, pos, ship):
+        super().__init__(pos, "assets/soul.png")
+        self.offset = (0.5,0.5)
+        self.ship = ship
+        self.time = 0
+
+    def update(self, dt):
+        self.time += dt
+        if self.time > 5:
+            self.ship.set_health(self.ship.get_max_health())
+            self.ship.scene.game_group.add(self.ship)
+            self.kill()
+        return super().update(dt)
 
 class BossMothership(SpaceObject):
     STATE_CINEMATIC_TRAVELING = "cinematic_traveling"
     STATE_CINEMATIC_POPULATING = "cinematic_populating"
     STATE_GAME_WAITING = "waiting"
     STATE_GAME_TRAVELING = "traveling"
+    HEALTHBAR_SIZE = (50,4)
     def __init__(self, scene, pos):
         super().__init__(scene, pos)
         self.time = 0
@@ -52,10 +69,13 @@ class BossMothership(SpaceObject):
         self.travel_target = None
         self.wait_time = 5
 
-        self.set_health(500)
-        self.health_bar.stay = True
-        self.health_bar.visible = True
+        self.set_health(self.get_max_health())
         self.range_indicator = None
+        self.allied_ships_in_range = []
+        self.souls = []
+
+    def get_max_health(self):
+        return 1500
 
     def brake(self, dt):
         if self.velocity.sqr_magnitude() > 0:
@@ -78,6 +98,8 @@ class BossMothership(SpaceObject):
 
     def update(self, dt):
         self.time += dt
+
+        self.health_bar.pos = self.pos + V2(0, -self.height / 2)
 
         if self.time > 1.0 and not self.jumped:
             self.jumped = True
@@ -116,8 +138,8 @@ class BossMothership(SpaceObject):
                     for i in range(num):
                         self.emit.append(self.ships_on_board.pop(0))
                     self.emit_timer = 5.0
-                    if self.target_planet.owning_civ == self.scene.my_civ:
-                        possible_evacs = self.scene.get_civ_planets(self.scene.my_civ)
+                    if self.target_planet.owning_civ == self.scene.player_civ:
+                        possible_evacs = self.scene.get_civ_planets(self.scene.player_civ)
                         possible_evacs.remove(self.target_planet)
                         if possible_evacs:
                             evac_target = helper.get_nearest(self.target_planet, possible_evacs)[0]
@@ -144,7 +166,7 @@ class BossMothership(SpaceObject):
                         self.scene.ui_group.add(self.range_indicator)
             else:
                 if self.emit_timer < 0:
-                    if self.target_planet.owning_civ == self.scene.my_civ:
+                    if self.target_planet.owning_civ == self.scene.player_civ:
                         self.target_planet.change_owner(None)
                     self.emit_timer = 1.0
                     name = self.emit.pop(0)
@@ -198,8 +220,22 @@ class BossMothership(SpaceObject):
         self.pos += self.velocity * dt
         if self.range_indicator:
             self.range_indicator.pos = self.pos
+
+        if self.state in [self.STATE_GAME_WAITING, self.STATE_GAME_TRAVELING]:
+            self.update_reincarnation()
             
         return super().update(dt)
+
+    def update_reincarnation(self):
+        nearby_ships = self.scene.get_my_ships_in_range(self.owning_civ, self.pos, REINCARNATE_RANGE)
+        all_ships = set(self.allied_ships_in_range + nearby_ships)
+        soul_ships = [s.ship for s in self.souls]
+        for ship in all_ships:
+            if ship.health <= 0 and ship not in soul_ships:
+                soul = Soul(ship.pos, ship)
+                self.souls.append(soul)
+                self.scene.game_group.add(soul)
+        self.allied_ships_in_range = nearby_ships[::]
 
     def _generate_image(self):
         frames = 30
