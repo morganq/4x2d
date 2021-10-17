@@ -41,6 +41,10 @@ class BossLevelController(levelcontroller.LevelController):
     def detect_victory(self):
         if self.phase == PHASE_1:
             if not self.scene.get_civ_planets(self.scene.enemy.civ):
+                # TODO: remove this
+                self.scene.paused = True
+                self.scene.sm.transition(levelstates.BeatGameState(self.scene))
+                return
                 self.phase = PHASE_REVIVING
                 self.scene.sm.transition(levelstates.CinematicState(self.scene))
                 self.mothership = bossmothership.BossMothership(self.scene, V2(game.Game.inst.game_resolution.x * 0.75, -20))
@@ -53,4 +57,4 @@ class BossLevelController(levelcontroller.LevelController):
             if self.mothership.health <= 0:
                 self.mothership.kill()
                 self.scene.paused = True
-                self.scene.sm.transition(levelstates.VictoryState(self.scene))
+                self.scene.sm.transition(levelstates.BeatGameState(self.scene))

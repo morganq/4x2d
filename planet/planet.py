@@ -453,7 +453,7 @@ class Planet(SpaceObject):
             prod_rate = 1 + self.get_stat("ship_production")
             prod_amt_mul = 1
 
-            prod_amt_mul += self.get_stat("ship_production_per_pop") * self.population
+            prod_rate *= 1 + self.get_stat("ship_production_rate_per_pop") * self.population
 
             if prod.ship_type == "fighter":
                 prod_amt_mul += self.get_stat("fighter_production_amt")

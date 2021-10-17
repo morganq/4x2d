@@ -69,9 +69,9 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             elif sys.argv[1] == "game":
-                self.scene = levelscene.LevelScene(self, "choke", "alien3", 3, 3, "Testing", "This is a test string for the description")
+                self.scene = levelscene.LevelScene(self, "choke", "alien2", 5, 5, "Testing", "This is a test string for the description")
             elif sys.argv[1] == "boss":
-                self.scene = levelscene.LevelScene(self, "boss", "boss", 9, 9, "Boss", "It's the boss")
+                self.scene = levelscene.LevelScene(self, "boss2", "boss", 9, 9, "Boss", "It's the boss")
             elif sys.argv[1] == "planet":
                 self.scene = planetgenscene.PlanetGenScene(self)
             elif sys.argv[1] == "new":

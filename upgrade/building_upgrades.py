@@ -108,7 +108,7 @@ class Pop2bUpgrade(AddBuildingUpgrade):
     icon = "university"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop1']}
-    building = make_simple_stats_building(stats=Stats(ship_production_per_pop=0.15), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(ship_production_rate_per_pop=0.15), shape="lifesupport")
     requires = ('b_pop1',)
 
 @register_upgrade

@@ -1,6 +1,6 @@
 import random
 
-from colors import PICO_ORANGE
+from colors import *
 from helper import clamp
 from planet import building as buildings
 from productionorder import ProductionOrder
@@ -156,23 +156,22 @@ class Alien3(alien.Alien):
         self.ship_void = {}
 
     def get_build_order_steps(self):
-        if self.difficulty == 1:
-            return [
-                BOResearch(0,"a3sfighter"),
-                BOResearch(30,"a3tvoid"),
-                BOResearch(50,"a3tvoid"),
-                BOExpand(60),
-                BOExpand(60),
-            ]
-        return [
+        bo = [
             BOResearch(0,"a3sfighter"),
-            BOAttack(20),
-            BOResearch(30,"a3tvoid"),
-            BOResearch(50,"a3tvoid"),
-            BOResearch(70,"a3sfighter"),
-            BOExpand(70),
-            BOExpand(70),
+            BOExpand(10, BOExpand.TARGET_TYPE_MIDDLE),
+            BOResearch(20,"a3becon"),
+            BOResearch(30,"a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOResearch(40, "a3bice", "a3becon"),
+            BOExpand(50, BOExpand.TARGET_TYPE_MIDDLE),
+            BOResearch(70,"a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOResearch(70,"a3tvoid"),
+            BOResearch(80,"a3tvoid"),
+            BOResearch(90,"a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOAttack(110, BOAttack.ATTACK_TYPE_OUTLYING),
         ]
+        if self.difficulty >= 3:
+            bo.append(BOAttack(115, BOAttack.ATTACK_TYPE_OUTLYING))
+        return bo
 
     def set_difficulty(self, difficulty):
         super().set_difficulty(difficulty)
@@ -211,62 +210,6 @@ class Alien3(alien.Alien):
     def grow_void(self):
         for void in self.planet_void.values():
             void.grow()
-
-    def get_resource_priority_odds(self):
-        if self.time < 180 and self.fear_attack:
-            return {'produce':0.95, 'grow':0.05,'tech':0}
-        return {
-            'produce':0.3,
-            'grow':0.3,
-            'tech':0.4
-        }
-
-    def get_attack_chance(self, my_planet, target):
-        odds = 0
-        if not self.build_order.is_over():
-            bostep = self.build_order.get_current_step(self.time)
-            if bostep and bostep.name == "attack":
-                print("Attacking because it's the build order")
-                odds = 1
-            else:
-                odds = 0
-
-        elif self.time > self.last_attack_time + (120 - self.difficulty * 8):
-            print("Attacking because it's been %d seconds" % (120 - self.difficulty * 8))
-            odds = 1
-
-        elif my_planet.ships['alien3battleship'] > 0:
-            print("Attacking because we have a battleship")
-            return 1
-
-        else:
-            print("Random chance to attack")
-            odds = 0.1
-
-        if self.count_attacking_ships() < self.get_max_attackers():
-            return odds
-        else:
-            print("May have attacked, but at max attackers", self.get_max_attackers())
-            return 0
-
-    def get_expand_chance(self, planet):    
-        if not self.build_order.is_over():
-            bostep = self.build_order.get_current_step(self.time)
-            if bostep and bostep.name == "expand":
-                self.build_order.completed_current_step()
-                return 1
-            else:
-                return 0
-
-        colonists_out = self.count_expanding_ships()              
-
-        if len(self.scene.get_civ_planets(self.civ)) < 3:
-            return 0.1 * planet.population / (colonists_out + 1)
-        else:
-            return 0.01 * planet.population / (colonists_out + 1)
-
-    def get_defend_chance(self, my_planet, target):
-        return 0
 
     def get_attacking_ships(self):
         return ['alien3fighter', 'alien3bomber', 'alien3battleship']

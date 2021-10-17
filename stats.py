@@ -93,7 +93,7 @@ VALID_STAT_NAMES = [
     'ship_health_mul',
     'ship_missile_speed',
     'ship_production',
-    'ship_production_per_pop',
+    'ship_production_rate_per_pop',
     'ship_production_proximity',
     'ship_regenerate',
     'ship_speed_mul_targeting_planets',

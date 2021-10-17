@@ -166,11 +166,11 @@ class Fleet:
         self.path_done = False
 
     def is_waiting(self):
-        average_time = sum(s.waiting_time for s in self.ships) / len(self.ships)
-        if average_time >= 6:
+        min_time = min(s.waiting_time for s in self.ships)
+        if min_time >= 25:
             return True
         return False
-
+        
     def mode_state(self):
         states = defaultdict(lambda:0)
         for s in self.ships:
@@ -178,6 +178,8 @@ class Fleet:
         return max([(b,a) for a,b in states.items()])[1]
 
     def develop_path(self, num_steps):
+        if not self.target:
+            return
         for i in range(num_steps):
             if (self.path[-1] - self.target.pos).sqr_magnitude() < (PATH_STEP_SIZE * 2) ** 2:
                 self.path_done = True
@@ -188,7 +190,6 @@ class Fleet:
                 delta = self.target.pos - self.pos
                 new_pt = self.path[-1] + delta.normalized() * PATH_STEP_SIZE
             self.path.append(new_pt)
-        print(num_steps, len(self.path))
 
 
     def get_size_info(self):

@@ -423,6 +423,7 @@ class Ship(SpaceObject):
     def kill(self):
         if self.health <= 0:
             sound.play("explosion1")
+            self.owning_civ.ships_lost += 1 # For score + stats
             base_angle = random.random() * 6.2818
             for x in range(self.image.get_width()):
                 for y in range(self.image.get_height()):

@@ -129,9 +129,10 @@ class LevelScene(scene.Scene):
                 pos = V2(*obj['pos'])
                 o = Planet(self, pos + self.game.game_offset, obj['size'], Resources(*r))
                 if owner and not owner.homeworld:
-                    owner.homeworld = obj
+                    owner.homeworld = o
                 if owner:
                     o.change_owner(owner)
+                    o.population = 1
                 
             elif obj['type'] == "hazard":
                 pos = V2(*obj['pos'])
@@ -346,7 +347,7 @@ class LevelScene(scene.Scene):
         self.setup_mods()
 
         # Add the time loops
-        if self.difficulty >= 6:
+        if self.difficulty >= 6 and self.difficulty < 9:
             planets = [s for s in self.get_objects_initial() if isinstance(s, Planet) and s.owning_civ == None and s.time_loop == False]
             if planets:
                 planets.sort(key=lambda x:x.pos.x)
@@ -485,7 +486,7 @@ class LevelScene(scene.Scene):
         #    self.update_game(TICK_TIME * self.game_speed)
         #    self.update_remainder_time -= TICK_TIME
 
-        self.update_game(dt * self.game_speed)
+        self.update_game(dt * self.game_speed, dt)
         self.update_ui(dt)
 
     def update_ui(self, dt):
@@ -511,11 +512,11 @@ class LevelScene(scene.Scene):
             self.meters[res_type].max_value = self.player_civ.upgrade_limits.data[res_type]
             self.meters[res_type].value = self.player_civ.resources.data[res_type]            
 
-    def update_game(self, dt):
+    def update_game(self, dt, base_dt):
         ut = time.time()
         self.update_times = defaultdict(lambda:0)
         if self.paused:
-            self.sm.state.paused_update(dt)
+            self.sm.state.paused_update(base_dt)
             return        
 
         self.time += dt
@@ -759,6 +760,9 @@ class LevelScene(scene.Scene):
 
         return None
 
+    def update_run_stats(self):
+        self.game.run_info.time_taken += self.time
+        self.game.run_info.ships_lost += self.player_civ.ships_lost
 
     def take_input(self, inp, event):
         if inp == "other" and game.DEV:

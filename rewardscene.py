@@ -36,7 +36,7 @@ class RewardSelector(SpriteBase):
 class RewardState(states.UIEnabledState):
     is_basic_joystick_panel = True
     def enter(self):
-        self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 50) + self.scene.game.game_offset, PICO_BLUE, multiline_width=480, offset=(0.5,0)))
+        self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 50) + self.scene.game.game_offset, PICO_BLUE, multiline_width=600, offset=(0.5,0)))
         self.scene.ui_group.add(Text(self.description, 'big', V2(game.RES[0] / 2, 90) + self.scene.game.game_offset, PICO_WHITE, multiline_width=380, offset=(0.5,0)))
 
         self.confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50) + self.scene.game.game_offset, "Confirm", "big", self.on_confirm)

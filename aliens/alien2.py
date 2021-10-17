@@ -196,7 +196,7 @@ class Alien2(alien.Alien):
 
     @classmethod
     def get_quote(kls):
-        s = "\"Factory Default Signal. Change Me!\""
+        return "\"Factory Default Signal. Change Me!\""
 
     def __init__(self, scene, civ):
         super().__init__(scene, civ)
@@ -206,25 +206,28 @@ class Alien2(alien.Alien):
         self.curse = None
 
     def get_build_order_steps(self):
-        if self.difficulty == 1:
-            return [
-                BOExpand(0),
-                BOResearch(0,"alien2econrate"),
-                BOResearch(30,"alien2econrate"),
-                BOResearch(50,"alien2fighters"),
-                BOExpand(80)
-            ]
         return [
-            BOExpand(0),
-            BOResearch(0,"alien2econrate"),
-            BOResearch(30,"alien2econrate"),
-            BOResearch(50,"alien2fighters"),
-            BOExpand(80),
-            BOResearch(100, "alien2techspeed")
+            BOResearch(5,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
+            BOResearch(10,"alien2fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOResearch(20,"alien2econrate"),
+            BOExpand(35),
+            BOExpand(35, target_type=BOExpand.TARGET_TYPE_NEAR_ENEMY),
+            BOResearch(36,"alien2controlship", "alien2fighters"),
+            BOResearch(70,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
+            BOResearch(70,"alien2fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOExpand(70),
+            BOResearch(90,"alien2fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOResearch(90,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
+            BOResearch(90,"alien2controlship", "alien2fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOResearch(90,"alien2battleship", "alien2controlship", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOAttack(120, BOAttack.ATTACK_TYPE_OUTLYING),
+            BOResearch(120,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
+            BOResearch(120, "alien2techspeed"),
+            BOResearch(130, "alien2techspeed"),            
+            BOResearch(140,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
         ]
 
     def update(self, dt):
-        self.pick_new_target_time += dt
         if self.duration_edge(60):
             if self.attack_to:
                 self.attack_to.upgradeable = True
@@ -243,95 +246,6 @@ class Alien2(alien.Alien):
                 self.attack_to.upgradeable = False
                 
         return super().update(dt)
-
-    def set_difficulty(self, difficulty):
-        super().set_difficulty(difficulty)
-        #self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
-
-    def get_resource_priority_odds(self):
-        if self.time < 180 and self.fear_attack:
-            return {'produce':0.95, 'grow':0.05,'tech':0}
-        if self.time < 180:
-            return {
-                'grow':0.5,
-                'produce':0.2,
-                'tech':0.3
-            }
-        elif self.time < 300:
-            return {
-                'grow':0,
-                'produce':1,
-                'tech':0
-            }            
-        else:
-            return {
-                'grow':0.2,
-                'produce':0.5,
-                'tech':0.3
-            }
-
-    def get_attack_chance(self, my_planet, target):
-        odds = 0
-        if not self.build_order.is_over():
-            bostep = self.build_order.get_current_step(self.time)
-            if bostep and bostep.name == "attack":
-                print("Attacking because it's the build order")
-                odds = 1
-            else:
-                odds = 0
-
-        elif self.time > self.last_attack_time + (130 - self.difficulty * 4):
-            print("Attacking because it's been %d seconds" % (130 - self.difficulty * 4))
-            odds = 1
-
-        elif my_planet.ships['alien2battleship'] > 0:
-            print("Attacking because we have a battleship")
-            return 1
-
-        elif target == self.attack_to:
-            for ship in self.scene.get_civ_ships(self.civ):
-                if ship.chosen_target == target:
-                    print("Attacking because other ships are attacking the intimidated target")
-                    odds = 1
-
-        else:
-            print("Random chance to attack")
-            odds = 0.1
-
-        if self.count_attacking_ships() < self.get_max_attackers():
-            return odds
-        else:
-            print("May have attacked, but at max attackers", self.get_max_attackers())
-            return 0
-
-    def _get_possible_attack_targets(self, planet):
-        if self.attack_to:
-            return [self.attack_to]
-        return []
-
-    def get_expand_chance(self, planet):    
-        if not self.build_order.is_over():
-            bostep = self.build_order.get_current_step(self.time)
-            if bostep and bostep.name == "expand":
-                self.build_order.completed_current_step()
-                return 1
-            else:
-                return 0
-
-        colonists_out = self.count_expanding_ships()             
-
-        if len(self.scene.get_civ_planets(self.civ)) < 3:
-            return 0.1 * planet.population / (colonists_out + 1)
-        else:
-            return 0.01 * planet.population / (colonists_out + 1)
-
-    def get_defend_chance(self, my_planet, target):
-        if self.attack_from == target and sum(my_planet.ships.values()) > 0:
-            if (my_planet.pos - self.attack_to.pos).sqr_magnitude() < (self.attack_from.pos - self.attack_to.pos).sqr_magnitude():
-                return 0
-            else:
-                return 1
-        return 0
 
     def get_attacking_ships(self):
         return ['alien2fighter', 'alien2controlship', 'fighter', 'bomber', 'interceptor', 'battleship']

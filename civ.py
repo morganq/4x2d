@@ -44,6 +44,9 @@ class Civ:
         self.collection_cycle_time = 0
         self.time = 0
         self.upgrade_times = []
+
+        # Score
+        self.ships_lost = 0
         
         ### Upgrades Stuff ###
         self.nuclear_instability_timer = 0

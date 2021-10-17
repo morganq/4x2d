@@ -141,7 +141,12 @@ class StarMapScene(Scene):
                     prev_obj = self.grid[-2][j]
                     path = StarPath(p1,p2,obj.is_travelled() and prev_obj.is_travelled(), obj.is_pickable() and prev_obj.is_travelled())
                     self.game_group.add(path)
-                if not obj.is_travelled():
+                if obj.is_travelled():
+                    if r < len(run_path) - 1:
+                        o = SimpleSprite(obj.pos, "assets/si-traveled.png")
+                        o.offset = (0.5,0.5)
+                        self.game_group.add(o)
+                else:
                     self.nodes.append(obj)
                     self.game_group.add(obj)
                     if reward:

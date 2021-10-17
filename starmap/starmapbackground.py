@@ -3,7 +3,9 @@ import random
 import game
 import pygame
 import spritebase
+import text
 from colors import *
+from v2 import V2
 
 
 class StarmapBackground(spritebase.SpriteBase):
@@ -22,11 +24,19 @@ class StarmapBackground(spritebase.SpriteBase):
         self.image.fill(PICO_BLACK) 
 
         x = game.Game.inst.game_offset.x
+        x2 = x + 64
         lx = x + 360
 
         pygame.draw.rect(self.image, PICO_DARKGREEN, (0,0,lx, self.center_y))
+
+        pygame.draw.rect(self.image, PICO_BLACK, (0,0,x2, self.center_y))
+        pygame.draw.line(self.image, PICO_DARKGREEN, (x2,0), (x2, self.center_y))
+        
         pygame.draw.rect(self.image, PICO_DARKBLUE, (lx,0,res.x-lx, self.center_y))
         pygame.draw.line(self.image, PICO_DARKBLUE, (lx-2,0), (lx-2, self.center_y))
+
+        text.render_multiline_to(self.image, (x2 + (lx-x2) / 2 - 32, 10), "- Outer Ring -", "small", PICO_YELLOW, wrap_width=200)
+        text.render_multiline_to(self.image, (lx + (res.x - lx) / 2 - 32, 10), "- Inner Ring -", "small", PICO_YELLOW, wrap_width=200)
 
         for i in range(200):
             color = PICO_LIGHTGRAY

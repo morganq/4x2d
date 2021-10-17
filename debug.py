@@ -36,6 +36,7 @@ def debug_render(screen, scene):
         text.FONTS['tiny'].render_to(surf, (planet.pos + V2(-15,15)).tuple(), "%s" % sum(planet.ships.values()), (255,128,255,120))
 
     text.FONTS['tiny'].render_to(surf, (250, 5), ["feeling safe","in fear"][scene.enemy.fear_attack], (255,128,255,120))
+    text.FONTS['tiny'].render_to(surf, (250, 15), "%d ups" % len(scene.enemy.civ.upgrades_stocked), (255,128,255,120))
             
 
     for fleet in scene.fleet_managers['my'].current_fleets:

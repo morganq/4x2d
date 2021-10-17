@@ -2,6 +2,7 @@ import json
 
 import pygame
 
+import game
 import text
 from background import Background
 from colors import *
@@ -141,6 +142,7 @@ class LevelEditorScene(Scene):
         text.render_multiline_to(self.game.screen, (18,16), str(self.current_object_resources[1]), "small", PICO_BLUE)
         text.render_multiline_to(self.game.screen, (33,16), str(self.current_object_resources[2]), "small", PICO_PINK)
         pygame.draw.rect(self.game.screen, PICO_LIGHTGRAY, (3 + self.current_object_resources_index * 15, 24,6,2))
+        pygame.draw.rect(self.game.screen, PICO_WHITE, (*self.game.game_offset.tuple(), *game.RES),1)
         return super().render()
 
     def update(self, dt):

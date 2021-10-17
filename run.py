@@ -6,20 +6,21 @@ from upgrade.upgrades import UPGRADE_CLASSES
 RUN_INFO_SERIALIZE_FIELDS = [
     'data', 'path', 'saved_technologies', 'blueprints',
     'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
-    'bonus_credits', 'ship_levels', 'score', 'reward_list'
+    'bonus_credits', 'ship_levels', 'score', 'time_taken', 'ships_lost',
+    'reward_list', 'sectors_cleared', 'victory'
 ]
 
 LEVEL_TITLES = {
     0: {'name':'This is a bug', 'description':'This is a bug'},
     1: {'name':'Surprise Attack', 'description':'We\'ve entered the system undetected - a promising start to our mission.'},
     2: {'name':'Alert!', 'description':'They\'ve issued an alert to the federation. Let\'s make quick work of this before reinforcements are prepared.'},
-    3: {'name':'Reinforcements', 'description':'Get ready, it seems the whole sector knows we\'re here!'},
-    4: {'name':'Strange Technology', 'description':'They have some strange new technology... where did they get that?'},
-    5: {'name':'Breakthrough', 'description':'We are nearing the Inner Ring, what lies beyond the belt?'},
-    6: {'name':'Discovery', 'description':'We\'re detecting a temporal anomoly on one of these planets - it\s locked in a time loop!'},
-    7: {'name':'Stronghold', 'description':'The distress signal is not far off now. But the enemy\'s defenses are only improving.'},
-    8: {'name':'Second Guess', 'description':'What if we\'re flying into a trap?'},
-    9: {'name':'Outpost', 'description':'This is it.'},
+    3: {'name':'Reinforcements', 'description':'Bad luck, now the whole sector knows we\'re here!'},
+    4: {'name':'All-In', 'description':'All the alien civs have closed ranks. Nowhere to go but forward.'},
+    5: {'name':'Breakthrough', 'description':'We are nearing the Inner Ring of the galaxy, but these aliens guarding it have some kind of advanced technology.'},
+    6: {'name':'Discovery', 'description':'We\'re detecting a temporal anomoly on one of these planets - it\'s locked in a time loop!'},
+    7: {'name':'Stronghold', 'description':'The signal is not far off. But the enemy\'s defenses are only getting stronger.'},
+    8: {'name':'Shop', 'description':'Shop level'},
+    9: {'name':'Signal Source', 'description':'This is where the signal originated. There, our comrades, frozen in time! We have to save them!'},
 }
 
 class RunInfo:
@@ -36,6 +37,10 @@ class RunInfo:
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0
+        self.sectors_cleared = 0
+        self.time_taken = 0
+        self.ships_lost = 0
+        self.victory = False
         self.reward_list = []
         self.next_path_segment = (0,0)
 

@@ -15,7 +15,7 @@ from text import Text
 from v2 import V2
 
 MOD_STRINGS = {
-    'warp_drive':'Enemy have warp drive technology.',
+    'warp_drive':'Enemy starts with warp drive technology.',
     'big_planet':'Enemy starts with a super planet.',
     'reflector':'Enemy has planetary reflector shields.',
     'atomic_bomb':'Enemy has atomic bombs attached to their worker ships.',
@@ -30,6 +30,7 @@ class LoadingScene(Scene):
         self.loaded = False
         self.levelscene = None
         self.loading_text = None
+        self.warnings = []
 
     def start(self):
         self.group = pygame.sprite.LayeredDirty()
@@ -84,9 +85,12 @@ class LoadingScene(Scene):
             self.quote.visible = False
 
         if galaxy['mods']:
-            self.group.add(SimpleSprite(V2(11, 322) + self.game.game_offset, "assets/exclamation.png"))
-            self.group.add(Text("WARNING", "small", V2(29, 320) + self.game.game_offset, PICO_YELLOW, multiline_width=400, center=False))
-            self.group.add(Text(MOD_STRINGS[galaxy['mods'][0]], "small", V2(29, 330) + self.game.game_offset, PICO_WHITE, multiline_width=400, center=False))
+            self.group.add(SimpleSprite(V2(61, 322) + self.game.game_offset, "assets/exclamation.png"))
+            self.group.add(Text("WARNING", "small", V2(79, 320) + self.game.game_offset, PICO_YELLOW, multiline_width=400, center=False))
+            self.group.add(Text(MOD_STRINGS[galaxy['mods'][0]], "small", V2(79, 330) + self.game.game_offset, PICO_WHITE, multiline_width=400, center=False))
+            self.warnings = self.group.sprites()[-3:]
+            for warning in self.warnings:
+                warning.visible = False
 
         self.sm = Machine(UIEnabledState(self))
 
@@ -104,6 +108,11 @@ class LoadingScene(Scene):
                 tip[1].visible = True
         if self.quote and self.time > 2.5:
             self.quote.visible = True
+            
+        if self.time > 3.25:
+            for warning in self.warnings:
+                warning.visible = True
+
         if not self.loaded and self.rendered and self.time > 4:
             self.levelscene = levelscene.LevelScene(
                 self.game,

@@ -7,7 +7,7 @@ from upgrade.building_upgrades import (AddBuildingUpgrade,
                                        make_simple_stats_building)
 from upgrade.upgrades import Upgrade, register_upgrade
 
-from aliens import alien, bosscolonist, bossfighter, bosslaser
+from aliens import alien, bosscolonist, bossfighter, bosslaser, buildorder
 from aliens.buildorder import *
 
 
@@ -44,7 +44,7 @@ class BossFighterProductionUpgrade(Upgrade):
 
 @register_upgrade
 class BossFighterProductionUpgradeIce(BossFighterProductionUpgrade):
-    name = "bosswarpship"
+    name = "bosslaser"
     resource_type = "ice"
     category = "ships"
     title = "Alien Warpship Production"
@@ -174,111 +174,24 @@ class Boss(alien.Alien):
         ]
 
     def set_difficulty(self, difficulty):
-        super().set_difficulty(difficulty)
-        #self.EXPAND_DURATION = max(40 - (difficulty * 2), 10)
-        self.EXPAND_DURATION = 10
-
         my_planet = self.scene.get_civ_planets(self.civ)[0]
         my_planet.add_building(BossHomeDefenseUpgrade)
+        my_planet.population = 10
+
+        self.civ.base_stats['planet_health_mul'] = 2
+        self.civ.base_stats['mining_rate'] = 1.5
+        self.civ.base_stats['max_ships_per_planet'] = 999
 
         self.starting_num_planets = len(self.scene.get_civ_planets(self.civ))
 
-    def get_resource_priority_odds(self):
-        if self.time < 180 and self.fear_attack:
-            return {'produce':0.85, 'grow':0.05,'tech':0.1}
-        if self.time < 180:
-            return {
-                'grow':0.5,
-                'produce':0.2,
-                'tech':0.3
-            }        
-        else:
-            return {
-                'grow':0.2,
-                'produce':0.45,
-                'tech':0.35
-            }             
+        for planet in self.scene.get_civ_planets(self.civ):
+            planet.set_health(planet.get_max_health(), False)
 
-    def get_attack_chance(self, my_planet, target):
-        odds = 0
-        if not self.build_order.is_over():
-            bostep = self.build_order.get_current_step(self.time)
-            if bostep and bostep.name == "attack":
-                print("Attacking because it's the build order")
-                odds = 1
-            else:
-                odds = 0
+        self.build_order = buildorder.BuildOrder(self.get_build_order_steps())        
 
-        elif self.time > self.last_attack_time + (120 - self.difficulty * 8):
-            print("Attacking because it's been %d seconds" % (120 - self.difficulty * 8))
-            odds = 1
-
-        elif my_planet.ships['bossbattleship'] > 0:
-            print("Attacking because we have a battleship")
-            return 1
-
-        else:
-            print("Random chance to attack")
-            odds = 0.1
-
-        if self.count_attacking_ships() < self.get_max_attackers():
-            return odds
-        else:
-            print("May have attacked, but at max attackers", self.get_max_attackers())
-            return 0
 
     def get_colonist(self):
         return "bosscolonist"
-
-    def _get_possible_expand_targets(self, planet):
-        near_planets = self.scene.get_planets()
-        near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
-
-        num_planets = len(self.scene.get_civ_planets(self.civ))
-        if num_planets > self.starting_num_planets:
-            near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:3]
-        else:
-            near_unclaimed = [p for p in near_planets if p.owning_civ == None][-4:]
-
-        return near_unclaimed
-
-    def get_expand_chance(self, planet):    
-        if not self.build_order.is_over():
-            bostep = self.build_order.get_current_step(self.time)
-            if bostep and bostep.name == "expand":
-                self.build_order.completed_current_step()
-                return 1
-            else:
-                return 0
-
-        num_planets = len(self.scene.get_civ_planets(self.civ))
-        z = clamp((120 - self.time) / 20, 1, 3)
-        if num_planets < 4:
-            odds = 0.15 * (planet.population-1) * z
-        else:
-            odds = 0.009 * planet.population
-
-        colonists_out = self.count_expanding_ships()
-
-        return odds / (colonists_out + 1)
-
-    def get_defend_chance(self, my_planet, target):
-        return 0
-
-    def get_max_attackers(self):
-        curve = {
-            1: 0,
-            2: 3,
-            3: 4,
-            4: 4,
-            5: 5,
-            6: 7,
-        }.get(self.difficulty, 999)        
-
-        if self.difficulty > 1 and self.time > 300:
-            curve *= 2
-
-        return curve
 
     def get_attacking_ships(self):
         return ['bossfighter', 'bosslaser']

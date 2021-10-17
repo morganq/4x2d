@@ -1,3 +1,6 @@
+import datetime
+import math
+
 import pygame
 
 import game
@@ -18,8 +21,9 @@ from arrow import OrderArrow
 from asteroid import Asteroid
 from button import Button
 from colors import *
+from elements import expandingtext
 from funnotification import FunNotification
-from helper import get_nearest
+from helper import clamp, get_nearest
 from helppanel import HelpPanel
 from orderpanel import OrderPanel
 from planet.planetpanel import PlanetPanel
@@ -484,39 +488,36 @@ class OrderShipsState(UIEnabledState):
 
 class GameOverState(State):
     def enter(self):
-        print("score", "resource", self.scene.score)
-        self.scene.game.run_info.score += int(self.scene.score)
-        scores = save.SAVE_OBJ.add_highscore(self.scene.game.run_info.score)
-        self.scene.game_group.empty()
+        self.scene.update_run_stats()
+        self.scene.game.game_speed_input = 0
+        #self.scene.game_group.empty()
+
         self.scene.ui_group.empty()
-        save.SAVE_OBJ.save()
-        picked_one = False
-        self.scene.ui_group.add(text.Text("- High Scores -", "big", V2(170, 60), PICO_BLUE, multiline_width=200))
-        places = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th']
-        for i, score in enumerate(save.SAVE_OBJ.get_highscores()):
-            color = PICO_WHITE
-            if score == int(self.scene.score) and not picked_one:
-                color = PICO_BLUE
-                picked_one = True
-            t1 = text.Text(places[i], "big", V2(240, i * 18 + 90), color)
-            t1.offset = (1, 0)
-            t1._recalc_rect()
-            t2 = text.Text("%d" % score, "big", V2(250, i * 18 + 90), color)
-            self.scene.ui_group.add(t1)
-            self.scene.ui_group.add(t2)
+        self.scene.pause_sprite.darken()
+        self.scene.ui_group.add(self.scene.pause_sprite)
 
-        self.scene.game.end_run()
+        ts = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2 + 2, 100 + 2), "DEFEAT", color=PICO_WHITE)
+        ts.offset = (0.5, 0)
+        ts.layer = 9
+        self.scene.ui_group.add(ts)
 
-        return super().enter()
+        t = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2, 100), "DEFEAT", color=PICO_RED)
+        t.offset = (0.5, 0)
+        t.layer = 10
+        self.scene.ui_group.add(t)
+        self.time = 0
 
-    def take_input(self, input, event):
-        if input == "action" or input == "click":
-            self.scene.game.set_scene("menu")
+    def paused_update(self, dt):
+        self.time += dt
+        if self.time > 2:
+            self.scene.sm.transition(HighScoreState(self.scene))
+        return super().paused_update(dt)
                 
 
 class VictoryState(State):
     def enter(self):
         self.scene.ui_group.empty()
+        self.scene.game.game_speed_input = 0
 
         sn = StageName(V2(0,100), self.scene.stage_num, "Victory!", "We've taken full control of this sector!")
         sn.time = 1.75
@@ -529,9 +530,8 @@ class VictoryState(State):
             elif r == "gas": self.scene.game.run_info.bonus_credits += 15
         self.scene.game.run_info.bonus_credits = min(self.scene.game.run_info.bonus_credits, 90)
 
-        speed_bonus = int((1000000 / (self.scene.time + 120)))
-        print("score", "resource", self.scene.score, "speed", speed_bonus)
-        self.scene.game.run_info.score += int(self.scene.score) + speed_bonus
+        self.scene.update_run_stats()
+        self.scene.game.run_info.sectors_cleared += 1
 
         self.scene.game.run_info.choose_path(*self.scene.game.run_info.next_path_segment)
         self.time = 0
@@ -557,7 +557,143 @@ class VictoryState(State):
         if self.time > 2 and (input == "action" or input == "click" or input == "confirm"):
             self.end()
 
-                                
+class BeatGameState(State):
+    def enter(self):
+        super().enter()
+
+        self.scene.game.game_speed_input = 0
+
+        self.scene.update_run_stats()
+        self.scene.game.run_info.victory = True
+        self.scene.game.run_info.sectors_cleared += 1
+
+        self.scene.ui_group.empty()
+        self.scene.pause_sprite.darken()
+        self.scene.ui_group.add(self.scene.pause_sprite)
+
+        ts = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2 + 2, 100 + 2), "VICTORY", color=PICO_RED)
+        ts.offset = (0.5, 0)
+        ts.layer = 9
+        self.scene.ui_group.add(ts)
+
+        t = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2, 100), "VICTORY")
+        t.offset = (0.5, 0)
+        t.layer = 10
+        self.scene.ui_group.add(t)
+        self.time = 0
+
+    def paused_update(self, dt):
+        self.time += dt
+        if self.time > 2:
+            self.scene.sm.transition(HighScoreState(self.scene))
+        return super().paused_update(dt)
+
+class HighScoreState(State):
+    def enter(self):
+        super().enter()
+        self.score_parts = []
+        self.time = 0
+
+        # Scoring
+        num_sectors = self.scene.game.run_info.sectors_cleared
+        minutes, seconds = divmod(int(self.scene.game.run_info.time_taken), 60)
+        time_formatted = "%d:%02d" % (minutes, seconds)
+
+        victory_bonus = 10_000 if self.scene.game.run_info.victory else 0
+        sectors_bonus = 2000 * num_sectors
+        time_per = self.scene.game.run_info.time_taken / max(num_sectors,1)
+        # 0 second avg = 10k
+        # 120 second avg = 5k
+        # 360 sec = 2.5k
+        time_bonus = int(1_200_000 / (time_per + 120))
+
+        # 0 lost = 10k
+        # 10 lost = 5k
+        # 30 lost = 2.5k
+        ships_bonus = int(100_000 / (self.scene.game.run_info.ships_lost + 10))
+        if not self.scene.game.run_info.victory:
+            ships_bonus = 0
+
+        self.score = victory_bonus + sectors_bonus + time_bonus + ships_bonus
+        scores = save.SAVE_OBJ.add_highscore(self.score)
+        save.SAVE_OBJ.save()
+
+        self.add_score_part("Cleared %d hostile sectors:" % num_sectors, sectors_bonus)
+        self.add_score_part("Victory Bonus:", victory_bonus)
+        self.add_score_part("Time Bonus (%s):" % time_formatted, time_bonus)
+        if self.scene.game.run_info.victory:
+            self.add_score_part("Safety Bonus (lost %d ships):" % self.scene.game.run_info.ships_lost, ships_bonus)
+        else:
+            self.add_score_part("Safety Bonus (lost %d ships):" % self.scene.game.run_info.ships_lost, "0 (Defeat)")
+        self.add_score_part("Total:", self.score)
+
+
+        self.highscores = []
+        self.add_scores()
+
+        self.scene.game.end_run()
+
+    def add_scores(self):
+        picked_one = False
+        x = self.scene.game.game_resolution.x / 2 - 120
+        y = self.scene.game.game_resolution.y / 2 - 40
+        label = text.Text("Top Scores", "big", V2(x - 60, y), PICO_WHITE, multiline_width=200)
+        label.layer = 10
+        label.visible = False
+        self.highscores.append(label)
+        self.scene.ui_group.add(label)
+        places = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th']
+        for i, score in enumerate(save.SAVE_OBJ.get_highscores()):
+            color = PICO_WHITE
+            if score == int(self.score) and not picked_one:
+                color = PICO_YELLOW
+                picked_one = True
+            t1 = text.Text(places[i], "small", V2(x - 40, i * 18 + y + 20), color)
+            t1.offset = (1, 0)
+            t1.layer = 10
+            t1._recalc_rect()
+            t2 = text.Text("%d" % score, "big", V2(x, i * 18 + y + 20), color)
+            t2.layer = 10
+            self.scene.ui_group.add(t1)
+            self.scene.ui_group.add(t2)    
+            t1.visible = False
+            t2.visible = False    
+            self.highscores.extend([t1,t2])
+
+    def add_score_part(self, name, score):
+        x = self.scene.game.game_resolution.x / 2 - 90
+        y = (len(self.score_parts) // 2) * 24 + self.scene.game.game_resolution.y / 2 - 40
+        tname = text.Text(name, "small", V2(x,y), PICO_WHITE, multiline_width=200, shadow=PICO_BLACK)
+        tname.layer = 10
+        self.scene.ui_group.add(tname)
+        self.score_parts.append(tname)
+        tname.visible = False
+        tname.initial_x = tname.x
+
+        tscore = text.Text(str(score), "small", V2(x + 160,y), PICO_YELLOW, multiline_width=120, shadow=PICO_BLACK)
+        tscore.layer = 10
+        self.scene.ui_group.add(tscore)        
+        self.score_parts.append(tscore)
+        tscore.visible = False
+        tscore.initial_x = tscore.x
+
+    def paused_update(self, dt):
+        self.time += dt
+        for i,part in enumerate(self.score_parts):
+            part.visible = self.time > i / 3
+            xt = clamp(self.time - 4, 0, 1)
+            xo = (math.cos(xt * 3.14159) * -0.5 + 0.5) * 110
+            part.x = part.initial_x + xo
+
+        for i,part in enumerate(self.highscores):
+            part.visible = self.time > (i / 10) + 5.25
+
+        return super().paused_update(dt)
+
+    def take_input(self, input, event):
+        if input in ['confirm', 'back', 'click'] and self.time > 7:
+            self.scene.game.set_scene("menu")
+        return super().take_input(input, event)
 
 class PauseState(UIEnabledState):
     is_basic_joystick_panel = True
