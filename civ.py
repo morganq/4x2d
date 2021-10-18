@@ -87,11 +87,11 @@ class Civ:
         if not self.upkeep_enabled:
             upkeep = 0
         self.upgrade_limits.iron = self.base_upgrade_limits.iron * (1 + upkeep)
-        self.upgrade_limits.ice = self.base_upgrade_limits.ice
-        self.upgrade_limits.gas = self.base_upgrade_limits.gas
+        self.upgrade_limits.ice = self.base_upgrade_limits.ice * (1 + upkeep)
+        self.upgrade_limits.gas = self.base_upgrade_limits.gas * (1 + upkeep)
 
     def get_upkeep_ratio(self):
-        return clamp(len(self.get_all_combat_ships()) - 6, 0, 15) * 0.075
+        return clamp(len(self.get_all_combat_ships()) - 6, 0, 15) * 0.15
 
     def get_all_combat_ships(self):
         all_ships = []

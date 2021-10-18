@@ -24,6 +24,7 @@ import sound
 import stagename
 import states
 import upgradestate
+import upkeepindicator
 from aliens import bosslevelcontroller, bossmothership, bosstimecrystal
 from asteroid import Asteroid
 from button import Button
@@ -245,7 +246,7 @@ class LevelScene(scene.Scene):
         self.meters = {}
         self.upgrade_texts = {}
         for i,r in enumerate(self.player_civ.resources.data.keys()):
-            self.meters[r] = Meter(V2(19,3 + i * 14), 120, 9, RESOURCE_COLORS[r], self.player_civ.upgrade_limits.data[r])
+            self.meters[r] = Meter(V2(19,3 + i * 14), 120, 9, RESOURCE_COLORS[r], self.player_civ.upgrade_limits.data[r], tick_x=120)
             self.meters[r].stay = True
             self.ui_group.add(simplesprite.SimpleSprite(V2(6,2 + i * 14), "assets/i-%s.png" % r))
             self.ui_group.add(self.meters[r])
@@ -278,6 +279,9 @@ class LevelScene(scene.Scene):
         self.ui_group.add(self.stage_name)
         if self.title == "":
             self.stage_name.kill()
+
+        self.upkeep_indicator = upkeepindicator.UpkeepIndicator(self)
+        self.ui_group.add(self.upkeep_indicator)
 
         self.pause_sprite = pauseoverlay.PauseOverlay()
         self.pause_sprite.layer = 5
@@ -700,21 +704,6 @@ class LevelScene(scene.Scene):
                     FONTS['tiny'].render_to(gi, (x1 + 2, y1 + 2), "%d" % len(self.objgrid.grid[y][x]), (128,255,128,180))
 
             self.game.screen.blit(gi, (0,0))
-
-        # TODO: should be a widget?
-        if self.meters['iron'].width > 120 and not self.cinematic:
-            delta = self.meters['iron'].width - 120
-            rect = self.meters['iron'].rect
-            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + 120, rect.y + rect.height + 1), (rect.x + 120, rect.y + rect.height + 2), 1)
-            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + 120, rect.y + rect.height + 2), (rect.x + rect.width - 1, rect.y + rect.height + 2), 1)
-            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + rect.width - 1, rect.y + rect.height + 1), (rect.x + rect.width - 1, rect.y + rect.height + 2), 1)
-            pygame.draw.line(self.game.screen, PICO_YELLOW, (rect.x + 120 + delta / 2, rect.y + rect.height + 4), (rect.x + 120 + delta / 2 + 3, rect.y + rect.height + 4 + 3), 1)
-            render_multiline_to(
-                self.game.screen,
-                (rect.x + 120 + delta / 2 + 5, rect.y + rect.height + 4),
-                "Large Fleet Upkeep",
-                "tiny", PICO_YELLOW
-            )
         
         self.pause_sprite.visible = self.paused
         if self.stage_name.time < 2 and self.stage_name.alive():

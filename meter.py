@@ -7,7 +7,7 @@ from spritebase import SpriteBase
 STAY_TIME = 5.0
 
 class Meter(SpriteBase):
-    def __init__(self, pos, width, height, color, max_value):
+    def __init__(self, pos, width, height, color, max_value, tick_x = None):
         SpriteBase.__init__(self, pos)
         self.stay = False
         self.stay_time = 0
@@ -21,6 +21,7 @@ class Meter(SpriteBase):
 
         self._value = 0
         self._apparent_value = 0
+        self.tick_x = tick_x
         self._generate_image()
 
     def set_width(self, new_width):
@@ -65,6 +66,8 @@ class Meter(SpriteBase):
                 px = (self.meter_width - 4)
                 color = self.color if (self.flash_time * 8) % 1 > 0.5 else PICO_YELLOW
             pygame.draw.rect(self.image, color, (2,2, px, self.meter_height - 4), 0)
+            if self.tick_x and self.tick_x < self.meter_width:
+                pygame.draw.line(self.image, PICO_YELLOW, (self.tick_x, 2), (self.tick_x, self.meter_height - 3))
 
         self._width = self.meter_width
         self._height = self.meter_height
