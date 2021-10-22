@@ -78,6 +78,8 @@ class Game:
                 self.scene = newgamescene.NewGameScene(self)
             elif sys.argv[1] == "perf":
                 self.scene = levelscene.LevelScene(self, "choke", "alien3", 3, 3, "", "", options='performance')
+            elif sys.argv[1] == "flowfield":
+                self.scene = levelscene.LevelScene(self, "cross", "alien3", 1, 1, "", "", options='flowfield')
             else:
                 self.scene = menuscene.MenuScene(self)
         else:

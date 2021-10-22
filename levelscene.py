@@ -179,6 +179,9 @@ class LevelScene(scene.Scene):
 
         max_planets = min(int(self.difficulty / 1.5 + 7), 16)
 
+        if self.options == "flowfield":
+            max_planets = 25
+
         separation = 70
         # TODO: Planet resources more constrained
         while num_planets < max_planets:
@@ -345,6 +348,7 @@ class LevelScene(scene.Scene):
         self.flowfield = flowfield.FlowFieldMap()
         self.flowfield.generate(self)
         self.flowfielddebug = 0
+        self.flowfielddebugstage = 0
 
         self.fleet_diagram.generate_image(self)
 
@@ -685,7 +689,7 @@ class LevelScene(scene.Scene):
                     print(spr, "bad image")
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
-        if self.debug and False:
+        if self.debug:
             for k,v in self.fleet_managers.items():
                 for fleet in v.current_fleets:
                     fleet.debug_render(self.game.screen)
@@ -693,21 +697,51 @@ class LevelScene(scene.Scene):
             gi = pygame.Surface(self.game.screen.get_size(), pygame.SRCALPHA)
             gi.fill((0,0,0,0))
             ff = list(self.flowfield.fields.values())[self.flowfielddebug]
-            for y,gr in enumerate(ff.grid):
-                for x,gc in enumerate(gr):
-                    if gc:
-                        p1 = V2((x + 0.5) * flowfield.GRIDSIZE, (y + 0.5) * flowfield.GRIDSIZE) + ff.offset
-                        p2 = p1 + gc * flowfield.GRIDSIZE * 0.75
-                        pygame.draw.line(gi, (0,0,255), p1.tuple(),p2.tuple())
-                        pygame.draw.circle(gi, (0,0,255), p1.tuple(), 1)
-            
+            for col in range(1, len(ff.base_grid[0])):
+                x = col * flowfield.GRIDSIZE + ff.offset.x
+                pygame.draw.line(gi, (255,255,255,50), (x, ff.offset.y), (x, ff.offset.y + game.RES[1]), 1)
+            for row in range(1, len(ff.base_grid)):
+                y = row * flowfield.GRIDSIZE + ff.offset.y
+                pygame.draw.line(gi, (255,255,255,50), (ff.offset.x, y), (ff.offset.x + game.RES[0], y), 1)                
+            if self.flowfielddebugstage == 0:
+                for y,gr in enumerate(ff.base_grid):
+                    for x,gc in enumerate(gr):     
+                        pt = V2(x * flowfield.GRIDSIZE, y * flowfield.GRIDSIZE) + ff.offset
+                        s = "-"
+                        if gc:
+                            s = "O"
+                        FONTS['tiny'].render_to(gi, (pt.x + 2, pt.y + 2), s, (128,255,128,180))
 
-            for y in range(len(self.objgrid.grid)):
-                for x in range(len(self.objgrid.grid[0])):
-                    x1 = x * self.objgrid.grid_size
-                    y1 = y * self.objgrid.grid_size
-                    pygame.draw.rect(gi, (0,255,0,150), (x1,y1,self.objgrid.grid_size+1, self.objgrid.grid_size+1), 1)
-                    FONTS['tiny'].render_to(gi, (x1 + 2, y1 + 2), "%d" % len(self.objgrid.grid[y][x]), (128,255,128,180))
+            if self.flowfielddebugstage == 1:
+                for y,gr in enumerate(ff.dgrid):
+                    for x,gc in enumerate(gr):     
+                        pt = V2(x * flowfield.GRIDSIZE, y * flowfield.GRIDSIZE) + ff.offset
+                        if isinstance(gc, tuple):
+                            s = "-"
+                        elif gc is None:
+                            s = "??"
+                        else:
+                            s = str(gc % 10)
+                        FONTS['tiny'].render_to(gi, (pt.x + 2, pt.y + 2), s, (128,255,128,180))
+                        
+            elif self.flowfielddebugstage == 2:
+                for y,gr in enumerate(ff.grid):
+                    for x,gc in enumerate(gr):
+                        p1 = V2((x + 0.5) * flowfield.GRIDSIZE, (y + 0.5) * flowfield.GRIDSIZE) + ff.offset
+                        if gc is not None:
+                            p2 = p1 + gc * flowfield.GRIDSIZE * 0.75
+                            pygame.draw.line(gi, (0,0,255), p1.tuple(),p2.tuple())
+                            pygame.draw.circle(gi, (0,0,255), p1.tuple(), 1)
+                        else:
+                            pygame.draw.circle(gi, (255,0,255), p1.tuple(), 3, 1)
+            
+            if False:
+                for y in range(len(self.objgrid.grid)):
+                    for x in range(len(self.objgrid.grid[0])):
+                        x1 = x * self.objgrid.grid_size
+                        y1 = y * self.objgrid.grid_size
+                        pygame.draw.rect(gi, (0,255,0,150), (x1,y1,self.objgrid.grid_size+1, self.objgrid.grid_size+1), 1)
+                        FONTS['tiny'].render_to(gi, (x1 + 2, y1 + 2), "%d" % len(self.objgrid.grid[y][x]), (128,255,128,180))
 
             self.game.screen.blit(gi, (0,0))
         
@@ -769,6 +803,10 @@ class LevelScene(scene.Scene):
                 self.game.game_speed_input = 1
             if event.key == pygame.K_f:
                 self.flowfielddebug = (self.flowfielddebug + 1) % len(self.flowfield.fields)
+            if event.key == pygame.K_g:
+                self.flowfielddebugstage = (self.flowfielddebugstage + 1) % 3
+            if event.key == pygame.K_h:
+                self.flowfielddebug = len(self.flowfield.fields) - 1
         if inp == "menu": #TODO: pause menu
             pass
 

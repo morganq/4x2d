@@ -60,6 +60,7 @@ class BossMothership(SpaceObject):
         self.wander_time = 0
         self.wander_center = V2(0,0)
         self.wander_point = V2(0,0)
+        self.radius = 10
 
         self.emit = []
         self.ships_on_board = ['bossfighter','bossfighter','bossfighter','bossfighter','bossfighter','bossfighter','bosslaser','bosslaser','bosslaser']

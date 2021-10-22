@@ -9,7 +9,7 @@ from helper import clamp, get_nearest
 from v2 import V2
 
 GRIDSIZE = 7
-EXTRA = 5
+EXTRA = 9
 
 class FlowFieldMap:
     def __init__(self) -> None:
@@ -45,14 +45,16 @@ class FlowFieldMap:
             grid.append([])
             for gx in range(self.gw):
                 cell = None
-                center = V2(gx * GRIDSIZE + GRIDSIZE / 2, gy * GRIDSIZE + GRIDSIZE / 2)
-                closest, dist = get_nearest(center + self.offset, avoidees)
+                center = V2(gx * GRIDSIZE + GRIDSIZE / 2, gy * GRIDSIZE + GRIDSIZE / 2) + self.offset
+                closest, dist = get_nearest(center, avoidees)
                 if closest:
                     extra = EXTRA
                     if isinstance(closest, hazard.Hazard):
                         extra = 6
                     if dist < (closest.radius + extra) ** 2:
-                        cell = closest
+                        #print(center, closest.pos, closest)
+                        delta = (center - closest.pos).normalized()
+                        cell = (closest, delta)
                 grid[-1].append(cell)  
         return grid      
         
@@ -68,22 +70,12 @@ class FlowFieldMap:
 
     def update(self, dt):
         if self.boss:
-            nearest_dist = 99999999999
-            nearest_field = None
-            for obj, field in self.fields.items():
-                delta = obj.pos - self.boss.pos
-                dsq = delta.sqr_magnitude()
-                if dsq < nearest_dist:
-                    nearest_dist = dsq
-                    nearest_field = field
-            self.field_nearest_boss = nearest_field
-
             #print("--")
             if self.boss not in self.fields:
-                self.fields[self.boss] = FlowField(game.RES, self.offset, self._avoidees, obj, self._base_grid)
+                self.fields[self.boss] = FlowField(game.RES, self.offset, self._avoidees, self.boss, self._base_grid)
                 #print("Making complete boss field")
             if self._field_in_progress is None:
-                self._field_in_progress = FlowField(game.RES, self.offset, self._avoidees, obj, self._base_grid, staged_calculation=True)
+                self._field_in_progress = FlowField(game.RES, self.offset, self._avoidees, self.boss, self._base_grid, staged_calculation=True)
                 #print("Making staged boss field")
             else:
                 if not self._field_in_progress.fully_calculated:
@@ -94,9 +86,6 @@ class FlowFieldMap:
                     self.fields[self.boss] = self._field_in_progress
                     self._field_in_progress = None
 
-        else:
-            self.field_nearest_boss = None
-
 
 
 # From https://howtorts.github.io/2014/01/04/basic-flow-fields.html
@@ -105,6 +94,7 @@ class FlowField:
         self.size = size
         self.offset = offset
         self.base_grid = base_grid
+        self.dgrid = None
         self.grid = []
         self.gw = int(self.size[0] / GRIDSIZE)
         self.gh = int(self.size[1] / GRIDSIZE)
@@ -143,10 +133,11 @@ class FlowField:
             grid.append([])
             for gx in range(self.gw):
                 cell = self.base_grid[gy][gx]
-                if cell == self.obj:
-                    cell = None
-                elif cell:
-                    cell = inf
+                if cell:
+                    if cell[0] == self.obj:
+                        cell = None
+                    else:
+                        cell = (9999, cell[1])
                 grid[-1].append(cell)
 
         end = ((self.obj.pos - self.offset) / GRIDSIZE).tuple_int()
@@ -181,6 +172,7 @@ class FlowField:
         yield 1
 
         dgrid = self._generate_dijkstra_grid()
+        self.dgrid = dgrid
 	
         for x in range(self.gw):
             for y in range(self.gh):
@@ -188,23 +180,36 @@ class FlowField:
                     continue
                 
                 min = None
-                min_dist = 0 #??
+                min_dist = 999999999
+                inf_exception_dir = None
+                mval = dgrid[y][x]
+                #deltas = []
                 for n in self._get_8_neighbors(x,y):
                     nval = dgrid[n[1]][n[0]]
                     if nval is None:
-                        nval = inf
-                        print("Weird neighbor issue:", n)
-                    mval = dgrid[y][x]
+                        nval = 9999
+                        #print("Weird neighbor issue: n", n)
                     if mval is None:
-                        mval = inf
-                        print("Weird neighbor issue:", n)
+                        mval = 9999
+                        #print("Weird neighbor issue: m ", (x,y))
+                    if isinstance(nval, tuple):
+                        nval = nval[0]
+                    if isinstance(mval, tuple):
+                        inf_exception_dir = mval[1]
+                        mval = mval[0]
                     dist = nval - mval
+                    #deltas.append((n, (x,y), nval, mval))
                     if dist < min_dist:
                         min = n
                         min_dist = dist
 
-                    if min is not None:
-                        self.grid[y][x] = (V2(*min) - V2(x,y))#.normalized() # maybe do it here?
+                if inf_exception_dir:
+                    self.grid[y][x] = inf_exception_dir
+                elif min is not None:
+                    self.grid[y][x] = (V2(*min) - V2(x,y))#.normalized() # maybe do it here?
+                else:
+                    print("no min but also no inf exception", x,y)
+                    #print(deltas)
             if x % (self.gw // 8) == 0:
                 yield x
         yield 4
