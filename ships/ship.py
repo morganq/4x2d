@@ -45,6 +45,7 @@ class Ship(SpaceObject):
     WARP_DRIVE_TIME = 30.0
     SHIP_NAME = None
     SHIP_BONUS_NAME = None
+    DISPLAY_NAME = None
 
     def __init__(self, scene, pos, owning_civ):
         SpaceObject.__init__(self, scene, pos)
@@ -106,6 +107,10 @@ class Ship(SpaceObject):
         self.opt_fleet_forces = V2(0,0)
 
         self.updated_color = False
+
+    @classmethod
+    def get_display_name(cls):
+        return (cls.DISPLAY_NAME or cls.SHIP_NAME).title()
 
     def get_stat(self, stat):
         return self.owning_civ.get_stat(stat)
@@ -260,7 +265,16 @@ class Ship(SpaceObject):
         if nearest and nearest != self.effective_target:
             dsf = dsq - nearest.radius ** 2
             delta = (nearest.pos - self.pos).normalized()
-            self.velocity += -delta * (50 / math.sqrt(max(dsf,1))) * dt
+            near = 20
+            if dsf > 0 and dsf < near ** 2:
+                t = 1 - math.sqrt(dsf) / near
+                self.velocity += -delta * t * 5 * dt
+                side = V2(delta.y, -delta.x)
+                fwd = self.velocity.normalized()
+                cross = fwd.cross(side)
+                if cross > 0:
+                    side = -side
+                self.velocity += side * t * 5 * dt
 
 
         # Stay away from the edges of the world

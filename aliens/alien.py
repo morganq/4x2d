@@ -483,6 +483,7 @@ class Alien:
         self.civ.base_stats['mining_rate'] = 0.45 + 0.125 * difficulty
         self.civ.base_stats['max_ships_per_planet'] = int((difficulty + 5) / 2)
         extra_planets = 0
+        if difficulty == 6: extra_planets = 1
         if difficulty == 7: extra_planets = 1
         if difficulty == 8: extra_planets = 2
         if difficulty == 9: extra_planets = 3
@@ -495,7 +496,11 @@ class Alien:
         near_planets = self.scene.get_planets()
         near_planets.sort(key=lambda x:(x.pos - my_planet.pos).sqr_magnitude())
         near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:extra_planets]
+        time_looped = False
         for i in range(extra_planets):
+            if difficulty in [6,7,8] and not time_looped:
+                near_unclaimed[i].set_time_loop()
+                time_looped = True                
             near_unclaimed[i].change_owner(self.civ)
             near_unclaimed[i].population = extra_pops
             near_unclaimed[i].set_health(near_unclaimed[i].get_max_health(), False)

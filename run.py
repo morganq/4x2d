@@ -32,7 +32,7 @@ class RunInfo:
         self.bonus_population = 0
         self.bonus_fighters = 0
         self.rerolls = 3
-        self.o2 = 60 * 60 * 1.5 # 1.5 hrs
+        self.o2 = 60 * 60 * 1 # 1.5 hrs
         self.credits = 20
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
@@ -119,7 +119,7 @@ class RunInfo:
             offer_type = offer_types.pop()
             offering = {'offer_type':offer_type}
             if offer_type == 'o2':
-                offering['quantity'] = 600
+                offering['quantity'] = 60 * 15
             elif offer_type == 'memory':
                 techs = [n for n,u in UPGRADE_CLASSES.items() if u.category == "tech" and not u.alien]
                 random.shuffle(techs)

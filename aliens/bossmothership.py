@@ -142,7 +142,8 @@ class BossMothership(SpaceObject):
                         possible_evacs = self.scene.get_civ_planets(self.scene.player_civ)
                         possible_evacs.remove(self.target_planet)
                         if possible_evacs:
-                            evac_target = helper.get_nearest(self.target_planet, possible_evacs)[0]
+                            possible_evacs = helper.nearest_order(V2(0, self.scene.game.game_resolution.y//2), possible_evacs)
+                            evac_target = random.choice(possible_evacs[0:3])
                             for ship, amt in self.target_planet.ships.items():
                                 for i in range(amt):
                                     self.target_planet.emit_ship(ship, {"to":evac_target})

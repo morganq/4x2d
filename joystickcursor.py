@@ -100,6 +100,7 @@ class JoystickPanelCursor(SpriteBase):
         self.last_dir = None
         self.hovering = None
         self.time = 0
+        self.layer = 15
         if self.controls:
             self.update_hover()
             self._generate_image()

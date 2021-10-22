@@ -16,21 +16,24 @@ class BossLevelController(levelcontroller.LevelController):
         self.phase = PHASE_1
         self.reviving_time = 0
         self.mothership = None
+        self.post_cinematic_timer = 30
 
     def update(self, dt):
         super().update(dt)
         if self.phase == PHASE_REVIVING:
             self.reviving_time += dt
-            #self.scene.game_speed = clamp(self.reviving_time / 4, 1, 20)
-            self.scene.game_speed = 20
+            self.scene.game_speed = clamp(self.reviving_time / 4, 1, 20)
+            #self.scene.game_speed = 20
             if self.mothership.state == self.mothership.STATE_GAME_WAITING:
-                self.phase = PHASE_2
-                self.scene.game_speed = 1
-                self.scene.sm.transition(levelstates.PlayState(self.scene))
-                self.mothership.health_bar.visible = True
-                self.mothership.health_bar.stay = True
-                for p in self.scene.get_planets():
-                    p.cinematic_disable = False
+                self.post_cinematic_timer -= dt
+                if self.post_cinematic_timer <= 0:
+                    self.phase = PHASE_2
+                    self.scene.game_speed = 1
+                    self.scene.sm.transition(levelstates.PlayState(self.scene))
+                    self.mothership.health_bar.visible = True
+                    self.mothership.health_bar.stay = True
+                    for p in self.scene.get_planets():
+                        p.cinematic_disable = False
 
             # Make ships go into cinematic mode so they don't fight.
             for ship in self.scene.get_ships():
@@ -42,10 +45,15 @@ class BossLevelController(levelcontroller.LevelController):
         if self.phase == PHASE_1:
             if not self.scene.get_civ_planets(self.scene.enemy.civ):
                 # TODO: remove this
-                self.scene.paused = True
-                self.scene.sm.transition(levelstates.BeatGameState(self.scene))
-                return
+                #self.scene.paused = True
+                #self.scene.sm.transition(levelstates.BeatGameState(self.scene))
+                #return
                 self.phase = PHASE_REVIVING
+
+                for ship in self.scene.get_ships():
+                    if ship.state != "returning":
+                        ship.set_state("returning")                
+                
                 self.scene.sm.transition(levelstates.CinematicState(self.scene))
                 self.mothership = bossmothership.BossMothership(self.scene, V2(game.Game.inst.game_resolution.x * 0.75, -20))
                 self.scene.flowfield.boss = self.mothership

@@ -1,18 +1,12 @@
 ** Alpha **
 
-victory screen
-defeat screen
 
-ships fly too close to planets they're sieging
-after blow up crystal, recall
-joystick indicator is gone for order panel
-recall ships when mothership arrives
 sometimes can't target mothership?
+alien tries to expand too quick after killing something
 another pass on alien assets
 
 ? better alien tips against aliens based on what ships are available to them
 make sure planet panel updates properly
-time loop on last few levels
 
 
 ** Beta **

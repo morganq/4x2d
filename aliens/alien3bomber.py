@@ -1,11 +1,14 @@
 from helper import get_nearest
-from aliens.alien3mixin import Alien3Mixin
-from ships.bomber import Bomber
 from ships.all_ships import register_ship
+from ships.bomber import Bomber
+
+from aliens.alien3mixin import Alien3Mixin
+
 
 @register_ship
 class Alien3Bomber(Bomber, Alien3Mixin):
     SHIP_NAME = "alien3bomber"    
+    DISPLAY_NAME = "Void Bomber"
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         self.set_sprite_sheet("assets/alien3bomber.png", 13)   

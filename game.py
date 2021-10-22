@@ -167,8 +167,12 @@ class Game:
                 reverse_bindings = {v:k for k,v in bindings.items()}
                 axes = [0,1]
 
-                if event.type == pygame.JOYDEVICEADDED:
-                    self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]                    
+
+                #print(pygame.joystick.get_count())
+                #for joy in self.joysticks:
+                #    print(joy.get_instance_id(), joy.get_guid(), joy.get_name(), joy.get_axis(0))
+                if event.type == pygame.JOYDEVICEADDED:                    
+                    self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
 
                 if event.type == pygame.JOYAXISMOTION:
                     delta = V2(self.joysticks[0].get_axis(axes[0]), self.joysticks[0].get_axis(axes[1]))

@@ -265,6 +265,7 @@ class LevelScene(scene.Scene):
 
         if game.DEV:
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 50, self.game.game_resolution.y - 20), 'Win', 'small', self.dev_win))
+            self.ui_group.add(Button(V2(self.game.game_resolution.x - 110, self.game.game_resolution.y - 20), 'Lose', 'small', self.dev_lose))
 
         self.o2_meter = o2meter.O2Meter(V2(self.game.game_resolution.x - 68, 2))
         
@@ -357,7 +358,7 @@ class LevelScene(scene.Scene):
                 planets.sort(key=lambda x:x.pos.x)
                 for i in range(1):
                     p = planets.pop(int(len(planets) / 2))
-                    p.set_time_loop()
+                    #p.set_time_loop()
 
         if self.options == "surround":
             for planet in self.get_civ_planets(None):
@@ -405,9 +406,14 @@ class LevelScene(scene.Scene):
     def dev_win(self):
         for planet in self.get_civ_planets(self.enemy.civ):
             planet.take_damage(99999, origin=None)
-            planet.change_owner(self.player_civ)
-            planet.add_population(3)
-            planet.add_ship("fighter")
+            if not isinstance(planet, bosstimecrystal.TimeCrystal):
+                planet.change_owner(self.player_civ)
+                planet.add_population(3)
+                planet.add_ship("fighter")
+
+    def dev_lose(self):
+        for planet in self.get_civ_planets(self.player_civ):
+            planet.take_damage(99999, origin=None)        
 
     def on_civ_resource_change(self, res_type, val):
         pass
@@ -535,9 +541,9 @@ class LevelScene(scene.Scene):
             self.ui_group.add(fn)
             
         self.game.run_info.o2 -= dt
-        if self.time % 1 < (self.time - dt) % 1:
-            self.o2_meter.o2 = self.game.run_info.o2
-            self.o2_meter._generate_image()
+        #if self.time % 1 < (self.time - dt) % 1:
+        self.o2_meter.o2 = self.game.run_info.o2
+        self.o2_meter._generate_image()
 
         scene.Scene.update(self, dt)
 

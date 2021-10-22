@@ -245,9 +245,10 @@ class Fighter(Ship):
 
         tp = self.effective_target.pos + (self.pos - self.effective_target.pos).normalized() * self.effective_target.radius
         delta = tp - self.pos
+        dsq_from_target = delta.sqr_magnitude() - self.effective_target.radius ** 2
 
         def in_range():
-            return delta.sqr_magnitude() <= self.get_weapon_range() ** 2
+            return dsq_from_target <= self.get_weapon_range() ** 2
 
         # Time to fire and in range?
         if self.fire_timer >= 1:
@@ -261,9 +262,12 @@ class Fighter(Ship):
         if not in_range():
             dir = delta.normalized()
             self.target_heading = None
-        elif self.fire_timer > 0.65:
+        elif self.fire_timer > 0.95:
             dir = delta.normalized()
             self.target_heading = dir.to_polar()[1]
+        elif dsq_from_target < (self.get_weapon_range() * 0.66) ** 2:
+            dir = -delta.normalized()
+            self.target_heading = None
         else:
             _, a = (-delta).to_polar()
             a += self.combat_dodge_direction * 3.14159 / 2
@@ -308,6 +312,9 @@ class Fighter(Ship):
 
     ### Waiting ###
     def state_waiting(self, dt):
+        if not self.effective_target.alive():
+            self.set_state(STATE_RETURNING)
+            
         if self.DOGFIGHTS and not self.cinematic_no_combat:
             threats = self.get_threats()
             if threats:

@@ -10,6 +10,7 @@ from v2 import V2
 class Alien1WarpShip(Fighter):
     SHIP_NAME = "alien1warpship"
     SHIP_BONUS_NAME = "fighter"
+    DISPLAY_NAME = "Aegis"
     FIRE_RATE = 1.0
     BASE_DAMAGE = 4
     FIRE_RANGE = 10

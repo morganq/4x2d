@@ -316,7 +316,7 @@ class CommStationObject(SpaceObject):
     def __init__(self, scene, pos):
         super().__init__(scene, pos)
         self.set_sprite_sheet("assets/commstation.png", 19)
-        for obj in all_nearby(self.pos, scene.get_objects_in_range(self.pos, 180), 180):
+        for obj in all_nearby(self.pos, scene.get_objects_in_range(self.pos, 280), 180):
             if isinstance(obj, planet.planet.Planet):
                 obj.in_comm_range = True
 

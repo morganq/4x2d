@@ -1,15 +1,18 @@
+import random
+
 from colors import *
 from particle import Particle
+from ships.all_ships import register_ship
 from ships.battleship import Battleship
 from v2 import V2
-import random
-from ships.all_ships import register_ship
+
 
 @register_ship
 class Alien2Battleship(Battleship):
     HEALTHBAR_SIZE = (24,2)
     SHIP_NAME = "alien2battleship"
     SHIP_BONUS_NAME = 'battleship'
+    DISPLAY_NAME = "Network Destroyer"
 
     BASE_HEALTH = 400
     FIRE_RATE = 2.0

@@ -344,11 +344,7 @@ class PlayState(UIEnabledState):
                 if spr:
                     target_selection = spr.get_selection_info()
                     if spr != self.joy_arrow_from and target_selection:
-                        if target_selection['type'] == 'planet':
-                            self.scene.sm.transition(OrderShipsState(self.scene, self.joy_arrow_from, spr))
-                            spr.on_mouse_exit(V2(0,0))
-
-                        if target_selection['type'] == 'asteroid':
+                        if target_selection['type'] in ['planet', 'boss', 'asteroid']:
                             self.scene.sm.transition(OrderShipsState(self.scene, self.joy_arrow_from, spr))
                             spr.on_mouse_exit(V2(0,0))
 

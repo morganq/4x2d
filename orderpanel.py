@@ -2,6 +2,7 @@ import game
 from button import Button
 from colors import *
 from panel import Panel
+from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from slider import Slider
 from text import Text
@@ -27,7 +28,7 @@ class OrderPanel(Panel):
                 if ship == "colonist":
                     name = "Worker"
                 else:
-                    name = ship.title()
+                    name = SHIPS_BY_NAME[ship].get_display_name()
                 
                 self.add(SimpleSprite((0,0), 'assets/i-%s.png' % ship), V2(0,y))
                 self.add(Text("%ss" % name, "small", (0,0), PICO_WHITE, False), V2(14,y + 2))

@@ -12,6 +12,7 @@ class Alien2ControlShip(Fighter):
     SHIP_NAME = "alien2controlship"
     BASE_HEALTH = 55
     BASE_DAMAGE = 5
+    DISPLAY_NAME = "Supervisor"
     MAX_SPEED = 5
     FIRE_RANGE = 45
     FIRE_RATE = 0.25

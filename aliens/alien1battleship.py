@@ -80,6 +80,7 @@ class Alien1Battleship(Battleship):
     HEALTHBAR_SIZE = (24,2)
     SHIP_NAME = "alien1battleship"
     SHIP_BONUS_NAME = 'battleship'
+    DISPLAY_NAME = "Barysi Crusher"
 
     BASE_HEALTH = 200
     FIRE_RATE = 0.8

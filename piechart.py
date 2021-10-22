@@ -1,8 +1,11 @@
-from spritebase import SpriteBase
 import math
-from v2 import V2
-from colors import *
+
 import pygame
+
+from colors import *
+from spritebase import SpriteBase
+from v2 import V2
+
 
 class PieChart(SpriteBase):
     def __init__(self, pos, data):
@@ -11,7 +14,7 @@ class PieChart(SpriteBase):
         self._generate_image()
 
     def _generate_image(self):
-        r = 13
+        r = 16
         color_by_angles = []
         angle_so_far = 0
         for color, value in self.data.items():

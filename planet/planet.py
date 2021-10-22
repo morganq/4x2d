@@ -185,6 +185,7 @@ class Planet(SpaceObject):
         self.emit_ships_queue = []
         self.ships = defaultdict(int)
         self.production = []
+        self.last_production = None
         self.owned_time = 0
         self._generate_base_frames()
         self._generate_frames()
