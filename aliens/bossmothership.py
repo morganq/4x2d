@@ -51,12 +51,13 @@ class BossMothership(SpaceObject):
         self.planets_to_revive = []
         self.reviving_planets = True
         self.emitted_ships = False
-        self.max_speed = 6
+        self.max_speed = 4
         self.owning_civ = self.scene.enemy.civ
         self.jumped = False
         self.selectable = True
         self.collision_radius = 12
         self.collidable = True
+        self.stationary = False
         self.wander_time = 0
         self.wander_center = V2(0,0)
         self.wander_point = V2(0,0)
@@ -86,6 +87,14 @@ class BossMothership(SpaceObject):
             else:
                 self.velocity = V2(0,0)
 
+    def collide(self, other):
+        if other.stationary:
+            delta = other.pos - self.pos
+            dist = delta.magnitude()
+            overlap = (self.collision_radius + other.collision_radius) - dist
+            push = delta.normalized() * -overlap
+            self.pos += push
+
     def wander(self, dt):
         self.wander_time -= dt
         if self.wander_time < 0:
@@ -107,8 +116,7 @@ class BossMothership(SpaceObject):
             bad_location = True
             i = 0
             while bad_location:
-                np = V2(self.scene.game.game_resolution.x * 0.75, self.scene.game.game_resolution.y * 0.45) + V2.random_angle() * random.random() * (50 + i * 10)
-                print(np)
+                np = V2(self.scene.game.game_resolution.x * 0.66, self.scene.game.game_resolution.y * 0.4) + V2.random_angle() * random.random() * (50 + i * 10)
                 _, dsq = helper.get_nearest(np, self.scene.get_planets())
                 if dsq > 50 ** 2:
                     bad_location = False

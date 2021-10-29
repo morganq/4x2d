@@ -69,7 +69,7 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             elif sys.argv[1] == "game":
-                self.scene = levelscene.LevelScene(self, "choke", "alien2", 5, 5, "Testing", "This is a test string for the description")
+                self.scene = levelscene.LevelScene(self, "choke", "alien3", 5, 5, "Testing", "This is a test string for the description")
             elif sys.argv[1] == "boss":
                 self.scene = levelscene.LevelScene(self, "boss2", "boss", 9, 9, "Boss", "It's the boss")
             elif sys.argv[1] == "planet":
@@ -149,7 +149,9 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
                     if event.button == 1: self.scene.take_input("click", event)
-                    if event.button == 3: self.scene.take_input("rightclick", event)
+                    if event.button == 3:
+                        print(event)
+                        self.scene.take_input("rightclick", event)
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
@@ -264,6 +266,7 @@ class Game:
 
     def end_run(self):
         self.save.set_run_state(None)
+        self.save.save()
 
     def is_xbox(self):
         if self.joysticks:

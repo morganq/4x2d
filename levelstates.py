@@ -231,6 +231,7 @@ class PlayState(UIEnabledState):
             self.scene.sm.transition(PauseState(self.scene))
 
         if inp == "rightclick":
+            print("rightclick")
             self.scene.fleet_managers['my'].point_recall(event.gpos)
 
         if inp == "mouse_move":
@@ -711,7 +712,8 @@ class PauseState(UIEnabledState):
 
     def on_quit(self):
         self.scene.game.fps_limited_pause = False
-        self.scene.game.end_run()
+        if not self.scene.is_tutorial:
+            self.scene.game.end_run()
         self.scene.game.set_scene("menu")
 
     def exit(self):

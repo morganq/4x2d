@@ -1,25 +1,35 @@
 ** Alpha **
 
+* supervisor color bug
+warp drive sends units too close to target planet
+* change some upgrade odds in runinfo
+check alien arrangement in runinfo
+tips for boss loading screen
+* fast forward controls visible somewhere
+* double check tutorial
 
-sometimes can't target mothership?
-alien tries to expand too quick after killing something
-another pass on alien assets
 
-? better alien tips against aliens based on what ships are available to them
-make sure planet panel updates properly
+
+upgrade tweaks:
+ - vanguard boosters
 
 
 ** Beta **
+
+- Add EMP technology for Network
+
+saving progress mid game
+
 "research" help menu, plus achievements that unlock them.
+multiplayer
 make buildings look cool 
 asset icons
 asset design tweaks?
 asset names pass
 something better when you acquire upgrade
 explain different ships
-saving progress mid game
 4th civ
-make ships switch target if they're hit and they're attacking a ship that can't fire back
+
 
 
  ? limited range fighters, maybe battleship and refuel

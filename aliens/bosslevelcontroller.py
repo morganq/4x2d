@@ -22,8 +22,8 @@ class BossLevelController(levelcontroller.LevelController):
         super().update(dt)
         if self.phase == PHASE_REVIVING:
             self.reviving_time += dt
-            self.scene.game_speed = clamp(self.reviving_time / 4, 1, 20)
-            #self.scene.game_speed = 20
+            #self.scene.game_speed = clamp(self.reviving_time / 4, 1, 20)
+            self.scene.game_speed = 20
             if self.mothership.state == self.mothership.STATE_GAME_WAITING:
                 self.post_cinematic_timer -= dt
                 if self.post_cinematic_timer <= 0:
@@ -44,6 +44,7 @@ class BossLevelController(levelcontroller.LevelController):
     def detect_victory(self):
         if self.phase == PHASE_1:
             if not self.scene.get_civ_planets(self.scene.enemy.civ):
+                self.scene.game.run_info.o2 += 600 # 10 more minutes
                 # TODO: remove this
                 #self.scene.paused = True
                 #self.scene.sm.transition(levelstates.BeatGameState(self.scene))
@@ -57,6 +58,7 @@ class BossLevelController(levelcontroller.LevelController):
                 self.scene.sm.transition(levelstates.CinematicState(self.scene))
                 self.mothership = bossmothership.BossMothership(self.scene, V2(game.Game.inst.game_resolution.x * 0.75, -20))
                 self.scene.flowfield.boss = self.mothership
+                self.scene.enemy.mothership = self.mothership
                 self.scene.game_group.add(self.mothership)
                 all_planets_by_x = sorted(self.scene.get_planets(), key=lambda p:p.x, reverse=True)
                 self.mothership.planets_to_revive = all_planets_by_x[0:len(all_planets_by_x) // 2]

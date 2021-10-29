@@ -9,7 +9,7 @@ from colors import *
 from helper import clamp, get_nearest
 from v2 import V2
 
-COLOR_FADE = 0.7
+COLOR_FADE = 1.0#0.7
 
 class LevelBackground(spritebase.SpriteBase):
     def __init__(self, pos, size):
@@ -18,7 +18,7 @@ class LevelBackground(spritebase.SpriteBase):
         self.twinkle_timer = 0
         #self._generate_image()
 
-    def generate_image(self, objects):
+    def generate_image(self, objgrid):
         self.image = pygame.Surface(self.size.tuple(), pygame.SRCALPHA)
         self.image.fill((0,0,0,255))
         bw = 2
@@ -36,7 +36,7 @@ class LevelBackground(spritebase.SpriteBase):
                 if x % (min_step * 4) == 0 and y % (min_step * 4) == 0:
                     self.image.set_at((x,y), PICO_DARKGRAY)                
                 density = 0
-                for object in objects:
+                for object in objgrid.get_objects_near(V2(x,y), 100):
                     d = (V2(x,y) - object.pos).sqr_magnitude() ** 0.85
                     density += (8000 / max(d,100)) * (object.radius / 6.5)
 

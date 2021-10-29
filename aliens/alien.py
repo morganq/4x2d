@@ -1,8 +1,9 @@
 import random
 
+import planet
 from upgrade.upgrades import UPGRADE_CLASSES
 
-from aliens import buildorder
+from aliens import bossmothership, buildorder
 
 ALIENS = {}
 
@@ -30,6 +31,8 @@ class Alien:
         self.fear_attack = False
         self.redistribute_timer = 0
         self.near_winning = False
+
+        self.time_behind_expand_curve = 0
 
         self.build_order_acceleration = 1
         self.attack_behind_expansion_curve_countdown = 30
@@ -324,14 +327,19 @@ class Alien:
 
         target_num = self.get_target_num_planets(self.time * self.build_order_acceleration)
         if num < target_num:
-            if neutral_planets:            
-                self.execute_expand(buildorder.BOExpand.TARGET_TYPE_NEAR_HOME)
+            if self.time_behind_expand_curve < 20:
+                self.time_behind_expand_curve += dt
             else:
-                self.attack_behind_expansion_curve_countdown -= dt
-                if self.attack_behind_expansion_curve_countdown < 0:
-                    print("attack because expand curve")
-                    self.execute_attack(buildorder.BOAttack.ATTACK_TYPE_OUTLYING)
-                    self.attack_behind_expansion_curve_countdown = 120 / self.build_order_acceleration
+                if neutral_planets:            
+                    self.execute_expand(buildorder.BOExpand.TARGET_TYPE_NEAR_HOME)
+                    self.time_behind_expand_curve = 0
+                else:
+                    self.attack_behind_expansion_curve_countdown -= dt
+                    if self.attack_behind_expansion_curve_countdown < 0:
+                        self.time_behind_expand_curve = 0
+                        print("attack because expand curve")
+                        self.execute_attack(buildorder.BOAttack.ATTACK_TYPE_OUTLYING)
+                        self.attack_behind_expansion_curve_countdown = 120 / self.build_order_acceleration
 
         # Attack if we're close to winning
         if self.count_attacking_ships() < max(self.get_max_attackers() - 2,3):
@@ -367,7 +375,19 @@ class Alien:
                     else:
                         self.research_with_target(up.name, random.choice(available_targets))
 
-    def defend_planet(self, planet):
+    def defend_planet(self, planet, total_ships_ratio=None):
+        num_ships_to_send = 0
+        if total_ships_ratio is not None:
+            # Send a number of ships based on the total that we control. 
+            # Send a minimum of 1.
+            num_ships_to_send = max(total_ships_ratio * len(self.civ.get_all_combat_ships()), 1)
+        else:
+            num_ships_to_send = 1
+
+        # num_ships_to_send is the total number of ships that we need to send to defend
+        # the target planet. Order all the potential sources (our planets with ships)
+        # and then iterate through them, sending ships until we hit 0 that we need to send
+
         all_potential_sources = self.scene.get_civ_planets(self.civ)
         if planet in all_potential_sources:
             all_potential_sources.remove(planet)
@@ -380,29 +400,42 @@ class Alien:
         all_potential_sources.sort(key=lambda p:(p.pos - planet.pos).sqr_magnitude())
         if not all_potential_sources:
             return
-        source = all_potential_sources[0]
-        ships = self.get_planet_ship_instances(source)
-        ships = [s for s in ships if s in self.get_attacking_ships()]
-        num_to_send = random.randint(1, max(len(ships),1))
-        for s in ships[0:num_to_send]:
-            source.emit_ship(s, {'to':planet})
+
+        for source in all_potential_sources:
+            ships = self.get_planet_ship_instances(source)
+            ships = [s for s in ships if s in self.get_attacking_ships()]
+            num_to_send_from_source = int(min(num_ships_to_send, len(ships)))
+
+            for s in ships[0:num_to_send_from_source]:
+                source.emit_ship(s, {'to':planet})
+            num_ships_to_send -= num_to_send_from_source
+            if num_ships_to_send <= 0:
+                break
+
 
     def get_defend_countdown(self):
         if self.time == 0:
             return 10
-        return 120
+        return 120 - self.difficulty * 10
+
+    def get_defendable_objects(self):
+        return self.scene.get_civ_planets(self.civ)
 
     def update_reactions(self, dt):
         # React to incoming enemies
         my_planets = self.scene.get_civ_planets(self.civ)
+        defendables = self.get_defendable_objects()
         self.defend_countdown -= dt
         if self.defend_countdown < 0:
             for ship in self.scene.get_civ_ships(self.scene.player_civ):
-                if ship.chosen_target in my_planets:
+                if ship.chosen_target in defendables:
                     p = ship.chosen_target
-                    if sum(p.ships.values()) < 3:
+                    defend_ship_ratio = 0.25
+                    if isinstance(p, bossmothership.BossMothership):
+                        defend_ship_ratio = 0.5
+                    if not isinstance(p, planet.planet.Planet) or (sum(p.ships.values()) < 3):
                         if self.count_attacking_ships(target=ship.chosen_target) == 0:
-                            self.defend_planet(ship.chosen_target)
+                            self.defend_planet(ship.chosen_target, defend_ship_ratio)
                             self.defend_countdown = self.get_defend_countdown()
                             break # Only one defend per cycle
 

@@ -12,20 +12,6 @@ from aliens import (alien, alien1battleship, alien1colonist, alien1fighter,
 from aliens.buildorder import *
 
 
-#@register_upgrade
-class Alien1HomeDefenseUpgrade(AddBuildingUpgrade):
-    name = "alien1homedefense"
-    resource_type = "iron"
-    category = "buildings"
-    title = "Alien Home Defense"
-    description = "Planet fires missiles at nearby enemy ships"
-    icon = "mining"
-    family = {}
-    building = buildings.AlienHomeDefenseBuilding
-    requires = lambda x: False
-    alien = True
-    alien_name = 'alien1'
-
 @register_upgrade
 class Alien1FighterProductionUpgrade(Upgrade):
     name = "alien1fighters"

@@ -71,10 +71,10 @@ class RunInfo:
 
     def generate_reward_pool(self):
         self.reward_pool = []
-        self.reward_pool.extend(['memory_crystal'] * 8)
-        self.reward_pool.extend(['blueprint'] * 8)
-        self.reward_pool.extend(['life_support'] * 12)
-        self.reward_pool.extend(['jump_drive'] * 12)
+        self.reward_pool.extend(['memory_crystal'] * 12)
+        self.reward_pool.extend(['blueprint'] * 12)
+        self.reward_pool.extend(['life_support'] * 6)
+        self.reward_pool.extend(['jump_drive'] * 8)
         self.reward_pool.extend(['level_fighter'] * 2)
         self.reward_pool.extend(['level_interceptor'] * 2)
         self.reward_pool.extend(['level_bomber'] * 2)
@@ -196,7 +196,7 @@ class RunInfo:
                 self.data[-1].append(node)
 
         # Signal at the end
-        node = self.new_galaxy(height, [0], "boss", "boss")
+        node = self.new_galaxy(height, [0], "boss2", "boss")
         self.data.append([node])
 
         self.prune_path()

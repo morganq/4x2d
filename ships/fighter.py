@@ -1,6 +1,7 @@
 import math
 import random
 
+import aliens
 import asteroid
 import planet
 import sound
@@ -290,10 +291,18 @@ class Fighter(Ship):
                 return
 
         delta = self.effective_target.pos - self.pos
-        if isinstance(self.effective_target, planet.planet.Planet) or isinstance(self.effective_target, asteroid.Asteroid):
+        if isinstance(self.effective_target, (planet.planet.Planet, asteroid.Asteroid, aliens.bossmothership.BossMothership)):
             if (delta.sqr_magnitude() - self.effective_target.radius ** 2 - self.get_weapon_range() ** 2) <= 0:
                 if self.BOMBS: # If we can attack planets, figure out what to do
-                    if isinstance(self.effective_target, asteroid.Asteroid):
+                    # If it's an allied mothership, we want to enter waiting and orbit it.
+                    if self.effective_target.owning_civ == self.owning_civ and isinstance(self.effective_target, aliens.bossmothership.BossMothership):
+                        self.set_state(STATE_WAITING)
+                        return
+                    # If it's an enemy motherhsip, we want to siege it as if it was a planet.
+                    if self.effective_target.owning_civ != self.owning_civ and isinstance(self.effective_target, aliens.bossmothership.BossMothership):
+                        self.set_state(STATE_SIEGE)
+                        return
+                    elif isinstance(self.effective_target, asteroid.Asteroid):
                         self.set_state(STATE_SIEGE)
                         return
                     elif not self.effective_target.owning_civ or self.effective_target.health <= 0:
@@ -332,6 +341,14 @@ class Fighter(Ship):
 
 
         return super().state_waiting(dt)
+
+    def take_damage(self, damage, origin=None):
+        super().take_damage(damage, origin=origin)
+        # When we get hit by an enemy, we may want to switch target.
+        if self.state == STATE_DOGFIGHT:
+            if origin and isinstance(origin, Ship) and origin.owning_civ != self.owning_civ:
+                self.effective_target = origin
+
 
     def update(self, dt):
         self.fire_timer += self.get_fire_rate() * dt

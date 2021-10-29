@@ -162,6 +162,10 @@ class Boss(alien.Alien):
         ("assets/alieninfo-crusher.png", "")
     ]
 
+    def __init__(self, scene, civ):
+        super().__init__(scene, civ)
+        self.mothership = None
+
     def get_build_order_steps(self):
         return [
             BOExpand(0),
@@ -174,6 +178,7 @@ class Boss(alien.Alien):
         ]
 
     def set_difficulty(self, difficulty):
+        self.difficulty = difficulty
         my_planet = self.scene.get_civ_planets(self.civ)[0]
         my_planet.add_building(BossHomeDefenseUpgrade)
         my_planet.population = 10
@@ -189,6 +194,11 @@ class Boss(alien.Alien):
 
         self.build_order = buildorder.BuildOrder(self.get_build_order_steps())        
 
+    def get_defendable_objects(self):
+        objs = super().get_defendable_objects()
+        if self.mothership:
+            objs.append(self.mothership)
+        return objs
 
     def get_colonist(self):
         return "bosscolonist"

@@ -190,7 +190,7 @@ class Defense1Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Reflector"
-    description = "[^+2 pop]. Gain a [^50] health reflector shield (does not regenerate)"
+    description = "[^+1 pop]. Gain a [^50] health reflector shield (does not regenerate)"
     icon = "reflectorshield"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':[]}
@@ -198,7 +198,7 @@ class Defense1Upgrade(AddBuildingUpgrade):
 
     def apply(self, to):
         super().apply(to)
-        to.add_population(2)
+        to.add_population(1)
 
 @register_upgrade
 class Defense2aUpgrade(AddBuildingUpgrade):

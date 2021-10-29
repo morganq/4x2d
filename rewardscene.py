@@ -16,7 +16,7 @@ from v2 import V2
 
 REWARDS = {
     'jump_drive':{'title':'Jump Drive', 'description':'Begin with +2 fighter in future battles'},
-    'life_support':{'title':'Life Support', 'description': 'Begin with +2 population in future battles'},
+    'life_support':{'title':'Life Support', 'description': 'Begin with +3 population in future battles'},
     'memory_crystal':{'title':'Memory Crystal', 'description': 'Pick a technology to carry on to future battles'},
     'blueprint':{'title':'Blueprint', 'description': 'Pick a construct to carry on to future battles'},
     'level_fighter':{'title':'Upgrade Fighter', 'description':'Upgrade Fighters to have more health and damage'},
@@ -96,7 +96,7 @@ class LifeSupportRewardState(RewardState):
         self.description = REWARDS['life_support']['description']
 
     def on_confirm(self):
-        self.scene.game.run_info.bonus_population += 2
+        self.scene.game.run_info.bonus_population += 3
         self.scene.game.run_info.reward_list.append({"name":"life_support"})
         return super().on_confirm()
 

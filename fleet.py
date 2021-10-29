@@ -111,7 +111,7 @@ class FleetManager:
             if needs_repath:
                 fleet.path = [fleet.pos]
                 fleet.path_done = False
-                fleet.develop_path(999)
+                fleet.develop_path(100)
 
         t3 = time.time()
         #print(len(self.current_fleets))
@@ -226,7 +226,8 @@ class Fleet:
             self.path = self.path[path_end:]
 
     def debug_render(self, surface):
-        pygame.draw.circle(surface, (255,0,0), self.pos.tuple_int(), self.radius, 1)
+        pass
+        #pygame.draw.circle(surface, (255,0,0), self.pos.tuple_int(), self.radius, 1)
 
     def generate_selectable_object(self):
         radius = max(self.radius, 8)

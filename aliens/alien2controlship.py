@@ -10,7 +10,7 @@ from v2 import V2
 @register_ship
 class Alien2ControlShip(Fighter):
     SHIP_NAME = "alien2controlship"
-    BASE_HEALTH = 55
+    BASE_HEALTH = 45
     BASE_DAMAGE = 5
     DISPLAY_NAME = "Supervisor"
     MAX_SPEED = 5

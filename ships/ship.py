@@ -32,6 +32,8 @@ THRUST_PARTICLE_RATE = 0.25
 
 PATH_FOLLOW_CLOSENESS = 20
 
+NO_PATH_RANGE = 40
+
 STATE_CRUISING = 'cruising'
 STATE_RETURNING = 'returning'
 STATE_WAITING = 'waiting'
@@ -49,9 +51,11 @@ class Ship(SpaceObject):
 
     def __init__(self, scene, pos, owning_civ):
         SpaceObject.__init__(self, scene, pos)
+        self._base_sheet = self._sheet.copy()
         self.owning_civ = owning_civ
         self.offset = (0.5, 0.5)
         self.collidable = True
+        self.collision_radius = 3
         self.stationary = False
         self.fleet = None
         self.origin = None # Planet we were emitted from
@@ -367,7 +371,12 @@ class Ship(SpaceObject):
             self.set_state(STATE_RETURNING)
             return
 
-        if self.scene.flowfield.has_field(self.effective_target):
+        delta = self.effective_target.pos - self.pos
+        use_path = True
+        if not self.scene.flowfield.has_field(self.effective_target) or delta.sqr_magnitude() < NO_PATH_RANGE ** 2:
+            use_path = False
+
+        if use_path:
             towards_flow = self.scene.flowfield.get_vector(self.pos, self.effective_target, 0)
             towards_center = towards_flow
             distance = 1
@@ -381,7 +390,6 @@ class Ship(SpaceObject):
             self.target_velocity = (towards_flow * ratio + towards_center * (1 - ratio)) * self.get_cruise_speed()
 
         else:
-            delta = self.effective_target.pos - self.pos
             self.target_velocity = delta.normalized() * self.get_cruise_speed()
 
         # Warp
@@ -418,13 +426,25 @@ class Ship(SpaceObject):
             self.set_target(nearest)
 
     def state_returning(self, dt):
-        self.target_velocity = self.scene.flowfield.get_vector(self.pos, self.effective_target, 10) * self.get_cruise_speed()
+        if self.effective_target.owning_civ != self.owning_civ:
+            self.set_state(STATE_RETURNING)
+        elif self.effective_target:
+            self.target_velocity = self.scene.flowfield.get_vector(self.pos, self.effective_target, 10) * self.get_cruise_speed()
+        else:
+            self.set_state(STATE_WAITING)
 
     def state_waiting(self, dt):
         self.waiting_time += dt 
-        _,a = (self.pos - self.effective_target.pos).to_polar()
+        if not self.effective_target:
+            return
+
+        # If we have a target, we want to orbit it.
+        delta = self.pos - self.effective_target.pos
+        _,a = delta.to_polar()
+        # Create a target point which is a step around the circle compared to my angle around the circle.
         a += 0.2
         target_pt = self.effective_target.pos + V2.from_angle(a) * (ATMO_DISTANCE + self.effective_target.radius)
+        # Adjust our velocity to aim at this target point
         self.target_velocity = (target_pt - self.pos).normalized() * self.get_max_speed() * 0.5
 
         if isinstance(self.effective_target, planet.planet.Planet):
@@ -500,11 +520,11 @@ class Ship(SpaceObject):
         self.set_color(color)
 
     def set_color(self, color):
-
-        outline_mask = pygame.mask.from_surface(self._sheet, 127)
+        
+        outline_mask = pygame.mask.from_surface(self._base_sheet, 127)
         surf = outline_mask.to_surface(setcolor=(*PICO_BLACK,255), unsetcolor=(0,0,0,0))      
 
-        color_mask = pygame.mask.from_threshold(self._sheet, (*PICO_RED,255), (2,2,2,255))
+        color_mask = pygame.mask.from_threshold(self._base_sheet, (*PICO_RED,255), (2,2,2,255))
         surf2 = color_mask.to_surface(setcolor=(*color,255), unsetcolor=(0,0,0,0))
         surf.blit(surf2,(0,0))
         self._sheet = surf

@@ -23,6 +23,7 @@ import simplesprite
 import sound
 import stagename
 import states
+import text
 import upgradestate
 import upkeepindicator
 from aliens import bosslevelcontroller, bossmothership, bosstimecrystal
@@ -117,6 +118,7 @@ class LevelScene(scene.Scene):
         planet.owning_civ.researched_upgrade_names.add(upgrade.name)
 
     def load_level(self, levelfile):
+        print("load level")
         data = json.load(open(resource_path("levels/%s.json" % levelfile)))
         for obj in data:
             t = None
@@ -175,6 +177,7 @@ class LevelScene(scene.Scene):
         p.population = 5
 
     def add_extra_spaceobjects(self):
+        print("add space objects")
         num_planets = len(self.get_planets())
 
         max_planets = min(int(self.difficulty / 1.5 + 7), 16)
@@ -289,7 +292,7 @@ class LevelScene(scene.Scene):
 
         self.pause_sprite = pauseoverlay.PauseOverlay()
         self.pause_sprite.layer = 5
-        self.ui_group.add(self.pause_sprite)        
+        self.ui_group.add(self.pause_sprite)
         self.game.game_speed_input = 0
 
     def setup_mods(self):
@@ -315,6 +318,7 @@ class LevelScene(scene.Scene):
             p.add_ship("%sbattleship" % galaxy['alien'])
 
     def load(self):
+        print("load")
         self.create_layers()
         civ_name = self.game.run_info.get_current_level_galaxy()['alien']
         if self.alienrace:
@@ -335,16 +339,20 @@ class LevelScene(scene.Scene):
 
         self.setup_players()
         self.add_extra_spaceobjects()
-        self.background.generate_image(self.get_objects_initial())
+        self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
+        print("generate image")
+        self.background.generate_image(self.objgrid)
+        print("done generate image")
         self.add_ui_elements()    
 
-        self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
+        
 
         self.fleet_managers = {
             'my':fleet.FleetManager(self, self.player_civ),
             'enemy':fleet.FleetManager(self, self.enemy.civ)
         }
 
+        print("generate flowfield")
         self.flowfield = flowfield.FlowFieldMap()
         self.flowfield.generate(self)
         self.flowfielddebug = 0
@@ -411,9 +419,10 @@ class LevelScene(scene.Scene):
         for planet in self.get_civ_planets(self.enemy.civ):
             planet.take_damage(99999, origin=None)
             if not isinstance(planet, bosstimecrystal.TimeCrystal):
-                planet.change_owner(self.player_civ)
-                planet.add_population(3)
-                planet.add_ship("fighter")
+                pass
+                #planet.change_owner(self.player_civ)
+                #planet.add_population(3)
+                #planet.add_ship("fighter")
 
     def dev_lose(self):
         for planet in self.get_civ_planets(self.player_civ):
@@ -573,7 +582,7 @@ class LevelScene(scene.Scene):
         self.update_game_objects(dt)
         self.update_collisions(dt)
 
-        if not self.cinematic:
+        if not self.cinematic and not self.is_tutorial:
             for enemy in self.enemies:
                 enemy.update(dt)
         
@@ -697,13 +706,14 @@ class LevelScene(scene.Scene):
             gi = pygame.Surface(self.game.screen.get_size(), pygame.SRCALPHA)
             gi.fill((0,0,0,0))
             ff = list(self.flowfield.fields.values())[self.flowfielddebug]
-            for col in range(1, len(ff.base_grid[0])):
-                x = col * flowfield.GRIDSIZE + ff.offset.x
-                pygame.draw.line(gi, (255,255,255,50), (x, ff.offset.y), (x, ff.offset.y + game.RES[1]), 1)
-            for row in range(1, len(ff.base_grid)):
-                y = row * flowfield.GRIDSIZE + ff.offset.y
-                pygame.draw.line(gi, (255,255,255,50), (ff.offset.x, y), (ff.offset.x + game.RES[0], y), 1)                
-            if self.flowfielddebugstage == 0:
+            if self.flowfielddebugstage > 0:
+                for col in range(1, len(ff.base_grid[0])):
+                    x = col * flowfield.GRIDSIZE + ff.offset.x
+                    pygame.draw.line(gi, (255,255,255,50), (x, ff.offset.y), (x, ff.offset.y + game.RES[1]), 1)
+                for row in range(1, len(ff.base_grid)):
+                    y = row * flowfield.GRIDSIZE + ff.offset.y
+                    pygame.draw.line(gi, (255,255,255,50), (ff.offset.x, y), (ff.offset.x + game.RES[0], y), 1)                
+            if self.flowfielddebugstage == 1:
                 for y,gr in enumerate(ff.base_grid):
                     for x,gc in enumerate(gr):     
                         pt = V2(x * flowfield.GRIDSIZE, y * flowfield.GRIDSIZE) + ff.offset
@@ -712,7 +722,7 @@ class LevelScene(scene.Scene):
                             s = "O"
                         FONTS['tiny'].render_to(gi, (pt.x + 2, pt.y + 2), s, (128,255,128,180))
 
-            if self.flowfielddebugstage == 1:
+            if self.flowfielddebugstage == 2:
                 for y,gr in enumerate(ff.dgrid):
                     for x,gc in enumerate(gr):     
                         pt = V2(x * flowfield.GRIDSIZE, y * flowfield.GRIDSIZE) + ff.offset
@@ -724,7 +734,7 @@ class LevelScene(scene.Scene):
                             s = str(gc % 10)
                         FONTS['tiny'].render_to(gi, (pt.x + 2, pt.y + 2), s, (128,255,128,180))
                         
-            elif self.flowfielddebugstage == 2:
+            elif self.flowfielddebugstage == 3:
                 for y,gr in enumerate(ff.grid):
                     for x,gc in enumerate(gr):
                         p1 = V2((x + 0.5) * flowfield.GRIDSIZE, (y + 0.5) * flowfield.GRIDSIZE) + ff.offset
@@ -779,13 +789,25 @@ class LevelScene(scene.Scene):
             #surf.set_alpha(160)
             self.game.screen.blit(surf, (0,0))
 
+
+        tri = [V2(0,0), V2(4,4), V2(0,8)]
         if self.game_speed > 1:
             color = PICO_BLUE if ((self.time % 2) > 1) else PICO_WHITE
             
             pygame.draw.rect(self.game.screen, PICO_BLUE, (0, 0, res.x, res.y), 1)
-            tri = [V2(0,0), V2(4,4), V2(0,8)]
+            
             pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 12, res.y - 12)).tuple() for z in tri], 0)
             pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 7, res.y - 12)).tuple() for z in tri], 0)
+
+        elif not self.cinematic:
+            ctl = "Space"
+            if self.game.input_mode == "joystick":
+                ctl = "R1"
+            t = text.render_multiline(ctl, "small", PICO_LIGHTGRAY, wrap_width=130)
+            self.game.screen.blit(t, (res.x - t.get_width() - 16, res.y - 12))
+            pygame.draw.polygon(self.game.screen, PICO_LIGHTGRAY, [(z + V2(res.x - 12, res.y - 12)).tuple() for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, PICO_LIGHTGRAY, [(z + V2(res.x - 7, res.y - 12)).tuple() for z in tri], 0)            
+            #FONTS['small'].render_to(self.game.screen, PICO_BLUE, "")
 
         return None
 
@@ -804,7 +826,7 @@ class LevelScene(scene.Scene):
             if event.key == pygame.K_f:
                 self.flowfielddebug = (self.flowfielddebug + 1) % len(self.flowfield.fields)
             if event.key == pygame.K_g:
-                self.flowfielddebugstage = (self.flowfielddebugstage + 1) % 3
+                self.flowfielddebugstage = (self.flowfielddebugstage + 1) % 4
             if event.key == pygame.K_h:
                 self.flowfielddebug = len(self.flowfield.fields) - 1
         if inp == "menu": #TODO: pause menu

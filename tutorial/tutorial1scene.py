@@ -50,7 +50,7 @@ class Tutorial1Scene(TutorialScene):
         self.o2_meter.kill()
 
         self.player_civ.offered_upgrades = {
-            'buildings':'b_defense1',
+            'buildings':'b_econ1',
             'ships':'s_basicfighters1',
             'tech':'t_mechanics1'
         }
