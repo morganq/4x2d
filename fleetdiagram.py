@@ -38,6 +38,20 @@ class FleetDiagram(spritebase.SpriteBase):
                 self.max_debug_time = max(self.debug_times)
         return super().update(dt)
 
+    def smooth_path(self, path):
+        # give up if we don't have enough points to smooth
+        if len(path) < 5:
+            return path
+
+        smoothed_path = [path[0], path[1]]
+        for i in range(2, len(path)-2):
+            pt = (path[i-2] + path[i+2]) / 2
+            smoothed_path.append(pt)
+
+        smoothed_path.append(path[-2])
+        smoothed_path.append(path[-1])
+        return smoothed_path
+
     def generate_image(self, scene):
         t1 = time.time()
         self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
@@ -57,8 +71,10 @@ class FleetDiagram(spritebase.SpriteBase):
             #    continue
             center = fleet.pos
 
+            path = self.smooth_path(fleet.path)
+
             # todo: migrate from center to path.
-            path = fleet.path[:-2]
+            path = path[:-2]
             if len(path) > 3:
                 pygame.draw.circle(self.image, OUTLINE_COLOR, center.tuple_round(), 2, 0)
                 

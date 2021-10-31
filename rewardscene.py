@@ -23,6 +23,7 @@ REWARDS = {
     'level_interceptor':{'title':'Upgrade Interceptors', 'description':'Upgrade Interceptors to have more health and damage'},
     'level_bomber':{'title':'Upgrade Bombers', 'description':'Upgrade Bombers to have more health and damage'},
     'level_battleship':{'title':'Upgrade Battleships', 'description':'Upgrade Battleships to have more health and damage'},
+    'o2':{'title':'Oxygen Refill', 'description':'Gain +10 minutes of oxygen'}
 }
 
 class RewardSelector(SpriteBase):
@@ -64,6 +65,17 @@ class CreditsRewardState(RewardState):
     def on_confirm(self):
         self.scene.game.run_info.credits += self.quantity
         self.scene.game.run_info.bonus_credits = 0
+        return super().on_confirm()
+
+class OxygenRewardState(RewardState):
+    def __init__(self, scene):
+        RewardState.__init__(self, scene)
+        self.title = REWARDS['o2']['title']
+        self.description = REWARDS['o2']['description']
+
+    def on_confirm(self):
+        self.scene.game.run_info.o2 += 60 * 10
+        self.scene.game.run_info.reward_list.append({"name":"o2"})
         return super().on_confirm()
 
 class JumpDriveRewardState(RewardState):
@@ -132,7 +144,7 @@ class MemoryCrystalRewardState(RewardState):
         l = len(selected_technologies)
         for i,technology in enumerate(selected_technologies):
             p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11) + self.scene.game.game_offset
-            icon = upgradeicon.UpgradeIcon(p, technology, self.select_technology, True)
+            icon = upgradeicon.UpgradeIcon(p, technology, self.select_technology, True, "bottom")
             self.icons[technology] = icon
             self.scene.ui_group.add(icon)
 
@@ -184,7 +196,7 @@ class BlueprintRewardState(RewardState):
         l = len(selected_buildings)
         for i,building in enumerate(selected_buildings):
             p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11) + self.scene.game.game_offset
-            icon = upgradeicon.UpgradeIcon(p, building, self.select_building, True)
+            icon = upgradeicon.UpgradeIcon(p, building, self.select_building, True, "bottom")
             self.icons[building] = icon
             self.scene.ui_group.add(icon)
 
@@ -238,6 +250,8 @@ class RewardScene(Scene):
             elif reward in ["level_fighter", "level_interceptor", "level_bomber", "level_battleship"]:
                 ship_type = reward.split("level_")[1]
                 self.sm.transition(LevelUpRewardState(self, ship_type))
+            elif reward == "o2":
+                self.sm.transition(OxygenRewardState(self))
             else:
                 print(reward)
         else:

@@ -71,9 +71,10 @@ class RunInfo:
 
     def generate_reward_pool(self):
         self.reward_pool = []
-        self.reward_pool.extend(['memory_crystal'] * 12)
-        self.reward_pool.extend(['blueprint'] * 12)
-        self.reward_pool.extend(['life_support'] * 6)
+        self.reward_pool.extend(['o2'] * 5)
+        self.reward_pool.extend(['memory_crystal'] * 8)
+        self.reward_pool.extend(['blueprint'] * 8)
+        self.reward_pool.extend(['life_support'] * 5)
         self.reward_pool.extend(['jump_drive'] * 8)
         self.reward_pool.extend(['level_fighter'] * 2)
         self.reward_pool.extend(['level_interceptor'] * 2)
@@ -184,11 +185,11 @@ class RunInfo:
                 else:
                     from_links = [column, column + 1]
 
-                if row == 0 or row == 1:
+                if row in [0, 1, 2]:
                     alien = aliens[0]
-                elif row == 2 or row == 3:
+                elif row in [3, 4]:
                     alien = aliens[1]
-                elif row == 4:
+                elif row in [5, 6]:
                     alien = aliens[2]
                 else:
                     alien = random.choice(aliens)

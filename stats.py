@@ -53,7 +53,7 @@ VALID_STAT_NAMES = [
     'max_ships_per_planet', 
     'memorial', # +1 fighter when ship sent from here dies
     'mining_rate',
-    'mining_rate_first_60', 
+    'mining_rate_first_120', 
     'mining_rate_at_max_pop', 
     'mining_rate_proximity', 
     'mining_ice_per_iron',

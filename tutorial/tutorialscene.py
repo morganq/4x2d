@@ -63,7 +63,8 @@ class TutorialScene(LevelScene):
 
         self.setup_players()
         self.player_civ.upkeep_enabled = False
-        self.background.generate_image(self.get_objects_initial())
+        self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
+        self.background.generate_image(self.objgrid)
         self.add_ui_elements()
 
         self.tutorial_panel = TutorialMessage(" ")
@@ -73,7 +74,7 @@ class TutorialScene(LevelScene):
         self.tutorial_panel._reposition_children()
         self.tutorial_panel.set_visible(False)
 
-        self.objgrid.generate_grid([s for s in self.game_group.sprites() if s.collidable])
+        
 
         self.fleet_managers = {
             'my':fleet.FleetManager(self, self.player_civ),

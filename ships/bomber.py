@@ -19,7 +19,7 @@ from ships.ship import (STATE_CRUISING, STATE_WAITING, THRUST_PARTICLE_RATE,
 class Bomber(Fighter): 
     SHIP_NAME = "bomber"
     SHIP_BONUS_NAME = "bomber"
-    BASE_HEALTH = 55
+    BASE_HEALTH = 45
     BLAST_RADIUS = 0
     FIRE_RATE = 0.4
     BASE_DAMAGE = 40

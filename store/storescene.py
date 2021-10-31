@@ -181,7 +181,7 @@ class StoreScene(Scene):
             return lambda : self.buy_memory(price, upgrade)
         for i,upgrade in enumerate(row['upgrades']):
             price = 40
-            elem = UpgradeIcon(V2(0,0), upgrade, tooltip=True)
+            elem = UpgradeIcon(V2(0,0), upgrade, tooltip=True, tooltip_position="bottom")
             u = UPGRADE_CLASSES[upgrade]
 
             # Adjust price
@@ -244,7 +244,7 @@ class StoreScene(Scene):
             return lambda : self.buy_blueprint(price, upgrade)
         for i,upgrade in enumerate(row['upgrades']):
             price = 30
-            elem = UpgradeIcon(V2(0,0), upgrade, tooltip=True)
+            elem = UpgradeIcon(V2(0,0), upgrade, tooltip=True, tooltip_position="bottom")
             u = UPGRADE_CLASSES[upgrade]
             if u.resource_type == "ice":
                 price += 10
@@ -281,10 +281,13 @@ class StoreScene(Scene):
         ship = row['ship']
         elem = SimpleSprite(V2(0,0), "assets/i-%s.png" % ship)
         price = 100
+        lvl = self.game.run_info.ship_levels[ship] + 1
+        if 'levelup' in self.bought:
+            lvl -= 1
         sib = StoreItemButton(
             V2(225, y) + self.game.game_offset,
             elem,
-            "%s Level %d" % (ship.title(), self.game.run_info.ship_levels[ship] + 1),
+            "%s Level %d" % (ship.title(), lvl),
             "Improve health and damage of all %ss" % ship.title(),
             price,
             bought = 'levelup' in self.bought,

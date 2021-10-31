@@ -216,6 +216,10 @@ class PlayerCiv(Civ):
                 pos = where.pos + V2(0, -where.get_radius() - 5)
             self.scene.score += value
             it = IconText(pos, None, "+%d" % value, economy.RESOURCE_COLORS[resource])
-            it.pos = pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
+            xo = 0
+            if resource == 'iron': xo = -10
+            if resource == 'ice': xo = 0
+            if resource == 'gas': xo = 10
+            it.pos = pos - V2(it.width, it.height) * 0.5 + V2(xo, 0)
             self.scene.ui_group.add(it)
         return super().earn_resource(resource, value)

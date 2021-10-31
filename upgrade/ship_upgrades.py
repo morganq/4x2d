@@ -226,7 +226,7 @@ class Warp2Upgrade(Upgrade):
     name = "s_warp2"
     resource_type = "iron"
     category = "ships"
-    title = "Fleet Warp"
+    title = "Fleet Warp II"
     description = "Every ship is [^fully repaired], warps into range of its target, and gains [^+67%] attack speed for [6 seconds]"
     icon = "ship_default"
     cursor = None

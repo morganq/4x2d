@@ -273,7 +273,7 @@ class LevelScene(scene.Scene):
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 50, self.game.game_resolution.y - 20), 'Win', 'small', self.dev_win))
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 110, self.game.game_resolution.y - 20), 'Lose', 'small', self.dev_lose))
 
-        self.o2_meter = o2meter.O2Meter(V2(self.game.game_resolution.x - 68, 2))
+        self.o2_meter = o2meter.O2Meter(V2(self.game.game_resolution.x - 86, 6))
         
         if self.options == "oxygen":
             self.game.run_info.o2 = 0

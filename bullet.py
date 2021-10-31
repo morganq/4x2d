@@ -106,7 +106,7 @@ class Bullet(SpriteBase):
             if self.mods.get("iron_on_hit"):
                 if isinstance(obj, ships.ship.Ship):
                     if self.shooter.owning_civ:
-                        self.shooter.owning_civ.earn_resource("iron", self.mods.get("iron_on_hit"), where=self.pos)
+                        self.shooter.owning_civ.earn_resource("iron", self.mods.get("iron_on_hit"))
             if self.mods.get("grey_goo", False):
                 obj.add_effect(GreyGooEffect(other, self))
             if self.mods.get("raze_chance", 0):

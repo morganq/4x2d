@@ -12,6 +12,7 @@ import simplesprite
 import sound
 import states
 import text
+import upscale
 from colors import *
 from resources import resource_path
 from run import RunInfo
@@ -41,8 +42,12 @@ class IntroScene(scene.Scene):
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         self.sm = states.Machine(states.UIEnabledState(self))
-        self.bg = simplesprite.SimpleSprite(self.game.game_offset + V2(50,0), "assets/intro1.png")
+        self.bg = simplesprite.SimpleSprite(self.game.game_offset, "assets/intro-sm-1.png")
+        self.bg.image = upscale.pixel(self.bg.image, 4)
+        self.bg.pos = V2(self.game.game_resolution.x /2 - self.bg.image.get_width() / 2, self.game.game_resolution.y /2 - self.bg.image.get_height() / 2)
         self.background_group.add(self.bg)
+        self.mockup = text.Text("Mockup Art", "big", V2(30,30))
+        self.ui_group.add(self.mockup)
         self.stage = 0
 
         self.time = 0
@@ -69,7 +74,7 @@ class IntroScene(scene.Scene):
         if self.time > tut_stage_times[1] and self.stage == 1:
             self.stage += 1
             self.tut.set_visible(False)
-            self.bg.image = pygame.image.load(resource_path("assets/intro2.png"))
+            self.bg.image = upscale.pixel(pygame.image.load(resource_path("assets/intro-sm-2.png")),4)
 
         if self.time > tut_stage_times[2] and self.stage == 2:
             self.stage += 1
@@ -85,7 +90,7 @@ class IntroScene(scene.Scene):
 
         if self.time > tut_stage_times[4] and self.stage == 4:
             self.stage += 1
-            self.bg.image = pygame.image.load(resource_path("assets/intro3.png"))
+            self.bg.image = upscale.pixel(pygame.image.load(resource_path("assets/intro-sm-3.png")),4)
             self.tut.set_visible(False)
 
         if self.time > tut_stage_times[5] and self.stage == 5:
@@ -96,7 +101,7 @@ class IntroScene(scene.Scene):
 
         if self.time > tut_stage_times[6] and self.stage == 6:
             self.stage += 1
-            self.tut.set_text("Standing between us and the others are many hostile Federation star systems, and our oxygen is running out...")
+            self.tut.set_text("Standing between us and the others are many hostile Federation star systems, and our oxygen is limited...")
 
         if self.time > tut_stage_times[7] and self.stage == 7:
             self.stage += 1

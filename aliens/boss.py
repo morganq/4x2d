@@ -157,9 +157,9 @@ class Boss(alien.Alien):
     ]
 
     tips = [
-        ("assets/alieninfo-terraform.png", ""),
-        ("assets/alieninfo-warpship.png", ""),
-        ("assets/alieninfo-crusher.png", "")
+        ("assets/alieninfo-crystal.png", "CENSORS control the TIME CRYSTALS which periodically freeze all nearby ships in a time prison."),
+        ("assets/alieninfo-unknown.png", ""),
+        ("assets/alieninfo-unknown.png", "")
     ]
 
     def __init__(self, scene, civ):

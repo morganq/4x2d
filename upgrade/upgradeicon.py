@@ -30,13 +30,13 @@ def generate_upgrade_image(upgrade):
     return image
 
 
-# TODO: tooltip position
 class UpgradeIcon(SpriteBase):
-    def __init__(self, pos, upgrade_name, onclick = None, tooltip = False):
+    def __init__(self, pos, upgrade_name, onclick = None, tooltip = False, tooltip_position="side"):
         super().__init__(pos)
         self.upgrade = UPGRADE_CLASSES[upgrade_name]
         self.onclick = onclick
         self.tooltip = tooltip
+        self.tooltip_position = tooltip_position
         self._tooltip_panel = None
         self.selectable = True
         self.layer = 1
@@ -57,10 +57,14 @@ class UpgradeIcon(SpriteBase):
             self._tooltip_panel.kill()
         if self.tooltip:
             self._tooltip_panel = TooltipPanel(self.upgrade.title, self.upgrade.description)
-            if self._tooltip_panel.width + self.pos.x + 30 > game.RES[0]:
-                self._tooltip_panel.pos = self.pos + V2(-5 - self._tooltip_panel.width,0)
-            else:
-                self._tooltip_panel.pos = self.pos + V2(30,0)
+            if self.tooltip_position == "side":
+                if self._tooltip_panel.width + self.pos.x + 30 > game.Game.inst.game_resolution.x:
+                    self._tooltip_panel.pos = self.pos + V2(-5 - self._tooltip_panel.width,0)
+                else:
+                    self._tooltip_panel.pos = self.pos + V2(30,0)
+            elif self.tooltip_position == "bottom":
+                x = int(-self._tooltip_panel.width / 2 + self.width / 2)
+                self._tooltip_panel.pos = self.pos + V2(x,24)
             self._tooltip_panel._reposition_children()
             self.groups()[0].add(self._tooltip_panel)
             self._tooltip_panel.add_all_to_group(self.groups()[0])

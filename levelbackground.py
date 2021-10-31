@@ -9,7 +9,7 @@ from colors import *
 from helper import clamp, get_nearest
 from v2 import V2
 
-COLOR_FADE = 1.0#0.7
+COLOR_FADE = 0.7
 
 class LevelBackground(spritebase.SpriteBase):
     def __init__(self, pos, size):

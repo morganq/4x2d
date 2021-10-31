@@ -1,24 +1,20 @@
-Cascading Stats:
-Stats class
-instance of it on each upgrade.
-civ has get_stat fn which looks at each upgrade on the civ
-building has get_stat fn which looks at its upgrade
-planet has get_stat fn which calls get_stat on each building
+status effects:
+ - 
 
-When a ship calculates stats, it looks at its owning civ's stats
-When a planet calculates stats, it looks at its building, planet, and civ stats and adds them.
+trade-offs
+ - 
 
-The only thing upgrades do is have stats and optionally take one-time actions.
 
-Many stats are used whenever the relevant thing is calculated. Bullets will check the shooter's civ's damage stat.
-Some stats do something per-frame or whatever. That can be just in a big conditional in the civ, or in the planet, or in the building or w/e. 
 
-====
+apply status effect to friendly ships in a radius, -100% pop
 
-Refactor the complicated stats as they are used right now, to set stage for many stats
+tech that grants ships a bonus for each planet they fly near
 
-===
-New text class
-Many options, well organized.
-Full border. Shadow. Multiline. Render to surf instead of create obj. 
-Parse text and extract [] to make a different color for putting stats in
+
+ghost ships that keep firing after they die for another minute
+
+blue flame
+cloaking
+
+
+"Quantum Advantage / Primacy"

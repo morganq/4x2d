@@ -49,6 +49,15 @@ class OptionsScene(scene.Scene):
 
         self.sm = states.Machine(states.UIEnabledState(self))
 
+        self.drag_notice = text.Text(
+            "Drag window corner to resize",
+            "small",
+            V2(self.game.game_resolution.x / 2 - 70, self.game.game_resolution.y - 20),
+            PICO_YELLOW,
+            multiline_width=300)
+        self.ui_group.add(self.drag_notice)
+        self.drag_notice.visible = not self.game.save.get_setting("fullscreen")
+
     def setup_menu(self):
         self.menumanager.clear()
         available_resolutions = self.game.get_available_resolutions()
@@ -63,7 +72,7 @@ class OptionsScene(scene.Scene):
         self.menumanager.add_option(menu.SliderMenuOption("SOUND", 0, 10, self.game.save.get_setting("sound_volume"), self.sound_change))
         self.menumanager.add_option(menu.ChoiceMenuOption("FULL SCREEN", ['YES', 'NO'], fullscreen_word, self.fullscreen_change))
         if is_fullscreen:
-            self.menumanager.add_option(menu.ChoiceMenuOption("RESOLUTION", resolutions, current_resolution, self.resolution_change))        
+            self.menumanager.add_option(menu.ChoiceMenuOption("RESOLUTION", resolutions, current_resolution, self.resolution_change))
 
     def on_display_resize(self, size):
         if self.ignore_next_resize_event:
@@ -127,6 +136,8 @@ class OptionsScene(scene.Scene):
         x = self.game.game_resolution.x / 2 - 120
         y = self.game.game_resolution.y / 2 - 120        
         self.menumanager.reconstruct(V2(x,y))
+        self.drag_notice.pos = V2(self.game.game_resolution.x / 2 - 70, self.game.game_resolution.y - 20)
+        self.drag_notice.visible = not fs
         self.game.save.save()
 
     def click_controls(self):

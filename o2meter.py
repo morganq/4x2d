@@ -1,7 +1,10 @@
-import spritebase
-from resources import resource_path
 import pygame
+
+import spritebase
+import text
+from colors import PICO_WHITE
 from helper import clamp
+from resources import resource_path
 
 O2_MAX = 3600
 class O2Meter(spritebase.SpriteBase):
@@ -16,8 +19,10 @@ class O2Meter(spritebase.SpriteBase):
 
     def _generate_image(self):
         self.image = self.full_image.copy()
-        pxs = (1 - (clamp(self.o2,0, O2_MAX) / O2_MAX)) * 60 + 5
+        pxs = (1 - (clamp(self.o2,0, O2_MAX) / O2_MAX)) * 60 + 19
         self.image.blit(self.empty_image, (0,0), (0, 0, pxs, self.image.get_height()))
+        m,s = divmod(self.o2, 60)
+        text.render_multiline_to(self.image, (38, -2), "%d:%02d" % (m,s), "tiny", PICO_WHITE)
 
     def update(self, dt):
         if self.o2 <= 0:
@@ -26,4 +31,5 @@ class O2Meter(spritebase.SpriteBase):
                 self.visible = True
             else:
                 self.visible = False
+        self._generate_image()
         return super().update(dt)

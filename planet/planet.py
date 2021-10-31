@@ -174,6 +174,7 @@ class Planet(SpaceObject):
             self.owning_civ.earn_resource(r, amt, self)
         self.lose_buildings()
         self.owning_civ = civ
+        self.upgrade_indicators = defaultdict(lambda:None)
         if civ in self.underground_buildings:
             for building in self.underground_buildings[civ]:
                 self.add_building(building['building'].upgrade)
@@ -424,8 +425,8 @@ class Planet(SpaceObject):
             if r == "gas" and self.get_stat("gas_mining_rate"):
                 rate_modifier *= 1 + self.get_stat("gas_mining_rate")
 
-            if self.get_stat("mining_rate_first_60") and self.owned_time < 60:
-                rate_modifier *= self.get_stat("mining_rate_first_60")
+            if self.get_stat("mining_rate_first_120") and self.owned_time < 120:
+                rate_modifier *= self.get_stat("mining_rate_first_120")
 
             if self.get_stat("mining_rate_proximity"):
                 _, distsq = get_nearest(self.pos,self.scene.get_hazards())

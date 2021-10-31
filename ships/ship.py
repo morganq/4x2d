@@ -51,7 +51,7 @@ class Ship(SpaceObject):
 
     def __init__(self, scene, pos, owning_civ):
         SpaceObject.__init__(self, scene, pos)
-        self._base_sheet = self._sheet.copy()
+        self._base_sheet = None
         self.owning_civ = owning_civ
         self.offset = (0.5, 0.5)
         self.collidable = True
@@ -140,6 +140,9 @@ class Ship(SpaceObject):
     def is_target_enemy(self):
         return self.effective_target and self.effective_target.owning_civ and self.effective_target.owning_civ != self.owning_civ
 
+    def is_target_not_ally(self):
+        return self.effective_target and self.effective_target.owning_civ != self.owning_civ
+
     def is_in_deep_space(self):
         nearest, distsq = helper.get_nearest(self.pos, self.scene.get_planets())
         return distsq > DEEP_SPACE_DIST ** 2
@@ -153,7 +156,7 @@ class Ship(SpaceObject):
                 self.scene.game_group.add(p)
         if self._timers['staged_booster'] < 0:
             speed *= 2
-        if self.get_stat('ship_speed_mul_targeting_planets') and self.is_target_enemy() and isinstance(self.effective_target, planet.planet.Planet):
+        if self.get_stat('ship_speed_mul_targeting_planets') and self.is_target_not_ally() and isinstance(self.effective_target, planet.planet.Planet):
             speed *= (1 + self.get_stat('ship_speed_mul_targeting_planets'))
             if random.random() < 0.02:
                 p = particle.Particle([PICO_WHITE, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 1.5, self.velocity * -1 + V2.random_angle() * 1.25)
@@ -171,7 +174,7 @@ class Ship(SpaceObject):
 
     def get_max_shield(self):
         shield = 0
-        if self.get_stat("enclosure_shield") and self.fleet and len(self.fleet.ships) >= 8:
+        if self.get_stat("enclosure_shield") and self.fleet and len(self.fleet.ships) >= 4:
             shield += self.get_stat("enclosure_shield")
         if self.get_stat('ship_shield_far_from_home'):
             _, near_dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
@@ -404,8 +407,9 @@ class Ship(SpaceObject):
         end = self.effective_target.pos
         offset_dist = self.effective_target.radius + 20
         delta = (end - self.pos)
-        if warp_dist ** 2 >= delta.sqr_magnitude() or not self.scene.flowfield.has_field(self.effective_target):
-            maxdist = delta.magnitude() - offset_dist
+        delta_magnitude = delta.magnitude()
+        if warp_dist >= (delta_magnitude - offset_dist) or not self.scene.flowfield.has_field(self.effective_target):
+            maxdist = delta_magnitude - offset_dist
             delta = delta.normalized()
             target_pos = self.pos + delta * min(warp_dist, maxdist)
         else:
@@ -520,7 +524,8 @@ class Ship(SpaceObject):
         self.set_color(color)
 
     def set_color(self, color):
-        
+        if not self._base_sheet:
+            self._base_sheet = self._sheet.copy()
         outline_mask = pygame.mask.from_surface(self._base_sheet, 127)
         surf = outline_mask.to_surface(setcolor=(*PICO_BLACK,255), unsetcolor=(0,0,0,0))      
 

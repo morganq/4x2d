@@ -34,6 +34,7 @@ REWARD_ICONS_ORDER = {
     'level_interceptor':5,
     'level_bomber':6,
     'level_battleship':7,
+    'o2':8
 }
 
 class NodeSprite(SimpleSprite):

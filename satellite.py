@@ -1,4 +1,5 @@
 import math
+import random
 
 import pygame
 
@@ -19,9 +20,10 @@ class Satellite(SpaceObject):
         self.planet = planet
         super().__init__(scene, V2(-50,-50))
         self.owning_civ = planet.owning_civ
+        self.inst_angle_offset = random.random() * 0.6 - 0.3
 
     def set_pos(self):
-        self.angle = self.scene.time / (self.planet.radius + 10) * 3 + self.ANGLE_OFFSET
+        self.angle = self.scene.time / (self.planet.radius + 10) * 3 + self.ANGLE_OFFSET + self.inst_angle_offset
         self.angle = self.angle % (math.pi * 2)
         self.pos = self.planet.pos + V2.from_angle(self.angle) * (self.planet.radius + 10)
 

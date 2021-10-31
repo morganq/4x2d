@@ -67,9 +67,9 @@ class Atomic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nuclear Battery"
-    description = "Each planet has [^+75%] mining rate for the first [60 seconds] after colonizing."
+    description = "Each planet has [^+100%] mining rate for the first [120 seconds] after colonizing."
     icon = "nuclearbattery"
-    stats = Stats(mining_rate_first_60=0.75)
+    stats = Stats(mining_rate_first_120=1)
     family = {'tree':'t_atomic', 'parents':[]}
     requires = None
 
@@ -123,7 +123,7 @@ class Vanguard1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Vanguard Boosters"
-    description = "Ships fly [^+50%] faster when targeting enemy planets"
+    description = "Ships fly [^+50%] faster when targeting neutral or enemy planets"
     icon = "vanguardboosters"
     stats = Stats(ship_speed_mul_targeting_planets = 0.5)
     family = {'tree':'t_vanguard', 'parents':[]}
@@ -160,7 +160,7 @@ class Vanguard3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Quantum Weirdness"
-    description = "A [Worker] ship that uses warp drive has a [33% chance] for [^+1] population"
+    description = "A [Worker] ship that uses warp drive has a [33% chance] for [^+3] population"
     icon = "quantumweirdness"
     stats = Stats(warp_drive_pop_chance=0.33)
     family = {'tree':'t_vanguard', 'parents':['t_vanguard2b']}
@@ -362,7 +362,7 @@ class Proximity3Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Spoils"
-    description = "When you raze a planet, gain [^1 full asset] of its primary resource"
+    description = "When you raze a planet, gain [^1 full upgrade] of its primary resource"
     icon = "tech_default"
     stats = Stats(raze_upgrade=1)
     family = {'tree':'t_proximity', 'parents':['t_proximity2a', 't_proximity2b']}
@@ -412,7 +412,7 @@ class Optics3Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Refractor Shield"
-    description = "Ships in a fleet of [8 or more] gain a [^20] damage shield"
+    description = "Ships in a fleet of [4 or more] gain a [^20] damage shield"
     icon = "tech_default"
     stats = Stats(enclosure_shield=20)
     family = {'tree':'t_optics', 'parents':['t_optics2a', 't_optics2b']}

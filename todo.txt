@@ -1,20 +1,9 @@
 ** Alpha **
 
-* supervisor color bug
-warp drive sends units too close to target planet
-* change some upgrade odds in runinfo
-check alien arrangement in runinfo
-tips for boss loading screen
-* fast forward controls visible somewhere
-* double check tutorial
-
-
-
-upgrade tweaks:
- - vanguard boosters
 
 
 ** Beta **
+- second ship type in iron
 
 - Add EMP technology for Network
 
@@ -29,7 +18,6 @@ asset names pass
 something better when you acquire upgrade
 explain different ships
 4th civ
-
 
 
  ? limited range fighters, maybe battleship and refuel
