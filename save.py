@@ -7,7 +7,7 @@ DEFAULT_SETTINGS = {
     'music_volume': 5,
     'sound_volume': 5,
     'resolution':None,
-    'fullscreen':True,
+    'fullscreen':False,
     'showed_credits': False,
     'controls':{
         1:"confirm",
