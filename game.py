@@ -44,7 +44,7 @@ class Game:
 
         resolution = self.save.get_setting("resolution")
         if resolution == None:
-            resolution = self.get_available_resolutions()[0]        
+            resolution = (1200,800)
             self.save.set_setting("resolution", resolution)
             self.save.save()
         self.set_resolution(V2(*resolution), self.save.get_setting("fullscreen"))
