@@ -4,7 +4,6 @@ import random
 import pygame
 
 import bullet
-import game
 import helper
 from asteroid import Asteroid
 from colors import PICO_BLUE, PICO_PINK
@@ -120,7 +119,7 @@ class OrbitalLaser(Satellite):
         steps = 0
         p = self.pos
         self.target = None
-        while (p.x > 0 and p.x < game.RES[0]) and (p.y > 0 and p.y < game.RES[1]):
+        while (p.x > 0 and p.x < 600) and (p.y > 0 and p.y < 360):
             p += d
             steps += 1
             possible = [o for o in self.scene.get_objects_in_range(p, 25) if not isinstance(o, bullet.Bullet)]

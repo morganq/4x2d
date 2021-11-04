@@ -1,3 +1,4 @@
+import asteroid
 import game
 from button import Button
 from colors import *
@@ -16,6 +17,8 @@ class OrderPanel(Panel):
         self.planet_to = planet_to
         self.on_order = on_order
 
+        siegers_only = isinstance(self.planet_to, asteroid.Asteroid)
+
         self.tab = {'text':"Send Ships", 'color':PICO_PINK}
 
         ships = {**self.planet_from.ships}
@@ -30,9 +33,14 @@ class OrderPanel(Panel):
                 else:
                     name = SHIPS_BY_NAME[ship].get_display_name()
                 
+                color = PICO_WHITE
+                disabled = False
+                if siegers_only and not SHIPS_BY_NAME[ship].BOMBS:
+                    disabled = True                
+                    color = PICO_DARKGRAY
                 self.add(SimpleSprite((0,0), 'assets/i-%s.png' % ship), V2(0,y))
-                self.add(Text("%ss" % name, "small", (0,0), PICO_WHITE, False), V2(14,y + 2))
-                slider = Slider(V2(0,0), 80, 0, ships[ship])
+                self.add(Text("%ss" % name, "small", (0,0), color, False), V2(14,y + 2))
+                slider = Slider(V2(0,0), 80, 0, ships[ship], disabled=disabled)
                 self.add(slider, V2(0, y+12))
                 self.sliders[ship] = slider
                 y += 45

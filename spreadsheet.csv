@@ -1,0 +1,111 @@
+buildings,iron,econ,Refinery,[^+50%] [Mining Rate] for [Primary Resource]
+buildings,iron,econ,Nuclear Reactor,"[^+100%] [Mining Rate] for [Primary Resource], [!No more Buildings or Ships can be built here]"
+buildings,iron,econ,Military Surplus,"[^+50%] [Mining Rate] for [Primary Resource], [!-50%] [Fighter Production]"
+buildings,iron,econ,IO Matrix,[^+15%] [Mining Rate] for [Primary Resource] per Building
+buildings,iron,pop,Modular Dwellings,[^+2] Maximum Population
+buildings,iron,pop,Life Support,[^+40%] Maximum Population
+buildings,iron,pop,University,Ship production is [^+15%] faster for each population
+buildings,iron,pop,Underground Shelter,[^+100%] population growth rate
+buildings,iron,hangar,Fighter Hangar,[^+50%] [Fighter] Production Quantity
+buildings,iron,hangar,Interceptor Hangar,[^+100%] [Interceptor] Production Quantity
+buildings,iron,hangar,Bomber Hangar,[^+100%] [Bomber] Production Quantity
+buildings,iron,hangar,Battleship Hangar,[^+150%] [Battleship] Production Speed
+buildings,iron,defense,Reflector,[^+1 pop]. Gain a [^50] health reflector shield (does not regenerate)
+buildings,iron,defense,Resilient Ecosystem,[^+2 pop]. [^+100%] health and [^+5] health regeneration per second
+buildings,iron,defense,Armory,"When this planet takes damage, [!-1 pop], [^+1 fighter]. [!(10 second cooldown)]"
+buildings,iron,defense,Low Orbit Defenses,Grants [^+20] health to nearby Ships
+buildings,ice,dangerous,SSM Battery,Fire explosive missiles at nearby enemy ships
+buildings,ice,dangerous,Interplanetary SSM,Fire explosive missiles at enemy ships and planets within 100 units
+buildings,ice,dangerous,Atmospheric EM Generator,Enemy ships are disabled for 5 seconds the first time they move into range
+buildings,ice,dangerous,Caustic Amplifier,Planetary weapons deal [^+50%] damage
+buildings,ice,launchpad,Headquarters,"When a [Worker] sent from this planet colonizes a planet, [^+1] Population. [!30 second cooldown]"
+buildings,ice,launchpad,Employment Office,"If you are at maximum population, [^+40%] mining rate"
+buildings,ice,launchpad,Workforce Housing,[^+1] Max Population every 30 seconds; growth stops after 300 seconds or when you colonize a new planet
+buildings,ice,launchpad,Memorial,"When a ship sent from this planet dies, [^+1] [Fighter]. [!20 second cooldown]"
+buildings,ice,scarcest,Strip Mining,[^+50%] faster [Ice] and [Gas] mining rate
+buildings,ice,scarcest,Cryosteel Alloy,[^+1] [Ice] for every 1 [Iron] mined
+buildings,ice,scarcest,Terraform,Permanently flip iron and gas resource values on a planet
+buildings,ice,scarcest,Noble Alloy,[^+1] [Gas] for every 1 [Iron] mined
+buildings,gas,ultra,Comm Station,Enemy planets near the comm station reveal their ships and population when selected
+buildings,gas,ultra,Defense Matrix,Produces a field that deals [^10%] of maximum health every second to enemy ships
+buildings,gas,ultra,Portal,Portal allows teleportation between two allied planets
+buildings,gas,deserted,Bunker Trap,"If this planet is razed, emit a [^20] damage shockwave. All buildings go underground and return if you re-take the planet"
+buildings,gas,deserted,Scrap Collector,"Whenever this planet takes damage, gain [^+5] [Iron]"
+buildings,gas,deserted,War Economy A,"Produce [^1] [Fighter] every 45 seconds, [!-100% Max Population]"
+buildings,gas,deserted,War Economy B,"Produce [^1] [Fighter] every 30 seconds, [!-90% Max Health]"
+buildings,gas,satellite,Orbital Habitat,[^+4] maximum population
+buildings,gas,satellite,Orbital Reflector,Covers half the planet with a 50-health reflector shield; shield health regenerates at [^+2] health per second
+buildings,gas,satellite,Off-World Mining,"Gain [^+5] [Iron], [^+5] [Ice], and [^+5] [Gas] every 5 seconds."
+buildings,gas,satellite,Orbital Laser,Orbital Laser fires a constant beam at the nearest enemy target in line-of-sight
+ships,iron,basicfighters,Standard Order,Train [^2] [Fighters] Over [30 seconds]
+ships,iron,basicfighters,Expedited Order,Train [^3] [Fighters] Over [25 seconds]
+ships,iron,basicfighters,Rush Order,Train [^3] [Fighters] Over [20 seconds]
+ships,iron,instantfighters,Emergency Reinforcements,Train [^1] [Fighter] [^Instantly]
+ships,iron,instantfighters,Guard Deployment,"Train [^2] [Fighters] [^Instantly], [!-2] population"
+ships,iron,instantfighters,War Manufacturing,"Train [^2] [Fighters] [^Instantly], Planet loses [!50] health"
+ships,iron,instantfighters,Guard Deployment II,"Train [^3] [Fighters] [^Instantly], [!-2] population"
+ships,iron,instantfighters,War Manufacturing II,"Train [^3] [Fighters] [^Instantly], Planet loses [!80] health"
+ships,iron,longfighters,Efficient Assembly,"Train [^3] [Fighters] Over [120 seconds], [^+50] Iron"
+ships,iron,longfighters,Strategic Assembly,Train [^4] [Fighters] Over [120 seconds]
+ships,iron,longfighters,Efficient Assembly II,"Train [^3] [Fighters] Over [120 seconds], [^+100] Iron"
+ships,iron,longfighters,Efficient Assembly III,"Train [^4] [Fighters] Over [120 seconds], [^+50] Gas"
+ships,iron,warp,Fleet Warp,Every ship warps into range of its target and gains [^+67%] attack speed for [6 seconds]
+ships,iron,warp,Fleet Warp II,"Every ship is [^fully repaired], warps into range of its target, and gains [^+67%] attack speed for [6 seconds]"
+ships,ice,basicinterceptors,Interceptor,Train [^1] [Interceptor] Over [10 seconds]
+ships,ice,basicinterceptors,Interceptor II,Train [^2] [Interceptors] Over [45 seconds]
+ships,ice,basicinterceptors,Interceptor Assembly Line,Train [^3] [Interceptors] Over [60 seconds]
+ships,ice,basicinterceptors,Ad-Hoc Interceptors,Train [^2] [Interceptors] Instantly
+ships,ice,basicbombers,Bomb Squadron,Train [^2] [Bombers] Over [60 seconds]
+ships,ice,basicbombers,Bomb Squadron II,Train [^3] [Bombers] Over [60 seconds]
+ships,ice,basicbombers,Bomb Support,"Train [^2] [Bombers] Over [45 seconds], [^+150] [Iron]"
+ships,ice,basicbombers,Bomb Support II,"Train [^3] [Bombers] Over [60 seconds], [^+75] [Gas]"
+ships,ice,hangarprod,Specialized Manufacturing,"Train [^1] [Fighter], [^1] [Interceptor], and [^1] [Bomber] over 60 seconds at random planets"
+ships,ice,hangarprod,Specialized Manufacturing II,"Train [^1] [Fighter], [^1] [Interceptor], and [^1] [Bomber] instantly at random planets"
+ships,gas,basicbattleships,Battleship,Train [^1] [Battleship] Over [30 seconds]
+ships,gas,basicbattleships,Battleship II,Train [^1] [Battleship] Over [20 seconds]
+ships,gas,basicbattleships,Emergency Battleship,Train [^1] [Battleship] [^instantly]
+ships,gas,basicbattleships,Battleship III,Train [^2] [Battleships] Over [60 seconds]
+ships,gas,perplanet,Planetary Guard,Train [^1] [Fighter] over [40 seconds] at each planet
+ships,gas,perplanet,Planetary Guard II,Train [^1] [Fighter] over [10 seconds] at each planet
+ships,gas,variety,Armada,Train [^2] [Bombers] and [^2] [Interceptors] over [45 seconds]. [Iron] is [!Frozen] for [20 seconds]
+ships,gas,variety,Armada II,"Train [^2] [Bombers], [^2] [Interceptors], and [^2] [Fighters] over [45 seconds]. [Iron] is [!Frozen] for [20 seconds]"
+tech,iron,t_mechanics,Precise Assembly,[Fighters] gain [^+33%] rate of fire
+tech,iron,t_mechanics,Spaceport,Planets with no docked ships gain [^+2] health per second and [^+33%] population growth rate
+tech,iron,t_mechanics,Material Reconstruction,Gain [^+25] ice for each planet you control
+tech,iron,t_mechanics,Overgrowth,Population grows [^+20%] faster for each docked ship
+tech,iron,t_atomic,Nuclear Battery,Each planet has [^+100%] mining rate for the first [120 seconds] after colonizing.
+tech,iron,t_atomic,Isotope Conversion,Gain [150] [Ice] and [100] [Gas]. [Iron] is [!Frozen] for [20 seconds].
+tech,iron,t_atomic,Atomic Assembler,[^+50%] faster production of ships other than [Fighters]
+tech,iron,t_atomic,Unstable Reactor,"Mining rate on each planet slowly grows to [^+30%], but resets if attacked or if a ship is launched"
+tech,iron,t_vanguard,Vanguard Boosters,Ships fly [^+50%] faster when targeting neutral or enemy planets
+tech,iron,t_vanguard,Vanguard Armor,Ships gain a [^+10] health shield when far from a planet you control
+tech,iron,t_vanguard,Warp Drive,Ships gain warp drive: they can teleport forward [^+3] units in open space
+tech,iron,t_vanguard,Quantum Weirdness,A [Worker] ship that uses warp drive has a [33% chance] for [^+3] population
+tech,iron,t_quantum,Munitions Recycling,"When a [Fighter] deals damage to an enemy ship, gain [^+3] Iron"
+tech,iron,t_quantum,Proximity Alert,Planets you control that are near enemy planets produce ships [^+100%] faster
+tech,iron,t_quantum,Nanothread Plating,Ships have [^+25%] health
+tech,iron,t_quantum,Grey Goo,"Fighter missiles apply Grey Goo on hit, inflicting damage over time to the target."
+tech,ice,t_crystal,Crystal Repeater,[Interceptor] missiles bounce to hit a second target
+tech,ice,t_crystal,Phasing Lattice,[Bombers] dodge the first 3 attacks that target them
+tech,ice,t_crystal,Fragmentation Sequence,"If a [Worker] ship is destroyed, it explodes for [^5] damage. Damage and radius increase with ship population"
+tech,ice,t_crystal,Crystal Repeater,"[Interceptors] gain a 10 health shield, and their missiles bounce to [^+1] target"
+tech,ice,t_ai,Orbital Targeting Solution,Ships gain [^+66%] attack speed for [10 seconds] after take-off
+tech,ice,t_ai,Artificial Intelligence,Population growth rate [^+33%]. Population grows on planets even with [0] population
+tech,ice,t_ai,Coordination Protocol,[Interceptors] fire [^+50%] faster near [Bombers]
+tech,ice,t_ai,Robotic Assembly,"Whenever you gain control of a planet, [^add] a random tier 1 iron building"
+tech,ice,t_proximity,Hostile Takeover,A [Bomber] that helps raze a planet sends out a [Worker] ship to colonize it
+tech,ice,t_proximity,Fire Bomb,[Bombers] gain [^+25%] damage and have a [^30%] chance to destroy a random building on hit
+tech,ice,t_proximity,Space Mining,Planets you control that are near hazards gain [^+33%] mining rate
+tech,ice,t_proximity,Spoils,"When you raze a planet, gain [^1 full upgrade] of its primary resource"
+tech,gas,t_optics,Laser Diode,[Battleship] weapon upgrade - rapid laser array replaces missile weapon
+tech,gas,t_optics,Fleet Upgrade,"[Battleships] gain [^+67%] health, other ships have [!-33%] health"
+tech,gas,t_optics,Auto Focus,"Ships gradually gain attack speed while flying, up to [^+50%] over [60 seconds]"
+tech,gas,t_optics,Refractor Shield,Ships in a fleet of [4 or more] gain a [^20] damage shield
+tech,gas,t_exotic,Supercritical Materials,Gain [^+200%] resources from asteroids
+tech,gas,t_exotic,Transient Field,Ships gain [^+10] health
+tech,gas,t_exotic,Jettison,"When you lose a planet, gain [^1 full asset] of the planet's primary resource"
+tech,gas,t_exotic,Relativistic Targeting,Ships gain [^+35%] attack range
+tech,gas,t_alien,Unknown Artifact,Gain [^+3] re-rolls
+tech,gas,t_alien,Alien Thrusters,Ships move [^+33%] faster
+tech,gas,t_alien,Kinetic Sling,Ship weapons deal [^+50%] of bonus speed as bonus damage
+tech,gas,t_alien,Alien Core Drill,[^+30%] Ice mining and [^+15%] Gas mining

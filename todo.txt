@@ -1,6 +1,10 @@
 ** Alpha **
 
-
+gifs:
+ - order ships
+ - combat
+ - gain upgrade
+ - starmap
 
 ** Beta **
 - second ship type in iron

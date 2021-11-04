@@ -1,7 +1,12 @@
+import csv
 from collections import defaultdict
 
 from colors import *
 from stats import Stats
+
+write_spreadsheet = False
+if write_spreadsheet:
+    w = csv.writer(open("spreadsheet.csv", "w"))
 
 UPGRADES = {
     'iron':defaultdict(list),
@@ -40,6 +45,12 @@ def register_upgrade(cls):
     UPGRADE_CLASSES[cls.name] = cls
     UPGRADES[cls.resource_type][cls.category].append(cls.name)
     ALL_UPGRADE_CLASSES.append(cls)
+    if write_spreadsheet:
+        print(cls)
+        try:
+            w.writerow([cls.category, cls.resource_type, cls.family['tree'], cls.title, cls.description])
+        except:
+            pass
     return cls
 
 from upgrade import building_upgrades, ship_upgrades, tech_upgrades

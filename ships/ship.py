@@ -49,6 +49,9 @@ class Ship(SpaceObject):
     SHIP_BONUS_NAME = None
     DISPLAY_NAME = None
 
+    DOGFIGHTS = False
+    BOMBS = False
+
     def __init__(self, scene, pos, owning_civ):
         SpaceObject.__init__(self, scene, pos)
         self._base_sheet = None

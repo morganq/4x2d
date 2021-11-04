@@ -69,7 +69,7 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             elif sys.argv[1] == "game":
-                self.scene = levelscene.LevelScene(self, "choke", "alien3", 5, 5, "Testing", "This is a test string for the description")
+                self.scene = levelscene.LevelScene(self, "cross", "alien2", 5, 5, "Testing", "This is a test string for the description")
             elif sys.argv[1] == "boss":
                 self.scene = levelscene.LevelScene(self, "boss2", "boss", 9, 9, "Boss", "It's the boss")
             elif sys.argv[1] == "planet":
@@ -237,7 +237,7 @@ class Game:
         else:
             #self.scale_normal()
             self.scale_xbr()
-        if True:
+        if DEV:
             t = pygame.time.get_ticks() - self.frame_time
             self.frame_time = pygame.time.get_ticks()            
             text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))
