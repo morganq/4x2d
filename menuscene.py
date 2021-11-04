@@ -96,6 +96,7 @@ class MenuScene(scene.Scene):
             self.menumanager.add_option(menu.ButtonMenuOption(continue_text, self.click_continue))
         self.menumanager.add_option(menu.ButtonMenuOption("NEW GAME", self.click_new))
         self.menumanager.add_option(menu.ButtonMenuOption("TUTORIAL", self.click_tutorial))
+        self.menumanager.add_option(menu.ButtonMenuOption("MULTIPLAYER", self.click_multiplayer))
         self.menumanager.add_option(menu.ButtonMenuOption("OPTIONS", self.click_options))
         self.menumanager.add_option(menu.ButtonMenuOption("EXIT", sys.exit))
 
@@ -124,6 +125,9 @@ class MenuScene(scene.Scene):
         self.game_group.draw(self.game.screen)
         self.ui_group.draw(self.game.screen)
         super().render()    
+
+    def click_multiplayer(self):
+        self.game.set_scene("multiplayer_menu")
 
     def click_tutorial(self):
         self.game.scene = tutorial.introscene.IntroScene(self.game)

@@ -1,0 +1,31 @@
+Refactor game states.
+Two types of state:
+1. "Game state" - The game is in exactly one of these at any given time
+    a. Intro - show level name or w/e.. maybe 3,2,1 countdown
+    b. Game - everything really
+    c. Victory - who won
+
+2. "Player input state" - Each player has their own input state
+    a. MapState - the neutral main state
+    b. PreparingOrderState - when dragging the arrow
+    c. OrderShipsState - when picking the number of ships to go to each place
+    d. UpgradeState - selecting which upgrade to get
+    e. PickUpgradeTargetState - self-explanatory
+
+
+
+
+Game
+ - player_inputs[]
+ - game loop
+   - input -> figure out which player -> call scene's take_input passing the playerinput object
+
+Scene
+ - in_game_players[]
+
+PlayerInput
+ - id = player 1, player 2, etc.
+
+InGamePlayer
+ - id, matching playerinput. could even hold on to the playerinput object?
+ - player_input_state

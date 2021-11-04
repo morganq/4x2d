@@ -13,10 +13,12 @@ import introscene
 import leveleditorscene
 import levelscene
 import menuscene
+import multiplayermenu
 import newgamescene
 import optimize
 import optionsscene
 import planetgenscene
+import playerinput
 import run
 import simplesprite
 import sound
@@ -36,6 +38,9 @@ OBJ = {
 }
 class Game:
     inst = None
+    INPUT_MOUSE = "mouse"
+    INPUT_JOYSTICK = "joystick"
+    INPUT_MULTIPLAYER = "multiplayer"
     def __init__(self, save):
         #pygame.display.set_icon(pygame.image.load(resource_path("assets/icon_2_256.png")))
         pygame.mixer.pre_init(buffer=256)
@@ -52,9 +57,10 @@ class Game:
         sound.init()
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
         self.last_joy_axes = None
-        #sound.play_music("game")
         self.run_info = run.RunInfo()
-        self.input_mode = 'mouse'
+        self.input_mode = self.INPUT_MOUSE
+        self.player_inputs = []
+
         if len(sys.argv) > 1:
             global DEV
             DEV = True            
@@ -117,6 +123,141 @@ class Game:
             resizable
         )
 
+    def process_input_singleplayer(self, event):
+        bindings = {int(k):v for k,v in self.save.get_setting("controls").items()}
+        reverse_bindings = {v:k for k,v in bindings.items()}
+        axes = [0,1]
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT: self.scene.take_input("left", event)
+            elif event.key == pygame.K_RIGHT: self.scene.take_input("right", event)
+            elif event.key == pygame.K_UP: self.scene.take_input("up", event)
+            elif event.key == pygame.K_DOWN: self.scene.take_input("down", event)
+            elif event.key == pygame.K_SPACE:
+                self.scene.take_input("action", event)
+                self.game_speed_input = clamp(int(1 - self.game_speed_input), 0, 1)
+            elif event.key == pygame.K_ESCAPE:
+                self.scene.take_input("menu", event)
+            else:
+                self.scene.take_input("other", event)
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
+            if event.button == 1: self.scene.take_input("click", event)
+            if event.button == 3:
+                self.scene.take_input("rightclick", event)
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
+            if event.button == 1: self.scene.take_input("unclick", event)
+            if event.button == 3: self.scene.take_input("unrightclick", event)                    
+
+        elif event.type == pygame.MOUSEMOTION:
+            event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
+            event.__dict__['grel'] = V2(event.rel[0] / self.scale, event.rel[1] / self.scale)
+            if event.buttons[0]:
+                self.scene.take_input("mouse_drag", event)
+            else:
+                pass
+                self.scene.take_input("mouse_move", event)
+
+        elif event.type == pygame.JOYAXISMOTION:
+            delta = V2(self.joysticks[0].get_axis(axes[0]), self.joysticks[0].get_axis(axes[1]))
+            if delta.sqr_magnitude() < 0.35 ** 2:
+                delta = V2(0,0)
+            if delta.tuple() != self.last_joy_axes:
+                self.scene.take_input("joymotion", {'delta':delta})
+                self.last_joy_axes = delta.tuple()
+
+            if self.input_mode == "joystick":
+                self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]
+
+        elif event.type == pygame.JOYHATMOTION:
+            delta = V2(event.value[0], -event.value[1])
+            self.scene.take_input("joymotion", {'delta': delta })
+
+        elif event.type == pygame.JOYBUTTONDOWN:
+            try:
+                self.scene.take_input(bindings[event.button], event)
+            except KeyError:
+                self.scene.take_input(None, event)
+
+    def process_input_multiplayer(self, event):
+        self.scene.take_raw_input(event)
+
+        def get_mouse_player():
+            for inp in self.player_inputs:
+                if inp.input_type == playerinput.Player.INPUT_MOUSE:
+                    return inp
+            return None
+
+        def get_joystick_player(joystick_id):
+            for inp in self.player_inputs:
+                if inp.input_type == playerinput.Player.INPUT_JOYSTICK and inp.joystick_id == joystick_id:
+                    return inp
+            return None
+
+        p = None
+        if event.type == pygame.KEYDOWN:
+            p = get_mouse_player()
+            if p:
+                if event.key == pygame.K_ESCAPE:
+                    self.scene.take_player_input(p.player_id, "menu", event)
+                else:
+                    self.scene.take_player_input(p.player_id, "other", event) # Usually for debug purposes
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            p = get_mouse_player()
+            if p:
+                event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
+                if event.button == 1: self.scene.take_player_input(p.player_id, "click", event)
+                if event.button == 3: self.scene.take_player_input(p.player_id, "rightclick", event)
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            p = get_mouse_player()
+            if p:
+                event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
+                if event.button == 1: self.scene.take_player_input(p.player_id, "unclick", event)
+                if event.button == 3: self.scene.take_player_input(p.player_id, "unrightclick", event)                    
+
+        elif event.type == pygame.MOUSEMOTION:
+            p = get_mouse_player()
+            if p:            
+                event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
+                event.__dict__['grel'] = V2(event.rel[0] / self.scale, event.rel[1] / self.scale)
+                if event.buttons[0]:
+                    self.scene.take_player_input(p.player_id, "mouse_drag", event)
+                else:
+                    self.scene.take_player_input(p.player_id, "mouse_move", event)
+
+        elif event.type == pygame.JOYAXISMOTION:
+            p = get_joystick_player(event.instance_id)
+            if p:
+                delta = V2(self.joysticks[0].get_axis(p.get_horizontal_axis()), self.joysticks[0].get_axis(p.get_vertical_axis()))
+                if delta.sqr_magnitude() < 0.35 ** 2:
+                    delta = V2(0,0)
+                if delta.tuple() != self.last_joy_axes:
+                    self.scene.take_player_input(p.player_id, "joymotion", {'delta':delta})
+                    self.last_joy_axes = delta.tuple()
+
+                #if self.input_mode == "joystick":
+                #    self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]
+
+        elif event.type == pygame.JOYHATMOTION:
+            p = get_joystick_player(event.instance_id)
+            if p:            
+                delta = V2(event.value[0], -event.value[1])
+                self.scene.take_player_input(p.player_id, "joymotion", {'delta': delta })
+
+        elif event.type == pygame.JOYBUTTONDOWN:
+            p = get_joystick_player(event.instance_id)
+            if p:            
+                try:
+                    self.scene.take_player_input(p.player_id, p.get_binding(event.button), event)
+                except KeyError:
+                    self.scene.take_player_input(p.player_id, None, event)
+
+
     def run(self):
         clock = pygame.time.Clock()
         running = True
@@ -127,81 +268,20 @@ class Game:
                 if event.type == sound.MUSIC_ENDEVENT:
                     sound.end_of_music()
 
-                if event.type == pygame.VIDEORESIZE:
+                elif event.type == pygame.VIDEORESIZE:
                     self.scene.on_display_resize(V2(event.w, event.h))
 
-                if event.type == pygame.QUIT:
+                elif event.type == pygame.QUIT:
                     running = False
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT: self.scene.take_input("left", event)
-                    elif event.key == pygame.K_RIGHT: self.scene.take_input("right", event)
-                    elif event.key == pygame.K_UP: self.scene.take_input("up", event)
-                    elif event.key == pygame.K_DOWN: self.scene.take_input("down", event)
-                    elif event.key == pygame.K_SPACE:
-                        self.scene.take_input("action", event)
-                        self.game_speed_input = clamp(int(1 - self.game_speed_input), 0, 1)
-                    elif event.key == pygame.K_ESCAPE:
-                        self.scene.take_input("menu", event)
-                    else:
-                        self.scene.take_input("other", event)
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
-                    if event.button == 1: self.scene.take_input("click", event)
-                    if event.button == 3:
-                        print(event)
-                        self.scene.take_input("rightclick", event)
-
-                if event.type == pygame.MOUSEBUTTONUP:
-                    event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
-                    if event.button == 1: self.scene.take_input("unclick", event)
-                    if event.button == 3: self.scene.take_input("unrightclick", event)                    
-
-                if event.type == pygame.MOUSEMOTION:
-                    event.__dict__['gpos'] = V2(event.pos[0] / self.scale, event.pos[1] / self.scale)
-                    event.__dict__['grel'] = V2(event.rel[0] / self.scale, event.rel[1] / self.scale)
-                    if event.buttons[0]:
-                        self.scene.take_input("mouse_drag", event)
-                    else:
-                        pass
-                        self.scene.take_input("mouse_move", event)
-
-                bindings = {int(k):v for k,v in self.save.get_setting("controls").items()}
-                reverse_bindings = {v:k for k,v in bindings.items()}
-                axes = [0,1]
-
-
-                #print(pygame.joystick.get_count())
-                #for joy in self.joysticks:
-                #    print(joy.get_instance_id(), joy.get_guid(), joy.get_name(), joy.get_axis(0))
-                if event.type == pygame.JOYDEVICEADDED:                    
+                elif event.type == pygame.JOYDEVICEADDED:                    
                     self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
 
-                if event.type == pygame.JOYAXISMOTION:
-                    delta = V2(self.joysticks[0].get_axis(axes[0]), self.joysticks[0].get_axis(axes[1]))
-                    if delta.sqr_magnitude() < 0.35 ** 2:
-                        delta = V2(0,0)
-                    if delta.tuple() != self.last_joy_axes:
-                        self.scene.take_input("joymotion", {'delta':delta})
-                        self.last_joy_axes = delta.tuple()
+                elif self.input_mode in [self.INPUT_MOUSE, self.INPUT_JOYSTICK]:
+                    self.process_input_singleplayer(event)
 
-                    if self.input_mode == "joystick":
-                        self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]
-
-                if event.type == pygame.JOYHATMOTION:
-                    delta = V2(event.value[0], -event.value[1])
-                    self.scene.take_input("joymotion", {'delta': delta })
-
-                if event.type == pygame.JOYBUTTONDOWN:
-                    try:
-                        self.scene.take_input(bindings[event.button], event)
-                    except KeyError:
-                        self.scene.take_input(None, event)
-                    
-                #if event.type == pygame.JOYBUTTONUP:
-                #    self.scene.take_input("joyup", event)
-                #    print(event)
+                elif self.input_mode == self.INPUT_MULTIPLAYER:
+                    self.process_input_multiplayer(event)
 
             max_framerate = 60
             if self.fps_limited_pause:
@@ -260,7 +340,8 @@ class Game:
     def set_scene(self, scene_name, *args):
         self.scene = {
             'menu':menuscene.MenuScene,
-            'options':optionsscene.OptionsScene
+            'options':optionsscene.OptionsScene,
+            'multiplayer_menu':multiplayermenu.MultiplayerMenu
         }[scene_name](self, *args)
         self.scene.start()
 
