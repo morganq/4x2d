@@ -63,7 +63,9 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.meters = {}
         # Make a civ for each player
         for i in range(self.num_players):
-            c = civ.MultiplayerCiv(self)
+            pp = (UI_POSITIONS[self.num_players][i] - V2(0.5,0.5))
+            pp = V2(pp.x * 400, pp.y * 390) + self.game.game_resolution / 2
+            c = civ.MultiplayerCiv(self, pp)
             c.color = PLAYER_COLORS[i]
             self.player_civs.append(c)
             self.player_input_sms[(i+1)] = states.Machine(inputstates.CursorState(self, c, self.game.player_inputs[i].input_type))
@@ -84,9 +86,12 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.radar = Explosion(V2(300, 180), [PICO_GREEN], 1.25, self.game.game_resolution.x)
         self.ui_group.add(self.radar)            
 
-    def get_civ_sm(self, civ):
+    def get_player_id(self, civ):
         i = self.player_civs.index(civ)
-        return self.player_input_sms[(i+1)]
+        return i+1
+
+    def get_civ_sm(self, civ):
+        return self.player_input_sms[self.get_player_id(civ)]
 
     def add_ui_elements(self):
         self.pause_sprite = pauseoverlay.PauseOverlay()
@@ -152,3 +157,7 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
 
     def take_player_input(self, player_id, inp, event):
         self.player_input_sms[player_id].state.take_input(inp, event)
+
+    def player_click_upgrade(self, civ):
+        pid = self.get_player_id(civ)
+        #self.player_input_sms[pid].transition(inputstates.UpgradeState(self, civ, self.game.player_inputs[pid-1].input_type))

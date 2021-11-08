@@ -57,6 +57,7 @@ class Game:
         pygame.display.set_caption("Hostile Quadrant")
         sound.init()
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+        print(self.joysticks)
         self.last_joy_axes = None
         self.run_info = run.RunInfo()
         self.input_mode = self.INPUT_MOUSE
@@ -91,8 +92,8 @@ class Game:
                 self.player_inputs = [
                     playerinput.Player(1, playerinput.Player.INPUT_MOUSE),
                     playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 0),
-                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 1),
-                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 2)
+                    playerinput.Player(3, playerinput.Player.INPUT_JOYSTICK, 1),
+                    playerinput.Player(4, playerinput.Player.INPUT_JOYSTICK, 2)
                 ]
                 self.input_mode = self.INPUT_MULTIPLAYER
                 self.scene = multiplayerscene.MultiplayerScene(self, 4)

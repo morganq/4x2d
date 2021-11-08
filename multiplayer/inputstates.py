@@ -249,8 +249,8 @@ class CursorState(MultiplayerState):
         if input == "joymotion":
             self.joystick_overlay.joystick_delta(event['delta'])
 
-        if input == "special" and len(self.scene.player_civ.upgrades_stocked) > 0:
-            self.scene.on_click_upgrade()
+        if input == "special" and len(self.civ.upgrades_stocked) > 0:
+            self.scene.player_click_upgrade(self.civ)
 
         if input == "confirm":
             if self.joy_controls_state == "default":
@@ -385,3 +385,6 @@ class OrderShipsState(MultiplayerState):
     def get_joystick_cursor_controls(self):
         controls = list(self.panel.sliders.values())
         return [[c] for c in controls]
+
+class UpgradeState(MultiplayerState):
+    pass

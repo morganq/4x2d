@@ -2,6 +2,7 @@ import random
 from collections import defaultdict
 
 import economy
+import funnotification
 import sound
 from colors import *
 from helper import clamp
@@ -230,5 +231,28 @@ class PlayerCiv(Civ):
 
 
 class MultiplayerCiv(PlayerCiv):
+    def __init__(self, scene, pos):
+        super().__init__(scene)
+        self.pos = pos
+
     def on_resource_overflow(self, res_type):
-        self.scene.meters[self][res_type].flash()
+        try:
+            self.scene.meters[self][res_type].flash()
+            possibles = list(self.offer_upgrades(res_type).values())
+            if possibles:
+                u = random.choice(possibles)
+                up = upgrades.UPGRADE_CLASSES[u]
+                if up.cursor not in ['allied_planet', None]:
+                    return
+                if up.cursor == None:
+                    up().apply(self)
+                else:
+                    up().apply(random.choice(self.scene.get_civ_planets(self)))
+                self.researched_upgrade_names.add(up.name)
+                self.upgrades.append(up)
+                fn = funnotification.FunNotification(up.title, self.pos)
+                self.scene.ui_group.add(fn)
+                self.clear_offers()
+        except:
+            pass
+
