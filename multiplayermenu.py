@@ -1,5 +1,6 @@
 import pygame
 
+import button
 import game
 import menu
 import playerinput
@@ -17,6 +18,7 @@ class MultiplayerMenu(scene.Scene):
         self.ui_group = pygame.sprite.LayeredDirty()
 
         self.game.input_mode = game.Game.INPUT_MULTIPLAYER
+        self.game.player_inputs = []
         
         self.player_index = 1
 
@@ -31,12 +33,18 @@ class MultiplayerMenu(scene.Scene):
 
         self.ui_group.add(self.instructions)
 
+        self.back = button.Button(V2(10,10), "Back", "big", self.on_back)
+        self.ui_group.add(self.back)
+
+        self.start_btn = button.Button(V2(res.x/2,res.y - 100), "Start", "big", self.on_start)
+        self.start_btn.offset = (0.5, 0)
+        self.ui_group.add(self.start_btn)
+
         self.sm = states.Machine(states.UIEnabledState(self))
 
     def take_raw_input(self, event):
+        print(event)
         if event.type == pygame.JOYBUTTONDOWN:
-            print("joy", event.instance_id)
-
             found = False
             for pi in self.game.player_inputs:
                 if pi.input_type == playerinput.Player.INPUT_JOYSTICK and pi.joystick_id == event.instance_id:
@@ -50,7 +58,6 @@ class MultiplayerMenu(scene.Scene):
 
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-            print("mouse")
             found = False
             for pi in self.game.player_inputs:
                 if pi.input_type == playerinput.Player.INPUT_MOUSE:
@@ -61,9 +68,19 @@ class MultiplayerMenu(scene.Scene):
                 self.game.player_inputs.append(playerinput.Player(self.player_index, playerinput.Player.INPUT_MOUSE))
                 self.player_index += 1
                 self.ui_group.add(text.Text("Mouse", "small", V2(self.game.game_resolution.x / 2 - 25, 100 + self.player_index * 20)))
+        self.game.input_mode = game.Game.INPUT_MULTIPLAYER
 
     def take_player_input(self, p, inp, event):
-        print(p, inp, event)
+        if inp in ["click", "mousemotion"]:
+            self.take_input(inp, event)
+        self.sm.state.take_input(inp, event)
+        self.game.input_mode = game.Game.INPUT_MULTIPLAYER
+
+    def on_back(self):
+        self.game.set_scene("menu")
+
+    def on_start(self):
+        self.game.set_scene("multiplayer", len(self.game.player_inputs))
 
     def render(self):   
         self.game.screen.fill(PICO_BLACK)        

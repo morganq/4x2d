@@ -1,7 +1,6 @@
 import pygame
 
-from colors import (DARKEN_COLOR, PICO_BLACK, PICO_DARKBLUE, PICO_PURPLE,
-                    PICO_YELLOW)
+from colors import *
 from spritebase import SpriteBase
 
 STAY_TIME = 5.0
@@ -64,7 +63,7 @@ class Meter(SpriteBase):
             color = self.color
             if self.flash_time > 0:
                 px = (self.meter_width - 4)
-                color = self.color if (self.flash_time * 8) % 1 > 0.5 else PICO_YELLOW
+                color = self.color if (self.flash_time * 8) % 1 > 0.5 else PICO_GREEN
             pygame.draw.rect(self.image, color, (2,2, px, self.meter_height - 4), 0)
             if self.tick_x and self.tick_x < self.meter_width:
                 pygame.draw.line(self.image, PICO_YELLOW, (self.tick_x, 2), (self.tick_x, self.meter_height - 3))

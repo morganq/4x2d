@@ -14,7 +14,7 @@ from v2 import V2
 
 
 class PlanetPanel(Panel):
-    def __init__(self, planet):
+    def __init__(self, planet, pov_civ = None):
         Panel.__init__(self, (5,5), planet)
         self.planet = planet
         
@@ -22,14 +22,24 @@ class PlanetPanel(Panel):
 
         owner = "Neutral"
         color = PICO_YELLOW
+
         is_mine = False
         if planet.owning_civ:
             color = planet.owning_civ.color
-            if planet.owning_civ.is_enemy:
-                owner = "Enemy"
+            # If the player's point of view is passed in (multiplayer) then
+            # we want the string to be based on if this is that POV civ's planet or not
+            if pov_civ is not None:
+                if planet.owning_civ != pov_civ:
+                    owner = "Enemy"
+                else:
+                    owner = "Your"
+                    is_mine = True
             else:
-                owner = "Your"
-                is_mine = True
+                if planet.owning_civ.is_enemy:
+                    owner = "Enemy"
+                else:
+                    owner = "Your"
+                    is_mine = True
 
         self.tab = {'text':'%s Planet' % (owner,), 'color':color, 'icon':'assets/i-planet.png'}
         y = 0

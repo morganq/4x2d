@@ -14,6 +14,7 @@ import flowfield
 import funnotification
 import game
 import levelcontroller
+import levelscenebase
 import levelstates
 import o2meter
 import optimize
@@ -51,13 +52,12 @@ from v2 import V2
 
 TICK_TIME = 0.05
 
-class LevelScene(scene.Scene):
+class LevelScene(levelscenebase.LevelSceneBase):
     def __init__(self, game, levelfile, alienrace, difficulty, stage_num, title, description, options=None):
-        scene.Scene.__init__(self, game)
+        levelscenebase.LevelSceneBase.__init__(self, game, levelfile)
         self.options = options
         self.animation_timer = 0
         self.player_civ = PlayerCiv(self)
-        self.levelfile = levelfile
         self.alienrace = alienrace
         self.difficulty = difficulty
         self.stage_num = stage_num
@@ -84,38 +84,6 @@ class LevelScene(scene.Scene):
     @score.setter
     def score(self, value):
         self._score = value
-
-    def random_object_pos(self):
-        pos = None
-        while pos is None:
-            pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
-            pos += self.game.game_offset
-            
-            #near_button = pygame.Rect(game.RES[0] / 2 - 100, game.RES[1] - 60, 200, 60)
-            #if near_button.collidepoint(*pos.tuple()):
-            #    pos = None
-            #    continue
-
-            #near_meters = pygame.Rect(0, 0, 250, 60)
-            #if near_meters.collidepoint(*pos.tuple()):
-            #    pos = None
-            #    continue
-
-            dist = 999999
-            for obj in self.get_objects_initial():
-                delta = (obj.pos - pos).sqr_magnitude()
-                if delta < dist:
-                    dist = delta
-            if dist <= 30 ** 2:
-                pos = None
-                continue
-
-            
-        return pos
-
-    def give_building(self, planet, upgrade):
-        planet.add_building(upgrade)
-        planet.owning_civ.researched_upgrade_names.add(upgrade.name)
 
     def load_level(self, levelfile):
         print("load level")
@@ -151,18 +119,6 @@ class LevelScene(scene.Scene):
             self.game_group.add(o)
         self.objgrid.generate_grid(self.get_objects_initial())
 
-    def create_layers(self):
-        self.objgrid = ObjGrid(self.game.game_resolution.x, self.game.game_resolution.y, 50)
-        self.background_group = pygame.sprite.LayeredDirty()
-        self.game_group = pygame.sprite.LayeredDirty()
-        self.ui_group = pygame.sprite.LayeredDirty()
-        self.tutorial_group = pygame.sprite.LayeredDirty()
-
-        self.background = LevelBackground(V2(0,0), self.game.game_resolution)
-        self.background_group.add(self.background)
-        self.fleet_diagram = fleetdiagram.FleetDiagram(V2(0,0), self)
-        self.game_group.add(self.fleet_diagram)        
-
     def setup_players(self):
         # Me
         self.homeworld = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.player_civ))[0]
@@ -175,78 +131,6 @@ class LevelScene(scene.Scene):
         # Alien
         p = get_nearest(V2(0, game.RES[1]), self.get_civ_planets(self.enemy.civ))[0]
         p.population = 5
-
-    def add_extra_spaceobjects(self):
-        print("add space objects")
-        num_planets = len(self.get_planets())
-
-        max_planets = min(int(self.difficulty / 1.5 + 7), 16)
-
-        if self.options == "flowfield":
-            max_planets = 25
-
-        separation = 70
-        # TODO: Planet resources more constrained
-        while num_planets < max_planets:
-            avg_pos = sum([p.pos for p in self.get_planets()], V2(0,0)) / num_planets
-            pos = V2(random.randint(30, game.RES[0] - 30), random.randint(30, game.RES[1] - 30))
-            pos += self.game.game_offset
-
-            # If we're most of the way through creating planets, and we're on the wrong side of the avg, flip it.
-            if num_planets >= max_planets * 1 / 3:
-                if ((avg_pos.x < self.game.game_resolution.x / 2 and pos.x < self.game.game_resolution.x /2) or
-                    (avg_pos.x > self.game.game_resolution.x / 2 and pos.x > self.game.game_resolution.x /2)):
-                    pos = V2(self.game.game_resolution.x - pos.x, pos.y)
-            
-            #near_button = pygame.Rect(self.game_resolution.x / 2 - 100, self.game_resolution.y - 60, 200, 60)
-            #if near_button.collidepoint(*pos.tuple()):
-            #    continue
-
-            #near_meters = pygame.Rect(0, 0, 250, 60)
-            #if near_meters.collidepoint(*pos.tuple()):
-            #    continue            
-            
-            dist = 999999
-            for obj in self.get_objects_initial():
-                delta = (obj.pos - pos).sqr_magnitude()
-                if delta < dist:
-                    dist = delta
-            if dist > separation ** 2:
-                size = random.randint(2, 6)
-                resources = {'a':0, 'b':0, 'c':0}
-                # One resource
-                ra = random.random()
-                if ra > 0.66:
-                    resources['a'] = 10
-                # Two resource
-                elif ra > 0.2:
-                    resources['a'] = random.randint(5,10)
-                    resources['b'] = 10 - resources['a']
-                # Three
-                else:
-                    resources['a'] = random.randint(1,7)
-                    resources['b'] = random.randint(1, 10 - resources['a'])
-                    resources['c'] = 10 - resources['a'] - resources['b']
-                rb = random.random()
-                if rb > 0.6:
-                    pr = Resources(resources['a'] * 10, resources['b'] * 10, resources['c'] * 10)
-                    size += 1
-                elif rb > 0.25:
-                    pr = Resources(resources['b'] * 10, resources['a'] * 10, resources['c'] * 10)
-                    size -= 1
-                else:
-                    pr = Resources(resources['c'] * 10, resources['b'] * 10, resources['a'] * 10)
-                    size -= 1
-                self.game_group.add(Planet(self, pos, size, pr))
-                num_planets += 1
-            else:
-                separation -= 1
-
-        for i in range(random.randint(15,20) - int(self.difficulty / 3)):
-            pos = self.random_object_pos()
-            self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))
-
-
 
     def add_ui_elements(self):
         self.meters = {}
@@ -431,109 +315,18 @@ class LevelScene(scene.Scene):
     def on_civ_resource_change(self, res_type, val):
         pass
 
-    def get_objects_initial(self):
-        return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
-
-    def get_objects(self):
-        return self.objgrid.all_objects
-
-    def get_objects_in_range(self, pos, range):
-        return self.objgrid.get_objects_near(pos, range)
-
-    def get_planets(self):
-        return [s for s in self.game_group.sprites() if isinstance(s,Planet)]
-
-    def get_civ_planets(self, civ, skip_objgrid = False):
-        if skip_objgrid:
-            return [s for s in self.get_objects_initial() if isinstance(s,Planet) and s.owning_civ == civ] 
-        return [s for s in self.get_objects() if isinstance(s,Planet) and s.owning_civ == civ]
-
-    def get_enemy_planets(self, civ):
-        return [s for s in self.get_objects() if isinstance(s,Planet) and s.owning_civ and s.owning_civ != civ]        
-
-    def get_special_enemies_in_range(self, civ, pos, range):
-        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,bossmothership.BossMothership) and s.owning_civ != civ]
-
-    def get_ships(self):
-        return [s for s in self.get_objects() if isinstance(s,Ship)]
-    
-    def get_my_ships(self, civ):
-        return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ == civ]
-
-    def get_my_ships_in_range(self, civ, pos, range):
-        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ == civ]
-
-    def get_enemy_ships(self, civ):
-        return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ != civ]
-
-    def get_enemy_ships_in_range(self, civ, pos, range):
-        return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ != civ]
-
-    def get_enemy_objects(self, civ):
-        return [s for s in self.get_objects() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]
-
-    def get_civ_ships(self, civ, skip_objgrid = False):
-        if skip_objgrid:
-            return [s for s in self.get_objects_initial() if isinstance(s,Ship) and s.owning_civ == civ]
-        return [s for s in self.get_objects() if isinstance(s,Ship) and s.owning_civ == civ]        
-
-    def get_hazards(self):
-        return [s for s in self.get_objects() if isinstance(s, Hazard)]
-
-    def get_asteroids(self):
-        return [s for s in self.get_objects() if isinstance(s, Asteroid)]
-
     def get_starting_state(self):
         return levelstates.BeginState(self)
 
-    def initialize_state(self):
-        self.sm = states.Machine(self.get_starting_state())
-
-    def update_layers(self):
-        pass
-
-    def start(self):
-        self.load()
-        self.initialize_state()
-        #sound.play_music('game')  
-
-    def update(self, dt):
-        dt = min(dt,0.1)
-        if not self.cinematic:
-            self.game_speed = round((self.game.game_speed_input * 3) + 1)
-        # This is correct way to do things, but we need to optimize more for this to work
-        #game_dt = dt * self.game_speed        
-        #self.update_remainder_time += dt
-        #num_updates = int(self.update_remainder_time / TICK_TIME)
-        #for i in range(num_updates):
-        #    self.update_game(TICK_TIME * self.game_speed)
-        #    self.update_remainder_time -= TICK_TIME
-
-        self.update_game(dt * self.game_speed, dt)
-        self.update_ui(dt)
-
     def update_ui(self, dt):
-        for sprite in self.ui_group.sprites():
-            sprite.update(dt)        
-
-        if self.radar:
-            for spr in self.game_group.sprites():
-                if True: #isinstance(spr, Planet) or isinstance(spr, Asteroid):
-                    delta = spr.pos - self.radar.pos
-                    if delta.sqr_magnitude() < self.radar.size ** 2:
-                        spr.visible = True
-                    else:
-                        spr.visible = False
-            if self.radar.time > 1.25:
-                self.radar.kill()
-                self.radar = None
+        levelscenebase.LevelSceneBase.update_ui(self, dt)
 
         for res_type in self.player_civ.upgrade_limits.data.keys():
             ratio = self.player_civ.upgrade_limits.data[res_type] / self.player_civ.base_upgrade_limits.data[res_type]
             self.upgrade_texts[res_type].x = 120 * ratio + 20
             self.meters[res_type].set_width(120 * ratio)
             self.meters[res_type].max_value = self.player_civ.upgrade_limits.data[res_type]
-            self.meters[res_type].value = self.player_civ.resources.data[res_type]            
+            self.meters[res_type].value = self.player_civ.resources.data[res_type]
 
     def update_game(self, dt, base_dt):
         ut = time.time()
@@ -601,40 +394,7 @@ class LevelScene(scene.Scene):
         self.update_times['civs'] = time.time() - t
 
         self.update_times['update'] = time.time() - ut
-
-    def update_collisions(self, dt):
-        t = time.time()
-        # Collisions
-        colliders = [s for s in self.get_objects() if s.collidable]
-        lc = len(colliders)
-        #print(lc, "colliders")
-        checked = set()
-        for first in colliders:
-            near = self.objgrid.get_objects_near(first.pos, 50) # 50 is arbitrary...
-            for second in near:
-                if second in checked: # Don't double collide
-                    continue
-                if second == first:
-                    continue
-                if first.stationary and second.stationary:
-                    continue
-                d = first.pos - second.pos
-                if d.sqr_magnitude() <= (first.collision_radius + second.collision_radius) ** 2:
-                    first.collide(second)
-                    second.collide(first)
-
-            checked.add(first)
-
-        elapsed = time.time() - t
-        self.update_times["collisions"] = elapsed
-
-    def update_game_objects(self, dt):
-        for sprite in self.game_group.sprites():
-            t = time.time()
-            sprite.update(dt)
-            elapsed = time.time() - t
-            self.update_times[type(sprite)] += elapsed
-
+        
     def update_asset_buttons(self):
         for i,button in enumerate(self.asset_buttons):
             button.pos = V2(self.game.game_resolution.x / 2 - i * 8 - 30, self.game.game_resolution.y - 4)

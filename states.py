@@ -51,11 +51,6 @@ class UIEnabledState(State):
         self.dragging_from_sprite = None # When dragging, this is the sprite dragging FROM
         self.dragging_to = None # When dragging, this is the position dragging TO        
 
-        self.key_picked_sprite = None
-        self.key_images = {}
-        self.key_targets = {}
-        self.key_crosshair = None
-
         self.joystick_overlay = None
 
     def filter_only_panel_ui(self, o):
@@ -65,18 +60,6 @@ class UIEnabledState(State):
         return o in [c['control'] for c in self.panel._controls]
 
     def enter(self):
-        for i,d in enumerate(['up', 'right', 'down', 'left']):
-            self.key_images[d] = framesprite.FrameSprite(V2(0,0), 'assets/keyarrows.png',9)
-            self.key_images[d].frame = i
-            self.scene.ui_group.add(self.key_images[d])
-            self.scene.ui_group.change_layer(self.key_images[d],3)
-            self.key_images[d].visible = False
-        self.key_crosshair = framesprite.FrameSprite(V2(0,0), 'assets/keyarrows.png',9)
-        self.key_crosshair.frame = 4
-        self.scene.ui_group.add(self.key_crosshair)
-        self.scene.ui_group.change_layer(self.key_crosshair,3)
-        self.key_crosshair.visible = False
-
         if self.scene.game.input_mode == "mouse":
             self.set_mouse_input()
         elif self.scene.game.input_mode == "keyboard":
@@ -95,23 +78,13 @@ class UIEnabledState(State):
         return o in self.scene.ui_group.sprites()
 
     def set_keyboard_input(self):
-        self.scene.game.input_mode = 'keyboard'
-        for i,d in enumerate(['up', 'right', 'down', 'left']):
-            self.key_images[d].visible = True
-        self.key_crosshair.visible = True
-        self.update_key_targets()
+        pass
 
     def set_mouse_input(self):
         self.scene.game.input_mode = 'mouse'
-        for i,d in enumerate(['up', 'right', 'down', 'left']):
-            self.key_images[d].visible = False        
-        self.key_crosshair.visible = False
 
     def set_joystick_input(self):
-        self.scene.game.input_mode = 'joystick'
-        for i,d in enumerate(['up', 'right', 'down', 'left']):
-            self.key_images[d].visible = False        
-        self.key_crosshair.visible = False        
+        self.scene.game.input_mode = 'joystick'     
 
         if self.is_basic_joystick_panel:
             if not self.joystick_overlay:
@@ -210,70 +183,12 @@ class UIEnabledState(State):
 
         return handled
 
-    def update_key_targets(self):
-        self.key_targets = {'left':None, 'right':None, 'up':None, 'down':None}
-        sprite_directions = {'left':[], 'right':[], 'up':[], 'down':[]}
-        all_sprites = self.scene.game_group.sprites()[::]
-        all_sprites.extend(self.scene.ui_group.sprites()[::])
-        selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]
-        for s in selectable_sprites:
-            if not self.key_picked_sprite: self.key_picked_sprite = s
-            self.key_crosshair.pos = self.key_picked_sprite.get_center() + V2(5,5)
-            if self.key_picked_sprite == s: continue
-            delta = s.pos - self.key_picked_sprite.pos
-            if abs(delta.x) > abs(delta.y):
-                if delta.x > 0:
-                    sprite_directions['right'].append(s)
-                else:
-                    sprite_directions['left'].append(s)
-            else:
-                if delta.y > 0:
-                    sprite_directions['down'].append(s)
-                else:
-                    sprite_directions['up'].append(s)
-
-        for d, sl in sprite_directions.items():
-            nearest = helper.get_nearest(self.key_picked_sprite, sl)[0]
-            if nearest:
-                self.key_targets[d] = nearest
-                self.key_images[d].pos = nearest.get_center() + V2(5,5)
-                self.key_images[d].visible = True
-            else:
-                self.key_images[d].visible = False
-
     def keyboard_input(self, input, event):
-        sel = self.key_picked_sprite.get_selection_info()
-        if sel and sel['type'] == 'slider':
-            if input == 'left':
-                self.key_picked_sprite.set_value(self.key_picked_sprite.value - 1)
-                return
-            elif input == 'right':
-                self.key_picked_sprite.set_value(self.key_picked_sprite.value + 1)
-                return
-        for d in ['left', 'up', 'right', 'down']:
-            if input == d and self.key_targets[d]:
-                s = self.key_targets[d]
-                self.key_picked_sprite.on_mouse_exit(self.key_picked_sprite.pos)
-                self.hover_sprite = s
-                self.last_clicked_sprite = s
-                self.key_picked_sprite = s
-                self.key_picked_sprite.on_mouse_enter(self.key_picked_sprite.pos)
-
-        if input == 'action':
-            self.key_picked_sprite.on_mouse_down(self.key_picked_sprite.pos)
-            self.key_picked_sprite.on_mouse_up(self.key_picked_sprite.pos)            
+        pass       
 
     def exit(self):
         if self.joystick_overlay:
             self.joystick_overlay.kill()
-        self.key_crosshair.kill()
-        for d in ['left', 'up', 'right', 'down']:
-            self.key_images[d].kill()
-
-    def update(self, dt):
-        if self.scene.game.input_mode == 'keyboard':
-            self.update_key_targets()
-        State.update(self, dt)
 
     def paused_update(self, dt):
         self.update(dt)

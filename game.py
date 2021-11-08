@@ -14,6 +14,7 @@ import leveleditorscene
 import levelscene
 import menuscene
 import multiplayermenu
+import multiplayerscene
 import newgamescene
 import optimize
 import optionsscene
@@ -86,6 +87,15 @@ class Game:
                 self.scene = levelscene.LevelScene(self, "choke", "alien3", 3, 3, "", "", options='performance')
             elif sys.argv[1] == "flowfield":
                 self.scene = levelscene.LevelScene(self, "cross", "alien3", 1, 1, "", "", options='flowfield')
+            elif sys.argv[1] == "multiplayer":
+                self.player_inputs = [
+                    playerinput.Player(1, playerinput.Player.INPUT_MOUSE),
+                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 0),
+                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 1),
+                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 2)
+                ]
+                self.input_mode = self.INPUT_MULTIPLAYER
+                self.scene = multiplayerscene.MultiplayerScene(self, 4)
             else:
                 self.scene = menuscene.MenuScene(self)
         else:
@@ -341,7 +351,8 @@ class Game:
         self.scene = {
             'menu':menuscene.MenuScene,
             'options':optionsscene.OptionsScene,
-            'multiplayer_menu':multiplayermenu.MultiplayerMenu
+            'multiplayer_menu':multiplayermenu.MultiplayerMenu,
+            "multiplayer":multiplayerscene.MultiplayerScene
         }[scene_name](self, *args)
         self.scene.start()
 

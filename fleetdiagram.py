@@ -59,8 +59,12 @@ class FleetDiagram(spritebase.SpriteBase):
 
         jump_dist = 3
 
-        fleets = scene.fleet_managers['my'].current_fleets[::]
-        fleets.extend(scene.fleet_managers['enemy'].current_fleets[::])
+        #fleets = scene.fleet_managers['my'].current_fleets[::]
+        #fleets.extend(scene.fleet_managers['enemy'].current_fleets[::])
+        fleets = []
+        for fleet_manager in scene.fleet_managers.values():
+            fleets.extend(fleet_manager.current_fleets[::])
+            
         for fleet in fleets:
             if not fleet.target:
                 continue

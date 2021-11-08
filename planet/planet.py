@@ -508,7 +508,7 @@ class Planet(SpaceObject):
                             self.ships['battleship'] -= 1
                             destroyed_ship = "battleship"
 
-                if self.owning_civ == self.scene.player_civ:
+                if self.owning_civ is None or self.owning_civ.is_player:
                     it = IconText(self.pos, "assets/i-%s.png" % destroyed_ship, "-1", PICO_PINK)
                     it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
                     self.scene.ui_group.add(it)          
@@ -567,7 +567,7 @@ class Planet(SpaceObject):
 
         
             # o2 degeneration
-            if self.scene.game.run_info.o2 <= 0 and self.owning_civ == self.scene.player_civ:
+            if self.scene.game.run_info.o2 <= 0 and self.owning_civ and self.owning_civ.is_player:
                 self.health -= self.get_base_regen() * REGEN_TIMER
                 self.health -= 1 * REGEN_TIMER
 
@@ -656,7 +656,7 @@ class Planet(SpaceObject):
     def add_population(self, num):
         self._population = max(self._population + num, 0)
         self.needs_panel_update = True
-        if self.owning_civ == self.scene.player_civ:
+        if self.owning_civ and self.owning_civ.is_player:
             it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
             it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)        
@@ -693,7 +693,7 @@ class Planet(SpaceObject):
             self.ships[type] += 1
         else:
             self.ships[type] = 1
-        if self.owning_civ == self.scene.player_civ:
+        if self.owning_civ and self.owning_civ.is_player:
             it = IconText(self.pos, "assets/i-%s.png" % type, "+1", PICO_PINK)
             it.pos = self.pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)      
@@ -718,7 +718,7 @@ class Planet(SpaceObject):
         self.needs_panel_update = True 
         mh_after = self.get_max_health()
         self._health += mh_after - mh_before 
-        if self.owning_civ == self.scene.player_civ:
+        if self.owning_civ and self.owning_civ.is_player:
             self.scene.ui_group.add(FunNotification(upgrade.title, self))
         return b
 

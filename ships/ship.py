@@ -303,7 +303,7 @@ class Ship(SpaceObject):
 
         self.special_stat_update(dt)
 
-        if self.scene.game.run_info.o2 <= 0 and self.owning_civ == self.scene.player_civ:
+        if self.scene.game.run_info.o2 <= 0 and self.owning_civ and self.owning_civ.is_player:
             self.health -= self.get_max_health() / 60 * dt
 
         super().update(dt)
@@ -522,7 +522,6 @@ class Ship(SpaceObject):
         self.update_color()
 
     def update_color(self):
-        #new_color = PICO_GREEN if self.owning_civ == self.scene.player_civ else PICO_RED
         color = self.owning_civ.color
         self.set_color(color)
 

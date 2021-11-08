@@ -40,6 +40,9 @@ class Parallaxed:
         self.obj.pos = self.end_pos + delta
 
 class MenuScene(scene.Scene):
+    def take_raw_input(self, event):
+        self.game.input_mode = game.Game.INPUT_MOUSE
+
     def start(self):
         self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()

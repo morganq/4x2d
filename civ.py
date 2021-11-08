@@ -17,7 +17,8 @@ class Civ:
     def __init__(self, scene):
         self.scene = scene
         self.color = PICO_WHITE
-        self.is_enemy = True        
+        self.is_enemy = True     
+        self.is_player = False   
         self.resources = economy.Resources()
         self.frozen = economy.Resources(0,0,0)
         self.base_upgrade_limits = economy.Resources(25,80,150)
@@ -119,12 +120,7 @@ class Civ:
                 self.base_upgrade_limits.data[res_type] = int(self.base_upgrade_limits.data[res_type] + self.get_upgrade_increase_amts()[res_type])
                 self.upkeep_update()
                 self.num_upgrades += 1
-                if not self.is_enemy:
-                    self.scene.add_asset_button(res_type)
-                    self.scene.meters[res_type].flash()
-                    sound.play("upgrade")
-                    if res_type == 'iron':
-                        self.upgrade_times.append(self.time)
+                self.on_resource_overflow(res_type)
 
             # frozen
             self.frozen.data[res_type] = max(self.frozen.data[res_type] - dt,0)
@@ -136,6 +132,14 @@ class Civ:
                 self.collection_rate_history.append(self.collected_this_cycle)
                 self.collected_this_cycle = 0
                 #print(self.collection_rate_history)
+
+    def on_resource_overflow(self, res_type):
+        if not self.is_enemy:
+            self.scene.add_asset_button(res_type)
+            self.scene.meters[res_type].flash()
+            sound.play("upgrade")
+            if res_type == 'iron':
+                self.upgrade_times.append(self.time)        
 
     def earn_resource(self, resource, value, where = None):
         if self.frozen.data[resource] <= 0:
@@ -206,6 +210,7 @@ class PlayerCiv(Civ):
     def __init__(self, scene):
         Civ.__init__(self, scene)
         self.color = PICO_GREEN
+        self.is_player = True
         self.is_enemy = False
 
     def earn_resource(self, resource, value, where=None):
@@ -214,7 +219,6 @@ class PlayerCiv(Civ):
                 pos = where
             else:
                 pos = where.pos + V2(0, -where.get_radius() - 5)
-            self.scene.score += value
             it = IconText(pos, None, "+%d" % value, economy.RESOURCE_COLORS[resource])
             xo = 0
             if resource == 'iron': xo = -10
@@ -223,3 +227,8 @@ class PlayerCiv(Civ):
             it.pos = pos - V2(it.width, it.height) * 0.5 + V2(xo, 0)
             self.scene.ui_group.add(it)
         return super().earn_resource(resource, value)
+
+
+class MultiplayerCiv(PlayerCiv):
+    def on_resource_overflow(self, res_type):
+        self.scene.meters[self][res_type].flash()
