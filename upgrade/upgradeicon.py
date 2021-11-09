@@ -62,6 +62,8 @@ class UpgradeIcon(SpriteBase):
                     self._tooltip_panel.pos = self.pos + V2(-5 - self._tooltip_panel.width,0)
                 else:
                     self._tooltip_panel.pos = self.pos + V2(30,0)
+                if self._tooltip_panel.height + self._tooltip_panel.y > game.Game.inst.game_resolution.y:
+                    self._tooltip_panel.pos = (self._tooltip_panel.pos.x, game.Game.inst.game_resolution.y - self._tooltip_panel.height)
             elif self.tooltip_position == "bottom":
                 x = int(-self._tooltip_panel.width / 2 + self.width / 2)
                 self._tooltip_panel.pos = self.pos + V2(x,24)

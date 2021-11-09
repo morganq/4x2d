@@ -289,7 +289,7 @@ class PlayState(UIEnabledState):
 
     def set_joystick_input(self):
         if not self.joystick_overlay:
-            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos)
+            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos[self.scene.get_player_id(self.civ)])
             self.scene.ui_group.add(self.joystick_overlay)
         return super().set_joystick_input()
 

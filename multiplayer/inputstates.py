@@ -4,8 +4,11 @@ import joystickcursor
 import orderpanel
 import planet
 import pygame
+import rangeindicator
 import selector
+import simplesprite
 import sound
+import spaceobject
 import states
 import text
 from colors import *
@@ -13,7 +16,15 @@ from helper import *
 from planet import planetpanel
 from v2 import V2
 
-# TODO: civ and input mode into one shared object?
+from multiplayer import upgradepanel
+
+
+def position_panel(panel, civ):
+    if civ.pos.y < 200:
+        panel.pos = civ.pos
+    else:
+        panel.pos = civ.pos + V2(0,40 - panel.height)
+    panel._reposition_children()
 
 class MultiplayerState(states.UIEnabledState):
     def __init__(self, scene, civ, input_mode):
@@ -46,7 +57,7 @@ class MultiplayerState(states.UIEnabledState):
             if not self.joystick_overlay:
                 controls = self.get_joystick_cursor_controls()
                 self.joystick_overlay = joystickcursor.JoystickPanelCursor(self.scene, controls)
-                self.scene.ui_group.add(self.joystick_overlay)       
+                self.scene.ui_group.add(self.joystick_overlay)
 
 # States that the player inputs can be in
 class CursorState(MultiplayerState):
@@ -135,7 +146,7 @@ class CursorState(MultiplayerState):
 
                 if not self.current_panel:
                     self.current_panel = planetpanel.PlanetPanel(self.last_clicked_sprite, pov_civ = self.civ)
-                    self.current_panel.position_nicely(self.scene)
+                    position_panel(self.current_panel, self.civ)
                     self.current_panel.add_all_to_group(self.scene.ui_group)
                     if not just_update:
                         sound.play("panel")
@@ -241,11 +252,11 @@ class CursorState(MultiplayerState):
 
     def set_joystick_input(self):
         if not self.joystick_overlay:
-            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos)
+            pid = self.scene.get_player_id(self.civ)
+            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos[pid], color=self.civ.color, player_id=pid)
             self.scene.ui_group.add(self.joystick_overlay)
 
     def joystick_input(self, input, event):
-        print("joystick_input", input, event)
         if input == "joymotion":
             self.joystick_overlay.joystick_delta(event['delta'])
 
@@ -275,7 +286,7 @@ class CursorState(MultiplayerState):
 
                         if not self.current_panel:
                             self.current_panel = planetpanel.PlanetPanel(spr, pov_civ = self.civ)
-                            self.current_panel.position_nicely(self.scene)
+                            position_panel(self.current_panel, self.civ)
                             self.current_panel.add_all_to_group(self.scene.ui_group)
                             if not just_update:
                                 sound.play("panel")
@@ -338,7 +349,7 @@ class OrderShipsState(MultiplayerState):
     def enter(self):
         self.hover_filter = self.filter_only_panel_ui
         self.panel = orderpanel.OrderPanel(V2(0,0), self.planet_from, self.planet_to, self.on_order)
-        self.panel.position_nicely(self.scene)
+        position_panel(self.panel, self.civ)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.fade_in()
         self.arrow = arrow.OrderArrow()
@@ -386,5 +397,233 @@ class OrderShipsState(MultiplayerState):
         controls = list(self.panel.sliders.values())
         return [[c] for c in controls]
 
+def apply_upgrade_with_target(civ, up, targets):
+    up().apply(*targets)
+    civ.researched_upgrade_names.add(up.name)
+    civ.upgrades.append(up)
+    civ.upgrades_stocked.pop(0)
+    civ.clear_offers()
+
 class UpgradeState(MultiplayerState):
-    pass
+    is_basic_joystick_panel = True
+    def enter(self):
+        self.hover_filter = self.filter_only_panel_ui
+        res = self.civ.upgrades_stocked[0]
+        uppos = self.civ.pos + V2(3,3)
+        if self.civ.pos.y > 200:
+            uppos = uppos + V2(0, - 80)
+        self.panel = upgradepanel.UpgradePanel(uppos, self.civ, self.civ.offer_upgrades(res), res, self.on_select, self.on_reroll)
+        position_panel(self.panel, self.civ)
+        self.panel.add_all_to_group(self.scene.ui_group)
+        self.panel.fade_in()
+        if self.input_mode == "joystick":
+            self.set_joystick_input()
+        return super().enter()
+
+    def get_joystick_cursor_controls(self):
+        return self.panel.joystick_controls
+
+    def exit(self):
+        self.panel.kill()
+        return super().exit()
+
+    def on_select(self, up):
+        if up.cursor is None:
+            apply_upgrade_with_target(self.civ, up, [self.civ])
+            self.scene.finish_player_upgrade(self.civ)
+            self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
+        else:
+            self.scene.get_civ_sm(self.civ).transition(UpgradeTargetState(self.scene, self.civ, self.input_mode, up))
+
+    def on_reroll(self):
+        print("reroll")
+
+    def on_back(self): # Should back if you click off the panel or press back on joy
+        self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
+
+    def joystick_input(self, input, event):
+        if input == "joymotion":
+            self.joystick_overlay.joystick_delta(event['delta'])
+        if input == "confirm":
+            self.joystick_overlay.confirm()  
+
+
+class UpgradeTargetState(MultiplayerState):
+    NEARBY_RANGE = 70
+    def __init__(self, scene, civ, input_mode, up):
+        super().__init__(scene, civ, input_mode)
+        self.up = up
+        self.cursors_remaining = [up.cursor]
+        if isinstance(up.cursor, list):
+            self.cursors_remaining = up.cursor[::]
+        self.current_cursor = None
+        self.cursor_icon = None
+        self.targets = []
+        self.extras = []
+
+    def filter_my_planets(self, x):
+        return (
+            x.get_selection_info() and
+            x.get_selection_info()['type'] == 'planet' and
+            x.owning_civ == self.civ and 
+            x.upgradeable and
+            x.is_buildable()
+        )
+
+    def filter_my_fleets(self, x):
+        return (
+            x.get_selection_info() and x.get_selection_info()['type'] == 'fleet' and x.owning_civ == self.civ
+        )
+
+    def next_cursor(self):
+        if not self.cursors_remaining:
+            apply_upgrade_with_target(self.civ, self.up, self.targets)
+            self.scene.finish_player_upgrade(self.civ)
+            self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
+            return
+        self.current_cursor = self.cursors_remaining.pop(0)
+
+        if self.cursor_icon:
+            self.cursor_icon.kill()
+
+        if self.joystick_overlay:
+            self.joystick_overlay.set_button_options(["[*x*] Apply Upgrade"])
+
+        if self.current_cursor == "allied_planet":
+            self.cursor_icon = simplesprite.SimpleSprite(V2(0,0), "assets/i-planet-cursor.png")
+            self.hover_filter = self.filter_my_planets
+            #self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
+        elif self.current_cursor == "allied_fleet":
+            self.scene.fleet_managers[self.civ].generate_selectable_objects()
+            self.cursor_icon = simplesprite.SimpleSprite(V2(0,0), "assets/i-fleet-cursor.png")
+            self.hover_filter = self.filter_my_fleets
+            #self.selection_info_text = text.Text("Select one of your Fleets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
+        elif self.current_cursor == "point":
+            self.cursor_icon = simplesprite.SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
+            self.hover_filter = self.filter_only_ui
+            #self.selection_info_text = text.Text("Select a point", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
+        elif self.current_cursor == "nearby":
+            self.cursor_icon = simplesprite.SimpleSprite(V2(0,0), "assets/i-point-cursor.png")
+            self.range = rangeindicator.RangeIndicator(self.targets[0].pos, self.NEARBY_RANGE, PICO_LIGHTGRAY)
+            self.scene.ui_group.add(self.range)
+            self.extras.append(self.range)
+            self.hover_filter = self.filter_only_ui
+            #self.selection_info_text = text.Text("Select a point nearby", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
+
+        self.cursor_icon.offset = (0.5, 0.5)
+        self.cursor_icon._recalc_rect()
+        self.scene.ui_group.add(self.cursor_icon)            
+
+    def on_back(self):
+        self.scene.get_civ_sm(self.civ).transition(UpgradeState(self.scene, self.civ, self.input_mode))
+
+    def enter(self):
+        if self.input_mode == "joystick":
+            self.set_joystick_input()           
+        self.next_cursor()
+        return super().enter()
+
+    def exit(self):
+        if self.cursor_icon:
+            self.cursor_icon.kill()
+        if self.joystick_overlay:
+            self.joystick_overlay.kill()
+        for extra in self.extras:
+            extra.kill()
+
+    def mouse_input(self, input, event):
+        handled = super().mouse_input(input, event)
+        if handled:
+            return
+        if self.cursor_icon:
+            if input in ["mouse_move", "mouse_drag"]:
+                self.cursor_icon.pos = event.gpos + V2(10,10)
+
+        if self.current_cursor:
+            if input == "menu":
+                self.on_back()
+
+            if input == "click" and self.hover_sprite:
+                sel = self.hover_sprite.get_selection_info()
+                if sel:
+                    if self.current_cursor == "allied_planet" and sel['type'] == "planet" and self.hover_sprite.owning_civ == self.civ:
+                        self.targets.append(self.hover_sprite)
+                        self.next_cursor()
+                        return
+
+                    if self.current_cursor == "allied_fleet" and sel['type'] == "fleet":
+                        self.targets.append(self.hover_sprite)
+                        self.scene.fleet_managers[self.civ].destroy_selectable_objects()
+                        self.next_cursor()
+                        return
+
+            if input == "click" and self.current_cursor == "point":
+                self.targets.append(event.gpos)
+                self.next_cursor()
+                return
+
+            if input == "click" and self.current_cursor == "nearby":
+                if (event.gpos - self.targets[0].pos).sqr_magnitude() < self.NEARBY_RANGE ** 2:
+                    self.targets.append(event.gpos)
+                    self.next_cursor()
+                    return                
+
+        else:
+            if input == "menu" or input == "rightclick":
+                self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
+
+    def joystick_input(self, input, event):
+        if input == "back":
+            self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
+
+        if input == "joymotion":
+            self.joystick_overlay.joystick_delta(event['delta'])
+
+        if input == "confirm":
+            spr = self.joystick_overlay.nearest_obj
+            if spr:
+                sel = spr.get_selection_info()
+                if sel:
+                    if self.current_cursor == "allied_planet" and sel['type'] == "planet" and spr.owning_civ == self.civ:
+                        self.targets.append(spr)
+                        self.next_cursor()
+                        return
+
+                    if self.current_cursor == "allied_fleet" and sel['type'] == "fleet":
+                        self.scene.fleet_managers[self.civ].destroy_selectable_objects()
+                        self.targets.append(spr)
+                        self.next_cursor()
+                        return
+
+            if self.current_cursor == "point":
+                self.targets.append(self.joystick_overlay.cursor_pos)
+                self.next_cursor()
+                return
+
+            if self.current_cursor == "nearby":
+                if (self.joystick_overlay.cursor_pos - self.targets[0].pos).sqr_magnitude() < self.NEARBY_RANGE ** 2:
+                    self.targets.append(self.joystick_overlay.cursor_pos)
+                    self.next_cursor()
+                    return      
+
+    def joystick_update(self, dt):
+        all_sprites = []
+        all_sprites.extend(
+            sorted(self.scene.ui_group.sprites()[::], key=lambda x:x.layer, reverse=True)
+        )        
+        all_sprites.extend(
+            sorted(self.scene.game_group.sprites()[::], key=lambda x:x.layer, reverse=True)
+        )
+        selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and isinstance(s, spaceobject.SpaceObject) and self.hover_filter(s)]
+
+        nearest, d = get_nearest(self.joystick_overlay.cursor_pos, selectable_sprites)
+        if d < 40 ** 2:
+            self.joystick_overlay.set_nearest(nearest)
+        else:
+            self.joystick_overlay.set_nearest(None)  
+
+    def set_joystick_input(self):
+        if not self.joystick_overlay:
+            pid = self.scene.get_player_id(self.civ)
+            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos[pid], color=self.civ.color, player_id=pid)
+            self.scene.ui_group.add(self.joystick_overlay)

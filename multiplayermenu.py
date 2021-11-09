@@ -20,7 +20,7 @@ class MultiplayerMenu(scene.Scene):
         self.game.input_mode = game.Game.INPUT_MULTIPLAYER
         self.game.player_inputs = []
         
-        self.player_index = 1
+        self.player_index = 0
 
         res = self.game.game_resolution
         self.instructions = text.Text(
@@ -43,8 +43,8 @@ class MultiplayerMenu(scene.Scene):
         self.sm = states.Machine(states.UIEnabledState(self))
 
     def take_raw_input(self, event):
-        print(event)
         if event.type == pygame.JOYBUTTONDOWN:
+
             found = False
             for pi in self.game.player_inputs:
                 if pi.input_type == playerinput.Player.INPUT_JOYSTICK and pi.joystick_id == event.instance_id:
@@ -73,6 +73,8 @@ class MultiplayerMenu(scene.Scene):
     def take_player_input(self, p, inp, event):
         if inp in ["click", "mousemotion"]:
             self.take_input(inp, event)
+        if inp == "menu":
+            self.on_start()
         self.sm.state.take_input(inp, event)
         self.game.input_mode = game.Game.INPUT_MULTIPLAYER
 

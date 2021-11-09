@@ -110,7 +110,7 @@ class UpgradeState(UIEnabledState):
     def setup_cursor_type(self, cursor):
         if self.joystick_overlay:
             self.joystick_overlay.kill()
-            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos)
+            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos[0])
             self.scene.ui_group.add(self.joystick_overlay)
             self.joystick_overlay.set_button_options(["[*x*] Select"])
 

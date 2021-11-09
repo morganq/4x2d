@@ -16,21 +16,23 @@ from v2 import V2
 
 
 class JoystickCursor(SpriteBase):
-    def __init__(self, scene, pos):
+    def __init__(self, scene, pos, color=PICO_PINK, player_id=0):
         super().__init__(V2(0,0))
         self.cursor_pos = pos
+        self.player_id = player_id
         self.nearest_obj = None
         self.hovering = None
+        self.color = color
         self.joystick_state = V2(0,0)
         self.scene = scene
-        self.options_text = text.Text("", "small", V2(0,0), PICO_PINK, multiline_width=200, center=False, shadow=PICO_BLACK)
+        self.options_text = text.Text("", "small", V2(0,0), self.color, multiline_width=200, center=False, shadow=PICO_BLACK)
         self.scene.ui_group.add(self.options_text)
         self._generate_image()
 
     def _generate_image(self):
         self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
 
-        pygame.draw.circle(self.image, PICO_PINK, self.cursor_pos.tuple(), 7, 1)
+        pygame.draw.circle(self.image, self.color, self.cursor_pos.tuple(), 7, 1)
         pygame.draw.circle(self.image, PICO_WHITE, self.cursor_pos.tuple(), 2, 0)
 
         if self.nearest_obj:
@@ -44,13 +46,13 @@ class JoystickCursor(SpriteBase):
             )
             delta = (self.cursor_pos - self.nearest_obj.apparent_pos)
             dist, ang = V2(delta.x, -delta.y).to_polar()
-            pygame.draw.arc(self.image, PICO_PINK, rect, ang - 1, ang + 1)
+            pygame.draw.arc(self.image, self.color, rect, ang - 1, ang + 1)
 
             if dist > 15:
                 dn = delta.normalized()
                 p1 = self.cursor_pos - dn * 7
                 p2 = self.nearest_obj.apparent_pos + dn * (self.nearest_obj.radius + 4)
-                pygame.draw.line(self.image, PICO_PINK, p1.tuple(), p2.tuple(), 1)
+                pygame.draw.line(self.image, self.color, p1.tuple(), p2.tuple(), 1)
 
         self._width, self._height = self.image.get_size()
 
@@ -64,7 +66,7 @@ class JoystickCursor(SpriteBase):
     def update(self, dt):
 
         self.cursor_pos = (self.cursor_pos + self.joystick_state * dt * 350).rect_contain(0, 0, game.Game.inst.game_resolution.x, game.Game.inst.game_resolution.y)
-        self.scene.game.last_joystick_pos = self.cursor_pos
+        self.scene.game.last_joystick_pos[self.player_id] = self.cursor_pos
         self.options_text.pos = self.cursor_pos + V2(8, -8)
         self._generate_image()
         return super().update(dt)

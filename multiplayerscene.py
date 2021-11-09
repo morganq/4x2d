@@ -1,3 +1,4 @@
+import button
 import civ
 import economy
 import fleet
@@ -8,8 +9,9 @@ import pauseoverlay
 import simplesprite
 import stagename
 import states
+import text
 from colors import *
-from economy import Resources
+from economy import RESOURCE_COLORS, Resources
 from explosion import Explosion
 from multiplayer import inputstates
 from multiplayer.levelstates import MultiplayerNormalState
@@ -45,6 +47,8 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.num_players = num_players
         self.player_civs = []
         self.player_input_sms = {}
+        self.player_upgrade_buttons = {}
+        self.player_upgrade_texts = {}
 
     def load_level(self, file):
         # Make a homeworld for each player
@@ -63,18 +67,15 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.meters = {}
         # Make a civ for each player
         for i in range(self.num_players):
-            pp = (UI_POSITIONS[self.num_players][i] - V2(0.5,0.5))
-            pp = V2(pp.x * 400, pp.y * 390) + self.game.game_resolution / 2
-            c = civ.MultiplayerCiv(self, pp)
-            c.color = PLAYER_COLORS[i]
-            self.player_civs.append(c)
-            self.player_input_sms[(i+1)] = states.Machine(inputstates.CursorState(self, c, self.game.player_inputs[i].input_type))
-
             uipos = UI_POSITIONS[self.num_players][i]
             if uipos.x == 1:
                 uipos.x = self.game.game_resolution.x - 104
             if uipos.y == 1:
-                uipos.y = self.game.game_resolution.y - 45
+                uipos.y = self.game.game_resolution.y - 45            
+            c = civ.MultiplayerCiv(self, uipos)
+            c.color = PLAYER_COLORS[i]
+            self.player_civs.append(c)
+            self.player_input_sms[i] = states.Machine(inputstates.CursorState(self, c, self.game.player_inputs[i].input_type))
 
             self.meters[c] = {}
             for j,r in enumerate(['iron', 'ice', 'gas']):
@@ -83,12 +84,37 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
                 self.ui_group.add(simplesprite.SimpleSprite(V2(uipos.x + 6,uipos.y + 2 + j * 14), "assets/i-%s.png" % r))
                 self.ui_group.add(self.meters[c][r])
 
+            bp = None
+            if uipos.x < self.game.game_resolution.x / 2:
+                bp = V2(uipos.x + 110, uipos.y + 5)
+            else:
+                bp = V2(uipos.x - 50, uipos.y + 5)
+
+            ub = button.Button(
+                bp,
+                "Up",
+                "small",
+                (lambda c:(lambda:self.player_mouse_click_upgrade(c)))(c), # Closure to capture civ
+                None,
+                None,
+                "assets/i-iron.png",
+                PICO_LIGHTGRAY,
+                fixed_width=46
+            )
+            ub.visible = False
+            self.ui_group.add(ub)
+            self.player_upgrade_buttons[i] = ub
+            ut = text.Text("", "small", bp + V2(24,22), shadow=PICO_BLACK)
+            ut.offset = (0.5, 0)
+            self.ui_group.add(ut)
+            self.player_upgrade_texts[i] = ut
+
         self.radar = Explosion(V2(300, 180), [PICO_GREEN], 1.25, self.game.game_resolution.x)
         self.ui_group.add(self.radar)            
 
     def get_player_id(self, civ):
         i = self.player_civs.index(civ)
-        return i+1
+        return i
 
     def get_civ_sm(self, civ):
         return self.player_input_sms[self.get_player_id(civ)]
@@ -130,6 +156,9 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
 
         self.fleet_diagram.generate_image(self)
 
+        #self.game.game_speed_input = 1
+        self.stage_name.kill()
+
     def get_starting_state(self):
         return MultiplayerNormalState(self)
 
@@ -158,6 +187,32 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
     def take_player_input(self, player_id, inp, event):
         self.player_input_sms[player_id].state.take_input(inp, event)
 
+    def player_mouse_click_upgrade(self, civ):
+        if self.game.player_inputs[self.get_player_id(civ)].input_type == "mouse":
+            self.player_click_upgrade(civ)
+
     def player_click_upgrade(self, civ):
         pid = self.get_player_id(civ)
-        #self.player_input_sms[pid].transition(inputstates.UpgradeState(self, civ, self.game.player_inputs[pid-1].input_type))
+        self.player_input_sms[pid].transition(inputstates.UpgradeState(self, civ, self.game.player_inputs[pid].input_type))
+
+    def update_upgrade_ui(self, civ):
+        pid = self.get_player_id(civ)
+        b = self.player_upgrade_buttons[pid]
+        if len(civ.upgrades_stocked) > 0:
+            res_type = civ.upgrades_stocked[0]
+            b.icon = "assets/i-%s.png" % res_type
+            b.color = RESOURCE_COLORS[res_type]
+            b._generate_image()
+            b.visible = True
+        else:
+            b.visible = False
+        if len(civ.upgrades_stocked) > 1:
+            self.player_upgrade_texts[pid].set_text("+%d More" % (len(civ.upgrades_stocked) - 1))
+        else:
+            self.player_upgrade_texts[pid].set_text("")
+
+    def show_player_upgrade_button(self, civ, res_type):
+        self.update_upgrade_ui(civ)
+
+    def finish_player_upgrade(self, civ):
+        self.update_upgrade_ui(civ)

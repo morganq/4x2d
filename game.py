@@ -1,6 +1,7 @@
 import csv
 import io
 import sys
+from collections import defaultdict
 
 import pygame
 import xbrz
@@ -90,10 +91,10 @@ class Game:
                 self.scene = levelscene.LevelScene(self, "cross", "alien3", 1, 1, "", "", options='flowfield')
             elif sys.argv[1] == "multiplayer":
                 self.player_inputs = [
-                    playerinput.Player(1, playerinput.Player.INPUT_MOUSE),
-                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 0),
-                    playerinput.Player(3, playerinput.Player.INPUT_JOYSTICK, 1),
-                    playerinput.Player(4, playerinput.Player.INPUT_JOYSTICK, 2)
+                    playerinput.Player(0, playerinput.Player.INPUT_MOUSE),
+                    playerinput.Player(1, playerinput.Player.INPUT_JOYSTICK, 0),
+                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 1),
+                    playerinput.Player(3, playerinput.Player.INPUT_JOYSTICK, 2)
                 ]
                 self.input_mode = self.INPUT_MULTIPLAYER
                 self.scene = multiplayerscene.MultiplayerScene(self, 4)
@@ -105,7 +106,7 @@ class Game:
         self.playing_level_index = None
 
         self.game_speed_input = 0
-        self.last_joystick_pos = V2(200,200)
+        self.last_joystick_pos = defaultdict(lambda:V2(0,0))
 
         self.menu_bg_cache_obj = None
 
@@ -194,6 +195,7 @@ class Game:
                 self.scene.take_input(None, event)
 
     def process_input_multiplayer(self, event):
+        #print(event)
         self.scene.take_raw_input(event)
 
         def get_mouse_player():
@@ -243,8 +245,9 @@ class Game:
 
         elif event.type == pygame.JOYAXISMOTION:
             p = get_joystick_player(event.instance_id)
+            
             if p:
-                delta = V2(self.joysticks[0].get_axis(p.get_horizontal_axis()), self.joysticks[0].get_axis(p.get_vertical_axis()))
+                delta = V2(self.joysticks[p.joystick_id].get_axis(p.get_horizontal_axis()), self.joysticks[p.joystick_id].get_axis(p.get_vertical_axis()))
                 if delta.sqr_magnitude() < 0.35 ** 2:
                     delta = V2(0,0)
                 if delta.tuple() != self.last_joy_axes:
@@ -262,7 +265,7 @@ class Game:
 
         elif event.type == pygame.JOYBUTTONDOWN:
             p = get_joystick_player(event.instance_id)
-            if p:            
+            if p:          
                 try:
                     self.scene.take_player_input(p.player_id, p.get_binding(event.button), event)
                 except KeyError:
