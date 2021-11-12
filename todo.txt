@@ -1,27 +1,21 @@
-** Alpha **
-
-gifs:
- - order ships
- - combat
- - gain upgrade
- - starmap
-
-** Beta **
-- second ship type in iron
-
-- Add EMP technology for Network
-
-saving progress mid game
-
-"research" help menu, plus achievements that unlock them.
-multiplayer
-make buildings look cool 
-asset icons
-asset design tweaks?
-asset names pass
-something better when you acquire upgrade
-explain different ships
-4th civ
+** Bugs and tweaks **
+Make sure ships switch targets when attacked
+in-range effects must end if planet is destroyed
+network base defense too strong
+make fighters worse?
 
 
- ? limited range fighters, maybe battleship and refuel
+** Release **
+
+Ship revisions (scout etc. if necessary)
+Complete upgrade designs and implementation
+Complete upgrade icons and art
+Any necessary Alien upgrade and ship revisions
+Unlocking Alien upgrades 
+Intel menu
+Building art
+Redone title screen
+Multiplayer with unique upgrade balance tweaks
+Multiplayer civ selection ^
+Tutorial improvements
+(?) Coop design and implementation
