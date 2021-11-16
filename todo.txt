@@ -3,7 +3,9 @@ Make sure ships switch targets when attacked
 in-range effects must end if planet is destroyed
 network base defense too strong
 make fighters worse?
-
+Show oxygen in starmap center bar
+Ships defending a planet have a limited dogfighting range
+1 damage minimum with armor
 
 ** Release **
 
@@ -19,3 +21,4 @@ Multiplayer with unique upgrade balance tweaks
 Multiplayer civ selection ^
 Tutorial improvements
 (?) Coop design and implementation
+
