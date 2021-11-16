@@ -25,3 +25,10 @@ explain different ships
 
 
  ? limited range fighters, maybe battleship and refuel
+
+
+
+ Show oxygen in starmap center bar
+ Ships defending a planet have a limited dogfighting range
+ 1 damage minimum with armor
+ 
