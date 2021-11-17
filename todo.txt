@@ -6,6 +6,8 @@ make fighters worse?
 Show oxygen in starmap center bar
 Ships defending a planet have a limited dogfighting range
 1 damage minimum with armor
+Adjust upgrade curve [num upgrades per sector]
+Tutorial has bugs associated with the save game state
 
 ** Release **
 
@@ -21,4 +23,3 @@ Multiplayer with unique upgrade balance tweaks
 Multiplayer civ selection ^
 Tutorial improvements
 (?) Coop design and implementation
-
