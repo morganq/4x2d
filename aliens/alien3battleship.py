@@ -17,6 +17,7 @@ class Alien3Battleship(Battleship):
     BASE_HEALTH = 200
     FIRE_RATE = 1.0
     BASE_DAMAGE = 5
+    FUEL = 9999
 
     def __init__(self, scene, pos, owning_civ):
         Battleship.__init__(self, scene, pos, owning_civ)

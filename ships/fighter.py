@@ -25,7 +25,7 @@ class Fighter(Ship):
     SHIP_NAME = "fighter"
     SHIP_BONUS_NAME = "fighter"
     FIRE_RATE = 0.75
-    BASE_DAMAGE = 4
+    BASE_DAMAGE = 3
     BASE_HEALTH = 15
 
     FIRE_RANGE = 30
@@ -34,6 +34,8 @@ class Fighter(Ship):
 
     DOGFIGHTS = True
     BOMBS = True
+
+    FUEL = 250
 
     def __init__(self, scene, pos, owning_civ):
         Ship.__init__(self, scene, pos, owning_civ)
@@ -100,7 +102,7 @@ class Fighter(Ship):
             fighter_damage_curve = [1, 1.5, 1.9, 2.2]
             base_damage *= fighter_damage_curve[self.scene.game.run_info.ship_levels["fighter"] - 1]
         damage_add = 0
-        extra_speed = (self.get_max_speed() - Ship.MAX_SPEED) / Ship.MAX_SPEED
+        extra_speed = (self.get_max_speed() / self.MAX_SPEED) - 1
         damage_add += self.get_stat("ship_weapon_damage_speed") * clamp(extra_speed, 0, 1)
         damage_add += self.get_stat("ship_weapon_damage")
         damage_mul = self.get_stat("%s_damage_mul" % self.SHIP_BONUS_NAME)
@@ -227,9 +229,12 @@ class Fighter(Ship):
         self.post_dogfight_state = None
         self.post_dogfight_target = None
 
+    def wants_to_dogfight(self):
+        return self.DOGFIGHTS
+
     ### Siege ###
     def state_siege(self, dt):
-        if self.DOGFIGHTS and not self.cinematic_no_combat:
+        if self.wants_to_dogfight() and not self.cinematic_no_combat:
             threats = self.get_threats()
             if threats:
                 self.set_state(STATE_DOGFIGHT)
@@ -284,7 +289,7 @@ class Fighter(Ship):
 
     ### Cruising ###
     def state_cruising(self, dt):
-        if self.DOGFIGHTS and not self.cinematic_no_combat:
+        if self.wants_to_dogfight() and not self.cinematic_no_combat:
             threats = self.get_threats()
             if threats:
                 self.set_state(STATE_DOGFIGHT)
@@ -324,7 +329,7 @@ class Fighter(Ship):
         if not self.effective_target.alive():
             self.set_state(STATE_RETURNING)
             
-        if self.DOGFIGHTS and not self.cinematic_no_combat:
+        if self.wants_to_dogfight() and not self.cinematic_no_combat:
             threats = self.get_threats()
             if threats:
                 self.set_state(STATE_DOGFIGHT)
@@ -345,9 +350,15 @@ class Fighter(Ship):
     def take_damage(self, damage, origin=None):
         super().take_damage(damage, origin=origin)
         # When we get hit by an enemy, we may want to switch target.
-        if self.state == STATE_DOGFIGHT:
-            if origin and isinstance(origin, Ship) and origin.owning_civ != self.owning_civ:
-                self.effective_target = origin
+        current_target_dogfights = False
+        if isinstance(self.effective_target, Fighter): # Fighter or any subclass
+            if self.effective_target.DOGFIGHTS:
+                current_target_dogfights = True
+
+        if self.state == STATE_DOGFIGHT and origin:
+            shooter = origin.shooter
+            if shooter and isinstance(shooter, Ship) and shooter.is_alive() and shooter.owning_civ != self.owning_civ and not current_target_dogfights:
+                self.effective_target = shooter
 
 
     def update(self, dt):

@@ -8,6 +8,7 @@ from aliens.alien3mixin import Alien3Mixin
 class Alien3Fighter(Fighter, Alien3Mixin):
     SHIP_NAME = "alien3fighter"
     DISPLAY_NAME = "Void Fighter"
+    FUEL = 9999
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)
         self.set_sprite_sheet("assets/alien3fighter.png", 12)

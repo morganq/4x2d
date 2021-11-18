@@ -33,6 +33,8 @@ class Battleship(Fighter):
     SHIP_NAME = "battleship"
     SHIP_BONUS_NAME = "battleship"
 
+    FUEL = 9999
+
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         

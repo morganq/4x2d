@@ -1,3 +1,4 @@
+import random
 import time
 from collections import defaultdict
 from sys import path
@@ -185,7 +186,8 @@ class Fleet:
                 self.path_done = True
                 return
             if self.scene.flowfield.has_field(self.target):
-                new_pt = self.scene.flowfield.walk_field(self.path[-1], self.target, PATH_STEP_SIZE)
+                step = PATH_STEP_SIZE * (random.random() + 0.5)
+                new_pt = self.scene.flowfield.walk_field(self.path[-1], self.target, step)
             else:
                 delta = self.target.pos - self.pos
                 new_pt = self.path[-1] + delta.normalized() * PATH_STEP_SIZE

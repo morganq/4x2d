@@ -2,8 +2,10 @@ import pygame
 
 import game
 import sound
+import text
 from colors import *
 from line import ptmax, ptmin
+from ships import fighter
 from spritebase import SpriteBase
 from v2 import V2
 
@@ -89,10 +91,7 @@ class OrderArrow(SpriteBase):
         points.append(pt2)
         points.append(pt2 + side * -15 + forward * -15)
         points.append(pt2 + side * -ht + forward * -15)
-        points = [p.tuple() for p in points]
-
-        arrow1 = pt2 + forward * - 10 + side * 10
-        arrow2 = pt2 + forward * - 10 + side * -10        
+        points = [p.tuple() for p in points]       
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
         pygame.draw.polygon(self.image, color, points, 0)
@@ -104,6 +103,31 @@ class OrderArrow(SpriteBase):
 
         if self.last_end is None:
             self.last_end = end
+
+        civ = start_planet.owning_civ
+        fighter_range = fighter.Fighter.estimate_flight_range(civ, end_planet) * 0.9
+        if delta.sqr_magnitude() > fighter_range ** 2:
+            ang = -delta.to_polar()[1] * 180 / 3.14159
+            if ang < -90:
+                ang += 180
+                side = -side
+            if ang > 90:
+                ang -= 180  
+                side = -side          
+            pt2 = pt1 + forward * (fighter_range - start_offset)
+            points = []
+            ht = thickness / 2
+            ht2 = thickness + 3
+            mid1 = pt1 + forward * ((fighter_range - start_offset) / 2 - 42)
+            mid2 = pt1 + forward * ((fighter_range - start_offset) / 2 + 42)
+            pygame.draw.line(self.image, PICO_YELLOW, (pt1 + side * ht).tuple(), (pt1 + side * ht2).tuple(), 1)
+            pygame.draw.line(self.image, PICO_YELLOW, (pt1 + side * ht2).tuple(), (mid1 + side * ht2).tuple(), 1)
+            pygame.draw.line(self.image, PICO_YELLOW, (mid2 + side * ht2).tuple(), (pt2 + side * ht2).tuple(), 1)
+            pygame.draw.line(self.image, PICO_YELLOW, (pt2 + side * ht).tuple(), (pt2 + side * ht2).tuple(), 1)
+            ts = text.render_multiline("Fighter Range", "small", PICO_YELLOW)
+            ts2 = pygame.transform.rotate(ts, ang)
+            center = (pt1 + pt2) / 2 + 6 * side
+            self.image.blit(ts2, (center + V2(-ts2.get_width() / 2, -ts2.get_height() / 2)).tuple())
 
         if (end - self.last_end).sqr_magnitude() > 10 ** 2:
             if end_planet:

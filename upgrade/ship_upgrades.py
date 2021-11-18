@@ -7,51 +7,67 @@ from upgrade.upgrades import Upgrade, register_upgrade
 
 
 @register_upgrade
-class Basic1Upgrade(Upgrade):
-    name = "s_basicfighters1"
+class Scout1Upgrade(Upgrade):
+    name = "s_scouts1"
     resource_type = "iron"
     category = "ships"
     title = "Standard Order"
-    description = "Train [^2] [Fighters] Over [30 seconds]"
+    description = "Train [^1] [Scout] Over [10 seconds]"
     icon = "standardorder"
     cursor = "allied_planet"
-    family = {'tree':'basicfighters', 'parents':[]}
+    family = {'tree':'scouts', 'parents':[]}
 
     def apply(self, to):
-        p = ProductionOrder("fighter", 2, 30)
+        p = ProductionOrder("scout", 1, 10)
         to.add_production(p)
 
 @register_upgrade
-class Basic2Upgrade(Upgrade):
-    name = "s_basicfighters2"
+class Scout2aUpgrade(Upgrade):
+    name = "s_scouts2a"
     resource_type = "iron"
     category = "ships"
-    title = "Expedited Order"
-    description = "Train [^3] [Fighters] Over [25 seconds]"
-    icon = "expeditedorder"
+    title = "Standard Order"
+    description = "Train [^2] [Scouts] Over [30 seconds]"
+    icon = "standardorder"
     cursor = "allied_planet"
-    family = {'tree':'basicfighters', 'parents':['s_basicfighters1']}
-    requires = ('s_basicfighters1',)
+    family = {'tree':'scouts', 'parents':['s_scouts1']}
+    requires = ('s_scouts1',)
 
     def apply(self, to):
-        p = ProductionOrder("fighter", 3, 25)
+        p = ProductionOrder("scout", 2, 30)
         to.add_production(p)  
 
 @register_upgrade
-class Basic3Upgrade(Upgrade):
-    name = "s_basicfighters3"
+class Scout2bUpgrade(Upgrade):
+    name = "s_scouts2b"
     resource_type = "iron"
     category = "ships"
-    title = "Rush Order"
-    description = "Train [^3] [Fighters] Over [20 seconds]"
-    icon = "rushorder"
+    title = "Standard Order"
+    description = "Train [^2] [Scouts] Over [30 seconds]"
+    icon = "standardorder"
     cursor = "allied_planet"
-    family = {'tree':'basicfighters', 'parents':['basicfighters2']}
-    requires = ('s_basicfighters1', 's_basicfighters2')
+    family = {'tree':'scouts', 'parents':['s_scouts1']}
+    requires = ('s_scouts1',)
+
+    def apply(self, to):
+        p = ProductionOrder("scout", 2, 30)
+        to.add_production(p)          
+
+@register_upgrade
+class Scout3Upgrade(Upgrade):
+    name = "s_scouts3"
+    resource_type = "iron"
+    category = "ships"
+    title = "Standard Order"
+    description = "Train [^2] [Scouts] Over [30 seconds]"
+    icon = "standardorder"
+    cursor = "allied_planet"
+    family = {'tree':'scouts', 'parents':['s_scouts2a', 's_scouts2b']}
+    requires = lambda x:'s_scouts1' in x and ('s_scouts2a' in x or 's_scouts2b' in x)
     infinite = True
 
     def apply(self, to):
-        p = ProductionOrder("fighter", 3, 20)
+        p = ProductionOrder("scout", 2, 30)
         to.add_production(p)                
 
 @register_upgrade

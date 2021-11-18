@@ -18,6 +18,7 @@ class BossLaser(Fighter):
     FIRE_RATE = 0.25
     FIRE_RANGE = 75
     MAX_SPEED = 5
+    FUEL = 9999
 
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)

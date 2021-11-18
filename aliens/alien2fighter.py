@@ -9,6 +9,7 @@ class Alien2Fighter(Fighter):
     BASE_DAMAGE = 3
     MAX_SPEED = 5
     DISPLAY_NAME = "Network Fighter"
+    FUEL = 9999
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)
         self.set_sprite_sheet("assets/alien2fighter.png", 13)

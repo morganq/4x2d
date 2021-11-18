@@ -82,6 +82,7 @@ VALID_STAT_NAMES = [
     'reactive_field',
     'regen', 
     'scarcest_mining_rate',
+    'scout_damage_mul',
     'ship_armor_far_from_home', 
     'ship_shield_far_from_home', 
     'ship_death_heal',

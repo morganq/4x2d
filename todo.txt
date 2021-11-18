@@ -1,5 +1,6 @@
 ** Bugs and tweaks **
-Make sure ships switch targets when attacked
+
+* Make sure ships switch targets when attacked
 in-range effects must end if planet is destroyed
 network base defense too strong
 make fighters worse?

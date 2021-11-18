@@ -221,15 +221,21 @@ class FlowField:
     def get_vector(self, pos, radius):
         out = V2(0,0)
         pos = pos - self.offset
+        cx = int(clamp((pos.x) / GRIDSIZE, 0, self.gw-1))
+        cy = int(clamp((pos.y) / GRIDSIZE, 0, self.gh-1))
         x1 = int(clamp((pos.x - radius) / GRIDSIZE, 0, self.gw-1))
         x2 = int(clamp((pos.x + radius) / GRIDSIZE, 0, self.gw-1))
         y1 = int(clamp((pos.y - radius) / GRIDSIZE, 0, self.gh-1))
         y2 = int(clamp((pos.y + radius) / GRIDSIZE, 0, self.gh-1))
+        half = x2 - cx
+        coefficient = 1
         for x in range(x1, x2 + 1):
             for y in range(y1, y2 + 1):
                 v = self.grid[y][x]
                 if v:
-                    out += v.normalized() # instead of here?
+                    if half > 0:
+                        coefficient = 1 / max(((cx - x)) ** 2 + ((cy - y)) ** 2, 1)                    
+                    out += v.normalized() * coefficient # instead of here?
 
         return out.normalized()
 
@@ -240,7 +246,7 @@ class FlowField:
         iterations = 0
         while walked < distance:
             step = min(GRIDSIZE, distance)
-            p += self.get_vector(p + self.offset, 10) * step
+            p += self.get_vector(p + self.offset, 30) * step
             walked += step
             iterations += 1
             if iterations > distance * 2:

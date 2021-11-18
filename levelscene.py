@@ -43,6 +43,7 @@ from meter import Meter
 from objgrid import ObjGrid
 from planet.planet import Planet
 from resources import resource_path
+from ships import scout
 from ships.ship import Ship
 from spaceobject import SpaceObject
 from text import FONTS, Text, render_multiline_to

@@ -52,6 +52,8 @@ class Ship(SpaceObject):
     DOGFIGHTS = False
     BOMBS = False
 
+    FUEL = 9999
+
     def __init__(self, scene, pos, owning_civ):
         SpaceObject.__init__(self, scene, pos)
         self._base_sheet = None
@@ -62,6 +64,8 @@ class Ship(SpaceObject):
         self.stationary = False
         self.fleet = None
         self.origin = None # Planet we were emitted from
+
+        self.fuel_remaining = self.FUEL
 
         self._layer = 1
 
@@ -114,6 +118,14 @@ class Ship(SpaceObject):
         self.opt_fleet_forces = V2(0,0)
 
         self.updated_color = False
+
+    @classmethod
+    def estimate_flight_range(cls, civ, target=None):
+        dist = cls.FUEL * (1 + civ.get_stat("ship_speed_mul"))
+        if target and target.owning_civ != civ:
+            dist *= (1 + civ.get_stat('ship_speed_mul_targeting_planets'))
+        return dist
+        
 
     @classmethod
     def get_display_name(cls):
@@ -297,6 +309,14 @@ class Ship(SpaceObject):
         if self.pos.y > game.Game.inst.game_resolution.y - 5:
             self.velocity.y -= dt * self.get_thrust_accel() * 2                        
 
+        if self.state == STATE_CRUISING:
+            speed_adjust = self.get_max_speed() / self.MAX_SPEED
+            cruise_travel_dist_frame = self.velocity.magnitude() * dt / speed_adjust
+            self.fuel_remaining -= cruise_travel_dist_frame
+
+            if self.fuel_remaining < 0:
+                self.set_state(STATE_RETURNING)
+                
         self.pos += self.velocity * dt
         self.health_bar.pos = self.pos + V2(0, -6)
         self.shield_bar.pos = self.pos + V2(0, -9)

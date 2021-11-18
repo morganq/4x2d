@@ -16,6 +16,7 @@ class Alien1WarpShip(Fighter):
     FIRE_RANGE = 10
     TETHER_LENGTH = 80
     BASE_HEALTH = 65
+    FUEL = 9999
 
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)

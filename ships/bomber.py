@@ -31,6 +31,8 @@ class Bomber(Fighter):
     BOMBS = True
     DOGFIGHTS = False
 
+    FUEL = 9999
+
     # TODO: waiting-style movement for siege
 
     def __init__(self, scene, pos, owning_civ):

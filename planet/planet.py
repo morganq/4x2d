@@ -653,11 +653,15 @@ class Planet(SpaceObject):
             self.add_population(1)
             self._timers['headquarters'] = 0
 
-    def add_population(self, num):
+    def add_population(self, num, force_show=False):
         self._population = max(self._population + num, 0)
         self.needs_panel_update = True
-        if self.owning_civ and self.owning_civ.is_player:
-            it = IconText(self.pos, "assets/i-pop.png", "+1", PICO_GREEN)
+        if force_show or self.owning_civ and self.owning_civ.is_player:
+            if num > 0:
+                t = "+%d" % num
+            else:
+                t = "%d" % num
+            it = IconText(self.pos, "assets/i-pop.png", t, PICO_GREEN)
             it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)        
 

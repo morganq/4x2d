@@ -33,6 +33,8 @@ class Interceptor(Fighter):
     SHIP_NAME = "interceptor"
     SHIP_BONUS_NAME = "interceptor"
 
+    FUEL = 9999
+
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         

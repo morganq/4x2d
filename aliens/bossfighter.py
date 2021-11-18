@@ -16,6 +16,7 @@ class BossFighter(Fighter):
     BASE_DAMAGE = 3
     FIRE_RATE = 0.65
     MAX_SPEED = 10
+    FUEL = 9999
 
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)

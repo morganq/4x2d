@@ -96,6 +96,9 @@ class Bullet(SpriteBase):
             post_health = obj.health
 
             if isinstance(obj, planet.planet.Planet):
+                kill_pop = self.mods.get("kill_pop")
+                if kill_pop:
+                    obj.add_population(-kill_pop, force_show=True)
                 if pre_health > 0 and post_health <= 0:
                     if self.mods.get("raze_upgrade"):                    
                         civ = self.shooter.owning_civ
@@ -142,10 +145,15 @@ class Bullet(SpriteBase):
 
     def _generate_image(self):
         self.image = pygame.Surface((9,9), pygame.SRCALPHA)
-        vn = self.vel.normalized()
-        p1 = V2(4,4)
-        p2 = V2(4,4) + vn * 2
-        pygame.draw.line(self.image, self.mods.get("color", PICO_BLUE), p1.tuple(), p2.tuple(), 1)
+        shape = self.mods.get('shape', 'line')
+        if shape == 'line':
+            vn = self.vel.normalized()
+            p1 = V2(4,4)
+            p2 = V2(4,4) + vn * self.mods.get("size", 2)
+            pygame.draw.line(self.image, self.mods.get("color", PICO_BLUE), p1.tuple(), p2.tuple(), 1)
+        elif shape == 'circle':
+            pygame.draw.circle(self.image, self.mods.get("color", PICO_BLUE), (4,4), self.mods.get("size", 2), 0)
+
 
         self._width = 9
         self._height = 9
