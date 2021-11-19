@@ -22,7 +22,7 @@ class Bomber(Fighter):
     BASE_HEALTH = 45
     BLAST_RADIUS = 0
     FIRE_RATE = 0.4
-    BASE_DAMAGE = 40
+    BASE_DAMAGE = 25
 
     FIRE_RANGE = 35
     THREAT_RANGE_DEFAULT = 40
@@ -55,7 +55,11 @@ class Bomber(Fighter):
             damage_curve = [1, 1.5, 1.9, 2.2]
             mods['damage_base'] *= damage_curve[self.scene.game.run_info.ship_levels["bomber"] - 1]
         mods['raze_chance'] = self.get_stat("bomber_raze_chance")
-        mods['color'] = PICO_PINK
+        mods['color'] = PICO_RED
+        mods['shape'] = 'circle'
+        mods['size'] = 1
+        mods['missile_speed'] = -0.3
+        mods['trail'] = PICO_RED
         return mods
 
     def fire(self, at):

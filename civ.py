@@ -1,3 +1,4 @@
+import math
 import random
 from collections import defaultdict
 
@@ -22,6 +23,7 @@ class Civ:
         self.is_player = False   
         self.resources = economy.Resources()
         self.frozen = economy.Resources(0,0,0)
+        self.num_resource_upgrades = economy.Resources(0,0,0)
         self.base_upgrade_limits = economy.Resources(25,80,150)
         self.upgrade_limits = economy.Resources(9999,9999,9999)
         self.upgrades_stocked = []
@@ -55,20 +57,23 @@ class Civ:
         self.housing_colonized = False # Turns True when we colonize something
 
         self.blueprints = []
+        self.comm_objects = []
 
     def get_upgrade_increase_amts(self):
-        if self.scarcity:
-            return {
-                'iron':30 * 4,
-                'ice':35 * 4,
-                'gas':50 * 4
-            }            
-        else:
-            return {
-                'iron':30,
-                'ice':35,
-                'gas':50
-            }        
+        res_vals = {
+            'iron':(25, 170),
+            'ice':(80, 185),
+            'gas':(150, 230),
+        }
+           
+        data = {}
+        for res,i in self.num_resource_upgrades.data.items():
+            start, co = res_vals[res]
+            new_val = int(start + i * co / math.sqrt((i + 10) * 1.05) - min(i ** 1.45,150))
+            if self.scarcity:
+                new_val *= 2
+            data[res] = new_val - self.base_upgrade_limits.data[res]
+        return data   
 
     def enable_scarcity(self):
         self.base_upgrade_limits.iron += 200
@@ -83,6 +88,16 @@ class Civ:
         self.upgrades_update(dt)
         self.upkeep_update()
         self.time += dt
+
+    def get_comm_circles(self):
+        self.comm_objects = [o for o in self.comm_objects if o.is_alive()]
+        return [(o.pos, o.comm_radius) for o in self.comm_objects]
+    
+    def in_comm_circle(self, pos):
+        for (comm_pos, comm_radius) in self.get_comm_circles():
+            if (pos - comm_pos).sqr_magnitude() <= comm_radius ** 2:
+                return True
+        return False
 
     def upkeep_update(self):
         upkeep = self.get_upkeep_ratio()
@@ -118,7 +133,10 @@ class Civ:
             while self.resources.data[res_type] >= self.upgrade_limits.data[res_type]:
                 self.upgrades_stocked.append(res_type)
                 self.resources.set_resource(res_type, self.resources.data[res_type] - self.upgrade_limits.data[res_type])
+                self.num_resource_upgrades.data[res_type] += 1
                 self.base_upgrade_limits.data[res_type] = int(self.base_upgrade_limits.data[res_type] + self.get_upgrade_increase_amts()[res_type])
+                if self.is_player:
+                    print(self.base_upgrade_limits.data)
                 self.upkeep_update()
                 self.num_upgrades += 1
                 self.on_resource_overflow(res_type)

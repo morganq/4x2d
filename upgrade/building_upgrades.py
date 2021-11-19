@@ -440,6 +440,7 @@ class Ultra1Upgrade(AddBuildingUpgrade):
 
     def apply(self, to, pt):
         cso = CommStationObject(to.scene, pt)
+        to.owning_civ.comm_objects.append(cso)
         to.scene.game_group.add(cso)
         super().apply(to)
 

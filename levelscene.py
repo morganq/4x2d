@@ -300,6 +300,12 @@ class LevelScene(levelscenebase.LevelSceneBase):
     def invalidate_saved_upgrade(self, upgrade):
         self.saved_upgrade_buttons[upgrade.name].kill()
 
+    def get_enemy_civs(self, civ):
+        if civ == self.player_civ:
+            return [self.enemy.civ]
+        else:
+            return [self.player_civ]
+
     def dev_win(self):
         for planet in self.get_civ_planets(self.enemy.civ):
             planet.take_damage(99999, origin=None)

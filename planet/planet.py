@@ -102,7 +102,6 @@ class Planet(SpaceObject):
         self._timers['regen'] = 0
         self.underground_buildings = {}
         self.planet_weapon_mul = 1
-        self.in_comm_range = False
         self._timers['last_launchpad_pop'] = 999
         self._timers['armory'] = 999
         self._timers['headquarters'] = 999
@@ -311,7 +310,7 @@ class Planet(SpaceObject):
 
     def get_max_health(self):
         hp_per_building = HP_PER_BUILDING * (1 + self.get_stat("planet_health_per_construct"))
-        base = 50 + self.size * 30 + len(self.buildings) * hp_per_building
+        base = 25 + self.size * 15 + len(self.buildings) * hp_per_building
         max_hp = base * (1 + self.get_stat("planet_health_mul"))
         if self.get_stat("planet_temp_health_mul"):
             if self.owned_time < 60:
@@ -393,6 +392,8 @@ class Planet(SpaceObject):
                 s.set_target(target)
                 s.angle = math.atan2(off.y, off.x)
                 s.velocity = off * 10
+                if 'defending' in data:
+                    s.defending = data['defending']
                 self.scene.game_group.add(s)
                 self.emit_ships_timer -= EMIT_SHIPS_RATE
                 self.needs_panel_update = True
@@ -755,7 +756,7 @@ class Planet(SpaceObject):
         for ship_name in self.ships.keys():
             if ship_name not in ['bomber']:
                 for i in range(self.ships[ship_name]):
-                    self.emit_ship(ship_name, {"to":random.choice(threats)})
+                    self.emit_ship(ship_name, {"to":random.choice(threats), "defending":self})
 
     def blow_up_buildings(self):
         for building in self.buildings:

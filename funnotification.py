@@ -1,6 +1,6 @@
 import random
 
-import game
+import res
 from colors import *
 from helper import clamp
 from text import Text
@@ -14,18 +14,18 @@ class FunNotification(Text):
         size = "big"
         if target:
             size="small"
-        super().__init__(text.upper(), size, V2(0,0), color=COLORS[0], border=False, multiline_width=game.RES[0], shadow=PICO_BLACK)
-        self.pos = V2(game.RES[0] / 2, game.RES[1] / 2)
+        super().__init__(text.upper(), size, V2(0,0), color=COLORS[0], border=False, multiline_width=res.RES[0], shadow=PICO_BLACK)
+        self.pos = V2(res.RES[0] / 2, res.RES[1] / 2)
         if target:
             if isinstance(target, V2):
                 self.pos = V2(
-                    clamp(target.x, self.width/2, game.RES[0] - self.width/2),
-                    clamp(target.y, self.height/2, game.RES[1] - self.height/2)
+                    clamp(target.x, self.width/2, res.RES[0] - self.width/2),
+                    clamp(target.y, self.height/2, res.RES[1] - self.height/2)
                 )
             else:                
                 self.pos = V2(
-                    clamp(target.pos.x, self.width/2, game.RES[0] - self.width/2),
-                    clamp(target.pos.y, self.height/2, game.RES[1] - self.height/2)
+                    clamp(target.pos.x, self.width/2, res.RES[0] - self.width/2),
+                    clamp(target.pos.y, self.height/2, res.RES[1] - self.height/2)
                 )
         self.offset = (0.5, 0.5)
         self._recalc_rect()

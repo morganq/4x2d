@@ -162,6 +162,9 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
     def get_starting_state(self):
         return MultiplayerNormalState(self)
 
+    def get_enemy_civs(self, civ):
+        return [c for c in self.player_civs if c != civ]
+
     def update_game(self, dt, base_dt):
         for sm in self.player_input_sms.values():
             sm.state.update(dt)

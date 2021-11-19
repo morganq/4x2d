@@ -49,14 +49,15 @@ class ShipCounter(SpriteBase):
 
     def update(self, dt):
         self.time += dt
-        if self.planet.owning_civ is None or not self.planet.owning_civ.is_player and not self.planet.in_comm_range:
+        in_comm_range = any([civ.in_comm_circle(self.planet.pos) for civ in self.planet.scene.get_enemy_civs(self.planet.owning_civ)])
+        if self.planet.owning_civ is None or not self.planet.owning_civ.is_player and not in_comm_range:
             self.visible = False
             return
         self.visible = True
         ships = sum(self.planet.ships.values())
         self._num_ships = ships
         self._generate_image()
-        if self._num_ships == 0 and not self.planet.production:
+        if self._num_ships == 0 and not self.planet.production and not self.planet.owning_civ.is_enemy:
             self.visible = False
         else:
             self.visible = True

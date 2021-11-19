@@ -192,6 +192,9 @@ class LevelSceneBase(scene.Scene):
     def get_enemy_planets(self, civ):
         return [s for s in self.get_objects() if isinstance(s,Planet) and s.owning_civ and s.owning_civ != civ]        
 
+    def get_enemy_civs(self, civ):
+        return []
+
     def get_special_enemies_in_range(self, civ, pos, range):
         return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,bossmothership.BossMothership) and s.owning_civ != civ]
 

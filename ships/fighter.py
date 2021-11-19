@@ -31,6 +31,7 @@ class Fighter(Ship):
     FIRE_RANGE = 30
     THREAT_RANGE_DEFAULT = 40
     THREAT_RANGE_DEFENSE = 60
+    STOP_CHASING_RANGE = 70
 
     DOGFIGHTS = True
     BOMBS = True
@@ -187,6 +188,12 @@ class Fighter(Ship):
         if invalid_target(): # Still no target? Go back to whatever we were doing.
             self.set_state(self.post_dogfight_state)
             return
+
+        # If we're defending a planet...
+        if self.defending:
+            # And our dogfight target is too far...
+            if (self.effective_target.pos - self.defending.pos).sqr_magnitude() > self.STOP_CHASING_RANGE ** 2:
+                self.set_state("returning")
 
         # Fire if reloaded (and close enough)
         if self.fire_timer > 1:

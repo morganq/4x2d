@@ -1,23 +1,20 @@
 ** Bugs and tweaks **
 
-* Make sure ships switch targets when attacked
-in-range effects must end if planet is destroyed
-network base defense too strong
-make fighters worse?
-Show oxygen in starmap center bar
-Ships defending a planet have a limited dogfighting range
-1 damage minimum with armor
+Scouts shouldn't use buster missile on asteroids
 Adjust upgrade curve [num upgrades per sector]
+
+Show oxygen in starmap center bar
 Tutorial has bugs associated with the save game state
 
 ** Release **
 
+Make memory crystal + blueprint clearer on how to use.
 Ship revisions (scout etc. if necessary)
 Complete upgrade designs and implementation
 Complete upgrade icons and art
+Intel menu
 Any necessary Alien upgrade and ship revisions
 Unlocking Alien upgrades 
-Intel menu
 Building art
 Redone title screen
 Multiplayer with unique upgrade balance tweaks

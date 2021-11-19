@@ -4,6 +4,7 @@ import random
 import pygame
 
 import helper
+import particle
 import planet
 import satellite
 import ships
@@ -30,11 +31,11 @@ class Bullet(SpriteBase):
         self.stationary = False
         self.collision_radius = 5
         self.mods = mods or {}
-        speed = VEL * (1 + self.mods.get("missile_speed", 0))
+        self.speed = VEL * (1 + self.mods.get("missile_speed", 0))
         if vel:
-            self.vel = vel.normalized() * speed
+            self.vel = vel.normalized() * self.speed
         else:
-            self.vel = (self.get_target_pos() - self.pos).normalized() * speed
+            self.vel = (self.get_target_pos() - self.pos).normalized() * self.speed
 
         self.death_time = self.mods.get("life", None) or DEATH_TIME
         self.offset = (0.5, 0.5)
@@ -186,3 +187,15 @@ class Bullet(SpriteBase):
         self.time += dt
         if self.time > self.death_time:
             self.kill()
+        if self.mods.get("trail"):
+            tm1 = (self.time - dt) * 15
+            tm2 = self.time * 15
+            if (tm1 % 1) > (tm2 % 1):
+                p = particle.Particle(
+                    [self.mods.get("trail")],
+                    1,
+                    self.pos,
+                    25 / self.speed,
+                    V2.from_angle(random.random() * 6.2818) * self.speed / 8
+                )
+                self.shooter.scene.game_group.add(p)

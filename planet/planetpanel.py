@@ -41,6 +41,11 @@ class PlanetPanel(Panel):
                     owner = "Your"
                     is_mine = True
 
+
+        if not pov_civ:
+            pov_civ = self.planet.scene.player_civ # horrible.
+        in_comm_range = pov_civ.in_comm_circle(planet.pos)
+
         self.tab = {'text':'%s Planet' % (owner,), 'color':color, 'icon':'assets/i-planet.png'}
         y = 0
 
@@ -82,13 +87,13 @@ class PlanetPanel(Panel):
         color = PICO_WHITE
         if planet.population == 0 or planet.population >= planet.get_max_pop():
             color = PICO_YELLOW
-        if planet.owning_civ == None or is_mine or planet.in_comm_range:
+        if planet.owning_civ == None or is_mine or in_comm_range:
             self.add(Text("%d/%d" %(planet.population, planet.get_max_pop()), "small", (0,0), color, False), V2(57,y+1))
         else:
             self.add(Text("?/%d" %planet.get_max_pop(), "small", (0,0), color, False), V2(57,y+1))
 
         y += 14
-        if sum(planet.ships.values()) and (is_mine or planet.in_comm_range):
+        if sum(planet.ships.values()) and (is_mine or in_comm_range):
             self.add(Line(V2(0,0), V2(120, 0), PICO_GREYPURPLE),V2(0, y))
             y += 4
             ships_alpha = sorted(planet.ships.keys())

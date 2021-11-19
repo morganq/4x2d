@@ -27,6 +27,8 @@ class Scout(fighter.Fighter):
         self.busters = 1
         self.buster_time = 1.0
         self.states['siege']['enter'] = self.enter_state_siege
+        self.comm_radius = 100
+        self.owning_civ.comm_objects.append(self)
 
     def wants_to_dogfight(self):
         if not isinstance(self.effective_target, planet.Planet):
@@ -40,7 +42,7 @@ class Scout(fighter.Fighter):
         return False
 
     def enter_state_siege(self):
-        self.buster_time = 1.0
+        self.buster_time = 1.3
 
     def state_siege(self, dt):
         super().state_siege(dt)
@@ -50,20 +52,20 @@ class Scout(fighter.Fighter):
                 self.busters -= 1
                 self.buster_time = 0.25
                 ang = (self.effective_target.pos - self.pos).to_polar()[1]
-                rvel = V2.from_angle(ang + 3.14159 + random.random() - 0.5) * 1
+                rvel = V2.from_angle(ang + 3.14159 + random.random() - 0.5)
                 b = bullet.Bullet(
                     self.pos,
                     self.effective_target,
                     self,
                     vel=rvel,
                     mods={
-                        'homing':2,
+                        'homing':0.5,
                         'color':PICO_PINK,
-                        'missile_speed':0.25,
+                        'missile_speed':-0.65,
                         'life':15,
                         'kill_pop':1,
                         'shape':'circle',
-                        'size':3,
+                        'size':2,
                         'trail':PICO_PINK
                     }
                 )

@@ -67,6 +67,8 @@ class Ship(SpaceObject):
 
         self.fuel_remaining = self.FUEL
 
+        self.defending = None
+
         self._layer = 1
 
         # States
@@ -118,6 +120,7 @@ class Ship(SpaceObject):
         self.opt_fleet_forces = V2(0,0)
 
         self.updated_color = False
+        self.visible = False
 
     @classmethod
     def estimate_flight_range(cls, civ, target=None):
@@ -544,6 +547,7 @@ class Ship(SpaceObject):
     def update_color(self):
         color = self.owning_civ.color
         self.set_color(color)
+        self.visible = True
 
     def set_color(self, color):
         if not self._base_sheet:

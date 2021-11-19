@@ -67,6 +67,9 @@ class Building:
     def kill(self):
         pass
 
+    def is_alive(self):
+        return self.alive()
+
 def make_simple_stats_building(stats=None, shape=None):
     class AdHocBuilding(Building):
         def __init__(self):
@@ -219,7 +222,8 @@ class OrbitalLaserBuilding(SatelliteBuilding):
     SATELLITE_CLASS = OrbitalLaser
 
 class AlienHomeDefenseBuilding(Building):
-    FIRE_RATE = 0.40
+    FIRE_RATE = 2
+    THREAT_RANGE = 40
     upgrade = "alienhomedefense"
     def __init__(self):
         Building.__init__(self)
@@ -227,12 +231,15 @@ class AlienHomeDefenseBuilding(Building):
         self.stats = Stats(planet_health_mul=1)
         self.fire_time = 0
         
+    def get_threats(self, planet):
+        return planet.scene.get_enemy_ships_in_range(planet.owning_civ, planet.pos, self.THREAT_RANGE + planet.get_radius())
+
     def update(self, planet, dt):
         # Regenerate
-        planet.health += 1 * dt
+        planet.health += 0.5 * dt
         # Fire at threats
         self.fire_time += dt
-        threats = planet.get_threats()
+        threats = self.get_threats(planet)
         if self.fire_time > self.FIRE_RATE and threats:
             self.fire_time = 0
             threat = random.choice(threats)
@@ -241,7 +248,13 @@ class AlienHomeDefenseBuilding(Building):
             b = bullet.Bullet(
                 planet.pos + V2.from_angle(angle) * planet.get_radius(),
                 threat, 
-                planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "color":PICO_RED},
+                planet, vel=V2.from_angle(angle) * 20, mods={
+                    'homing':1,
+                    'color':PICO_YELLOW,
+                    'damage_base':3,
+                    'missile_speed':-0.25,
+                    'life':5
+                },
                 )
             planet.scene.game_group.add(b)
 
@@ -316,9 +329,7 @@ class CommStationObject(SpaceObject):
     def __init__(self, scene, pos):
         super().__init__(scene, pos)
         self.set_sprite_sheet("assets/commstation.png", 19)
-        for obj in all_nearby(self.pos, scene.get_objects_in_range(self.pos, 280), 180):
-            if isinstance(obj, planet.planet.Planet):
-                obj.in_comm_range = True
+        self.comm_radius = 230
 
     def update(self, dt):
         return super().update(dt)
