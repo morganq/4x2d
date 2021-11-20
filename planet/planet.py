@@ -470,7 +470,7 @@ class Planet(SpaceObject):
                 prod_amt_mul += self.get_stat("fighter_production_amt")
                 prod_amt_mul /= (2 ** self.get_stat("fighter_production_amt_halving"))
             
-            if prod.ship_type in ['fighter', 'interceptor', 'bomber', 'battleship']:
+            if prod.ship_type in ['fighter', 'scout', 'interceptor', 'bomber', 'battleship']:
                 prod_rate *= 1 + self.get_stat("%s_production" % prod.ship_type)
 
             self.upgrade_indicators['ship_production_proximity'] = None

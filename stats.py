@@ -26,7 +26,7 @@ VALID_STAT_NAMES = [
     'fighter_health_add',
     'fighter_health_mul',
     'fighter_production_amt_halving',
-    'fighter_production',
+    'fighter_production', # production speed
     'fighter_production_amt',
     'fighter_regen',
     'fire_rate_over_time', 
@@ -84,6 +84,7 @@ VALID_STAT_NAMES = [
     'regen', 
     'scarcest_mining_rate',
     'scout_damage_mul',
+    'scout_production', # production speed
     'ship_armor_far_from_home', 
     'ship_shield_far_from_home', 
     'ship_death_heal',

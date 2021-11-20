@@ -133,12 +133,12 @@ class Hangar1Upgrade(AddBuildingUpgrade):
     name = "b_hangar1"
     resource_type = "iron"
     category = "buildings"
-    title = "Fighter Hangar"
-    description = "[^+50%] [Fighter] Production Quantity"
+    title = "Basic Hangar"
+    description = "[^+50%] [Fighter] and [Scout] Production Speed"
     icon = "fighterhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(fighter_production_amt=0.5), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(fighter_production=0.5, scout_production=0.5), shape="modulardwellings")
 
 @register_upgrade
 class Hangar2aUpgrade(AddBuildingUpgrade):
