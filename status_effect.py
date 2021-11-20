@@ -1,7 +1,10 @@
+import math
 import random
 
+import explosion
 import game
 import particle
+import ships
 from colors import *
 from v2 import V2
 
@@ -19,8 +22,11 @@ class StatusEffect:
         self.owner.remove_effect(self)
 
     # Default stacking behavior: Simply add the other effect to the obj
-    def stack(self, other_effect):
-        self.owner.add_single_effect(other_effect)
+    def stack(self, fresh_effect):
+        self.owner.add_single_effect(fresh_effect)
+
+    def get_stat(self, stat):
+        return 0
 
 
 class GreyGooEffect(StatusEffect):
@@ -51,3 +57,35 @@ class GreyGooEffect(StatusEffect):
         if self.time <= 0:
             self.kill()
         return super().update(dt)
+
+class ShipBoostEffect(StatusEffect):
+    def __init__(self, owner, applier):
+        super().__init__(owner, applier)
+        self.stacks = 1
+        self.particle_timer = 0
+
+    def stack(self, fresh_effect):
+        self.stacks += 1
+    
+    def get_stat(self, stat):
+        return {
+            'ship_speed_mul':0.1 * self.stacks,
+            'ship_fire_rate':0.05 * self.stacks
+        }.get(stat, 0)
+
+    def update(self, dt):
+        super().update(dt)
+        if not isinstance(self.owner, ships.ship.Ship):
+            self.kill()
+            return
+            
+        self.particle_timer += dt
+        if self.particle_timer > 0.4:
+            pos = self.owner.pos
+            def sf(t):
+                return math.sin(t * 3.14159)
+            e = explosion.Explosion(pos, [PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_WHITE, PICO_WHITE, PICO_BLUE], 0.8, 3, line_width=1)
+            self.owner.scene.game_group.add(e)
+            self.particle_timer = 0
+
+

@@ -35,6 +35,7 @@ VALID_STAT_NAMES = [
     'grey_goo',
     'headquarters', # +1 pop when worker sent from here colonizes
     'ice_mining_rate',
+    'ice_per_docked', # "Every 5 seconds, gain [^+1] Ice for each docked ship"
     'interceptor_blast_radius',
     'interceptor_damage_mul',
     'interceptor_fire_rate_deep_space', 
@@ -93,12 +94,13 @@ VALID_STAT_NAMES = [
     'ship_health_add',
     'ship_health_mul',
     'ship_missile_speed',
+    'ship_pop_boost', # Ships launched from this planet gain [^+10%] speed and [^+5%] attack speed per population
     'ship_production',
     'ship_production_rate_per_pop',
     'ship_production_proximity',
     'ship_regenerate',
     'ship_speed_mul_targeting_planets',
-    'ship_speed_mul', 
+    'ship_speed_mul', # Multiplier on ship speed
     'ship_take_damage_on_fire',
     'ship_weapon_damage_speed',
     'ship_weapon_damage',

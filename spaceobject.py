@@ -23,7 +23,10 @@ class SpaceObject(AnimRotSprite, Healthy):
         return self.health > 0 and self.alive()
 
     def get_stat(self, stat):
-        return 0
+        value = 0
+        for effect in self.status_effects:
+            value += effect.get_stat(stat)
+        return value
 
     def update(self,dt):
         self.update_effects(dt)

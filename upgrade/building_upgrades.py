@@ -103,25 +103,25 @@ class Pop2bUpgrade(AddBuildingUpgrade):
     name = "b_pop2b"
     resource_type = "iron"
     category = "buildings"
-    title = "University"
-    description = "Ship production is [^+15%] faster for each population"
+    title = "???"
+    description = "Every 5 seconds, gain [^+2] Ice for each docked ship"
     icon = "university"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop1']}
-    building = make_simple_stats_building(stats=Stats(ship_production_rate_per_pop=0.15), shape="lifesupport")
-    requires = ('b_pop1',)
+    building = make_simple_stats_building(stats=Stats(ice_per_docked=2), shape="lifesupport")
+    requires = ('b_pop1',)    
 
 @register_upgrade
 class Pop3Upgrade(AddBuildingUpgrade):
     name = "b_pop3"
     resource_type = "iron"
     category = "buildings"
-    title = "Underground Shelter"
-    description = "[^+100%] population growth rate"
+    title = "?"
+    description = "Ships launched from this planet gain [^+10%] speed and [^+5%] attack speed per population"
     icon = "undergroundshelter"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop2a', 'b_pop2b']}
-    building = make_simple_stats_building(stats=Stats(pop_growth_rate=1), shape="undergroundshelter")
+    building = make_simple_stats_building(stats=Stats(ship_pop_boost=1), shape="undergroundshelter")
     requires = lambda x:'b_pop1' in x and ('b_pop2a' in x or 'b_pop2b' in x)
     infinite = True
 
@@ -649,3 +649,15 @@ class Health3Upgrade(AddBuildingUpgrade):
     building = make_simple_stats_building(stats=Stats(planet_shield=150), shape="autoartillery")
     requires = lambda x:'b_health1' in x and ('b_health2a' in x or 'b_health2b' in x)
     family = {'tree':'planethealth', 'parents':['b_health2a','b_health2b']}    
+
+class Pop2bUpgrade(AddBuildingUpgrade):
+    name = "b_pop2b"
+    resource_type = "iron"
+    category = "buildings"
+    title = "University"
+    description = "Ship production is [^+15%] faster for each population"
+    icon = "university"
+    cursor = "allied_planet"
+    family = {'tree':'pop', 'parents':['b_pop1']}
+    building = make_simple_stats_building(stats=Stats(ship_production_rate_per_pop=0.15), shape="lifesupport")
+    requires = ('b_pop1',)

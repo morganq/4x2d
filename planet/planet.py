@@ -12,6 +12,7 @@ import ships.colonist
 import ships.fighter
 import ships.interceptor
 import sound
+import status_effect
 from colors import *
 from framesprite import FrameSprite
 from funnotification import FunNotification
@@ -106,6 +107,7 @@ class Planet(SpaceObject):
         self._timers['armory'] = 999
         self._timers['headquarters'] = 999
         self._timers['memorial'] = 999
+        self._timers['ice_per_docked'] = 0
         self.housing_growth_repeater = 0
         self.housing_growth_timer = 0
         self.housing_max_pop = 0
@@ -191,10 +193,11 @@ class Planet(SpaceObject):
         self._generate_frames()
 
     def get_stat(self, stat):
-        owning_civ_stat = 0
+        value = super().get_stat(stat)
         if self.owning_civ:
-            owning_civ_stat += self.owning_civ.get_stat(stat)
-        return sum([b['building'].stats[stat] for b in self.buildings]) + owning_civ_stat
+            value += self.owning_civ.get_stat(stat)
+        value += sum([b['building'].stats[stat] for b in self.buildings])
+        return value
 
     def get_base_regen(self):
         regen = self.get_max_health() / 120
@@ -399,6 +402,11 @@ class Planet(SpaceObject):
                 self.needs_panel_update = True
                 sound.play("launch")
 
+                # Any effects to attach to the ship
+                if self.get_stat("ship_pop_boost"):
+                    for i in range(self.population):
+                        s.add_effect(status_effect.ShipBoostEffect(s, self))
+
         ### Resource production ###
         # Figure out which is the "top" resource
         resource_order = [(a,b) for (a,b) in self.resources.data.items() if b > 0]
@@ -571,6 +579,12 @@ class Planet(SpaceObject):
             if self.scene.game.run_info.o2 <= 0 and self.owning_civ and self.owning_civ.is_player:
                 self.health -= self.get_base_regen() * REGEN_TIMER
                 self.health -= 1 * REGEN_TIMER
+
+        if self.get_stat("ice_per_docked") > 0:
+            if self._timers['ice_per_docked'] > 5:
+                self._timers['ice_per_docked'] -= 5
+                docked = sum(self.ships.values())
+                self.owning_civ.earn_resource("ice", self.get_stat("ice_per_docked") * docked, where = self.pos)
 
         self.owned_time += dt
 

@@ -135,7 +135,7 @@ class Ship(SpaceObject):
         return (cls.DISPLAY_NAME or cls.SHIP_NAME).title()
 
     def get_stat(self, stat):
-        return self.owning_civ.get_stat(stat)
+        return super().get_stat(stat) + self.owning_civ.get_stat(stat)
 
     def take_damage(self, damage, origin=None):
         armor = 0
