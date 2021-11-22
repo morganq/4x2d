@@ -3,6 +3,7 @@ import random
 
 import aliens
 import asteroid
+import particle
 import planet
 import sound
 from bullet import Bullet
@@ -40,7 +41,8 @@ class Fighter(Ship):
 
     def __init__(self, scene, pos, owning_civ):
         Ship.__init__(self, scene, pos, owning_civ)
-        self.set_sprite_sheet("assets/fighter.png", 12)
+        self._set_player_ship_sprite_sheet()
+        
         self.states[STATE_DOGFIGHT] = {
             'update':self.state_dogfight,
             'enter':self.enter_state_dogfight,
@@ -60,6 +62,9 @@ class Fighter(Ship):
         self._timers['time'] = 0
         self._timers['opt_threats'] = 0
         self.opt_threats = []
+
+        self.need_attack_speed_particle = False
+        self.attack_speed_particle_angle = 0
 
     def get_fire_rate(self):
         rate = self.FIRE_RATE
@@ -115,6 +120,11 @@ class Fighter(Ship):
             'raze_upgrade': self.get_stat("raze_upgrade"),
             'color':PICO_LIGHTGRAY,
         }
+        damage_factor = (mods['damage_mul'] * mods['damage_base'] + mods['damage_add']) / mods['damage_base']
+        if damage_factor > 1:
+            mods['trail'] = PICO_PINK
+            mods['trail_length'] = 0.5 + (damage_factor - 1)
+            
         if self.SHIP_BONUS_NAME == "fighter":
             mods['iron_on_hit'] = self.get_stat("fighter_damage_iron")
             mods['grey_goo'] = self.get_stat("grey_goo")
@@ -163,6 +173,9 @@ class Fighter(Ship):
             pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.game_group.add(p)        
+
+        self.need_attack_speed_particle = True
+        self.attack_speed_particle_angle = towards.to_polar()[1]
 
     ### Dogfight ###
     def enter_state_dogfight(self):
@@ -369,5 +382,29 @@ class Fighter(Ship):
 
 
     def update(self, dt):
+        if self.need_attack_speed_particle and (self.fire_timer < self.get_fire_rate() / 3) and ((self.fire_timer + dt) >= self.get_fire_rate() / 3):
+            self.need_attack_speed_particle = False
+            self.make_attack_speed_particle()
         self.fire_timer += self.get_fire_rate() * dt
+        
         return super().update(dt)
+
+    def make_attack_speed_particle(self):
+        as_factor = self.get_fire_rate() / self.FIRE_RATE
+        if as_factor > 1:
+            extra = int((as_factor - 1) * 3) + 1
+            for i in range(3 + extra):
+                ang = self.attack_speed_particle_angle
+                ang += (random.random() - 0.5) * 1.6
+                pos = self.pos + V2.from_angle(ang) * (4 + random.random() * 3)
+                colors = [PICO_BLUE, PICO_WHITE, PICO_GREEN, PICO_PINK, PICO_PURPLE]
+                colors = colors[0:extra]                
+                p = Particle([random.choice(colors)], 1, pos, 0.1, -V2.from_angle(ang) * 30)
+                self.scene.game_group.add(p)
+
+    def emit_thrust_particles(self):
+        for i in range(2):
+            pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
+            pvel += -self.velocity / 2
+            p = particle.Particle([PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY, PICO_DARKGRAY, PICO_DARKGRAY], 1, self.pos + -self.velocity.normalized() * self.radius, 1, pvel)
+            self.scene.game_group.add(p)

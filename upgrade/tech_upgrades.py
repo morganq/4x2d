@@ -508,7 +508,7 @@ class Alien2bUpgrade(Upgrade):
     title = "Kinetic Sling"
     description = "Ship weapons deal [^+50%] of bonus speed as bonus damage"
     icon = "tech_default"
-    stats = Stats(ship_weapon_damage_speed=0.5)
+    stats = Stats(ship_weapon_damage_speed=4)
     family = {'tree':'t_alien', 'parents':['t_alien1']}
     requires = ('t_alien1',)
 

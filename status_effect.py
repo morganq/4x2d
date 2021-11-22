@@ -78,14 +78,11 @@ class ShipBoostEffect(StatusEffect):
         if not isinstance(self.owner, ships.ship.Ship):
             self.kill()
             return
-            
-        self.particle_timer += dt
-        if self.particle_timer > 0.4:
-            pos = self.owner.pos
-            def sf(t):
-                return math.sin(t * 3.14159)
-            e = explosion.Explosion(pos, [PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_WHITE, PICO_WHITE, PICO_BLUE], 0.8, 3, line_width=1)
-            self.owner.scene.game_group.add(e)
-            self.particle_timer = 0
 
+class DamageBoostEffect(StatusEffect):
+    def __init__(self, owner, applier):
+        super().__init__(owner, applier)
+        name = "damage_boost"
 
+    def get_stat(self, stat):
+        return {'ship_weapon_damage':1}.get(stat, 0)

@@ -1,6 +1,7 @@
 import math
 import random
 
+import explosion
 import planet
 import sound
 from bullet import Bullet
@@ -37,8 +38,7 @@ class Battleship(Fighter):
 
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
-        
-        self.set_sprite_sheet("assets/battleship.png", 12)
+        self._set_player_ship_sprite_sheet()
 
     def get_max_health(self):
         mh = super().get_max_health()
@@ -101,3 +101,12 @@ class Battleship(Fighter):
             pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.game_group.add(p)               
+
+
+    def emit_thrust_particles(self):
+        def sfn(t):
+            if t < 0.125:
+                return t * 8
+            return 1 - (t - 0.125)
+        e = explosion.Explosion(self.pos + -self.velocity, [PICO_WHITE, PICO_YELLOW, PICO_YELLOW, PICO_ORANGE, PICO_RED], 3, 4, sfn, 4)
+        self.scene.game_group.add(e)

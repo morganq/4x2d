@@ -1,6 +1,7 @@
 import math
 import random
 
+import particle
 import planet
 import sound
 from bullet import Bullet
@@ -37,8 +38,7 @@ class Interceptor(Fighter):
 
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
-        
-        self.set_sprite_sheet("assets/interceptor.png", 12)
+        self._set_player_ship_sprite_sheet()
         self.bullets_chambered = 0
         self.fast_fire_timer = 0
         self.firing_target = None
@@ -110,3 +110,13 @@ class Interceptor(Fighter):
 
     def get_max_shield(self):
         return super().get_max_shield() + self.get_stat("interceptor_shield")
+
+    def emit_thrust_particles(self):
+        pvel = V2(random.random() - 0.5, random.random() - 0.5) * 1
+        pvel += -self.velocity / 2
+        vn = self.velocity.normalized()
+        side = V2(vn.y, -vn.x) # Sideways vector from forward
+        p1 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -self.velocity.normalized() * self.radius + side * 1.5, 1, pvel)
+        self.scene.game_group.add(p1)
+        p2 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -self.velocity.normalized() * self.radius - side * 1.5, 1, pvel)
+        self.scene.game_group.add(p2)        

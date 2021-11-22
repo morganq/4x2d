@@ -98,6 +98,9 @@ class Ship(SpaceObject):
         self._timers['stun_time'] = 0
         self._timers['warp_drive'] = 0
 
+        self._timers['bonus_speed_particle_time'] = 0
+
+
         # Upgrades
         self.bonus_max_health_aura = 0
         self.bonus_attack_speed_time = 0
@@ -121,6 +124,13 @@ class Ship(SpaceObject):
 
         self.updated_color = False
         self.visible = False
+
+    def _set_player_ship_sprite_sheet(self, size=12):
+        lvl = self.scene.game.run_info.ship_levels[self.SHIP_BONUS_NAME]
+        if lvl == 1:
+            self.set_sprite_sheet("assets/%s.png" % self.SHIP_BONUS_NAME, size)
+        else:
+            self.set_sprite_sheet("assets/%s_lvl%d.png" % (self.SHIP_BONUS_NAME, lvl), size)
 
     @classmethod
     def estimate_flight_range(cls, civ, target=None):
@@ -169,16 +179,10 @@ class Ship(SpaceObject):
         speed = self.MAX_SPEED
         if self.get_stat("deep_space_drive") and self.is_in_deep_space():
             speed *= (1 + self.get_stat("deep_space_drive"))
-            if random.random() < 0.02:
-                p = particle.Particle([PICO_WHITE, PICO_GREEN, PICO_GREEN, PICO_DARKGREEN], 1, self.pos, 1.0, self.velocity * -1 + V2.random_angle() * 2)
-                self.scene.game_group.add(p)
         if self._timers['staged_booster'] < 0:
             speed *= 2
         if self.get_stat('ship_speed_mul_targeting_planets') and self.is_target_not_ally() and isinstance(self.effective_target, planet.planet.Planet):
             speed *= (1 + self.get_stat('ship_speed_mul_targeting_planets'))
-            if random.random() < 0.02:
-                p = particle.Particle([PICO_WHITE, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 1.5, self.velocity * -1 + V2.random_angle() * 1.25)
-                self.scene.game_group.add(p)    
 
         speed *= (1 + self.get_stat("ship_speed_mul"))
         speed *= (1 - self.slow_aura)
@@ -343,6 +347,19 @@ class Ship(SpaceObject):
         self.health += self.get_stat("ship_regenerate") * dt
 
         self.bonus_attack_speed_time -= dt
+
+        speed_factor = self.get_max_speed() / self.MAX_SPEED
+        if speed_factor > 1:
+            if self._timers['bonus_speed_particle_time'] > 0.15 / speed_factor:
+                #e = explosion.Explosion(self.pos + V2.random_angle(), [PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_WHITE, PICO_WHITE, PICO_BLUE], 0.25, 3, line_width=1)
+                colors = [PICO_WHITE, PICO_BLUE, PICO_GREEN, PICO_PINK, PICO_PURPLE]
+                n = int((speed_factor - 1) * 3) + 1
+                colors = colors[0:n]
+                #ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 3
+                ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 0.45 + math.sin(self.time * 3 * speed_factor)
+                p = particle.Particle([random.choice(colors)], 1, self.pos + -self.velocity.normalized() * self.radius, 0.6, V2.from_angle(ang) * 8)
+                self.scene.game_group.add(p)
+                self._timers['bonus_speed_particle_time'] = 0
 
     def collide(self, other):
         if self.can_land(other) and self.wants_to_land():
@@ -558,6 +575,11 @@ class Ship(SpaceObject):
         color_mask = pygame.mask.from_threshold(self._base_sheet, (*PICO_RED,255), (2,2,2,255))
         surf2 = color_mask.to_surface(setcolor=(*color,255), unsetcolor=(0,0,0,0))
         surf.blit(surf2,(0,0))
+
+        white_mask = pygame.mask.from_threshold(self._base_sheet, (*PICO_WHITE,255), (2,2,2,255))
+        surf3 = white_mask.to_surface(setcolor=(*PICO_WHITE,255), unsetcolor=(0,0,0,0))
+        surf.blit(surf3,(0,0))
+
         self._sheet = surf
 
         self._update_image()

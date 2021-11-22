@@ -1,7 +1,8 @@
 import random
 
 import bullet
-from colors import PICO_PINK
+import particle
+from colors import *
 from planet import planet
 from v2 import V2
 
@@ -23,7 +24,7 @@ class Scout(fighter.Fighter):
 
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
-        self.set_sprite_sheet("assets/scout.png", 12)
+        self._set_player_ship_sprite_sheet()
         self.busters = 1
         self.buster_time = 1.0
         self.states['siege']['enter'] = self.enter_state_siege
@@ -44,9 +45,15 @@ class Scout(fighter.Fighter):
     def enter_state_siege(self):
         self.buster_time = 1.3
 
+    def prepare_bullet_mods(self):
+        mods = super().prepare_bullet_mods()
+        mods['shape'] = 'circle'
+        mods['size'] = 1
+        return mods
+
     def state_siege(self, dt):
         super().state_siege(dt)
-        if self.busters > 0:
+        if self.busters > 0 and isinstance(self.effective_target, planet.Planet):
             self.buster_time -= dt
             if self.buster_time <= 0:
                 self.busters -= 1
@@ -71,4 +78,8 @@ class Scout(fighter.Fighter):
                 )
                 self.scene.game_group.add(b)
 
-
+    def emit_thrust_particles(self):
+        pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
+        pvel += -self.velocity / 2
+        p = particle.Particle([PICO_WHITE, PICO_BLUE], 1, self.pos + -self.velocity.normalized() * self.radius, 2, pvel)
+        self.scene.game_group.add(p)

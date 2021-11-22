@@ -1,10 +1,13 @@
-from framesprite import FrameSprite
 import pygame
+
+from framesprite import FrameSprite
 from resources import resource_path
+
 
 class AnimRotSprite(FrameSprite):
     def __init__(self, pos, sprite_sheet=None, frame_width=0):
         self._angle = 0
+        self.debug_rotation_num = 0
         FrameSprite.__init__(self, pos, sprite_sheet=sprite_sheet, frame_width=frame_width)
 
     @property
@@ -25,8 +28,8 @@ class AnimRotSprite(FrameSprite):
         h = self._sheet.get_height()
         midframe = (sw / self._frame_width) // 2
 
-        sixteenth = 6.2818 / 16
-        rotation_number = int((self._angle + sixteenth) / 6.2818 * 8) % 8
+        rotation_number = round((self._angle) / 6.2818 * 8) % 8
+        self.debug_rotation_num = rotation_number
         diagonal = (rotation_number % 2) == 1
 
         sheet_frame = self._frame + midframe if diagonal else self._frame

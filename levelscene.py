@@ -581,22 +581,3 @@ class LevelScene(levelscenebase.LevelSceneBase):
     def update_run_stats(self):
         self.game.run_info.time_taken += self.time
         self.game.run_info.ships_lost += self.player_civ.ships_lost
-
-    def take_input(self, inp, event):
-        if inp == "other" and game.DEV:
-            if event.key == pygame.K_d:
-                self.debug = not self.debug
-            if event.key == pygame.K_1:
-                self.game.game_speed_input = 0
-            if event.key == pygame.K_0:
-                self.game.game_speed_input = 1
-            if event.key == pygame.K_f:
-                self.flowfielddebug = (self.flowfielddebug + 1) % len(self.flowfield.fields)
-            if event.key == pygame.K_g:
-                self.flowfielddebugstage = (self.flowfielddebugstage + 1) % 4
-            if event.key == pygame.K_h:
-                self.flowfielddebug = len(self.flowfield.fields) - 1
-        if inp == "menu": #TODO: pause menu
-            pass
-
-        return super().take_input(inp, event)

@@ -53,6 +53,9 @@ class SpaceObject(AnimRotSprite, Healthy):
         if effect in self.status_effects:
             self.status_effects.remove(effect)
 
+    def remove_all_effects_by_name(self, effect_name):
+        self.status_effects = [e for e in self.status_effects if e.name != effect_name]
+
     def kill(self):
         self.health_bar.kill()
         while(self.status_effects):

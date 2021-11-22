@@ -292,12 +292,12 @@ class Dangerous3Upgrade(AddBuildingUpgrade):
     name = "b_dangerous3"
     resource_type = "ice"
     category = "buildings"
-    title = "Caustic Amplifier"
-    description = "Planetary weapons deal [^+50%] damage"
+    title = "?"
+    description = "Enemy fighters that fly nearby will retarget to attack this planet"
     icon = "causticamplifier"
     cursor = "allied_planet"
     family = {'tree':'dangerous', 'parents':['b_dangerous2a', 'b_dangerous2b']}
-    building = make_simple_stats_building(stats=Stats(planet_weapon_boost=0.5), shape="lifesupport")
+    building = buildings.DecoyBuilding
     requires = lambda x:'b_dangerous1' in x and ('b_dangerous2a' in x or 'b_dangerous2b' in x)
     infinite = False
 

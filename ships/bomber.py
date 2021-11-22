@@ -1,6 +1,7 @@
 import math
 import random
 
+import particle
 import planet
 from bullet import Bullet
 from colors import *
@@ -37,8 +38,7 @@ class Bomber(Fighter):
 
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
-        
-        self.set_sprite_sheet("assets/bomber.png", 12)
+        self._set_player_ship_sprite_sheet()
         self.can_create_colonist = True
         self.num_dodges = 0
         self.last_shot_at = None
@@ -102,3 +102,15 @@ class Bomber(Fighter):
             hp_curve = [1, 1.6, 2.1, 2.6]
             hp *= hp_curve[self.scene.game.run_info.ship_levels["bomber"] - 1]           
         return hp
+
+    def emit_thrust_particles(self):
+        pvel = V2(random.random() - 0.5, random.random() - 0.5) * 1
+        pvel += -self.velocity / 2
+        vn = self.velocity.normalized()
+        side = V2(vn.y, -vn.x) # Sideways vector from forward
+        p1 = particle.Particle([PICO_WHITE, PICO_RED, PICO_RED], 1, self.pos + -self.velocity.normalized() * self.radius + side * 2, 0.75, pvel)
+        self.scene.game_group.add(p1)
+        p2 = particle.Particle([PICO_WHITE, PICO_RED, PICO_RED], 1, self.pos + -self.velocity.normalized() * self.radius - side * 2, 0.75, pvel)
+        self.scene.game_group.add(p2)                
+        p3 = particle.Particle([PICO_WHITE, PICO_RED, PICO_RED], 1, self.pos + -self.velocity.normalized() * self.radius, 1.5, pvel)
+        self.scene.game_group.add(p3)                        

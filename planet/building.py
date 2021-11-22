@@ -2,9 +2,12 @@ import json
 import random
 
 import bullet
+import laserparticle
 import pygame
+import status_effect
 from colors import *
 from helper import all_nearby
+from line import Line
 from rangeindicator import RangeIndicator
 from resources import resource_path
 from satellite import (OffWorldMining, OrbitalLaser, ReflectorShield,
@@ -263,6 +266,7 @@ class AuraBuilding(Building):
         super().__init__()
         self.targeting = "enemy"
         self.applied_ships = set()
+        self.aura_radius = 80
 
     def update(self, planet, dt):
         if self.targeting == "enemy":
@@ -271,24 +275,24 @@ class AuraBuilding(Building):
             ships = set(planet.scene.get_my_ships(planet.owning_civ))
         else:
             ships = set([])
-        near = set(all_nearby(planet.pos, ships, 80))
+        near = set(all_nearby(planet.pos, ships, self.aura_radius))
         far = ships - near
         for ship in near:
             if ship not in self.applied_ships:
-                self.apply(ship)
+                self.apply(ship, planet)
                 self.applied_ships.add(ship)
 
         for ship in far:
             if ship in self.applied_ships:
-                self.unapply(ship)
+                self.unapply(ship, planet)
                 self.applied_ships.remove(ship)
 
         return super().update(planet, dt)     
 
-    def apply(self, ship):
+    def apply(self, ship, planet):
         pass
 
-    def unapply(self, ship):
+    def unapply(self, ship, planet):
         pass   
 
     def kill(self):
@@ -301,13 +305,57 @@ class LowOrbitDefensesBuilding(AuraBuilding):
         super().__init__()
         self.targeting = "mine"
 
-    def apply(self, ship):
+    def apply(self, ship, planet):
         ship.bonus_max_health_aura += 20
         ship.health += 20
 
-    def unapply(self, ship):
+    def unapply(self, ship, planet):
         ship.bonus_max_health_aura -= 20
         ship.health = min(ship.health, ship.get_max_health())
+
+class ScalingDamageAuraBuilding(AuraBuilding):
+    def __init__(self):
+        super().__init__()
+        self.targeting = "mine"
+
+    def update(self, planet, dt):
+        self.aura_radius = 250 - len(planet.buildings) * 25
+        return super().update(planet, dt)
+
+    def apply(self, ship, planet):
+        ship.add_effect(status_effect.DamageBoostEffect(ship, planet))
+
+    def unapply(self, ship, planet):
+        ship.remove_all_effects_by_name("damage_boost")
+
+class DecoyBuilding(AuraBuilding):
+    def __init__(self):
+        super().__init__()
+        self.targeting = "enemy"
+        self.aura_radius = 85
+
+    def apply(self, ship, planet):
+        if ship.SHIP_BONUS_NAME == "fighter":
+            ship.chosen_target = planet
+            ship.effective_target = planet
+            # Decoy sound effect
+            delta = ship.pos - planet.pos
+            dn = delta.normalized()
+            dist, ang = delta.to_polar()
+            t = 0
+            p1 = planet.pos
+            steps = 8
+            for i in range(steps):
+                t += 0.25
+                
+                if i == steps - 1:
+                    p2 = ship.pos
+                else:
+                    p2 = p1 + V2.from_angle(ang + ((i % 2) - 0.5)) * dist / steps
+                l = laserparticle.LaserParticle(p1, p2, PICO_BLUE, 0.25 + i / 8)
+                planet.scene.game_group.add(l)
+                p1 = p2.copy()
+        return super().apply(ship, planet)
 
 class UltraBuilding(Building):
     def __init__(self):

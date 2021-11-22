@@ -16,6 +16,7 @@ VALID_STAT_NAMES = [
     'bomber_raze_chance',
     'colonize_random_building', 
     'damage_iron',
+    'decoy', #Enemy fighters that fly nearby will retarget to attack this planet
     'deep_space_drive',
     'deserted_regen', # x
     'enclosure_shield', 
