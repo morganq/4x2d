@@ -371,6 +371,8 @@ class Ship(SpaceObject):
                 return
             if isinstance(other, ReflectorShieldObj) or isinstance(other, planet.building.ReflectorShieldCircleObj):
                 return
+            if not other.solid:
+                return
             delta=(other.pos-self.pos).normalized()
             self.pos += -delta
 

@@ -109,8 +109,13 @@ class SSMBatteryBuilding(Building):
         Building.__init__(self)
         self.load_shapes("armory")
         self.fire_time = 0
+        self.indicator = None
         
     def update(self, planet, dt):
+        if not self.indicator:
+            self.indicator = RangeIndicator(planet.pos, planet.DEFENSE_RANGE + planet.get_radius(), PICO_PINK, line_length=2, line_space=5)
+            planet.scene.game_group.add(self.indicator)
+            planet.selected_graphics.append(self.indicator)            
         self.fire_time += dt
         threats = planet.get_threats()
         if self.fire_time > self.FIRE_RATE and threats:
@@ -130,16 +135,22 @@ class SSMBatteryBuilding(Building):
 
 class InterplanetarySSMBatteryBuilding(Building):
     FIRE_RATE = 2.5
+    RANGE = 100
     def __init__(self):
         Building.__init__(self)
         self.load_shapes("armory")
         self.fire_time = 0
+        self.indicator = None
         
     def update(self, planet, dt):
+        if not self.indicator:
+            self.indicator = RangeIndicator(planet.pos, self.RANGE, PICO_PINK, line_length=2, line_space=5)
+            planet.scene.game_group.add(self.indicator)
+            planet.selected_graphics.append(self.indicator)               
         self.fire_time += dt
         threats = [
             o for o in planet.scene.get_enemy_objects(planet.owning_civ)
-            if (o.pos - planet.pos).sqr_magnitude() < 100 ** 2 and o.health > 0
+            if (o.pos - planet.pos).sqr_magnitude() < self.RANGE ** 2 and o.health > 0
         ]
         if self.fire_time > self.FIRE_RATE and threats:
             self.fire_time = 0
@@ -168,6 +179,7 @@ class EMGeneratorBuilding(Building):
         if not self.indicator:
             self.indicator = RangeIndicator(planet.pos, planet.DEFENSE_RANGE + planet.get_radius(), PICO_BLUE, line_length=2, line_space=5)
             planet.scene.game_group.add(self.indicator)
+            planet.selected_graphics.append(self.indicator)
         threats = planet.get_threats()
         for ship in threats:
             if ship not in self.stunned_ships:
@@ -304,8 +316,16 @@ class LowOrbitDefensesBuilding(AuraBuilding):
     def __init__(self):
         super().__init__()
         self.targeting = "mine"
+        self.indicator = None
 
-    def apply(self, ship, planet):
+    def update(self, planet, dt):
+        if not self.indicator:
+            self.indicator = RangeIndicator(planet.pos, self.aura_radius, PICO_GREEN, line_length=2, line_space=5)
+            planet.scene.game_group.add(self.indicator)
+            planet.selected_graphics.append(self.indicator)               
+        return super().update(planet, dt)
+
+    def apply(self, ship, planet): 
         ship.bonus_max_health_aura += 20
         ship.health += 20
 
@@ -317,9 +337,17 @@ class ScalingDamageAuraBuilding(AuraBuilding):
     def __init__(self):
         super().__init__()
         self.targeting = "mine"
+        self.indicator = None
 
     def update(self, planet, dt):
-        self.aura_radius = 250 - len(planet.buildings) * 25
+        if not self.indicator:
+            self.indicator = RangeIndicator(planet.pos, self.aura_radius, PICO_BLUE, line_length=2, line_space=5)
+            planet.scene.game_group.add(self.indicator)
+            planet.selected_graphics.append(self.indicator)
+        self.aura_radius = max(285 - len(planet.scene.get_civ_planets(planet.owning_civ)) * 35,80)
+        if self.aura_radius != self.indicator.radius:
+            self.indicator.radius = self.aura_radius
+            self.indicator._generate_image()
         return super().update(planet, dt)
 
     def apply(self, ship, planet):
@@ -333,9 +361,17 @@ class DecoyBuilding(AuraBuilding):
         super().__init__()
         self.targeting = "enemy"
         self.aura_radius = 85
+        self.indicator = None
+
+    def update(self, planet, dt):
+        if not self.indicator:
+            self.indicator = RangeIndicator(planet.pos, self.aura_radius, PICO_BLUE, line_length=2, line_space=5)
+            planet.scene.game_group.add(self.indicator)
+            planet.selected_graphics.append(self.indicator)        
+        return super().update(planet, dt)
 
     def apply(self, ship, planet):
-        if ship.SHIP_BONUS_NAME == "fighter":
+        if ship.SHIP_BONUS_NAME == "fighter" and (ship.chosen_target != planet or ship.effective_target != planet):
             ship.chosen_target = planet
             ship.effective_target = planet
             # Decoy sound effect

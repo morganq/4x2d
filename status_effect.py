@@ -85,4 +85,4 @@ class DamageBoostEffect(StatusEffect):
         name = "damage_boost"
 
     def get_stat(self, stat):
-        return {'ship_weapon_damage':1}.get(stat, 0)
+        return {'ship_weapon_damage':2}.get(stat, 0)

@@ -6,6 +6,7 @@ from planet.building import *
 from productionorder import PermanentHangarProductionOrder
 from stats import Stats
 
+from upgrade.spacemine import SpaceMine
 from upgrade.upgrades import Upgrade, register_upgrade
 
 
@@ -292,7 +293,7 @@ class Dangerous3Upgrade(AddBuildingUpgrade):
     name = "b_dangerous3"
     resource_type = "ice"
     category = "buildings"
-    title = "?"
+    title = "Decoy Kit"
     description = "Enemy fighters that fly nearby will retarget to attack this planet"
     icon = "causticamplifier"
     cursor = "allied_planet"
@@ -308,11 +309,11 @@ class Launchpad1Upgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Headquarters"
-    description = "When a [Worker] sent from this planet colonizes a planet, [^+1] Population. [!30 second cooldown]"
+    description = "Ships you control in a large radius gain +2 damage per attack. Radius is reduced by the number of other planets you control."
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(headquarters=1), shape="modulardwellings")
+    building = buildings.ScalingDamageAuraBuilding
 
 @register_upgrade
 class Launchpad2aUpgrade(AddBuildingUpgrade):
@@ -445,8 +446,8 @@ class Ultra1Upgrade(AddBuildingUpgrade):
         super().apply(to)
 
 @register_upgrade
-class Ultra2Upgrade(AddBuildingUpgrade):
-    name = "b_ultra2"
+class Ultra2aUpgrade(AddBuildingUpgrade):
+    name = "b_ultra2a"
     resource_type = "gas"
     category = "buildings"
     title = "Defense Matrix"
@@ -465,16 +466,16 @@ class Ultra2Upgrade(AddBuildingUpgrade):
         b['building'].obj = dm
 
 @register_upgrade
-class Ultra3Upgrade(AddBuildingUpgrade):
-    name = "b_ultra3"
+class Ultra2bUpgrade(AddBuildingUpgrade):
+    name = "b_ultra2b"
     resource_type = "gas"
     category = "buildings"
     title = "Portal"
     description = "Portal allows teleportation between two allied planets"
     icon = "clockwiseportal"
     cursor = ["allied_planet", "allied_planet"]
-    family = {'tree':'ultra', 'parents':['b_ultra2']}
-    requires = ('b_ultra1','b_ultra2')
+    family = {'tree':'ultra', 'parents':['b_ultra1']}
+    requires = ('b_ultra1')
     building = building.Portal
 
     def apply(self, to, second):
@@ -489,6 +490,40 @@ class Ultra3Upgrade(AddBuildingUpgrade):
         p2.other_portal = p1
         to.scene.game_group.add(p1)
         to.scene.game_group.add(p2)
+        return super().apply(to)
+
+@register_upgrade
+class Ultra3Upgrade(AddBuildingUpgrade):
+    name = "b_ultra3"
+    resource_type = "gas"
+    category = "buildings"
+    title = "Line of Mines"
+    description = "Make a line of mines between two of your planets"
+    icon = "clockwiseportal"
+    cursor = ["allied_planet", "allied_planet"]
+    family = {'tree':'ultra', 'parents':['b_ultra2a', 'b_ultra2b']}
+    requires = lambda x:'b_ultra1' in x and ('b_ultra2a' in x or 'b_ultra2b' in x)
+    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
+
+    def apply(self, to, second):
+        if to == second:
+            return False
+            
+        scene = to.scene
+        if scene.flowfield.has_field(second):
+            pass
+        
+        delta = second.pos - to.pos
+        dn = delta.normalized()
+        pos = to.pos + dn * (to.get_radius() + 10)
+        i = 0
+        while (pos - second.pos).sqr_magnitude() > (10 + second.get_radius()) ** 2:
+            sm = SpaceMine(scene, pos, to.owning_civ, i / 9)
+            scene.game_group.add(sm)
+            step = scene.flowfield.get_vector(pos, second, 0) * 15
+            pos += step
+            i += 1
+        
         return super().apply(to)
 
 # Deserted - Orange

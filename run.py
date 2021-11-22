@@ -35,7 +35,7 @@ class RunInfo:
         self.o2 = 60 * 60 * 1 # 1.5 hrs
         self.credits = 20
         self.bonus_credits = 0
-        self.ship_levels = {'fighter':3, 'scout':3, 'interceptor':3, 'bomber':3, 'battleship': 3}
+        self.ship_levels = {'fighter':1, 'scout':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0
         self.sectors_cleared = 0
         self.time_taken = 0

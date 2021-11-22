@@ -16,6 +16,7 @@ class SpaceObject(AnimRotSprite, Healthy):
         self.owning_civ = None
         self.debug_id = self.SOID
         self.stationary = True
+        self.solid = True
         SpaceObject.SOID += 1
         Healthy.__init__(self, scene, meter_size=self.HEALTHBAR_SIZE)
 

@@ -52,7 +52,6 @@ class Planet(SpaceObject):
         self.scene = scene
         self.object_type = "planet"        
         self.resources = resources
-        self.rotation = random.random() * 6.2818
         self.rotation = 0
         self.rotate_speed = random.random() * 0.5 + 0.125
         self.generate_base_art()
@@ -115,6 +114,8 @@ class Planet(SpaceObject):
         self.upgrade_indicators = defaultdict(lambda:None)
         self.created_upgrade_indicators = defaultdict(lambda:None)
 
+        self.selected_graphics = []
+
         # extra
         self.cinematic_disable = False
 
@@ -173,6 +174,8 @@ class Planet(SpaceObject):
             r = self.get_primary_resource()
             amt = self.owning_civ.upgrade_limits.data[r]
             self.owning_civ.earn_resource(r, amt, self)
+        for spr in self.selected_graphics:
+            spr.kill()
         self.lose_buildings()
         self.owning_civ = civ
         self.upgrade_indicators = defaultdict(lambda:None)
@@ -558,6 +561,15 @@ class Planet(SpaceObject):
         pass
 
     def upgrade_update(self, dt):
+        # If this planet is selected
+        if self.frame == 1:
+            for spr in self.selected_graphics:
+                spr.visible = True
+        else:
+            for spr in self.selected_graphics:
+                spr.visible = False            
+
+
         if self.get_stat("unstable_reaction") > 0:
             USR = 1 / 60
             # Slowly increase to 1
@@ -634,7 +646,6 @@ class Planet(SpaceObject):
                 self.created_upgrade_indicators[key] = None
 
     def create_indicator(self, key):
-        print("create indicator", key)
         if key == "ship_production_proximity":
             obj = IndicatorLine(self, self.pos, self.upgrade_indicators[key].pos, PICO_RED, name="Proximity Alert")
             self.scene.ui_group.add(obj)
