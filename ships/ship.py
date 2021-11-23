@@ -14,6 +14,7 @@ from laserparticle import LaserParticle
 from resources import resource_path
 from satellite import ReflectorShieldObj
 from spaceobject import SpaceObject
+from upgrade.spacemine import SpaceMine
 from v2 import V2
 
 ROTATE_SPEED = 6.2818
@@ -68,6 +69,7 @@ class Ship(SpaceObject):
         self.fuel_remaining = self.FUEL
 
         self.defending = None
+        self.stealth = False
 
         self._layer = 1
 
@@ -105,6 +107,7 @@ class Ship(SpaceObject):
         self.bonus_max_health_aura = 0
         self.bonus_attack_speed_time = 0
         self.slow_aura = 0
+        self.extra_shield = 0
 
         # Alien stuff
         self.tether_target = False
@@ -153,6 +156,7 @@ class Ship(SpaceObject):
             nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
             if dist > FAR_FROM_HOME_DIST ** 2:
                 armor = self.get_stat("ship_armor_far_from_home")
+        armor += self.get_stat("ship_armor")
         if damage > 1 and armor > 0:
             damage = max(damage - armor,1)
         
@@ -194,8 +198,13 @@ class Ship(SpaceObject):
         mhp = self.BASE_HEALTH * (self.get_stat("ship_health_mul") + 1) + self.get_stat("ship_health_add") + self.bonus_max_health_aura
         return mhp
 
+    def add_shield(self, val):
+        self.extra_shield += val
+        self.shield += val
+        self.shield_bar.show()
+
     def get_max_shield(self):
-        shield = 0
+        shield = self.extra_shield
         if self.get_stat("enclosure_shield") and self.fleet and len(self.fleet.ships) >= 4:
             shield += self.get_stat("enclosure_shield")
         if self.get_stat('ship_shield_far_from_home'):
@@ -231,6 +240,14 @@ class Ship(SpaceObject):
 
         # Change state
         self.state = state
+
+    def _generate_stealth_image(self):
+        self.image.fill((0,0,0,0))
+        op = self.top_left + V2(math.sin(self.time * 3.4) * 2, math.cos(self.time * 5.1) * 2)
+        self.image.blit(self.scene.background.image, (0,0), (*op.tuple_int(), self.width, self.height))
+        mask = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        pygame.draw.circle(mask, (255,255,255), (self.width // 2, self.height // 2), self.width // 2, 0)
+        self.image.blit(mask, (0,0), None, pygame.BLEND_RGBA_MULT)
 
     def update(self, dt):
         if not self.updated_color:
@@ -334,6 +351,10 @@ class Ship(SpaceObject):
             self.health -= self.get_max_health() / 60 * dt
 
         super().update(dt)
+
+        if self.stealth:
+            self._generate_stealth_image()       
+            self._timers['thrust_particle_time'] = -1
 
     def emit_thrust_particles(self):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
@@ -469,6 +490,7 @@ class Ship(SpaceObject):
     def on_warp(self):
         pass
 
+
     def enter_state_returning(self):
         nearest, dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
         if nearest:        
@@ -505,6 +527,11 @@ class Ship(SpaceObject):
 
     def kill(self):
         if self.health <= 0:
+            if self.owning_civ.ships_dropping_mines > 0:
+                self.owning_civ.ships_dropping_mines -= 1
+                m = SpaceMine(self.scene, self.pos, self.owning_civ, 0)
+                self.scene.game_group.add(m)
+                            
             sound.play("explosion1")
             self.owning_civ.ships_lost += 1 # For score + stats
             base_angle = random.random() * 6.2818

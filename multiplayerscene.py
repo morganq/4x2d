@@ -165,6 +165,9 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
     def get_enemy_civs(self, civ):
         return [c for c in self.player_civs if c != civ]
 
+    def get_fleet_manager(self, civ):
+        return self.fleet_managers[civ]        
+
     def update_game(self, dt, base_dt):
         for sm in self.player_input_sms.values():
             sm.state.update(dt)

@@ -10,8 +10,8 @@ from helper import all_nearby
 from line import Line
 from rangeindicator import RangeIndicator
 from resources import resource_path
-from satellite import (OffWorldMining, OrbitalLaser, ReflectorShield,
-                       SpaceStation)
+from satellite import (OffWorldMining, OrbitalLaser, OxygenSatellite,
+                       ReflectorShield, SpaceStation)
 from spaceobject import SpaceObject
 from stats import Stats
 from v2 import V2
@@ -150,7 +150,7 @@ class InterplanetarySSMBatteryBuilding(Building):
         self.fire_time += dt
         threats = [
             o for o in planet.scene.get_enemy_objects(planet.owning_civ)
-            if (o.pos - planet.pos).sqr_magnitude() < self.RANGE ** 2 and o.health > 0
+            if (o.pos - planet.pos).sqr_magnitude() < self.RANGE ** 2 and o.health > 0 and not o.stealth
         ]
         if self.fire_time > self.FIRE_RATE and threats:
             self.fire_time = 0
@@ -225,12 +225,24 @@ class OffWorldMiningBuilding(SatelliteBuilding):
 
     def update(self, planet, dt):
         self.timer += dt
-        if self.timer >= 5:
-            self.timer = self.timer % 5
-            planet.owning_civ.earn_resource("iron", 5, where=self.satellite.pos)
-            planet.owning_civ.earn_resource("ice", 5, where=self.satellite.pos)
-            planet.owning_civ.earn_resource("gas", 5, where=self.satellite.pos)
+        if self.timer >= 10:
+            self.timer = self.timer % 10
+            max_iron = planet.owning_civ.upgrade_limits.iron
+            planet.owning_civ.earn_resource("iron", max_iron * 0.05, where=self.satellite.pos)
         return super().update(planet, dt)
+
+class OxygenBuilding(SatelliteBuilding):
+    SATELLITE_CLASS = OxygenSatellite
+    def __init__(self):
+        super().__init__()
+        self.timer = 0
+
+    def update(self, planet, dt):
+        self.timer += dt
+        if self.timer >= 10:
+            self.timer = self.timer % 10
+            planet.scene.game.run_info.o2 += 3
+        return super().update(planet, dt)        
 
 
 class OrbitalLaserBuilding(SatelliteBuilding):
@@ -247,7 +259,10 @@ class AlienHomeDefenseBuilding(Building):
         self.fire_time = 0
         
     def get_threats(self, planet):
-        return planet.scene.get_enemy_ships_in_range(planet.owning_civ, planet.pos, self.THREAT_RANGE + planet.get_radius())
+        return [s for s in 
+            planet.scene.get_enemy_ships_in_range(planet.owning_civ, planet.pos, self.THREAT_RANGE + planet.get_radius())
+            if not s.stealth
+        ]
 
     def update(self, planet, dt):
         # Regenerate
@@ -279,8 +294,10 @@ class AuraBuilding(Building):
         self.targeting = "enemy"
         self.applied_ships = set()
         self.aura_radius = 80
+        self.planet = None
 
     def update(self, planet, dt):
+        self.planet = planet
         if self.targeting == "enemy":
             ships = set(planet.scene.get_enemy_ships(planet.owning_civ))
         elif self.targeting == "mine":
@@ -309,7 +326,7 @@ class AuraBuilding(Building):
 
     def kill(self):
         for ship in self.applied_ships:
-            self.unapply(ship)
+            self.unapply(ship, self.planet)
         return super().kill()
 
 class LowOrbitDefensesBuilding(AuraBuilding):
@@ -392,6 +409,37 @@ class DecoyBuilding(AuraBuilding):
                 planet.scene.game_group.add(l)
                 p1 = p2.copy()
         return super().apply(ship, planet)
+
+class MultiBonusAuraBuilding(AuraBuilding):
+    def __init__(self):
+        super().__init__()
+        self.aura_radius = 110
+        self.targeting = "mine"
+        self.stats = Stats(pop_max_mul=-1, prevent_buildings=1)
+        self.indicator = None
+        self.effects = {}
+
+    def update(self, planet, dt):
+        if not self.indicator:
+            self.indicator = RangeIndicator(planet.pos, self.aura_radius, PICO_BLUE, line_length=2, line_space=5)
+            planet.scene.game_group.add(self.indicator)
+            planet.selected_graphics.append(self.indicator)           
+        return super().update(planet, dt)
+
+    def apply(self, ship, planet):
+        e = status_effect.MultiBonusEffect(ship, planet, planet.resources)
+        ship.add_effect(e)
+        self.effects[ship] = e
+        return super().apply(ship, planet)
+
+    def unapply(self, ship, planet):
+        if ship in self.effects:
+            ship.remove_effect(self.effects[ship])
+        else:
+            print("probable bug - removed an effect *by name* for multi bonus building")
+            ship.remove_all_effects_by_name("multi_bonus")
+        return super().unapply(ship, planet)
+
 
 class UltraBuilding(Building):
     def __init__(self):

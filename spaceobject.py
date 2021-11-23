@@ -17,6 +17,7 @@ class SpaceObject(AnimRotSprite, Healthy):
         self.debug_id = self.SOID
         self.stationary = True
         self.solid = True
+        self.stealth = False
         SpaceObject.SOID += 1
         Healthy.__init__(self, scene, meter_size=self.HEALTHBAR_SIZE)
 

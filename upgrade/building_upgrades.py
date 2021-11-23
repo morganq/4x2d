@@ -320,19 +320,6 @@ class Launchpad2aUpgrade(AddBuildingUpgrade):
     name = "b_launchpad2a"
     resource_type = "ice"
     category = "buildings"
-    title = "Employment Office"
-    description = "If you are at maximum population, [^+40%] mining rate"
-    icon = "building_default"
-    cursor = "allied_planet"
-    family = {'tree':'launchpad', 'parents':['b_launchpad1']}
-    building = make_simple_stats_building(stats=Stats(mining_rate_at_max_pop=0.40), shape="lifesupport")
-    requires = ('b_launchpad1',)
-
-@register_upgrade
-class Launchpad2bUpgrade(AddBuildingUpgrade):
-    name = "b_launchpad2b"
-    resource_type = "ice"
-    category = "buildings"
     title = "Workforce Housing"
     description = "[^+1] Max Population every 30 seconds; growth stops after 300 seconds or when you colonize a new planet"
     icon = "building_default"
@@ -346,18 +333,31 @@ class Launchpad2bUpgrade(AddBuildingUpgrade):
         return super().apply(to)
 
 @register_upgrade
+class Launchpad2bUpgrade(AddBuildingUpgrade):
+    name = "b_launchpad2b"
+    resource_type = "ice"
+    category = "buildings"
+    title = "Memorial"
+    description = "When a ship launched from this planet dies, Instantly train [1] [Fighter]. [!20 second cooldown]"    
+    icon = "building_default"
+    cursor = "allied_planet"
+    family = {'tree':'launchpad', 'parents':['b_launchpad1']}
+    building = make_simple_stats_building(stats=Stats(memorial=1), shape="lifesupport")
+    requires = ('b_launchpad1',)
+
+@register_upgrade
 class Launchpad3Upgrade(AddBuildingUpgrade):
     name = "b_launchpad3"
     resource_type = "ice"
     category = "buildings"
-    title = "Memorial"
-    description = "When a ship sent from this planet dies, [^+1] [Fighter]. [!20 second cooldown]"    
+    title = "?"
+    description = "[Scouts] launched from this planet carry [^+2] [Disruptor Bombs]"    
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad2a', 'b_launchpad2b']}
-    building = make_simple_stats_building(stats=Stats(memorial=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(scout_bombs=2), shape="lifesupport")
     requires = lambda x:'b_launchpad1' in x and ('b_launchpad2a' in x or 'b_launchpad2b' in x)
-    infinite = False    
+    infinite = True
 
 
 # Scarcest - Brown
@@ -378,13 +378,19 @@ class Scarcest2aUpgrade(AddBuildingUpgrade):
     name = "b_scarcest2a"
     resource_type = "ice"
     category = "buildings"
-    title = "Cryosteel Alloy"
-    description = "[^+1] [Ice] for every 1 [Iron] mined"
+    title = "?"
+    description = "Permanently swap the resources of any two planets"
     icon = "building_default"
-    cursor = "allied_planet"
+    cursor = ["any_planet", "any_planet"]
     family = {'tree':'scarcest', 'parents':['b_scarcest1']}
-    building = make_simple_stats_building(stats=Stats(mining_ice_per_iron=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
     requires = ('b_scarcest1',)
+    infinite = True
+
+    def apply(self, to, second):
+        to.resources, second.resources = second.resources, to.resources
+        to.regenerate_art()
+        second.regenerate_art()
 
 @register_upgrade
 class Scarcest2bUpgrade(AddBuildingUpgrade):
@@ -409,14 +415,13 @@ class Scarcest3Upgrade(AddBuildingUpgrade):
     name = "b_scarcest3"
     resource_type = "ice"
     category = "buildings"
-    title = "Noble Alloy"
-    description = "[^+1] [Gas] for every 1 [Iron] mined"
+    title = "?"
+    description = "[!Condemn this planet]. Your ships near this planet gain up to [^+100%] speed based on planet's Iron, up to [^+50%] attack speed based on planet's Ice, and up to [^+100% health] based on planet's Gas."
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':['b_scarcest2a', 'b_scarcest2b']}
-    building = make_simple_stats_building(stats=Stats(mining_gas_per_iron = 1), shape="lifesupport")
+    building = MultiBonusAuraBuilding
     requires = lambda x:'b_scarcest1' in x and ('b_scarcest2a' in x or 'b_scarcest2b' in x)
-    infinite = True  
 
 
 #############
@@ -543,53 +548,53 @@ class Deserted2bUpgrade(AddBuildingUpgrade):
     infinite = True
 
 @register_upgrade
-class Deserted2Upgrade(AddBuildingUpgrade):
-    name = "b_deserted2"
+class Deserted2aUpgrade(AddBuildingUpgrade):
+    name = "b_deserted2a"
     resource_type = "gas"
     category = "buildings"
-    title = "Scrap Collector"
-    description = "Whenever this planet takes damage, gain [^+5] [Iron]"
+    title = "War Economy"
+    description = "[!Condemn this planet]. Produce [^1] [Fighter] every 45 seconds"
     icon = "building_default"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats = Stats(damage_iron=5), shape="modulardwellings")
     family = {'tree':'deserted', 'parents':['b_deserted1']}
     requires = ('b_deserted1',)
-
-@register_upgrade
-class Deserted3aUpgrade(AddBuildingUpgrade):
-    name = "b_deserted3a"
-    resource_type = "gas"
-    category = "buildings"
-    title = "War Economy A"
-    description = "Produce [^1] [Fighter] every 45 seconds, [!-100% Max Population]"
-    icon = "building_default"
-    cursor = "allied_planet"
-    family = {'tree':'deserted', 'parents':['b_deserted2']}
-    requires = ('b_deserted1', 'b_deserted2')
-    building = make_simple_stats_building(stats=Stats(pop_max_mul=-1), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(pop_max_mul=-1, prevent_buildings=1), shape="modulardwellings")
 
     def apply(self, to):
-        p = PermanentHangarProductionOrder(45)
+        p = PermanentHangarProductionOrder("fighter", 45)
+        to.add_production(p)
+        return super().apply(to)    
+
+@register_upgrade
+class Deserted2bUpgrade(AddBuildingUpgrade):
+    name = "b_deserted2b"
+    resource_type = "gas"
+    category = "buildings"
+    title = "?"
+    description = "[!Condemn this planet]. Produce [^1] [Scout] every 45 seconds"
+    icon = "building_default"
+    cursor = "allied_planet"
+    building = make_simple_stats_building(stats = Stats(pop_max_mul=-1, prevent_buildings=1), shape="modulardwellings")
+    family = {'tree':'deserted', 'parents':['b_deserted1']}
+    requires = ('b_deserted1',)    
+
+    def apply(self, to):
+        p = PermanentHangarProductionOrder("scout", 45)
         to.add_production(p)
         return super().apply(to)        
 
 @register_upgrade
-class Deserted3bUpgrade(AddBuildingUpgrade):
+class Deserted3Upgrade(AddBuildingUpgrade):
     name = "b_deserted3"
     resource_type = "gas"
     category = "buildings"
-    title = "War Economy B"
-    description = "Produce [^1] [Fighter] every 30 seconds, [!-90% Max Health]"
+    title = "?"
+    description = "In 30 seconds, this planet [!explodes], dealing [^100 damage] to enemy ships and planets in a large radius"
     icon = "building_default"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats=Stats(planet_health_mul=-0.9), shape="lifesupport")
-    family = {'tree':'deserted', 'parents':['b_deserted2']}
-    requires = ('b_deserted1', 'b_deserted2')
-
-    def apply(self, to):
-        p = PermanentHangarProductionOrder(45)
-        to.add_production(p)
-        return super().apply(to)    
+    building = make_simple_stats_building(stats=Stats(planet_self_destruct=1), shape="lifesupport")
+    family = {'tree':'deserted', 'parents':['b_deserted2a', 'b_deserted2b']}
+    requires = lambda x:'b_deserted1' in x and ('b_deserted2a' in x or 'b_deserted2b' in x)
 
 # Satellite - Black
 
@@ -610,12 +615,12 @@ class Satellite2aUpgrade(AddBuildingUpgrade):
     name = "b_satellite2a"
     resource_type = "gas"
     category = "buildings"
-    title = "Orbital Reflector"
-    description = "Covers half the planet with a 50-health reflector shield; shield health regenerates at [^+2] health per second"
+    title = "?"
+    description = "[^+3] [Oxygen] every 10 seconds"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'satellite', 'parents':['b_satellite1']}
-    building = ReflectorShieldBuilding
+    building = OxygenBuilding
     requires = ('b_satellite1',)
 
 
@@ -625,12 +630,13 @@ class Satellite2bUpgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Off-World Mining"
-    description = "Gain [^+5] [Iron], [^+5] [Ice], and [^+5] [Gas] every 5 seconds."
+    description = "[^+5% of maximum] [Iron] every 10 seconds."
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'satellite', 'parents':['b_satellite1']}
     building = OffWorldMiningBuilding
     requires = ('b_satellite1',)   
+    infinite = True
 
 @register_upgrade
 class Satellite3Upgrade(AddBuildingUpgrade):

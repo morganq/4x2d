@@ -71,6 +71,8 @@ class FleetDiagram(spritebase.SpriteBase):
             if fleet.mode_state() == 'waiting':
                 pygame.draw.circle(self.image, OUTLINE_COLOR, fleet.target.pos.tuple(), fleet.target.radius + 15, 3)
                 continue       
+            if all([s.stealth == True for s in fleet.ships]):
+                continue
             #if fleet.mode_state == 'dogfighting':
             #    continue
             center = fleet.pos

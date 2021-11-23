@@ -11,7 +11,7 @@ class SpaceMine(spaceobject.SpaceObject):
         self.set_sprite_sheet("assets/mine.png", 13)
         self.time = -delay
         self.collidable = True
-        self.collision_radius = 4
+        self.collision_radius = 13
         self.stationary = True
         self.solid = False
 
@@ -24,7 +24,7 @@ class SpaceMine(spaceobject.SpaceObject):
 
     def collide(self, other):
         if self.time > 1 and isinstance(other, ships.ship.Ship) and other.owning_civ != self.owning_civ:
-            self.time = -10
-            b = bullet.Bullet(other.pos, other, self, mods={'damage_base':10, 'blast_radius':10})
+            self.time = -15
+            b = bullet.Bullet(self.pos, other, self, mods={'damage_base':10, 'blast_radius':10})
             self.scene.game_group.add(b)
         return super().collide(other)

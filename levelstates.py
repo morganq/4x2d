@@ -460,6 +460,8 @@ class OrderShipsState(UIEnabledState):
             else:
                 for i in range(num):
                     self.planet_from.emit_ship(ship, {"to":self.planet_to, "path":self.path})
+        if self.planet_from.owning_civ.oxygen_cost_per_order > 0:
+            self.scene.game.run_info.o2 -= self.planet_from.owning_civ.oxygen_cost_per_order
         self.scene.sm.transition(PlayState(self.scene))
 
     def mouse_input(self, input, event):
@@ -532,7 +534,7 @@ class VictoryState(State):
 
         self.scene.game.run_info.choose_path(*self.scene.game.run_info.next_path_segment)
         self.time = 0
-        self.scene.paused = True
+        #self.scene.paused = True
 
         return super().enter()
 

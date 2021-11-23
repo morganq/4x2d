@@ -79,7 +79,7 @@ class Fighter(Ship):
                 rate *= 1 + self.get_stat("overclock")
 
         if self.get_stat("ship_fire_rate_after_takeoff"):
-            if self._timers['time'] < 10:
+            if self._timers['time'] < 5:
                 rate *= 1 + self.get_stat("ship_fire_rate_after_takeoff")
 
         try:
@@ -91,7 +91,7 @@ class Fighter(Ship):
         rate *= (1 - self.slow_aura)
 
         if self.bonus_attack_speed_time > 0:
-            rate *= 1.67
+            rate *= 1.33
         return rate
 
     def get_weapon_range(self):
@@ -143,7 +143,11 @@ class Fighter(Ship):
         threat_range = self.THREAT_RANGE_DEFAULT
         self.opt_threats = [
             e for e in enemies
-            if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.is_alive())
+            if (
+                (e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and
+                e.is_alive() and
+                not e.stealth
+            )
         ]
         return self.opt_threats
 
@@ -176,6 +180,7 @@ class Fighter(Ship):
 
         self.need_attack_speed_particle = True
         self.attack_speed_particle_angle = towards.to_polar()[1]
+        self.stealth = False
 
     ### Dogfight ###
     def enter_state_dogfight(self):

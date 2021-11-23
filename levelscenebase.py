@@ -172,6 +172,9 @@ class LevelSceneBase(scene.Scene):
             pos = self.random_object_pos()
             self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))  
 
+    def get_fleet_manager(self, civ):
+        return None
+
     def get_objects_initial(self):
         return [s for s in self.game_group.sprites() if isinstance(s,SpaceObject)]
 
@@ -212,6 +215,9 @@ class LevelSceneBase(scene.Scene):
 
     def get_enemy_ships_in_range(self, civ, pos, range):
         return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ != civ]
+
+    def get_enemy_objects_in_range(self, civ, pos, range):
+        return [s for s in self.get_objects_in_range(pos, range) if hasattr(s, "owning_civ") and s.owning_civ and s.owning_civ != civ]
 
     def get_enemy_objects(self, civ):
         return [s for s in self.get_objects() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]

@@ -24,14 +24,14 @@ class ProductionOrder:
 
 
 class PermanentHangarProductionOrder(ProductionOrder):
-    def __init__(self, time):
-        super().__init__(None, 1, time)
+    def __init__(self, ship_type, time):
+        super().__init__(ship_type, 1, time)
 
     def update(self, planet, dt):
         self.time += dt * self.number_mul
         if self.time > self.period:
             self.time -= self.period
-            ship_type = "fighter"
+            ship_type = self.ship_type
             #for b in planet.buildings:
             #    if b['building'].upgrade.name == "b_hangar2a" and ship_type not in ['battleship', 'bomber']:
             #        ship_type = "interceptor"

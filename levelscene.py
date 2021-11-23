@@ -285,6 +285,11 @@ class LevelScene(levelscenebase.LevelSceneBase):
             for i in range(20):
                 self.homeworld.add_ship("fighter")    
 
+    def get_fleet_manager(self, civ):
+        if civ == self.player_civ:
+            return self.fleet_managers['my']
+        return self.fleet_managers['enemy']
+
     def on_click_help(self):
         self.sm.transition(levelstates.HelpState(self))
 

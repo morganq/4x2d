@@ -55,6 +55,8 @@ class Civ:
         ### Upgrades Stuff ###
         self.nuclear_instability_timer = 0
         self.housing_colonized = False # Turns True when we colonize something
+        self.oxygen_cost_per_order = 0
+        self.ships_dropping_mines = 0
 
         self.blueprints = []
         self.comm_objects = []

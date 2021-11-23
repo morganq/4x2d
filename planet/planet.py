@@ -110,6 +110,7 @@ class Planet(SpaceObject):
         self.housing_growth_repeater = 0
         self.housing_growth_timer = 0
         self.housing_max_pop = 0
+        self.self_destruct_timer = 0
 
         self.upgrade_indicators = defaultdict(lambda:None)
         self.created_upgrade_indicators = defaultdict(lambda:None)
@@ -172,8 +173,9 @@ class Planet(SpaceObject):
     def change_owner(self, civ):
         if self.get_stat("lost_planet_upgrade"):
             r = self.get_primary_resource()
-            amt = self.owning_civ.upgrade_limits.data[r]
-            self.owning_civ.earn_resource(r, amt, self)
+            for i in range(self.get_stat("lost_planet_upgrade")):    
+                amt = self.owning_civ.upgrade_limits.data[r]
+                self.owning_civ.earn_resource(r, amt, self)
         for spr in self.selected_graphics:
             spr.kill()
         self.lose_buildings()
@@ -192,6 +194,7 @@ class Planet(SpaceObject):
         self.production = []
         self.last_production = None
         self.owned_time = 0
+        self.self_destruct_timer = 0
         self._generate_base_frames()
         self._generate_frames()
 
@@ -400,6 +403,8 @@ class Planet(SpaceObject):
                 s.velocity = off * 10
                 if 'defending' in data:
                     s.defending = data['defending']
+                if ship_type == "scout" and self.get_stat('scout_bombs'):
+                    s.set_starting_busters(1 + self.get_stat('scout_bombs'))
                 self.scene.game_group.add(s)
                 self.emit_ships_timer -= EMIT_SHIPS_RATE
                 self.needs_panel_update = True
@@ -429,7 +434,9 @@ class Planet(SpaceObject):
             if bottom_resource == r:
                 rate_modifier += self.get_stat("scarcest_mining_rate")
 
-            rate_modifier *= (1 + self.get_stat("mining_rate") + self.unstable_reaction)
+            rate_modifier *= (1 + self.get_stat("mining_rate"))
+            if self.unstable_reaction > 0:
+                rate_modifier *= (1 + self.get_stat("unstable_reaction"))
 
             if r == "ice" and self.get_stat("ice_mining_rate"):
                 rate_modifier *= 1 + self.get_stat("ice_mining_rate")
@@ -569,11 +576,19 @@ class Planet(SpaceObject):
             for spr in self.selected_graphics:
                 spr.visible = False            
 
+        if self.get_stat("planet_self_destruct") > 0:
+            self.self_destruct_timer += dt
+            if self.self_destruct_timer > 30:
+                self.take_damage(9999)
+                e = explosion.Explosion(self.pos, [PICO_WHITE, PICO_YELLOW, PICO_ORANGE, PICO_RED], 2, 110, "log", 2.5)
+                self.scene.game_group.add(e)
+                
+                for obj in all_nearby(self.pos, self.scene.get_enemy_objects_in_range(self.owning_civ, self.pos, 110), 110):
+                    obj.take_damage(100, self)
 
         if self.get_stat("unstable_reaction") > 0:
-            USR = 1 / 60
             # Slowly increase to 1
-            self.unstable_reaction = clamp(self.unstable_reaction * (dt * self.get_stat("unstable_reaction") * USR), 0, self.get_stat("unstable_reaction"))
+            self.unstable_reaction += dt / 60.0
 
         REGEN_TIMER = 5
         if self._timers['regen'] > REGEN_TIMER:
@@ -702,6 +717,8 @@ class Planet(SpaceObject):
         enemy_ships = self.scene.get_enemy_ships(self.owning_civ)
         ret = []
         for s in enemy_ships:
+            if s.stealth:
+                continue
             dist = (s.pos - self.pos).sqr_magnitude()
             if dist < (self.get_radius() + self.DEFENSE_RANGE) ** 2:        
                 ret.append(s)
@@ -757,7 +774,7 @@ class Planet(SpaceObject):
 
     def on_health_changed(self, old, new):
         if new < old:
-            self.unstable_reaction = 0
+            self.unstable_reaction = -1
         return super().on_health_changed(old, new)
 
     def take_damage(self, damage, origin=None):

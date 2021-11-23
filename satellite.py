@@ -104,6 +104,12 @@ class OffWorldMining(Satellite):
         super().__init__(scene, planet)
         self.set_sprite_sheet("assets/offworldmining.png", 13)
 
+class OxygenSatellite(Satellite):
+    ANGLE_OFFSET = math.pi
+    def __init__(self, scene, planet):
+        super().__init__(scene, planet)
+        self.set_sprite_sheet("assets/reflector.png", 13)        
+
 class OrbitalLaser(Satellite):
     ANGLE_OFFSET = math.pi * 3 / 2
     def __init__(self, scene, planet):
@@ -135,12 +141,12 @@ class OrbitalLaser(Satellite):
 
     def update(self, dt):
         self.new_target_timer += dt
-        if self.new_target_timer > 0.2:
+        if self.new_target_timer > 0.35:
             self.new_target_timer = 0
             self.find_new_target()
             if self.target:
                 lp = LaserParticle(self.pos, self.target.pos, PICO_PINK, 0.25)
                 self.scene.game_group.add(lp)
-                b = bullet.Bullet(self.target.pos, self.target, self, mods={'damage_base':6 * self.planet.planet_weapon_mul})
+                b = bullet.Bullet(self.target.pos, self.target, self, mods={'damage_base':3 * self.planet.planet_weapon_mul})
                 self.scene.game_group.add(b)
         return super().update(dt)

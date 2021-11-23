@@ -6,6 +6,7 @@ import game
 import particle
 import ships
 from colors import *
+from economy import RESOURCE_COLORS
 from v2 import V2
 
 
@@ -82,7 +83,36 @@ class ShipBoostEffect(StatusEffect):
 class DamageBoostEffect(StatusEffect):
     def __init__(self, owner, applier):
         super().__init__(owner, applier)
-        name = "damage_boost"
+        self.name = "damage_boost"
 
     def get_stat(self, stat):
         return {'ship_weapon_damage':2}.get(stat, 0)
+
+
+class MultiBonusEffect(StatusEffect):
+    def __init__(self, owner, applier, resources):
+        super().__init__(owner, applier)
+        self.resources = resources
+        self.name = "multi_bonus"
+        self.time = 999
+        self.particle_time = 0
+
+    def update(self, dt):
+        self.time += dt
+        self.particle_time += dt
+        if self.particle_time > 0.1:
+            for res in self.resources.data.keys():
+                amt = self.resources.data[res]
+                if amt > 0:
+                    pos = V2.from_angle(self.time * 2) * 6 + self.owner.pos
+                    p = particle.Particle([RESOURCE_COLORS[res]], 1, pos, amt / 100, V2.random_angle() * 2)
+                    self.owner.scene.game_group.add(p)
+            self.particle_time = 0
+        return super().update(dt)
+
+    def get_stat(self, stat):
+        return {
+            'ship_speed_mul': 1.0 * self.resources.iron / 100,
+            'ship_fire_rate': 0.5 * self.resources.ice / 100,
+            'ship_health_mul': 1.0 * self.resources.gas / 100
+        }.get(stat, 0)

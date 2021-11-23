@@ -67,6 +67,7 @@ VALID_STAT_NAMES = [
     'planet_health_per_construct', 
     'planet_proximity_health_mul',
     'planet_regen_without_ships', 
+    'planet_self_destruct', # explodes in 30 seconds
     'planet_shield', 
     'planet_slow_aura', 
     'planet_temp_health_mul', 
@@ -84,9 +85,12 @@ VALID_STAT_NAMES = [
     'reactive_field',
     'regen', 
     'scarcest_mining_rate',
+    'scout_bombs',
     'scout_damage_mul',
     'scout_production', # production speed
+    'scout_stealth', # scouts gain stealth
     'ship_armor_far_from_home', 
+    'ship_armor',
     'ship_shield_far_from_home', 
     'ship_death_heal',
     'ship_dodge_near_enemy_planets', 

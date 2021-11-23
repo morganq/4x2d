@@ -41,6 +41,7 @@ class Mechanics2bUpgrade(Upgrade):
     icon = "matreconstruction"    
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
+    infinite = True
 
     def apply(self, to):
         for planet in to.scene.get_civ_planets(to):
@@ -52,13 +53,17 @@ class Mechanics3Upgrade(Upgrade):
     name = "t_mechanics3"
     resource_type = "iron"
     category = "tech"
-    title = "Overgrowth"
-    description = "Population grows [^+20%] faster for each docked ship"
+    title = "Turbocharger"
+    description = "Ships gain [^+33%] move speed and [^+33%] rate of fire. Every time you issue an order, [!-5] seconds of oxygen"
     icon = "tech_default"
-    stats = Stats(pop_growth_rate_per_docked_ship = 0.2)
+    stats = Stats(ship_speed_mul = 0.33, ship_fire_rate = 0.33)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics2a', 't_mechanics2b']}
     requires = lambda x: 't_mechanics1' in x and ('t_mechanics2a' in x or 't_mechanics2b' in x)
-    infinite = True    
+
+    def apply(self, to):
+        # TODO: impl in multiplayer
+        to.owning_civ.oxygen_cost_per_order += 5
+        return super().apply(to)
 
 ### 2) Atomic - Macro/Quick Tech: dark green
 @register_upgrade
@@ -67,7 +72,7 @@ class Atomic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nuclear Battery"
-    description = "Each planet has [^+100%] mining rate for the first [120 seconds] after colonizing."
+    description = "Each planet has [^+100%] mining rate for the first [120 seconds] after capture"
     icon = "nuclearbattery"
     stats = Stats(mining_rate_first_120=1)
     family = {'tree':'t_atomic', 'parents':[]}
@@ -79,16 +84,16 @@ class Atomic2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Isotope Conversion"
-    description = "Gain [150] [Ice] and [100] [Gas]. [Iron] is [!Frozen] for [20 seconds]."
+    description = "Gain [^+50%] [Ice] and [^+50%] [Gas]"
     icon = "isotope"
     stats = Stats()
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
     requires = ('t_atomic1',)
+    infinite = True
 
     def apply(self, to):
-        to.resources.ice += 150
-        to.resources.gas += 100
-        to.frozen.iron += 20
+        to.resources.ice += to.upgrade_limits.ice * 0.5
+        to.resources.gas += to.upgrade_limits.gas * 0.5
         return super().apply(to)
 
 @register_upgrade
@@ -109,12 +114,11 @@ class Atomic3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Unstable Reactor"
-    description = "Mining rate on each planet slowly grows to [^+30%], but resets if attacked or if a ship is launched"
+    description = "Gain [^+30%] mining rate on each planet. Lose this bonus for 60 seconds if the planet is attacked or launches a ship"
     icon = "unstablereactor"
     stats = Stats(unstable_reaction = 0.30)
     family = {'tree':'t_atomic', 'parents':['t_atomic2a', 't_atomic2b']}
     requires = lambda x: 't_atomic1' in x and ('t_atomic2a' in x or 't_atomic2b' in x)
-    infinite = True
 
 ### 3) Vanguard
 @register_upgrade
@@ -199,11 +203,12 @@ class Quantum2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nanothread Plating"
-    description = "Ships have [^+25%] health"
+    description = "Ships have [^+20%] health"
     icon = "nanothread"
     stats = Stats(ship_health_mul = 0.25)
     family = {'tree':'t_quantum', 'parents':['t_quantum1']}
     requires = ('t_quantum1',)
+    infinite = True
 
 @register_upgrade
 class Quantum3Upgrade(Upgrade):
@@ -211,12 +216,11 @@ class Quantum3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Grey Goo"
-    description = "Fighter missiles apply Grey Goo on hit, inflicting damage over time to the target."
+    description = "Fighters apply Grey Goo on hit, inflicting damage over time to the target."
     icon = "tech_default"
     stats = Stats(grey_goo=1)
     family = {'tree':'t_quantum', 'parents':['t_quantum2a', 't_quantum2b']}
     requires = lambda x: 't_quantum1' in x and ('t_quantum2a' in x or 't_quantum2b' in x)
-    infinite = False    
 
 ### 5) Crystal - Interceptor / contain: blue
 @register_upgrade
@@ -276,9 +280,9 @@ class AI1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Orbital Targeting Solution"
-    description = "Ships gain [^+66%] attack speed for [10 seconds] after take-off"
+    description = "Ships gain [^+50%] attack speed for [5 seconds] after take-off"
     icon = "orbitaltargeting"
-    stats = Stats(ship_fire_rate_after_takeoff=0.66)
+    stats = Stats(ship_fire_rate_after_takeoff=0.5)
     family = {'tree':'t_ai', 'parents':[]}
     requires = None
 
@@ -299,10 +303,10 @@ class AI2bUpgrade(Upgrade):
     name = "t_ai2b"
     resource_type = "ice"
     category = "tech"
-    title = "Coordination Protocol"
-    description = "[Interceptors] fire [^+50%] faster near [Bombers]"
+    title = "?"
+    description = "Ships gain [^+2] damage"
     icon = "coordination"
-    stats = Stats(interceptor_fire_rate_near_bombers=0.50)
+    stats = Stats(ship_weapon_damage=2)
     family = {'tree':'t_ai', 'parents':['t_ai1']}
     requires = ('t_ai1',)    
     infinite = True
@@ -349,10 +353,10 @@ class Proximity2bUpgrade(Upgrade):
     name = "t_proximity2b"
     resource_type = "ice"
     category = "tech"
-    title = "Space Mining"
-    description = "Planets you control that are near hazards gain [^+33%] mining rate"
+    title = "?"
+    description = "Ships gain +1 armor"
     icon = "tech_default"
-    stats = Stats(mining_rate_proximity=.33)
+    stats = Stats(ship_armor=1)
     family = {'tree':'t_proximity', 'parents':['t_proximity1']}
     requires = ('t_proximity1',)
 
@@ -439,10 +443,10 @@ class Exotic2aUpgrade(Upgrade):
     name = "t_exotic2a"
     resource_type = "gas"
     category = "tech"
-    title = "Transient Field"
-    description = "Ships gain [^+10] health"
+    title = "?"
+    description = "Ships gain [^+35%] attack range"
     icon = "tech_default"
-    stats = Stats(ship_health_add=10)
+    stats = Stats(ship_weapon_range=0.35)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
     requires = ('t_exotic1',)
 
@@ -453,9 +457,9 @@ class Exotic2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Jettison"
-    description = "When you lose a planet, gain [^1 full asset] of the planet's primary resource"
+    description = "When you lose a planet, gain [^2 full upgrades] of the planet's primary resource"
     icon = "tech_default"
-    stats = Stats(lost_planet_upgrade=1)
+    stats = Stats(lost_planet_upgrade=2)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
     requires = ('t_exotic1',)
 
@@ -464,12 +468,17 @@ class Exotic3Upgrade(Upgrade):
     name = "t_exotic3"
     resource_type = "gas"
     category = "tech"
-    title = "Relativistic Targeting"
-    description = "Ships gain [^+35%] attack range"
+    title = "?"
+    description = "Your next 10 ships to die drop a mine upon death"
     icon = "tech_default"
-    stats = Stats(ship_weapon_range=0.35)
+    stats = Stats()
     family = {'tree':'t_exotic', 'parents':['t_exotic2a', 't_exotic2b']}
     requires = lambda x: 't_exotic1' in x and ('t_exotic2a' in x or 't_exotic2b' in x)
+    infinite = True
+
+    def apply(self, to):
+        to.ships_dropping_mines += 10
+        return super().apply(to)
 
 ### 10) Alien - yellow
 @register_upgrade
@@ -477,10 +486,10 @@ class Alien1Upgrade(Upgrade):
     name = "t_alien1"
     resource_type = "gas"
     category = "tech"
-    title = "Unknown Artifact"
-    description = "Gain [^+3] re-rolls"
+    title = "?"
+    description = "Scouts gain cloaking"
     icon = "tech_default"
-    stats = Stats()
+    stats = Stats(scout_stealth=1)
     family = {'tree':'t_alien', 'parents':[]}
     requires = None
 
@@ -493,12 +502,16 @@ class Alien2aUpgrade(Upgrade):
     name = "t_alien2a"
     resource_type = "gas"
     category = "tech"
-    title = "Alien Thrusters"
-    description = "Ships move [^+33%] faster"
+    title = "Unknown Artifact"
+    description = "Gain [^+3] re-rolls"
     icon = "tech_default"
-    stats = Stats(ship_speed_mul=0.33)
+    stats = Stats()
     family = {'tree':'t_alien', 'parents':['t_alien1']}
     requires = ('t_alien1',)
+
+    def apply(self, to):
+        game.Game.inst.run_info.rerolls += 3
+        return super().apply(to)    
 
 @register_upgrade
 class Alien2bUpgrade(Upgrade):
@@ -506,11 +519,12 @@ class Alien2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Kinetic Sling"
-    description = "Ship weapons deal [^+50%] of bonus speed as bonus damage"
+    description = "Ship weapons deal up to [^+4] damage, scales based on bonus speed"
     icon = "tech_default"
     stats = Stats(ship_weapon_damage_speed=4)
     family = {'tree':'t_alien', 'parents':['t_alien1']}
     requires = ('t_alien1',)
+    infinite = True
 
 @register_upgrade
 class Alien3Upgrade(Upgrade):
@@ -518,12 +532,18 @@ class Alien3Upgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Alien Core Drill"
-    description = "[^+30%] Ice mining and [^+15%] Gas mining"
+    description = "[^+30] seconds of [Oxygen] for every planet you control"
     icon = "tech_default"
-    stats = Stats(ice_mining_rate=0.3, gas_mining_rate=0.15)
+    stats = Stats()
     family = {'tree':'t_alien', 'parents':['t_alien2a', 't_alien2b']}
     requires = lambda x: 't_alien1' in x and ('t_alien2a' in x or 't_alien2b' in x)
-    infinite = True
+
+    def apply(self, to):
+        # TODO: Effect
+        for planet in to.scene.get_civ_planets(to):
+            to.scene.game.run_info.o2 += 30
+        return super().apply(to)
+    
 
 
 ##########

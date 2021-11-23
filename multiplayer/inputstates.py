@@ -470,6 +470,12 @@ class UpgradeTargetState(MultiplayerState):
             x.is_buildable()
         )
 
+    def filter_any_planets(self, x):
+        return (
+            x.get_selection_info() and
+            x.get_selection_info()['type'] == 'planet'
+        )        
+
     def filter_my_fleets(self, x):
         return (
             x.get_selection_info() and x.get_selection_info()['type'] == 'fleet' and x.owning_civ == self.civ
@@ -493,6 +499,9 @@ class UpgradeTargetState(MultiplayerState):
             self.cursor_icon = simplesprite.SimpleSprite(V2(0,0), "assets/i-planet-cursor.png")
             self.hover_filter = self.filter_my_planets
             #self.selection_info_text = text.Text("Select one of your Planets to apply upgrade", "big", V2(res.x / 2, res.y / 2), PICO_WHITE, multiline_width=180,shadow=PICO_BLACK, flash_color=PICO_YELLOW)
+        if self.current_cursor == "any_planet":
+            self.cursor_icon = simplesprite.SimpleSprite(V2(0,0), "assets/i-planet-cursor.png")
+            self.hover_filter = self.filter_any_planets
         elif self.current_cursor == "allied_fleet":
             self.scene.fleet_managers[self.civ].generate_selectable_objects()
             self.cursor_icon = simplesprite.SimpleSprite(V2(0,0), "assets/i-fleet-cursor.png")
@@ -551,6 +560,11 @@ class UpgradeTargetState(MultiplayerState):
                         self.next_cursor()
                         return
 
+                    if self.current_cursor == "any_planet" and sel['type'] == "planet":
+                        self.targets.append(self.hover_sprite)
+                        self.next_cursor()
+                        return                        
+
                     if self.current_cursor == "allied_fleet" and sel['type'] == "fleet":
                         self.targets.append(self.hover_sprite)
                         self.scene.fleet_managers[self.civ].destroy_selectable_objects()
@@ -588,6 +602,11 @@ class UpgradeTargetState(MultiplayerState):
                         self.targets.append(spr)
                         self.next_cursor()
                         return
+
+                    if self.current_cursor == "any_planet" and sel['type'] == "planet":
+                        self.targets.append(spr)
+                        self.next_cursor()
+                        return                         
 
                     if self.current_cursor == "allied_fleet" and sel['type'] == "fleet":
                         self.scene.fleet_managers[self.civ].destroy_selectable_objects()
