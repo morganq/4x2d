@@ -308,6 +308,9 @@ class Alien:
             self.build_order.update(self, duration * self.build_order_acceleration)
             if self.build_order.is_over():
                 self.update_post_build_order(duration * self.build_order_acceleration)
+            else: # If build order still going but we have too many upgrades
+                if len(self.civ.upgrades_stocked) > 1:
+                    self.research_randomly()
             self.update_reactions(duration)
 
     def get_target_num_planets(self, time):
@@ -355,6 +358,9 @@ class Alien:
                 self.attack_countdown = self.get_next_attack_countdown()
 
         # Research randomly
+        self.research_randomly()
+
+    def research_randomly(self):
         if self.civ.upgrades_stocked:
             rt = self.civ.upgrades_stocked.pop(0)
             available_upgrades = [
@@ -373,7 +379,7 @@ class Alien:
                     if up.category == "tech":
                         self.research_with_target(up.name, self.civ)
                     else:
-                        self.research_with_target(up.name, random.choice(available_targets))
+                        self.research_with_target(up.name, random.choice(available_targets))        
 
     def defend_planet(self, planet, total_ships_ratio=None):
         num_ships_to_send = 0
@@ -485,10 +491,10 @@ class Alien:
         curve = {
             1: 0,
             2: 2,
-            3: 3,
-            4: 3,
-            5: 4,
-            6: 6,
+            3: 4,
+            4: 6,
+            5: 8,
+            6: 12,
         }.get(self.difficulty, 999)        
 
         if self.difficulty > 1 and self.time > 300:

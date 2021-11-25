@@ -177,7 +177,7 @@ class EMGeneratorBuilding(Building):
         
     def update(self, planet, dt):
         if not self.indicator:
-            self.indicator = RangeIndicator(planet.pos, planet.DEFENSE_RANGE + planet.get_radius(), PICO_BLUE, line_length=2, line_space=5)
+            self.indicator = RangeIndicator(planet.pos, planet.DEFENSE_RANGE + planet.get_radius(), PICO_PINK, line_length=2, line_space=5)
             planet.scene.game_group.add(self.indicator)
             planet.selected_graphics.append(self.indicator)
         threats = planet.get_threats()
@@ -361,7 +361,7 @@ class ScalingDamageAuraBuilding(AuraBuilding):
             self.indicator = RangeIndicator(planet.pos, self.aura_radius, PICO_BLUE, line_length=2, line_space=5)
             planet.scene.game_group.add(self.indicator)
             planet.selected_graphics.append(self.indicator)
-        self.aura_radius = max(285 - len(planet.scene.get_civ_planets(planet.owning_civ)) * 35,80)
+        self.aura_radius = max(305 - len(planet.scene.get_civ_planets(planet.owning_civ)) * 55,80)
         if self.aura_radius != self.indicator.radius:
             self.indicator.radius = self.aura_radius
             self.indicator._generate_image()

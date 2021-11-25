@@ -206,7 +206,7 @@ class Alien2(alien.Alien):
         self.curse = None
 
     def get_build_order_steps(self):
-        return [
+        bo = [
             BOResearch(5,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
             BOResearch(10,"alien2fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
             BOResearch(20,"alien2econrate"),
@@ -225,7 +225,13 @@ class Alien2(alien.Alien):
             BOResearch(120, "alien2techspeed"),
             BOResearch(130, "alien2techspeed"),            
             BOResearch(140,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
+            BOAttack(160, BOAttack.ATTACK_TYPE_OUTLYING),
         ]
+        if self.difficulty >= 3:
+            bo.append(BOAttack(162, BOAttack.ATTACK_TYPE_CENTRAL))
+        if self.difficulty >= 5:
+            bo.append(BOAttack(165, BOAttack.ATTACK_TYPE_OUTLYING))        
+        return bo
 
     def update(self, dt):
         if self.duration_edge(60):

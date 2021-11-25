@@ -229,7 +229,6 @@ class Warp2aUpgrade(Upgrade):
     cursor = None
     family = {'tree':'warp', 'parents':['s_warp1']}
     requires = ('s_warp1',)
-    infinite = True
 
     def apply(self, to):
         for ship in to.scene.get_civ_ships(to):
@@ -247,7 +246,6 @@ class Warp2bUpgrade(Upgrade):
     cursor = None
     family = {'tree':'warp', 'parents':['s_warp1']}
     requires = ('s_warp1',)
-    infinite = True
 
     def apply(self, to):
         for ship in to.scene.get_civ_ships(to):

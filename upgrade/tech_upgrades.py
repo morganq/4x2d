@@ -84,7 +84,7 @@ class Atomic2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Isotope Conversion"
-    description = "Gain [^+50%] [Ice] and [^+50%] [Gas]"
+    description = "Gain [^+50% of maximum] [Ice] and [^+50% of maximum] [Gas]"
     icon = "isotope"
     stats = Stats()
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}

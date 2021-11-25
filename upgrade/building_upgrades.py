@@ -274,6 +274,7 @@ class Dangerous2aUpgrade(AddBuildingUpgrade):
     family = {'tree':'dangerous', 'parents':['b_dangerous1']}
     building = InterplanetarySSMBatteryBuilding
     requires = ('b_dangerous1',)
+    infinite = True
 
 @register_upgrade
 class Dangerous2bUpgrade(AddBuildingUpgrade):
@@ -300,7 +301,6 @@ class Dangerous3Upgrade(AddBuildingUpgrade):
     family = {'tree':'dangerous', 'parents':['b_dangerous2a', 'b_dangerous2b']}
     building = buildings.DecoyBuilding
     requires = lambda x:'b_dangerous1' in x and ('b_dangerous2a' in x or 'b_dangerous2b' in x)
-    infinite = False
 
 # Launchpad - Yellow
 @register_upgrade

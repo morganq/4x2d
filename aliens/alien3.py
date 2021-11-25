@@ -157,6 +157,8 @@ class Alien3(alien.Alien):
         ]
         if self.difficulty >= 3:
             bo.append(BOAttack(115, BOAttack.ATTACK_TYPE_OUTLYING))
+        if self.difficulty >= 5:
+            bo.append(BOAttack(120, BOAttack.ATTACK_TYPE_OUTLYING))
         return bo
 
     def set_difficulty(self, difficulty):

@@ -150,7 +150,7 @@ class Alien1(alien.Alien):
     ]
 
     def get_build_order_steps(self):
-        return [
+        bo = [
             BOExpand(3),
             BOExpand(4),
             BOExpand(5),
@@ -170,6 +170,12 @@ class Alien1(alien.Alien):
             BOResearch(140, "alien1techwarp", "alien1techrof"),
         ]
 
+        if self.difficulty >= 3:
+            bo.append(BOAttack(145, BOAttack.ATTACK_TYPE_RANDOM))
+        if self.difficulty >= 5:
+            bo.append(BOAttack(155, BOAttack.ATTACK_TYPE_RANDOM))        
+        return bo        
+
     def set_difficulty(self, difficulty):
         super().set_difficulty(difficulty)
 
@@ -183,21 +189,6 @@ class Alien1(alien.Alien):
 
     def get_colonist(self):
         return "alien1colonist"
-
-    def get_max_attackers(self):
-        curve = {
-            1: 0,
-            2: 3,
-            3: 4,
-            4: 4,
-            5: 5,
-            6: 7,
-        }.get(self.difficulty, 999)        
-
-        if self.difficulty > 1 and self.time > 300:
-            curve *= 2
-
-        return curve
 
     def get_attacking_ships(self):
         return ['alien1fighter', 'alien1battleship']

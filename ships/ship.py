@@ -548,14 +548,14 @@ class Ship(SpaceObject):
                         p = particle.Particle([PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY],1,self.pos + V2(x - 6,y - 6),1.5,pvel)
                         self.scene.game_group.add(p)        
 
-        if self.get_stat("ship_death_heal") > 0:
-            nearby = helper.all_nearby(self.pos,[s for s in self.scene.get_civ_ships(self.owning_civ) if s is not self], FLEET_RADIUS)
-            if nearby:
-                other = random.choice(nearby)
-                other.health += self.get_stat("ship_death_heal") # TODO: Particles!
+            if self.get_stat("ship_death_heal") > 0:
+                nearby = helper.all_nearby(self.pos,[s for s in self.scene.get_civ_ships(self.owning_civ) if s is not self], FLEET_RADIUS)
+                if nearby:
+                    other = random.choice(nearby)
+                    other.health += self.get_stat("ship_death_heal") # TODO: Particles!
 
-        if self.origin:
-            self.origin.emitted_ship_died(self)
+            if self.origin:
+                self.origin.emitted_ship_died(self)
 
         return super().kill()
 
