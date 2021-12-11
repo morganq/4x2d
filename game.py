@@ -90,14 +90,15 @@ class Game:
             elif sys.argv[1] == "flowfield":
                 self.scene = levelscene.LevelScene(self, "cross", "alien3", 1, 1, "", "", options='flowfield')
             elif sys.argv[1] == "multiplayer":
-                self.player_inputs = [
-                    playerinput.Player(0, playerinput.Player.INPUT_MOUSE),
-                    playerinput.Player(1, playerinput.Player.INPUT_JOYSTICK, 0),
-                    playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 1),
-                    playerinput.Player(3, playerinput.Player.INPUT_JOYSTICK, 2)
-                ]
-                self.input_mode = self.INPUT_MULTIPLAYER
-                self.scene = multiplayerscene.MultiplayerScene(self, 4)
+                # self.player_inputs = [
+                #     playerinput.Player(0, playerinput.Player.INPUT_MOUSE),
+                #     playerinput.Player(1, playerinput.Player.INPUT_JOYSTICK, 0),
+                #     playerinput.Player(2, playerinput.Player.INPUT_JOYSTICK, 1),
+                #     playerinput.Player(3, playerinput.Player.INPUT_JOYSTICK, 2)
+                # ]
+                # self.input_mode = self.INPUT_MULTIPLAYER
+                # self.scene = multiplayerscene.MultiplayerScene(self, 4)
+                self.scene = multiplayermenu.MultiplayerMenu(self)
             else:
                 self.scene = menuscene.MenuScene(self)
         else:
@@ -110,6 +111,7 @@ class Game:
 
         self.menu_bg_cache_obj = None
 
+        self.first_load = True
         self.frame_time = 0
         self.fps_limited_pause = False
         Game.inst = self

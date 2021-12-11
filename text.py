@@ -17,7 +17,7 @@ FONTS = {
     'big':pygame.freetype.Font(resource_path("assets/upheavtt.ttf"), 20),
     'huge':pygame.freetype.Font(resource_path("assets/m12.ttf"), 30),
     'pixolde':pygame.freetype.Font(resource_path("assets/Pixolde-Italic.ttf"), 16),
-    'logo':pygame.freetype.Font(resource_path("assets/conthrax-sb.ttf"), 40)
+    'logo':pygame.freetype.Font(resource_path("assets/conthrax-sb.ttf"), 20)
 }
 
 for font in FONTS.values():

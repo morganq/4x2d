@@ -5,15 +5,17 @@ import pygame
 from helper import clamp
 from particle import Particle
 from spritebase import SpriteBase
+from v2 import V2
 
 
 class Explosion(SpriteBase):
-    def __init__(self, pos, colors, lifetime, max_size, scale_fn=None, line_width=1.5):
+    def __init__(self, pos, colors, lifetime, max_size, scale_fn=None, line_width=1.5, velocity=None):
         super().__init__(pos)
         self.colors = colors
         self.lifetime = lifetime
         self.max_size = max_size
         self.line_width = line_width
+        self.velocity = velocity or V2(0,0)
         if isinstance(scale_fn, str):
             self.scale_fn = {
                 "log":lambda t:clamp(math.log(t * 10+1) / 4 + t / 2.5, 0, 1)
@@ -45,6 +47,7 @@ class Explosion(SpriteBase):
 
     def update(self, dt):
         self.time += dt
+        self.pos += self.velocity * dt
         if self.time > (self.lifetime * 2):
             self.kill()
         self.generate_image()

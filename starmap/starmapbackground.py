@@ -29,7 +29,9 @@ class StarmapBackground(spritebase.SpriteBase):
 
         pygame.draw.rect(self.image, PICO_DARKGREEN, (0,0,lx, self.center_y))
 
-        pygame.draw.rect(self.image, PICO_BLACK, (0,0,x2, self.center_y))
+        #pygame.draw.rect(self.image, PICO_BLACK, (0,0,x2, self.center_y))
+        pygame.draw.circle(self.image, PICO_BLACK, (x2 - 34, self.center_y // 2), 15, 0)
+        pygame.draw.circle(self.image, PICO_BLACK, (x2 - 34, self.center_y // 2), 17, 1)
         pygame.draw.line(self.image, PICO_DARKGREEN, (x2,0), (x2, self.center_y))
         
         pygame.draw.rect(self.image, PICO_DARKBLUE, (lx,0,res.x-lx, self.center_y))
