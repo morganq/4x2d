@@ -13,6 +13,7 @@ from colors import *
 from elements import digitalpointer, typewriter
 from helper import clamp, get_nearest
 from loadingscene import LoadingScene
+from store import storepanel
 from store.storenode import StoreNodeGraphic, StoreNodePanel
 from store.storescene import StoreScene
 from v2 import V2
@@ -79,8 +80,9 @@ class StarMapState(states.UIEnabledState):
     def click_store(self):
         sound.play("click1")
         self.scene.game.run_info.choose_path(*self.current_node.node_pos)
-        self.scene.game.scene = StoreScene(self.scene.game, self.current_node.get_node())
-        self.scene.game.scene.start()
+        #self.scene.game.scene = StoreScene(self.scene.game, self.current_node.get_node())
+        #self.scene.game.scene.start()
+        self.scene.sm.transition(StoreNodeState(self.current_node.get_node(), self.scene))
 
     def click_launch(self):
         sound.play("click1")
@@ -177,3 +179,15 @@ class StarMapState(states.UIEnabledState):
         self.scene.ui_group.add(b)
         self.joy_current_confirm_button = b
         self.display_objs = [t1,b]
+
+class StoreNodeState(states.UIEnabledState):
+    def __init__(self, store_data, scene):
+        super().__init__(scene)
+        self.store_data = store_data
+
+    def enter(self):
+        print("enter")
+        super().enter()
+        self.panel = storepanel.StorePanel(self.store_data, V2(0,0), self)
+        self.scene.ui_group.add(self.panel)
+        self.panel.add_all_to_group(self.scene.ui_group)
