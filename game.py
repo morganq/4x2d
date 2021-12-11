@@ -4,7 +4,6 @@ import sys
 from collections import defaultdict
 
 import pygame
-import xbrz
 from pygame.transform import scale
 
 import allupgradesscene
@@ -33,6 +32,13 @@ from helper import clamp
 from resources import resource_path
 from starmap import starmapscene
 from v2 import V2
+
+xbrz_scale = False
+try:
+    import xbrz
+    xbrz_scale = True
+except:
+    pass
 
 DEV = len(sys.argv) > 1 and sys.argv[1] == "dev"
 RES = (600,360)
@@ -328,7 +334,7 @@ class Game:
     def render(self):
         self.scaled_screen.fill((128,128,128,255))
         self.scene.render()
-        if self.scale == 1:
+        if self.scale == 1 or not xbrz_scale:
             self.scale_normal()
         else:
             #self.scale_normal()
