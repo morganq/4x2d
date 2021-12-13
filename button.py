@@ -46,7 +46,10 @@ class Button(SpriteBase, FadeInMixin):
         if sum(color) > 180 * 3:
             text_color = PICO_BLACK
         if hover:
-            color = PICO_WHITE
+            if self.color == PICO_WHITE:
+                color = PICO_LIGHTGRAY
+            else:
+                color = PICO_WHITE
             text_color = PICO_BLACK        
 
         text_img = text.render_multiline(self.text, self.size, text_color)

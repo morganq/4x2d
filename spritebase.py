@@ -41,6 +41,10 @@ class SpriteBase(pygame.sprite.DirtySprite):
         return V2(self.rect[0] + self.rect[2] / 2, self.rect[1]+self.rect[3] / 2)
 
     @property
+    def wh(self):
+        return V2(self._width, self._height)
+
+    @property
     def offset(self):
         return self._offset
 

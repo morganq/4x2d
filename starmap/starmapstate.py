@@ -186,8 +186,18 @@ class StoreNodeState(states.UIEnabledState):
         self.store_data = store_data
 
     def enter(self):
-        print("enter")
         super().enter()
-        self.panel = storepanel.StorePanel(self.store_data, V2(0,0), self)
+        self.panel = storepanel.StorePanel(self.store_data, V2(0,0), self, self.on_done)
+        
         self.scene.ui_group.add(self.panel)
-        self.panel.add_all_to_group(self.scene.ui_group)
+        self.panel.rebuild()
+        self.panel.pos = self.scene.game.game_resolution / 2 - self.panel.wh / 2
+        self.panel._reposition_children()
+        self.hover_filter = self.filter_only_panel_ui
+
+    def exit(self):
+        self.panel.kill()
+        return super().exit()
+
+    def on_done(self):
+        self.scene.game.set_scene("starmap")

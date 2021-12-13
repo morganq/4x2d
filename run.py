@@ -33,7 +33,7 @@ class RunInfo:
         self.bonus_fighters = 0
         self.rerolls = 3
         self.o2 = 60 * 60 * 1 # 1.5 hrs
-        self.credits = 20
+        self.credits = 120
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'scout':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0
@@ -113,7 +113,7 @@ class RunInfo:
 
     def new_store(self, row, from_links):
         offerings = []
-        offer_types = ['memory', 'blueprint', 'levelup']
+        offer_types = ['memory_crystal', 'blueprint', 'levelup']
         random.shuffle(offer_types)
         offer_types.insert(2, 'o2')
         for i in range(3):
@@ -121,7 +121,7 @@ class RunInfo:
             offering = {'offer_type':offer_type}
             if offer_type == 'o2':
                 offering['quantity'] = 60 * 15
-            elif offer_type == 'memory':
+            elif offer_type == 'memory_crystal':
                 techs = [n for n,u in UPGRADE_CLASSES.items() if u.category == "tech" and not u.alien]
                 random.shuffle(techs)
                 offering['upgrades'] = techs[0:3]

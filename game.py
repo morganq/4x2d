@@ -364,7 +364,8 @@ class Game:
             'menu':menuscene.MenuScene,
             'options':optionsscene.OptionsScene,
             'multiplayer_menu':multiplayermenu.MultiplayerMenu,
-            "multiplayer":multiplayerscene.MultiplayerScene
+            "multiplayer":multiplayerscene.MultiplayerScene,
+            "starmap":starmapscene.StarMapScene
         }[scene_name](self, *args)
         self.scene.start()
 

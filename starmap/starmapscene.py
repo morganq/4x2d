@@ -34,7 +34,8 @@ REWARD_ICONS_ORDER = {
     'level_interceptor':5,
     'level_bomber':6,
     'level_battleship':7,
-    'o2':8
+    'o2':8,
+    'levelup':9
 }
 
 class NodeSprite(SimpleSprite):
@@ -99,7 +100,7 @@ class StarMapScene(Scene):
 
         backtext = "BACK"
         if self.game.input_mode == "joystick": backtext = "[*circle*] BACK"
-        self.back = button.Button(V2(5, 5), backtext, "big", self.on_back, color=PICO_LIGHTGRAY)
+        self.back = button.Button(V2(5, 5), backtext, "big", self.on_back, color=PICO_WHITE)
         self.ui_group.add(self.back)        
 
         run_path = self.game.run_info.path
