@@ -109,7 +109,7 @@ def render_multiline_to(surface, pos, text, size, color, wrap_width=None, center
     surface.blit(s, pos)
 
 parens_re = re.compile("\((.+?)\).*")
-TEXT_COLORS = {'!':PICO_RED,'^':PICO_GREEN}
+TEXT_COLORS = {'!':PICO_RED,'^':PICO_GREEN, '>': PICO_YELLOW}
 def get_groups(line, inside_group=None):
     groups = [(inside_group, "")]
     x = 0

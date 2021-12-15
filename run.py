@@ -32,8 +32,8 @@ class RunInfo:
         self.bonus_population = 0
         self.bonus_fighters = 0
         self.rerolls = 3
-        self.o2 = 60 * 60 * 1 # 1.5 hrs
-        self.credits = 120
+        self.o2 = 60 * 60 * 1 # 1 hr
+        self.credits = 20
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'scout':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0
@@ -41,7 +41,7 @@ class RunInfo:
         self.time_taken = 0
         self.ships_lost = 0
         self.victory = False
-        self.reward_list = []
+        self.reward_list = [] #[{'name':'blueprint'}]
         self.next_path_segment = (0,0)
 
     def serialize(self):

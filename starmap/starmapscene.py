@@ -92,8 +92,11 @@ class StarMapScene(Scene):
         self.ui_group = pygame.sprite.LayeredDirty()
         self.display_group = pygame.sprite.LayeredDirty()
         self.tutorial_group = pygame.sprite.Group()
-
-        rewards_width = len(self.game.run_info.reward_list) * 23 + 140
+        
+        if self.game.run_info.reward_list:
+            rewards_width = len(self.game.run_info.reward_list) * 23 + 200
+        else:
+            rewards_width = 160
 
         self.background = starmapbackground.StarmapBackground(V2(0,0), rewards_width)
         self.background_group.add(self.background)
@@ -161,13 +164,15 @@ class StarMapScene(Scene):
         self.colonist.offset = (0.5,0.5)
         self.game_group.add(self.colonist)
         ry = self.background.center_y
-        t1 = text.Text("Credits: %d" % self.game.run_info.credits, "small", V2(res.x / 2 + rewards_width / 2 - 8, ry - 3), PICO_BLACK)
+        m,s = divmod(self.game.run_info.o2, 60)
+        o2_format = "%d:%02d" % (m,s)
+        t1 = text.Text("Credits | [>%d]        O2 | [>%s]" % (self.game.run_info.credits, o2_format), "small", V2(res.x / 2 + rewards_width / 2 - 8, ry - 3), PICO_DARKBLUE, multiline_width=150)
         t1.offset = (1, 0)
         self.ui_group.add(t1)
         if self.game.run_info.reward_list:
-            t2 = text.Text("Acquired:", "small", V2(res.x / 2 - rewards_width / 2 + 8, ry - 3), PICO_BLACK)
+            t2 = text.Text("Acquired |", "small", V2(res.x / 2 - rewards_width / 2 + 8, ry - 3), PICO_BLACK)
             self.ui_group.add(t2)
-            rx = t2.x + 60
+            rx = t2.x + 61
             for r in self.game.run_info.reward_list:
                 reward = RewardWithBackground(V2(rx, ry + 1), r['name'])
                 reward.offset = (0.5,0.5)  

@@ -1,5 +1,8 @@
 ** Immediate **
 
+Joystick on Title Screen
+Joystick on Shop Screen
+
 Count labels as hover/click targets
 
 ** Bugs and tweaks **
@@ -12,7 +15,6 @@ Tutorial has bugs associated with the save game state
 
 ** Release **
 
-Make memory crystal + blueprint clearer on how to use.
 Make game harder
 Complete upgrade designs and implementation
 Complete upgrade icons and art
