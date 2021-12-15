@@ -16,8 +16,9 @@ HOVER_COLORS = {
     PICO_GREEN:PICO_DARKGREEN
 }
 
-def generate_upgrade_image(upgrade):
+def generate_upgrade_image(upgrade, disabled=False):
     image = pygame.image.load(resource_path("assets/up-back-iron.png")).convert_alpha()
+    dither = pygame.image.load(resource_path("assets/dither.png")).convert_alpha()
     try:
         icon = pygame.image.load(resource_path("assets/upgrades/%s.png" % upgrade.icon)).convert_alpha()
     except:
@@ -27,11 +28,15 @@ def generate_upgrade_image(upgrade):
     category_icon = pygame.image.load(resource_path("assets/%s.png" % category_icons[upgrade.category])).convert_alpha()
     image.blit(icon, (4,5))
     image.blit(category_icon, (0,0))
+    if disabled:
+        #disabled_image = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+        #disabled_image.fill((0,0,0,128))
+        image.blit(dither, (0,0), (0,0,*image.get_size()))
     return image
 
 
 class UpgradeIcon(SpriteBase):
-    def __init__(self, pos, upgrade_name, onclick = None, tooltip = False, tooltip_position="side"):
+    def __init__(self, pos, upgrade_name, onclick = None, tooltip = False, tooltip_position="side", disabled=False):
         super().__init__(pos)
         self.upgrade = UPGRADE_CLASSES[upgrade_name]
         self.onclick = onclick
@@ -41,11 +46,12 @@ class UpgradeIcon(SpriteBase):
         self.selectable = True
         self.layer = 1
         self.radius = 13
+        self.disabled = disabled
 
         self._generate_image()
 
     def _generate_image(self, hover=False):
-        self.image = generate_upgrade_image(self.upgrade)
+        self.image = generate_upgrade_image(self.upgrade, disabled=self.disabled)
 
         self._width = self.image.get_width()
         self._height = self.image.get_height()
@@ -72,15 +78,19 @@ class UpgradeIcon(SpriteBase):
             self._tooltip_panel.add_all_to_group(self.groups()[0])
         return super().on_mouse_enter(pos)
 
-    def on_mouse_exit(self, pos):
+    def on_mouse_exit(self, pos):       
         self._generate_image(False)
         if self.tooltip and self._tooltip_panel:
             self._tooltip_panel.kill()
         return super().on_mouse_exit(pos)
 
     def on_mouse_down(self, pos):
+        if self.disabled:
+            return        
         if self.onclick:
             self.onclick(self.upgrade)
+        if self.tooltip and self._tooltip_panel:
+            self._tooltip_panel.kill()
         return super().on_mouse_down(pos)        
 
     def kill(self):

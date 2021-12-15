@@ -35,6 +35,7 @@ from colors import *
 from debug import debug_render
 from economy import RESOURCE_COLORS, RESOURCES, Resources
 from explosion import Explosion
+from framesprite import FrameSprite
 from hazard import Hazard
 from helper import all_nearby, get_nearest
 from levelbackground import LevelBackground
@@ -146,13 +147,34 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
         self.player_civ.resources.on_change(self.on_civ_resource_change)
 
-        upy = 80
+        # Set up blueprint and memory crystal buttons
         self.saved_upgrade_buttons = {}
-        for u in self.game.run_info.saved_technologies + self.game.run_info.blueprints:
-            upicon = UpgradeIcon(V2(-2, upy), u, self.on_click_saved_upgrade, tooltip=True)
-            self.saved_upgrade_buttons[u] = upicon
-            self.ui_group.add(upicon)
-            upy += 27
+        upy = 50
+        def make_reward_icon(frame, h):
+            img = FrameSprite(V2(3, upy), "assets/reward_icons.png", 23)
+            img.frame = frame
+            self.ui_group.add(img)
+            self.ui_group.add(Line(V2(2, upy + 12), V2(7, upy + 12), PICO_YELLOW))
+            self.ui_group.add(Line(V2(2, upy + 11), V2(2, upy + h), PICO_YELLOW))
+
+        if self.game.run_info.saved_technologies:
+            make_reward_icon(2, len(self.game.run_info.saved_technologies) * 27 + 17)
+            upy += 17
+            for u in self.game.run_info.saved_technologies:
+                upicon = UpgradeIcon(V2(3, upy), u, self.on_click_saved_upgrade, tooltip=True)
+                self.saved_upgrade_buttons[u] = upicon
+                self.ui_group.add(upicon)
+                upy += 27
+
+        if self.game.run_info.blueprints:
+            upy += 10
+            make_reward_icon(3, len(self.game.run_info.blueprints) * 27 + 17)
+            upy += 17            
+            for u in self.game.run_info.blueprints:
+                upicon = UpgradeIcon(V2(3, upy), u, self.on_click_saved_upgrade, tooltip=True)
+                self.saved_upgrade_buttons[u] = upicon
+                self.ui_group.add(upicon)
+                upy += 27            
 
         if game.DEV:
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 50, self.game.game_resolution.y - 20), 'Win', 'small', self.dev_win))
@@ -303,7 +325,9 @@ class LevelScene(levelscenebase.LevelSceneBase):
         st.on_select(upgrade)
 
     def invalidate_saved_upgrade(self, upgrade):
-        self.saved_upgrade_buttons[upgrade.name].kill()
+        ub = self.saved_upgrade_buttons[upgrade.name]
+        ub.disabled = True
+        ub._generate_image()
 
     def get_enemy_civs(self, civ):
         if civ == self.player_civ:

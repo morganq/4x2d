@@ -143,9 +143,9 @@ class MemoryCrystalRewardState(RewardState):
 
         self.icons = {}
 
-        selected_technologies = [t for t in self.technologies if t not in self.scene.game.run_info.saved_technologies]
+        
+        selected_technologies = list(set(self.technologies))
         random.shuffle(selected_technologies)
-        selected_technologies = list(set(selected_technologies))
         selected_technologies = selected_technologies[0:4]
         l = len(selected_technologies)
         for i,technology in enumerate(selected_technologies):
@@ -195,8 +195,7 @@ class BlueprintRewardState(RewardState):
 
         self.icons = {}
 
-        selected_buildings = [b for b in self.buildings if b not in self.scene.game.run_info.blueprints]
-        selected_buildings = list(set(selected_buildings))
+        selected_buildings = list(set(self.buildings))
         random.shuffle(selected_buildings)
         selected_buildings = selected_buildings[0:4]
         l = len(selected_buildings)

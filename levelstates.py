@@ -547,8 +547,16 @@ class VictoryState(State):
     def end(self):
         self.scene.game.scene = rewardscene.RewardScene(
             self.scene.game,
-            [u.name for u in self.scene.player_civ.upgrades],
-            [u for u in self.scene.player_civ.researched_upgrade_names if UPGRADE_CLASSES[u].category == 'buildings'],
+            [
+                un for un in self.scene.player_civ.researched_upgrade_names if (
+                    un not in self.scene.game.run_info.saved_technologies and
+                    UPGRADE_CLASSES[un].category == "tech")
+            ],
+            [
+                un for un in self.scene.player_civ.researched_upgrade_names if (
+                    un not in self.scene.game.run_info.blueprints and
+                    UPGRADE_CLASSES[un].category == 'buildings')
+            ],
         )
         self.scene.game.scene.start()
 

@@ -7,6 +7,7 @@ import game
 import spritebase
 from colors import *
 from helper import clamp, get_nearest
+from resources import resource_path
 from v2 import V2
 
 COLOR_FADE = 0.7
@@ -21,6 +22,7 @@ class LevelBackground(spritebase.SpriteBase):
     def generate_image(self, objgrid):
         self.image = pygame.Surface(self.size.tuple(), pygame.SRCALPHA)
         self.image.fill((0,0,0,255))
+        #dither = pygame.image.load(resource_path("assets/dither.png")).convert_alpha()
         bw = 2
         pygame.draw.rect(self.image, PICO_DARKBLUE, (0,0,self.size.x, bw))
         pygame.draw.rect(self.image, PICO_DARKBLUE, (0,self.size.y-bw,self.size.x, bw))
@@ -90,6 +92,12 @@ class LevelBackground(spritebase.SpriteBase):
                             self.image.set_at((x,y), color)
                         
         self.base_image = self.image
+        #tw = 9
+        #th = 7
+        #for tx in range(tw):
+        #    for ty in range(th):
+        #        self.image.blit(dither, (tx * 100, ty * 100))
+
 
     # def update(self, dt):
     #     self.twinkle_timer -= dt

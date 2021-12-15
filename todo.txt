@@ -23,4 +23,3 @@ Building art
 Multiplayer with unique upgrade balance tweaks
 Multiplayer civ selection ^
 Tutorial improvements
-(?) Coop design and implementation
