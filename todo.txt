@@ -1,9 +1,6 @@
 ** Immediate **
 
-Finish title screen animations
 Count labels as hover/click targets
-
-
 
 ** Bugs and tweaks **
 
@@ -15,8 +12,6 @@ Tutorial has bugs associated with the save game state
 
 ** Release **
 
-Make shop screen look good
-Make upgrade screen look good
 Make memory crystal + blueprint clearer on how to use.
 Make game harder
 Complete upgrade designs and implementation

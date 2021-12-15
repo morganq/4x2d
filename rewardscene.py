@@ -8,6 +8,7 @@ import starmap
 import states
 from button import Button
 from colors import *
+from rectangle import Rectangle
 from scene import Scene
 from spritebase import SpriteBase
 from text import Text
@@ -36,12 +37,17 @@ class RewardSelector(SpriteBase):
 
 class RewardState(states.UIEnabledState):
     is_basic_joystick_panel = True
-    def enter(self):
-        self.scene.ui_group.add(Text(self.title, 'huge', V2(game.RES[0] / 2, 50) + self.scene.game.game_offset, PICO_BLUE, multiline_width=600, offset=(0.5,0)))
-        self.scene.ui_group.add(Text(self.description, 'big', V2(game.RES[0] / 2, 90) + self.scene.game.game_offset, PICO_WHITE, multiline_width=380, offset=(0.5,0)))
 
-        self.confirm_button = Button(V2(game.RES[0]/2, game.RES[1] - 50) + self.scene.game.game_offset, "Confirm", "big", self.on_confirm)
-        self.confirm_button.offset = (0.5,0.5)
+    def enter(self):
+        pos1 = self.scene.game.game_offset + V2(game.RES[0] * 0.1, game.RES[1] / 2 - 75)
+        size = (game.RES[0] * 0.8, 150)
+        self.scene.ui_group.add(Rectangle(pos1 + V2(-10,-10), (size[0] + 20, size[1] + 20), PICO_BLUE, 1))
+        self.scene.ui_group.add(Text("Reward %d of %d" % (self.scene.current_reward_num + 1, self.scene.num_rewards), 'small', pos1, PICO_BLUE, multiline_width=size[0] - 20))
+        self.scene.ui_group.add(Text(self.title, 'big', pos1 + V2(0, 20), PICO_YELLOW, multiline_width=size[0] - 20))
+        self.scene.ui_group.add(Text(self.description, 'small', pos1 + V2(0, 45), PICO_WHITE, multiline_width=size[0] - 20))
+
+        self.confirm_button = Button(pos1 + V2(size[0], size[1]), "Confirm", "big", self.on_confirm)
+        self.confirm_button.offset = (1,1)
         self.scene.ui_group.add(self.confirm_button)
         return super().enter()
 
@@ -143,7 +149,7 @@ class MemoryCrystalRewardState(RewardState):
         selected_technologies = selected_technologies[0:4]
         l = len(selected_technologies)
         for i,technology in enumerate(selected_technologies):
-            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11) + self.scene.game.game_offset
+            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2) + self.scene.game.game_offset
             icon = upgradeicon.UpgradeIcon(p, technology, self.select_technology, True, "bottom")
             self.icons[technology] = icon
             self.scene.ui_group.add(icon)
@@ -195,7 +201,7 @@ class BlueprintRewardState(RewardState):
         selected_buildings = selected_buildings[0:4]
         l = len(selected_buildings)
         for i,building in enumerate(selected_buildings):
-            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2 - 11) + self.scene.game.game_offset
+            p = V2(i * 50 - (l - 1) * 50 / 2 - 12 + game.RES[0] / 2, game.RES[1] / 2) + self.scene.game.game_offset
             icon = upgradeicon.UpgradeIcon(p, building, self.select_building, True, "bottom")
             self.icons[building] = icon
             self.scene.ui_group.add(icon)
@@ -221,6 +227,8 @@ class RewardScene(Scene):
         super().__init__(game)
         self.technologies = technologies
         self.buildings = buildings
+        self.num_rewards = 0
+        self.current_reward_num = 0
 
     def start(self):
         self.background_group = pygame.sprite.Group()
@@ -232,6 +240,7 @@ class RewardScene(Scene):
         self.rewards = self.game.run_info.get_path_galaxy()['rewards'][::]
         if self.game.run_info.bonus_credits > 0:
             self.rewards.append("credits")
+        self.num_rewards = len(self.rewards)
         self.setup_next_reward()
 
     def setup_next_reward(self):
@@ -254,6 +263,7 @@ class RewardScene(Scene):
                 self.sm.transition(OxygenRewardState(self))
             else:
                 print(reward)
+            self.current_reward_num += 1
         else:
             # Give rerolls also
             self.game.run_info.rerolls += 2
