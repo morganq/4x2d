@@ -30,6 +30,7 @@ class ImageButton(FrameSprite):
         self.tooltip = tooltip
         self.tooltip_title = tooltip_title
         self._tooltip_panel = None
+        self.radius = 13
 
     def on_mouse_enter(self, pos):
         if self._tooltip_panel:

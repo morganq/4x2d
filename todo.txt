@@ -1,8 +1,6 @@
 ** Immediate **
 
-Joystick on Title Screen
 Joystick on Shop Screen
-
 Count labels as hover/click targets
 
 ** Bugs and tweaks **

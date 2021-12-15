@@ -23,6 +23,7 @@ class Button(SpriteBase, FadeInMixin):
         self.label = label
         self.icon = icon
         self.joy_button = None
+        self.radius = 15
         self.asset_border = asset_border
         self._generate_image()
 

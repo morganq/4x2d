@@ -73,6 +73,9 @@ class NewGameScene(scene.Scene):
 
     def on_launch(self):
         self.game.run_info = run.RunInfo()
+        self.game.run_info.started = True
+        self.game.save.set_run_state(self.game.run_info)
+        self.game.save.save()
         self.game.scene = starmapscene.StarMapScene(self.game)
         self.game.scene.start()
 

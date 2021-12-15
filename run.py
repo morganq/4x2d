@@ -7,7 +7,7 @@ RUN_INFO_SERIALIZE_FIELDS = [
     'data', 'path', 'saved_technologies', 'blueprints',
     'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
     'bonus_credits', 'ship_levels', 'score', 'time_taken', 'ships_lost',
-    'reward_list', 'sectors_cleared', 'victory'
+    'reward_list', 'sectors_cleared', 'victory', 'started'
 ]
 
 LEVEL_TITLES = {
@@ -33,7 +33,7 @@ class RunInfo:
         self.bonus_fighters = 0
         self.rerolls = 3
         self.o2 = 60 * 60 * 1 # 1 hr
-        self.credits = 20
+        self.credits = 220
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'scout':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0
@@ -43,6 +43,7 @@ class RunInfo:
         self.victory = False
         self.reward_list = [] #[{'name':'blueprint'}]
         self.next_path_segment = (0,0)
+        self.started = False
 
     def serialize(self):
         obj = {}

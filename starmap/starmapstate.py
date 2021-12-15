@@ -185,6 +185,21 @@ class StoreNodeState(states.UIEnabledState):
         super().__init__(scene)
         self.store_data = store_data
 
+    def set_joystick_input(self):
+        self.scene.game.input_mode = "joystick"
+        if not self.joystick_overlay:
+            self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos[0])
+            self.joystick_overlay.layer = 20
+            self.scene.ui_group.add(self.joystick_overlay)
+        return super().set_joystick_input()
+
+    def set_mouse_input(self):
+        self.scene.game.input_mode = "mouse"
+        if self.joystick_overlay:
+            self.joystick_overlay.kill()
+            self.joystick_overlay = None
+        return super().set_mouse_input()
+
     def enter(self):
         super().enter()
         self.panel = storepanel.StorePanel(self.store_data, V2(0,0), self, self.on_done)
@@ -197,7 +212,42 @@ class StoreNodeState(states.UIEnabledState):
 
     def exit(self):
         self.panel.kill()
+        if self.joystick_overlay:
+            self.joystick_overlay.kill()        
         return super().exit()
+
+    def joystick_input(self, input, event):
+        if input == "joymotion":
+            self.joystick_overlay.joystick_delta(event['delta'])
+        if input == "confirm":
+            spr = self.joystick_overlay.nearest_obj
+            if spr:
+                # Check if we clicked a stored upgrade
+                if spr.selectable:
+                    spr.on_mouse_exit(spr.pos)
+                    spr.on_mouse_down(spr.pos)
+
+    def update(self, dt):
+        super().update(dt)
+        if self.scene.game.input_mode == "joystick":
+            self.joystick_update(dt)
+
+    def joystick_update(self, dt):
+        all_sprites = []
+        all_sprites.extend(
+            sorted(self.scene.ui_group.sprites()[::], key=lambda x:x.layer, reverse=True)
+        )        
+        selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]
+        print(selectable_sprites)
+        nearest, d = get_nearest(self.joystick_overlay.cursor_pos, selectable_sprites)
+        if d < 40 ** 2:
+            self.joystick_overlay.set_nearest(nearest)
+        else:
+            self.joystick_overlay.set_nearest(None)
+            nearest = None                    
+        self.joystick_overlay.cursor_pos = (self.joystick_overlay.cursor_pos).rect_contain(
+            self.panel.x, self.panel.y, self.panel.width, self.panel.height
+        )
 
     def on_done(self):
         self.scene.game.set_scene("starmap")

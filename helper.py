@@ -11,7 +11,7 @@ def get_nearest(pos, others):
     dist = 999999999
     res = None
     for other in others:
-        delta = (other.pos - pos).sqr_magnitude()
+        delta = (other.get_center() - pos).sqr_magnitude()
         if delta < dist:
             dist = delta
             res = other

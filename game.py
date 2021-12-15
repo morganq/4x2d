@@ -66,7 +66,11 @@ class Game:
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
         print(self.joysticks)
         self.last_joy_axes = None
-        self.run_info = run.RunInfo()
+        try:
+            self.run_info = self.save.get_run_state()
+        except:
+            self.run_info = run.RunInfo()
+        
         self.input_mode = self.INPUT_MOUSE
         self.player_inputs = []
 
@@ -113,7 +117,7 @@ class Game:
         self.playing_level_index = None
 
         self.game_speed_input = 0
-        self.last_joystick_pos = defaultdict(lambda:V2(0,0))
+        self.last_joystick_pos = defaultdict(lambda:self.game_resolution / 2)
 
         self.menu_bg_cache_obj = None
 

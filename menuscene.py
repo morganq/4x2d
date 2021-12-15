@@ -286,6 +286,7 @@ class MenuScene(scene.Scene):
 
     def start(self):
         self.joy = joyresolver.JoyResolver(self.on_joy_press)
+        self.set_starting_button = False
         self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
@@ -293,7 +294,8 @@ class MenuScene(scene.Scene):
         self.stars = []
 
         self.choices = []
-        self.current_choice = None
+        self.current_choice = 2
+        self.using_joy = True
         
         for i in range(120):
             s = framesprite.FrameSprite(V2(random.randint(0, self.game.game_resolution.x),random.randint(-30, self.game.game_resolution.y)), "assets/bgstar.png", 11)
@@ -319,7 +321,7 @@ class MenuScene(scene.Scene):
         self.game_group.add(self.bg_earth)
         self.parallax.append(Parallaxed(self.bg_earth, 1))
 
-        self.bg_enemies = IntelOption(self, earth_pos + V2(-165, 7), "assets/title-enemies.png", 251)
+        self.bg_enemies = IntelOption(self, earth_pos + V2(-165, 7), "assets/title-enemies.png", 251, onclick=self.click_intel)
         self.game_group.add(self.bg_enemies)
         self.bg_enemies.visible = False
         self.choices.append(self.bg_enemies)
@@ -330,11 +332,14 @@ class MenuScene(scene.Scene):
         self.parallax.append(Parallaxed(self.bg_multiplayer, 0.15))
         self.game_group.add(self.bg_multiplayer)
         self.choices.append(self.bg_multiplayer)
+        self.bg_multiplayer.visible = False
 
-        self.bg_continue = ContinueOption(self, V2(res.x * 0.4, res.y / 8), "assets/title-continue.png", frame_width=109, onclick=self.click_continue)
-        self.parallax.append(Parallaxed(self.bg_continue, 0.05))
-        self.game_group.add(self.bg_continue)
-        self.choices.append(self.bg_continue)
+        self.bg_continue = None
+        if self.game.run_info.started:
+            self.bg_continue = ContinueOption(self, V2(res.x * 0.4, res.y / 8), "assets/title-continue.png", frame_width=109, onclick=self.click_continue)
+            self.parallax.append(Parallaxed(self.bg_continue, 0.05))
+            self.game_group.add(self.bg_continue)
+            self.choices.append(self.bg_continue)
 
         self.bg_newgame_path = simplesprite.SimpleSprite(earth_pos + V2(150, -32), "assets/title-newgame-path.png")
         self.bg_newgame_path.visible = False
@@ -349,11 +354,13 @@ class MenuScene(scene.Scene):
         self.parallax.append(Parallaxed(self.bg_options, 1.5))
         self.game_group.add(self.bg_options)                        
         self.choices.append(self.bg_options)
+        self.bg_options.visible = False
 
         self.bg_exit = ExitOption(self, V2(res.x * 0.7, res.y * 0.8), "assets/title-exit.png", onclick=sys.exit)
         self.parallax.append(Parallaxed(self.bg_exit, 5))
         self.game_group.add(self.bg_exit)        
         self.choices.append(self.bg_exit)
+        self.bg_exit.visible = False
 
         self.logo = hqlogo.HQLogo(earth_pos + V2(89, 103), delay=6.25)
         self.logo.offset = (0.5, 0.5)
@@ -367,9 +374,10 @@ class MenuScene(scene.Scene):
         self.bg_multiplayer.label = l
         self.ui_group.add(l)  
 
-        l = MenuOptionLabel(self.bg_continue.pos + V2(18,22) + V2(42,-24) + V2(-4,-4), self.bg_continue.pos + V2(18,22) + V2(-4,-4), "Continue")
-        self.bg_continue.label = l
-        self.ui_group.add(l)              
+        if self.bg_continue:
+            l = MenuOptionLabel(self.bg_continue.pos + V2(18,22) + V2(42,-24) + V2(-4,-4), self.bg_continue.pos + V2(18,22) + V2(-4,-4), "Continue")
+            self.bg_continue.label = l
+            self.ui_group.add(l)              
 
         l = MenuOptionLabel(self.bg_newgame.pos + V2(38,26) + V2(22,6) + V2(-4,-4), self.bg_newgame.pos + V2(38,26) + V2(-4,-4), "New Game")
         self.bg_newgame.label = l
@@ -397,7 +405,13 @@ class MenuScene(scene.Scene):
         self.sm = states.Machine(states.UIEnabledState(self))
 
     def on_joy_press(self, dir):
-        print(dir)
+        self.using_joy = True
+        self.choices[self.current_choice].mouse_exit()
+        if dir in ['right', 'down']:
+            self.current_choice = min(self.current_choice + 1, len(self.choices) - 1)
+        if dir in ['up', 'left']:
+            self.current_choice = max(self.current_choice - 1, 0)
+        self.choices[self.current_choice].mouse_enter()
 
     def update(self, dt):
         self.time += min(dt,0.1)
@@ -408,7 +422,11 @@ class MenuScene(scene.Scene):
             self.bg_newgame_path.visible = True
             self.bg_newgame.visible = True
             self.bg_enemies.frame = 4
+        if self.time > 7 + off:
             self.bg_enemies.visible = True
+            self.bg_multiplayer.visible = True
+            self.bg_options.visible = True
+            self.bg_exit.visible = True
         elif self.time > 5 + off:
             self.bg_enemies.frame = 4
         elif self.time > 4.25 + off:
@@ -420,8 +438,14 @@ class MenuScene(scene.Scene):
         elif self.time > 3 + off:
             self.bg_enemies.visible = True
 
-        labels = [self.bg_enemies.label, self.bg_multiplayer.label, self.bg_continue.label, self.bg_newgame.label, self.bg_options.label, self.bg_exit.label]
-        i = clamp(int((self.time - 6.5) * 9), -1, 6)
+        if self.time > 6 and not self.set_starting_button:
+            self.set_starting_button = True
+            self.choices[self.current_choice].mouse_enter()
+
+        labels = [self.bg_enemies.label, self.bg_multiplayer.label, self.bg_newgame.label, self.bg_options.label, self.bg_exit.label]
+        if self.bg_continue:
+            labels.insert(2, self.bg_continue.label)
+        i = clamp(int((self.time - 6.5) * 9), -1, len(labels))
         if i >= 0:
             for j in range(i):
                 labels[j].visible = True
@@ -463,13 +487,21 @@ class MenuScene(scene.Scene):
 
     def click_new(self):
         self.game.scene = newgamescene.NewGameScene(self.game)
-        self.game.scene.start()                                  
+        self.game.scene.start()             
+
+    def click_intel(self):
+        pass                    
 
     def take_input(self, inp, event):
         if self.time < 6:
             return
         if inp == "joymotion":
             self.joy.take_input(inp, event)
+        elif inp == "confirm":
+            self.choices[self.current_choice].onclick()
         else:
             self.sm.state.take_input(inp, event)
+        if inp == "mouse_move" and self.using_joy:
+            self.choices[self.current_choice].mouse_exit()
+            self.using_joy = False
         return super().take_input(inp, event)

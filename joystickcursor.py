@@ -36,22 +36,21 @@ class JoystickCursor(SpriteBase):
         pygame.draw.circle(self.image, PICO_WHITE, self.cursor_pos.tuple(), 2, 0)
 
         if self.nearest_obj:
-            hx = (0.5 - self.nearest_obj.offset[0]) * self.nearest_obj.width
-            hy = (0.5 - self.nearest_obj.offset[1]) * self.nearest_obj.height
+            center = self.nearest_obj.get_center()
             rect = (
-                self.nearest_obj.apparent_pos.x + hx - self.nearest_obj.radius - 4,
-                self.nearest_obj.apparent_pos.y + hy - self.nearest_obj.radius - 4,
+                center.x - self.nearest_obj.radius - 4,
+                center.y - self.nearest_obj.radius - 4,
                 self.nearest_obj.radius * 2 + 8,
                 self.nearest_obj.radius * 2 + 8
             )
-            delta = (self.cursor_pos - self.nearest_obj.apparent_pos)
+            delta = (self.cursor_pos - center)
             dist, ang = V2(delta.x, -delta.y).to_polar()
             pygame.draw.arc(self.image, self.color, rect, ang - 1, ang + 1)
 
             if dist > 15:
                 dn = delta.normalized()
                 p1 = self.cursor_pos - dn * 7
-                p2 = self.nearest_obj.apparent_pos + dn * (self.nearest_obj.radius + 4)
+                p2 = self.nearest_obj.get_center() + dn * (self.nearest_obj.radius + 4)
                 pygame.draw.line(self.image, self.color, p1.tuple(), p2.tuple(), 1)
 
         self._width, self._height = self.image.get_size()
@@ -64,7 +63,6 @@ class JoystickCursor(SpriteBase):
         self.update_hover()
 
     def update(self, dt):
-
         self.cursor_pos = (self.cursor_pos + self.joystick_state * dt * 350).rect_contain(0, 0, game.Game.inst.game_resolution.x, game.Game.inst.game_resolution.y)
         self.scene.game.last_joystick_pos[self.player_id] = self.cursor_pos
         self.options_text.pos = self.cursor_pos + V2(8, -8)
