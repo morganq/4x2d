@@ -66,10 +66,13 @@ class Button(SpriteBase, FadeInMixin):
             h += 10
             y_offset = 10
 
+        if self.joy_button:
+            text_offset += 16
+
         if self.icon:
             icon = pygame.image.load(resource_path(self.icon)).convert_alpha()
             w += icon.get_width() + 4
-            text_offset = icon.get_width() / 2
+            text_offset += icon.get_width() / 2
             if icon.get_height() > HEIGHTS[self.size]:
                 h += int((icon.get_height() - HEIGHTS[self.size]))
                 y_offset += int((icon.get_height() - HEIGHTS[self.size]) / 2)
@@ -83,7 +86,7 @@ class Button(SpriteBase, FadeInMixin):
         icon_x = text_x
 
         #text.FONTS[self.size].render_to(self.image, (text_x, pad + y_offset), self.text, text_color)
-        self.image.blit(text_img, (text_x, pad + y_offset + 1))
+        self.image.blit(text_img, (text_x, pad + y_offset))
         if icon:
             icon_x = text_x - 4 - icon.get_width()
             icon_y = pad + y_offset + int((HEIGHTS[self.size] - icon.get_height()) / 2)
@@ -93,13 +96,14 @@ class Button(SpriteBase, FadeInMixin):
 
         if self.label:
             #text.render_multiline_to(self.image, (icon_x, pad), self.label, "tiny", text_color)
-            text.FONTS['tiny'].render_to(self.image, (icon_x, pad), self.label, text_color)
+            text.FONTS['tiny'].render_to(self.image, (icon_x, pad - 4), self.label, text_color)
 
         z = {'tiny':2, 'small':3,'medium':3,'big':4,'huge':5}[self.size]
         pygame.draw.polygon(self.image, (255,255,255,0), [(w-z,0), (w,0), (w,z)])
 
         if self.joy_button:
-            text.render_multiline_to(self.image, (1, 1), self.joy_button, "tiny", text_color)
+            btn_img = text.render_multiline(self.joy_button, "huge", text_color)
+            self.image.blit(btn_img, (4, h // 2 - btn_img.get_height() // 2))
 
         if self.asset_border:
             pygame.draw.line(self.image, PICO_BLACK, (0,0), (0,h))

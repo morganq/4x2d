@@ -16,7 +16,7 @@ class TooltipPanel(Panel):
         t = Text(description, "small", (0,0), PICO_LIGHTGRAY, False, multiline_width=160, center=False)
         t.layer = 14
         t._height -= 4
-        self.add(t, V2(0,15))
+        self.add(t, V2(0,17))
         
         self.bump_out = 0
         self.max_bump = 3

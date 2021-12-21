@@ -17,9 +17,9 @@ class ControlsScene(Scene):
             ('Press [*x*] (Confirm button)','confirm'),
             ('Press [*circle*] (Back button)','back'),
             ('Press [*square*] (Order Ships button)','action'),
-            ('Press [*triangle*] (Asset button)','special'),
+            ('Press [*triangle*] (Upgrade button)','special'),
             ('Press the button you want to use for Fast Forward','game_speed'),
-            ('Press the button you want to use for Menu','menu'),
+            ('Press the button you want to use for Pause','menu'),
         ]
         self.control_index = -1
         self.control_text = text.Text("", "medium", (game.RES[0]/2, game.RES[1]/2), multiline_width=300)

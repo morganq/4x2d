@@ -489,6 +489,7 @@ class GameOverState(State):
     def enter(self):
         self.scene.update_run_stats()
         self.scene.game.game_speed_input = 0
+        self.scene.paused = True
         #self.scene.game_group.empty()
 
         self.scene.ui_group.empty()
@@ -723,8 +724,7 @@ class PauseState(UIEnabledState):
     def on_quit(self):
         self.scene.game.fps_limited_pause = False
         if not self.scene.is_tutorial:
-            self.scene.game.end_run()
-        self.scene.game.set_scene("menu")
+            self.scene.sm.transition(GameOverState(self.scene))
 
     def exit(self):
         self.scene.paused = False

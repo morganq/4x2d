@@ -261,7 +261,7 @@ class AlienHomeDefenseBuilding(Building):
     def get_threats(self, planet):
         return [s for s in 
             planet.scene.get_enemy_ships_in_range(planet.owning_civ, planet.pos, self.THREAT_RANGE + planet.get_radius())
-            if not s.stealth
+            if not s.stealth and (s.pos - planet.pos).sqr_magnitude() <= (self.THREAT_RANGE + planet.get_radius()) ** 2
         ]
 
     def update(self, planet, dt):

@@ -2,7 +2,7 @@ import pygame
 
 import spritebase
 import text
-from colors import PICO_WHITE
+from colors import *
 from helper import clamp
 from resources import resource_path
 
@@ -22,6 +22,7 @@ class O2Meter(spritebase.SpriteBase):
         pxs = (1 - (clamp(self.o2,0, O2_MAX) / O2_MAX)) * 60 + 19
         self.image.blit(self.empty_image, (0,0), (0, 0, pxs, self.image.get_height()))
         m,s = divmod(self.o2, 60)
+        text.render_multiline_to(self.image, (39, -1), "%d:%02d" % (m,s), "tiny", PICO_BLACK)
         text.render_multiline_to(self.image, (38, -2), "%d:%02d" % (m,s), "tiny", PICO_WHITE)
 
     def update(self, dt):

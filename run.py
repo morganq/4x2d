@@ -27,13 +27,13 @@ class RunInfo:
     def __init__(self, data = None):
         self.data = data or self.generate_run()
         self.path = [(0,0)]
-        self.saved_technologies = ['t_atomic1']
-        self.blueprints = ['b_launchpad1', 'b_launchpad2a', 'b_launchpad3']
+        self.saved_technologies = [] # ['t_atomic1']
+        self.blueprints = [] # ['b_launchpad1', 'b_launchpad2a', 'b_launchpad3']
         self.bonus_population = 0
         self.bonus_fighters = 0
         self.rerolls = 3
         self.o2 = 60 * 60 * 1 # 1 hr
-        self.credits = 220
+        self.credits = 20
         self.bonus_credits = 0
         self.ship_levels = {'fighter':1, 'scout':1, 'interceptor':1, 'bomber':1, 'battleship': 1}
         self.score = 0

@@ -10,6 +10,7 @@ import planet
 import pygame
 import sound
 from colors import *
+from framesprite import FrameSprite
 from laserparticle import LaserParticle
 from resources import resource_path
 from satellite import ReflectorShieldObj
@@ -114,6 +115,10 @@ class Ship(SpaceObject):
 
         # Cinematic stuff
         self.cinematic_no_combat = False
+
+        # Turnaround
+        self.turnaround_spr = None
+        self.turnaround_time = 0
 
         # Stuff that has to come at the end
         self.set_health(self.get_max_health())
@@ -340,6 +345,10 @@ class Ship(SpaceObject):
 
             if self.fuel_remaining < 0:
                 self.set_state(STATE_RETURNING)
+                self.turnaround_spr = FrameSprite(self.pos, "assets/fighterturnaround.png", 6)
+                self.scene.ui_group.add(self.turnaround_spr)
+                self.turnaround_time = 0
+                # TODO: Error sound
                 
         self.pos += self.velocity * dt
         self.health_bar.pos = self.pos + V2(0, -6)
@@ -497,6 +506,18 @@ class Ship(SpaceObject):
             self.set_target(nearest)
 
     def state_returning(self, dt):
+        if self.fuel_remaining <= 0 and self.turnaround_spr:
+            self.turnaround_time += dt
+            self.turnaround_spr.pos = self.pos + V2(3, -8)
+            if self.turnaround_time < 1:
+                self.turnaround_spr.frame = min(int(self.turnaround_time * 4), 3)
+            else:
+                self.turnaround_spr.frame = int(self.turnaround_time * 4) % 2 + 2
+            if self.turnaround_time > 8:
+                self.turnaround_spr.kill()
+                self.turnaround_spr = None
+            
+
         if self.effective_target.owning_civ != self.owning_civ:
             self.set_state(STATE_RETURNING)
         elif self.effective_target:

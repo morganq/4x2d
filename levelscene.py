@@ -376,11 +376,11 @@ class LevelScene(levelscenebase.LevelSceneBase):
         if self.level_controller:
             self.level_controller.update(dt)
 
-        if self.time > 300 and not self.player_civ.scarcity:
-            self.player_civ.enable_scarcity()
-            self.enemy.civ.enable_scarcity()
-            fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
-            self.ui_group.add(fn)
+        # if self.time > 300 and not self.player_civ.scarcity:
+        #     self.player_civ.enable_scarcity()
+        #     self.enemy.civ.enable_scarcity()
+        #     fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
+        #     self.ui_group.add(fn)
             
         self.game.run_info.o2 -= dt
         #if self.time % 1 < (self.time - dt) % 1:
@@ -442,7 +442,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
                 button.onclick = None
             
     def add_asset_button(self, resource):
-        button = Button(V2(self.game.game_resolution.x / 2, self.game.game_resolution.y - 4), "UPGRADE", "big", None, asset_border=True, fixed_width=90)
+        button = Button(V2(self.game.game_resolution.x / 2, self.game.game_resolution.y - 4), "UPGRADE", "big", None, asset_border=True, fixed_width=110)
         text = "%s" % resource.upper()
         button.text = text
         if self.game.input_mode == "joystick":

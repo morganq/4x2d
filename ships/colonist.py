@@ -94,7 +94,7 @@ class Colonist(Ship):
             enemy_objs = self.scene.get_enemy_objects(self.owning_civ)
             near_enemies = helper.all_nearby(self.pos, enemy_objs, ATOMIC_BOMB_RANGE * range_adjust)
             for enemy in near_enemies:
-                enemy.take_damage(self.population * 5, self)
+                enemy.take_damage(self.population * 5)
             e = Explosion(self.pos, [PICO_GREEN, PICO_WHITE, PICO_GREEN, PICO_DARKGREEN], 0.75, ATOMIC_BOMB_RANGE * range_adjust, lambda x:helper.clamp(x * 3,0,1))
             self.scene.game_group.add(e)
             

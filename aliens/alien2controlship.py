@@ -1,3 +1,4 @@
+import bullet
 import sound
 from colors import PICO_LIGHTGRAY, PICO_PINK, PICO_YELLOW
 from line import Line
@@ -39,6 +40,9 @@ class Alien2ControlShip(Fighter):
             return
 
         sound.play("control")
+
+        b = bullet.Bullet(at.pos, at, self, mods={'damage_base':1})
+        self.scene.game_group.add(b)
 
         at.tether_target = True
         self.tethered = at

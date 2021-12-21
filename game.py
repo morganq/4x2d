@@ -63,6 +63,7 @@ class Game:
         self.set_resolution(V2(*resolution), self.save.get_setting("fullscreen"))
         pygame.display.set_caption("Hostile Quadrant")
         sound.init()
+        text.preload()
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
         print(self.joysticks)
         self.last_joy_axes = None
@@ -193,9 +194,6 @@ class Game:
                 self.scene.take_input("joymotion", {'delta':delta})
                 self.last_joy_axes = delta.tuple()
 
-            if self.input_mode == "joystick":
-                self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]
-
         elif event.type == pygame.JOYHATMOTION:
             delta = V2(event.value[0], -event.value[1])
             self.scene.take_input("joymotion", {'delta': delta })
@@ -205,6 +203,9 @@ class Game:
                 self.scene.take_input(bindings[event.button], event)
             except KeyError:
                 self.scene.take_input(None, event)
+
+        if self.input_mode == "joystick":
+            self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]                
 
     def process_input_multiplayer(self, event):
         #print(event)
@@ -376,6 +377,7 @@ class Game:
     def end_run(self):
         self.save.set_run_state(None)
         self.save.save()
+        self.run_info = run.RunInfo()
 
     def is_xbox(self):
         if self.joysticks:

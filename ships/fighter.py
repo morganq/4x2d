@@ -381,7 +381,10 @@ class Fighter(Ship):
                 current_target_dogfights = True
 
         if self.state == STATE_DOGFIGHT and origin:
-            shooter = origin.shooter
+            shooter = origin
+            if hasattr(origin, "shooter"):
+                shooter = origin.shooter
+            
             if shooter and isinstance(shooter, Ship) and shooter.is_alive() and shooter.owning_civ != self.owning_civ and not current_target_dogfights:
                 self.effective_target = shooter
 

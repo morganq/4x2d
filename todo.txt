@@ -1,18 +1,30 @@
+✓
+
 ** Immediate **
 
-Joystick on Shop Screen
-Count labels as hover/click targets
+Make controller icons on big buttons look good
+
+
+** Missing Sounds **
+
+Generic UI button press
+Take over a planet - maybe a "negative" version for when the enemy does it
+Fighter out of fuel turnaround
 
 ** Bugs and tweaks **
 
-Scouts shouldn't use buster missile on asteroids
+✓ Sometimes AI ships circle endlessly
+✓ Supervisors don't trigger ships to change target to them
+
+Consider using joystick cursor on upgrade screen
 Adjust upgrade curve [num upgrades per sector]
 
-Show oxygen in starmap center bar
-Tutorial has bugs associated with the save game state
+? Tutorial has bugs associated with the save game state
+? Count labels as hover/click targets
 
 ** Release **
 
+Finish mockup alien portraits
 Make game harder
 Complete upgrade designs and implementation
 Complete upgrade icons and art

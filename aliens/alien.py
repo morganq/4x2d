@@ -452,10 +452,10 @@ class Alien:
             self.near_winning = False
 
         # Recall waiting ships
-        if self.duration_edge(20):
-            for fleet in self.scene.fleet_managers['enemy'].current_fleets:
-                if fleet.is_waiting():
-                    self.scene.fleet_managers['enemy'].recall_fleet(fleet)            
+        #if self.duration_edge(20):
+        for fleet in self.scene.fleet_managers['enemy'].current_fleets:
+            if fleet.is_waiting():
+                self.scene.fleet_managers['enemy'].recall_fleet(fleet)            
 
     def redistribute_excess_ships(self):
         all_my_planets = self.scene.get_civ_planets(self.civ)
@@ -491,29 +491,29 @@ class Alien:
         curve = {
             1: 0,
             2: 2,
-            3: 4,
-            4: 6,
-            5: 8,
-            6: 12,
+            3: 3,
+            4: 5,
+            5: 7,
+            6: 10,
         }.get(self.difficulty, 999)        
 
-        if self.difficulty > 1 and self.time > 300:
+        if self.difficulty > 1 and self.time > 360:
             curve *= 2
 
         return curve
 
     def get_build_order_acceleration(self):
+        # curve = {
+        #     1:0.75, 2:0.85, 3:1.0, 4:1.1,
+        #     5:1.2, 6:1.35, 7:1.5, 8:1.65,
+        #     9:1.8
+        # }
         curve = {
-            1:0.75,
-            2:0.85,
-            3:1.0,
-            4:1.1,
-            5:1.2,
-            6:1.35,
-            7:1.5,
-            8:1.65,
-            9:1.8
-        }
+            1:0.85, 2:1.0, 3:1.2, 4:1.3,
+            5:1.4, 6:1.6, 7:1.8, 8:2.0,
+            9:2.25
+        }        
+        
         return curve[self.difficulty]
 
     def set_difficulty(self, difficulty):
@@ -522,10 +522,13 @@ class Alien:
         self.civ.base_stats['mining_rate'] = 0.45 + 0.125 * difficulty
         self.civ.base_stats['max_ships_per_planet'] = int((difficulty + 5) / 2)
         extra_planets = 0
-        if difficulty == 6: extra_planets = 1
-        if difficulty == 7: extra_planets = 1
-        if difficulty == 8: extra_planets = 2
-        if difficulty == 9: extra_planets = 3
+        if difficulty == 3: extra_planets = 1
+        if difficulty == 4: extra_planets = 1
+        if difficulty == 5: extra_planets = 1        
+        if difficulty == 6: extra_planets = 2
+        if difficulty == 7: extra_planets = 2
+        if difficulty == 8: extra_planets = 3
+        if difficulty == 9: extra_planets = 4
 
         self.build_order_acceleration = self.get_build_order_acceleration()
         extra_pops = difficulty // 2

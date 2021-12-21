@@ -20,8 +20,32 @@ FONTS = {
     'logo':pygame.freetype.Font(resource_path("assets/conthrax-sb.ttf"), 20)
 }
 
-for font in FONTS.values():
+PRELOADED_SYMBOLS = {}
+
+def preload():
+    mapping = {'tiny': 'sm', 'small': 'sm', 'medium':'md', 'big':'md', 'huge':'lg', 'pixolde':'md', 'logo':'md'}
+    for size, font in FONTS.items():
+        sy = {}
+        sy['left'] = ('assets/mouse_left.png', None)
+        sy['right'] = ('assets/mouse_right.png', None)
+        sy['drag'] = ('assets/mouse_drag.png', None)
+        sy['ps_square'] = ('assets/ps_%s.png' % mapping[size], 1)
+        sy['ps_triangle'] = ('assets/ps_%s.png' % mapping[size], 2)
+        sy['ps_circle'] = ('assets/ps_%s.png' % mapping[size], 3)
+        sy['ps_x'] = ('assets/ps_%s.png' % mapping[size], 0)
+        sy['xbox_square'] = ('assets/xbox_%s.png' % mapping[size], 2)
+        sy['xbox_triangle'] = ('assets/xbox_%s.png' % mapping[size], 3)
+        sy['xbox_circle'] = ('assets/xbox_%s.png' % mapping[size], 1)
+        sy['xbox_x'] = ('assets/xbox_%s.png' % mapping[size], 0)
+        PRELOADED_SYMBOLS[size] = {}
+        for k,v in sy.items():
+            PRELOADED_SYMBOLS[size][k] = (pygame.image.load(resource_path(v[0])), v[1])
+
+
+for name,font in FONTS.items():
     font.antialiased = False
+    font.pad = True
+    print(name, font.get_sized_height(), font.get_sized_glyph_height(), font.get_sized_ascender(), font.get_sized_descender())
 
 class Text(spritebase.SpriteBase):
     type = None
@@ -131,27 +155,14 @@ def get_groups(line, inside_group=None):
         x += 1
     return groups
 
-HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':26, 'bm_army':12, 'pixolde':16, 'logo':50}
+HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':28, 'bm_army':12, 'pixolde':16, 'logo':50}
+Y_OFFSETS = {'tiny':0, 'small': -2, 'medium': 0, 'big': -4, 'huge':-1, 'bm_army':0, 'pixolde':0, 'logo':0}
+Y_SYMBOL_OFFSETS = {'tiny':0, 'small': 0, 'medium': 0, 'big': 0, 'huge':1, 'bm_army':0, 'pixolde':0, 'logo':0}
 
-SYMBOLS = {
-    '*left*':"assets/mouse_left.png",
-    '*right*':"assets/mouse_right.png",
-    '*drag*':"assets/mouse_drag.png",
-}
 
-SYMBOLS_PS = {
-    '*square*':"assets/ps_square.png",
-    '*triangle*':"assets/ps_triangle.png",
-    '*circle*':"assets/ps_circle.png",
-    '*x*':"assets/ps_x.png"
-}
-
-SYMBOLS_XBOX = {
-    '*square*':"assets/xbox_x.png",
-    '*triangle*':"assets/xbox_y.png",
-    '*circle*':"assets/xbox_b.png",
-    '*x*':"assets/xbox_a.png"
-}
+SYMBOLS = [
+    'left', 'right', 'drag', 'x', 'square', 'triangle', 'circle'
+]
 
 def render_multiline(text, size, color, wrap_width=None, center=True):
     return render_multiline_extra(text, size, color, wrap_width, center)[0]
@@ -175,7 +186,8 @@ def render_multiline_extra(text, size, color, wrap_width=None, center=True):
     w = 0
     for line in lines:
         _,_,fw,fh = f.get_rect(line)
-        h += max(HEIGHTS[size], fh)
+        #h += max(HEIGHTS[size], fh)
+        h += HEIGHTS[size]
         w = max(w, fw)
     #h += (len(lines) - 1)
     text_surf = pygame.Surface((w,h), pygame.SRCALPHA)
@@ -199,27 +211,39 @@ def render_multiline_extra(text, size, color, wrap_width=None, center=True):
                 group_color = group[0]
             group_text = group[1]
 
+            yo = 0
+
             # Is text or a symbol?
-            joys = game.Game.inst.joysticks
-            if joys and joys[0].get_numbuttons() == 14:
-                symbols = {**SYMBOLS, **SYMBOLS_PS}
-            else:
-                symbols = {**SYMBOLS, **SYMBOLS_XBOX}
-            if group_text in symbols:
-                symbol_img = pygame.image.load(resource_path(symbols[group_text]))
-                text_surf.blit(symbol_img, (x + running_x, y + yo))
-                running_x += symbol_img.get_width() + 2
+            if group_text in ["*%s*" % s for s in SYMBOLS]:
+                which_symbol = group_text.replace("*", "")
+                if which_symbol in ["x", "square", "triangle", "circle"]:
+
+                    joys = game.Game.inst.joysticks
+                    if joys and joys[0].get_numbuttons() == 14:
+                        which_symbol = "ps_%s" % which_symbol
+                    else:
+                        which_symbol = "xbox_%s" % which_symbol
+                
+                symbol_img, frame = PRELOADED_SYMBOLS[size][which_symbol]
+                yo = Y_SYMBOL_OFFSETS[size]
+                frame_width = symbol_img.get_width()
+                if frame is not None:
+                    frame_width = symbol_img.get_width() / 4
+                    text_surf.blit(symbol_img, (x + running_x, y + yo), (frame * frame_width, 0, frame_width, symbol_img.get_height()))
+                else:
+                    text_surf.blit(symbol_img, (x + running_x, y + yo))
+                running_x += frame_width + 2
 
             else:
                 if group_text.startswith(" "):
                     running_x += 1
+                if not group_text:
+                    continue
                 rect = f.get_rect(group_text)
-                yo = 0
-                # Hacky comma detection...
-                if rect[3] <= 7 and rect[1] <= 7:
-                    yo = 6
-                
-                f.render_to(text_surf, (x + running_x,y + yo), group_text, group_color, (0,0,0,0))
+                yo = Y_OFFSETS[size]
+
+                surf, rect = f.render(group_text, group_color, (0,0,0,0))
+                text_surf.blit(surf, (x + running_x,y + yo))
                 if group_text.endswith(" "):
                     running_x += 1
                 
@@ -235,3 +259,25 @@ def render_multiline_extra(text, size, color, wrap_width=None, center=True):
 
 if __name__ == "__main__":
     print(get_groups("hello [world] how is [it] going?"))
+    pygame.init()
+    screen = pygame.display.set_mode((800,600))
+    screen.fill(PICO_WHITE)
+    f = FONTS['small']
+    x = 20
+    def draw_words(f, c):
+        global x
+        y = 20
+        #y -= f.get_sized_descender()
+        rect = f.render_to(screen, (x,y), c, PICO_BLACK)
+        x += rect[2] + 1
+
+    draw_words(FONTS['small'], "Helloqp")
+    draw_words(FONTS['big'], "Helloqp")
+    draw_words(FONTS['huge'], "Helloqp")
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        pygame.display.update()

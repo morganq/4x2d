@@ -609,7 +609,7 @@ class Planet(SpaceObject):
 
         if self.get_stat("ice_per_docked") > 0:
             if self._timers['ice_per_docked'] > 5:
-                self._timers['ice_per_docked'] -= 5
+                self._timers['ice_per_docked'] = 0
                 docked = sum(self.ships.values())
                 self.owning_civ.earn_resource("ice", self.get_stat("ice_per_docked") * docked, where = self.pos)
 
