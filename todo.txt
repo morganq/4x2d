@@ -2,12 +2,15 @@
 
 ** Immediate **
 
-Make controller icons on big buttons look good
+✓ Make controller icons on big buttons look good
 
 
 ** Missing Sounds **
 
-Generic UI button press
+* Generic UI button press
+Start order arrow drag sound
+Recall
+Generic UI cancel 
 Take over a planet - maybe a "negative" version for when the enemy does it
 Fighter out of fuel turnaround
 
@@ -16,11 +19,11 @@ Fighter out of fuel turnaround
 ✓ Sometimes AI ships circle endlessly
 ✓ Supervisors don't trigger ships to change target to them
 
-Consider using joystick cursor on upgrade screen
+✓ Consider using joystick cursor on upgrade screen
 Adjust upgrade curve [num upgrades per sector]
 
 ? Tutorial has bugs associated with the save game state
-? Count labels as hover/click targets
+? Menu - Count labels as hover/click targets
 
 ** Release **
 

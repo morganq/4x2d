@@ -51,11 +51,15 @@ class MainMenuOption(framesprite.FrameSprite):
         self.label = None
         self.initial_pos = pos
         self.hover = False
-        self.onclick = onclick
+        self.onclick_callback = onclick
         self.selectable = True
         self.on("mouse_down", lambda *args:self.onclick())
         self.on("mouse_enter", self.mouse_enter)
         self.on("mouse_exit", self.mouse_exit)
+
+    def onclick(self):
+        sound.play("click1")
+        self.onclick_callback()
 
     def mouse_enter(self, *args):
         self.label._generate_image(True)

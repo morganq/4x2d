@@ -301,6 +301,8 @@ class PlayState(UIEnabledState):
             self.scene.sm.transition(VictoryState(self.scene))
 
         if input == "special" and len(self.scene.player_civ.upgrades_stocked) > 0:
+            # Have to hack in the sound
+            sound.play("click1")
             self.scene.on_click_upgrade()
 
         if input == "confirm":
@@ -450,7 +452,7 @@ class OrderShipsState(UIEnabledState):
         self.scene.paused = False
         if self.joystick_overlay:
             self.joystick_overlay.kill()
-        sound.play("click1")
+        #sound.play("click1")
         super().exit()
 
     def on_order(self, values):
@@ -476,6 +478,7 @@ class OrderShipsState(UIEnabledState):
             self.scene.sm.transition(PlayState(self.scene))
 
         if input == "confirm":
+            sound.play("click1")
             self.panel.on_launch_click()
         return super().joystick_input(input, event)
 

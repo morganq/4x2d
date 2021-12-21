@@ -317,7 +317,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
     def on_click_upgrade(self):
         self.sm.transition(upgradestate.UpgradeState(self))
-        sound.play("click1")
+        #sound.play("click1")
 
     def on_click_saved_upgrade(self, upgrade):
         st = upgradestate.SavedUpgradeState(self)

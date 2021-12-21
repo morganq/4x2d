@@ -1,4 +1,5 @@
 import pygame
+import sound
 import text
 from colors import *
 from economy import RESOURCE_COLORS
@@ -18,11 +19,15 @@ class UpgradeButton(SpriteBase):
     def __init__(self, pos, upgrade, onclick, onhoverchange):
         super().__init__(pos)
         self.upgrade = upgrade
-        self.onclick = onclick
+        self.onclick_callback = onclick
         self.onhoverchange = onhoverchange
         self.selectable = True
 
         self._generate_image()
+
+    def onclick(self):
+        sound.play("click1")
+        self.onclick_callback()
 
     def _generate_image(self, hover=False):
         w = 240

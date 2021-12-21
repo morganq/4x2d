@@ -130,6 +130,7 @@ class LoadingScene(Scene):
                 t = "[*x*] Start"
             b = Button(V2(game.RES[0] - 80, 320) + self.game.game_offset, t, "big", self.on_click_start)
             b.offset = (0.5, 0)
+            self.start_button = b
             self.ui_group.add(b)
             self.loading_text.kill()
         return super().update(dt)
@@ -139,7 +140,7 @@ class LoadingScene(Scene):
 
     def take_input(self, inp, event):
         if inp == "confirm" and self.loaded:
-            self.on_click_start()
+            self.start_button.onclick()
         return super().take_input(inp, event)
 
     def render(self):

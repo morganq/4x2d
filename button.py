@@ -1,5 +1,6 @@
 import pygame
 
+import sound
 import text
 from colors import *
 from fadeinmixin import FadeInMixin
@@ -17,7 +18,7 @@ class Button(SpriteBase, FadeInMixin):
         self.text = text
         self.size = size
         self.fixed_width = fixed_width
-        self.onclick = onclick
+        self.onclick_callback = onclick
         self.selectable = True
         self.image_path = image_path
         self.label = label
@@ -26,6 +27,10 @@ class Button(SpriteBase, FadeInMixin):
         self.radius = 15
         self.asset_border = asset_border
         self._generate_image()
+
+    def onclick(self):
+        sound.play("click1")
+        self.onclick_callback()
 
     def _generate_image(self, hover=False):
         if self.image_path:

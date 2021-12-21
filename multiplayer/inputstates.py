@@ -366,7 +366,7 @@ class OrderShipsState(MultiplayerState):
         self.arrow.kill()
         if self.joystick_overlay:
             self.joystick_overlay.kill()
-        sound.play("click1")
+        #sound.play("click1")
         super().exit()
 
     def on_order(self, values):

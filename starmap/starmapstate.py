@@ -78,14 +78,14 @@ class StarMapState(states.UIEnabledState):
         self.select_node(obj)
 
     def click_store(self):
-        sound.play("click1")
+        #sound.play("click1")
         self.scene.game.run_info.choose_path(*self.current_node.node_pos)
         #self.scene.game.scene = StoreScene(self.scene.game, self.current_node.get_node())
         #self.scene.game.scene.start()
         self.scene.sm.transition(StoreNodeState(self.current_node.get_node(), self.scene))
 
     def click_launch(self):
-        sound.play("click1")
+        #sound.play("click1")
         #self.scene.game.run_info.choose_path(*galaxy.coords)
         self.scene.game.run_info.next_path_segment = self.current_node.node_pos
         self.scene.game.scene = LoadingScene(self.scene.game)

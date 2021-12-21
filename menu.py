@@ -1,6 +1,7 @@
 import game
 import joyresolver
 import slider
+import sound
 import text
 from colors import *
 from helper import clamp
@@ -46,6 +47,7 @@ class ButtonMenuOption(MenuOption):
         self.title.on("mouse_down", lambda a,b:self.input_confirm())
 
     def input_confirm(self):
+        sound.play("click1")
         self.on_confirm()
 
 class SliderMenuOption(MenuOption):

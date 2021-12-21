@@ -22,7 +22,7 @@ class ControlsScene(Scene):
             ('Press the button you want to use for Pause','menu'),
         ]
         self.control_index = -1
-        self.control_text = text.Text("", "medium", (game.RES[0]/2, game.RES[1]/2), multiline_width=300)
+        self.control_text = text.Text("", "small", (game.RES[0]/2, game.RES[1]/2), multiline_width=300)
         self.control_text.offset = (0.5, 0.5)
         self.ui_group.add(self.control_text)
         self.bindings = {
