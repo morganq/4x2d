@@ -1,6 +1,7 @@
 import random
 
 import helper
+import sound
 from colors import *
 from explosion import Explosion
 from icontext import IconText
@@ -72,6 +73,10 @@ class Colonist(Ship):
         mods = self.scene.game.run_info.get_current_level_galaxy()['mods']
         if mods and mods[0] == 'reflector':
             planet.add_building(UPGRADE_CLASSES['b_defense1'])
+        if self.owning_civ.is_player:
+            sound.play("goodcapture")
+        else:
+            sound.play("badcapture")            
 
 
     def update(self, dt):

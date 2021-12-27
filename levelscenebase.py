@@ -33,6 +33,7 @@ from civ import Civ, PlayerCiv
 from colors import *
 from debug import debug_render
 from economy import RESOURCE_COLORS, RESOURCES, Resources
+from elements import flash, shake
 from explosion import Explosion
 from hazard import Hazard
 from helper import all_nearby, get_nearest
@@ -67,6 +68,7 @@ class LevelSceneBase(scene.Scene):
 
         self.update_remainder_time = 0
         self.level_controller = None
+        self.shake_sprite = None
 
     def random_object_pos(self):
         pos = None
@@ -268,9 +270,12 @@ class LevelSceneBase(scene.Scene):
 
         if self.radar:
             for spr in self.game_group.sprites():
-                if True: #isinstance(spr, Planet) or isinstance(spr, Asteroid):
+                if isinstance(spr, Planet) or isinstance(spr, Asteroid):
                     delta = spr.pos - self.radar.pos
                     if delta.sqr_magnitude() < self.radar.size ** 2:
+                        if not spr.visible:
+                            flash.flash_sprite(spr)
+                            #shake.shake(self, spr.pos, 30)
                         spr.visible = True
                     else:
                         spr.visible = False
@@ -341,6 +346,11 @@ class LevelSceneBase(scene.Scene):
             elapsed = time.time() - t
             self.update_times[type(sprite)] += elapsed
 
+        if self.shake_sprite:
+            self.shake_sprite.update(dt)  
+            if self.shake_sprite.time > self.shake_sprite.end_time:
+                self.shake_sprite = None
+
     def render(self):
         t = time.time()
         #self.game.screen.fill(PICO_BLACK)
@@ -351,6 +361,9 @@ class LevelSceneBase(scene.Scene):
                     print(spr, "bad image")
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
+        if self.shake_sprite:
+            self.shake_sprite.render(self.game.screen)
+
         if self.debug:
             for k,v in self.fleet_managers.items():
                 for fleet in v.current_fleets:

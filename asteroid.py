@@ -2,12 +2,17 @@ import math
 import random
 
 import pygame
-from colors import *
-from v2 import V2
-from helper import get_nearest
-from spaceobject import SpaceObject
-from icontext import IconText
+
 import economy
+import sound
+from colors import *
+from explosion import Explosion
+from helper import get_nearest
+from icontext import IconText
+from particle import Particle
+from spaceobject import SpaceObject
+from v2 import V2
+
 
 class Asteroid(SpaceObject):
     HEALTHBAR_SIZE = (20, 2)
@@ -88,7 +93,15 @@ class Asteroid(SpaceObject):
         super().take_damage(damage, origin=origin)
 
         if self.health <= 0:
+            sound.play_explosion()
             civ = origin.owning_civ
+            e = Explosion(self.pos, [PICO_YELLOW, PICO_ORANGE, PICO_RED, PICO_BROWN], 0.4, 13, line_width=1)
+            self.scene.game_group.add(e)
+            for i in range(40):
+                v = V2.random_angle() * 4 * random.random()
+                color = random.choice([PICO_YELLOW, PICO_ORANGE, PICO_ORANGE, PICO_RED])
+                p = Particle([color], 1, self.pos + v, random.random() + 0.5, v * 3)
+                self.scene.game_group.add(p)
             for r,v in self.resources.data.items():
                 yield_mul = civ.get_stat("asteroid_yield_mul") + 1
                 v *= yield_mul

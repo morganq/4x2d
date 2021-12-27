@@ -300,21 +300,27 @@ class MenuScene(scene.Scene):
         self.choices = []
         self.current_choice = 2
         self.using_joy = True
+        self.takeoff = False
+        self.takeoff_time = 0
         
-        for i in range(120):
-            s = framesprite.FrameSprite(V2(random.randint(0, self.game.game_resolution.x),random.randint(-30, self.game.game_resolution.y)), "assets/bgstar.png", 11)
+        minx = -200
+        miny = -200
+        maxx = self.game.game_resolution.x + 200
+        maxy = self.game.game_resolution.y + 200
+        for i in range(320):
+            s = framesprite.FrameSprite(V2(random.randint(minx, maxx),random.randint(miny, maxy)), "assets/bgstar.png", 11)
             s.frame = 4 + random.randint(0,1)
             self.background_group.add(s)
             self.parallax.append(Parallaxed(s, 0.05))
             self.stars.append(s)
-        for i in range(60):
-            s = framesprite.FrameSprite(V2(random.randint(0, self.game.game_resolution.x),random.randint(-60, self.game.game_resolution.y)), "assets/bgstar.png", 11)
+        for i in range(90):
+            s = framesprite.FrameSprite(V2(random.randint(minx, maxx),random.randint(miny, maxy)), "assets/bgstar.png", 11)
             s.frame = 2 + random.randint(0,1)
             self.background_group.add(s)
             self.parallax.append(Parallaxed(s, 0.1))   
             self.stars.append(s)         
-        for i in range(20):
-            s = framesprite.FrameSprite(V2(random.randint(0, self.game.game_resolution.x),random.randint(-100, self.game.game_resolution.y)), "assets/bgstar.png", 11)
+        for i in range(40):
+            s = framesprite.FrameSprite(V2(random.randint(minx, maxx),random.randint(miny, maxy)), "assets/bgstar.png", 11)
             s.frame = 0 + random.randint(0,1)
             self.background_group.add(s)
             self.parallax.append(Parallaxed(s, 0.2)) 
@@ -419,7 +425,24 @@ class MenuScene(scene.Scene):
 
     def update(self, dt):
         self.time += min(dt,0.1)
+        if self.takeoff:
+            self.takeoff_update(dt)
+        else:
+            self.basic_update(dt)
 
+        for para in self.parallax:
+            para.update(self.time)
+
+        for spr in self.game_group.sprites():
+            spr.update(dt)
+
+        for i in range(10):
+            s = random.choice(self.stars)
+            s.frame = int(s.frame / 2) * 2 + random.randint(0,1)
+
+        super().update(dt)
+
+    def basic_update(self, dt):
         # Enemies
         off = 0.25
         if self.time > 6 + off:
@@ -455,17 +478,32 @@ class MenuScene(scene.Scene):
                 labels[j].visible = True
         
 
-        #self.bg.update(dt)
-        for para in self.parallax:
-            para.update(self.time)
+    def takeoff_update(self, dt):
+        self.takeoff_time += dt
+        for obj in [self.bg_enemies, self.bg_earth, self.bg_multiplayer, self.bg_continue, self.bg_options, self.bg_exit, self.bg_newgame_path]:
+            if obj:
+                obj.visible = False
+                if hasattr(obj, "label"):
+                    obj.label.visible = False
+        self.bg_newgame.label.visible = False
+        self.bg_newgame.hover = True
+        ow,oh = self.takeoff_earth.base_image.get_size()
+        nw = int(ow / (self.takeoff_time * 2 + 1))
+        nh = int(oh / (self.takeoff_time * 2 + 1))
+        offx = 0.05
+        offy = 0.8
+        self.takeoff_earth.x = (ow - nw) * offx
+        self.takeoff_earth.y = (oh - nh) * offy
+        self.takeoff_earth.image = pygame.transform.scale(self.takeoff_earth.base_image, (nw,nh))
 
-        for spr in self.game_group.sprites():
-            spr.update(dt)
-
-        for i in range(10):
-            s = random.choice(self.stars)
-            s.frame = int(s.frame / 2) * 2 + random.randint(0,1)
-        super().update(dt)
+        ep = V2(self.game.game_resolution.x * (offx + 0.025), self.game.game_resolution.y * (offy + 0.025))
+        for p in self.parallax:
+            if p.degree <= 0.2:
+                earth_delta = p.end_pos - ep
+                p.end_pos += V2(-30 * dt * p.degree, 0) - earth_delta * p.degree * dt * 0.3
+                #p.obj.x -= dt * p.degree * 10
+        if self.takeoff_time >= 3.5:
+            pass
 
     def render(self):   
         self.game.screen.fill(PICO_BLACK)        
@@ -490,8 +528,16 @@ class MenuScene(scene.Scene):
         self.game.scene.start()        
 
     def click_new(self):
-        self.game.scene = newgamescene.NewGameScene(self.game)
-        self.game.scene.start()             
+        #self.game.scene = newgamescene.NewGameScene(self.game)
+        #self.game.scene.start()
+        self.takeoff_earth = simplesprite.SimpleSprite(V2(0,0))
+        self.takeoff_earth.base_image = pygame.Surface(self.game.game_resolution.tuple(), pygame.SRCALPHA)
+        self.takeoff_earth.base_image.blit(self.bg_earth.image, self.bg_earth.pos.tuple_int())
+        self.takeoff_earth.base_image.blit(self.bg_enemies.image, self.bg_enemies.pos.tuple_int())
+        self.takeoff_earth.image = self.takeoff_earth.base_image
+        self.game_group.add(self.takeoff_earth)
+        self.takeoff = True
+        self.logo.kill()
 
     def click_intel(self):
         pass                    
@@ -508,4 +554,4 @@ class MenuScene(scene.Scene):
         if inp == "mouse_move" and self.using_joy:
             self.choices[self.current_choice].mouse_exit()
             self.using_joy = False
-        return super().take_input(inp, event)
+        #return super().take_input(inp, event)

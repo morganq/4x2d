@@ -109,7 +109,7 @@ class TimeCrystal(Planet):
             replica.kill()
         self.countdown.kill()
 
-        sound.play("explosion1")
+        sound.play_explosion()
         base_angle = random.random() * 6.2818
         for x in range(self.image.get_width()):
             for y in range(self.image.get_height()):

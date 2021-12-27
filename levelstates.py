@@ -365,6 +365,7 @@ class PlayState(UIEnabledState):
 
         if input == "back":
             if self.joy_controls_state == "arrow":
+                sound.play("cancel")
                 self.joy_controls_state = "default"
                 self.joy_hover_filter = self.default_joy_hover_filter
                 self.arrow.visible = False
@@ -470,11 +471,13 @@ class OrderShipsState(UIEnabledState):
         if input == "click":
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
             if not pr.collidepoint(event.gpos.tuple()):
+                sound.play("cancel")
                 self.scene.sm.transition(PlayState(self.scene))
         return super().mouse_input(input, event)
 
     def joystick_input(self, input, event):
         if input == "back":
+            sound.play("cancel")
             self.scene.sm.transition(PlayState(self.scene))
 
         if input == "confirm":

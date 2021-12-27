@@ -10,6 +10,7 @@ import planet
 import pygame
 import sound
 from colors import *
+from elements import shake
 from framesprite import FrameSprite
 from laserparticle import LaserParticle
 from resources import resource_path
@@ -344,6 +345,7 @@ class Ship(SpaceObject):
             self.fuel_remaining -= cruise_travel_dist_frame
 
             if self.fuel_remaining < 0:
+                sound.play("recall")
                 self.set_state(STATE_RETURNING)
                 self.turnaround_spr = FrameSprite(self.pos, "assets/fighterturnaround.png", 6)
                 self.scene.ui_group.add(self.turnaround_spr)
@@ -547,27 +549,19 @@ class Ship(SpaceObject):
         self.waiting_time = 0
 
     def kill(self):
+        if self.turnaround_spr:
+            self.turnaround_spr.kill()
         if self.health <= 0:
+            shake.shake(self.scene, self.pos, 7, 0.3)
+
             if self.owning_civ.ships_dropping_mines > 0:
                 self.owning_civ.ships_dropping_mines -= 1
                 m = SpaceMine(self.scene, self.pos, self.owning_civ, 0)
                 self.scene.game_group.add(m)
                             
-            sound.play("explosion1")
+            sound.play_explosion()
             self.owning_civ.ships_lost += 1 # For score + stats
-            base_angle = random.random() * 6.2818
-            for x in range(self.image.get_width()):
-                for y in range(self.image.get_height()):
-                    color = tuple(self.image.get_at((x,y)))
-                    if color[3] >= 128 and color[0:3] != PICO_BLACK:
-                        _,a = (V2(x,y) - V2(5.5,5.5)).to_polar()
-                        if abs(helper.get_angle_delta(a, base_angle)) > 3.14159/2:
-                            a = base_angle + 3.14159
-                        else:
-                            a = base_angle
-                        pvel = V2.from_angle(a) * 6
-                        p = particle.Particle([PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY],1,self.pos + V2(x - 6,y - 6),1.5,pvel)
-                        self.scene.game_group.add(p)        
+            self.space_explode()      
 
             if self.get_stat("ship_death_heal") > 0:
                 nearby = helper.all_nearby(self.pos,[s for s in self.scene.get_civ_ships(self.owning_civ) if s is not self], FLEET_RADIUS)

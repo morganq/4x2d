@@ -14,6 +14,7 @@ import ships.interceptor
 import sound
 import status_effect
 from colors import *
+from elements import flash, shake
 from framesprite import FrameSprite
 from funnotification import FunNotification
 from helper import all_nearby, clamp, get_nearest
@@ -24,7 +25,7 @@ from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
 from v2 import V2
 
-from planet import timeloop
+from planet import flag, timeloop
 from planet.rewindparticle import RewindParticle
 from planet.shipcounter import ShipCounter
 
@@ -86,6 +87,7 @@ class Planet(SpaceObject):
         ## Building juice ##
         self.building_construction_time = 0
         self.last_building = None
+        self.flag = None
 
         ## Time loop ##
         self.time_loop = False
@@ -188,6 +190,8 @@ class Planet(SpaceObject):
 
         if civ is not None:
             self.health = max(self.health, self.get_max_health() / 4)
+            self.flag = flag.Flag(self.pos + V2(1, -self.radius-1), civ.color)
+            self.scene.game_group.add(self.flag)
         self._population = 0
         self.emit_ships_queue = []
         self.ships = defaultdict(int)
@@ -261,8 +265,8 @@ class Planet(SpaceObject):
                 c = self.building_construction_time            
             b.draw_foreground(frame, offset, building['angle'] + self.base_angle, construction=c)
 
-        if self.building_construction_time > 2.75:
-            pygame.draw.circle(frame, PICO_WHITE, (cx,cy), radius)
+        #if self.building_construction_time > 2.75:
+        #    pygame.draw.circle(frame, PICO_WHITE, (cx,cy), radius)
 
         return frame
 
@@ -677,6 +681,7 @@ class Planet(SpaceObject):
 
     def on_die(self):  
         sound.play("explosion2")
+        shake.shake(self.scene, self.pos, 30, 1.0)
         if self.get_stat("underground"):
             for ship in all_nearby(self.pos, self.scene.get_enemy_ships(self.owning_civ), 60):
                 ship.take_damage(20 * self.get_stat("underground"), self)
@@ -762,6 +767,7 @@ class Planet(SpaceObject):
         self.building_construction_time = 3        
         self._generate_base_frames()
         self._generate_frames()
+        flash.flash_sprite(self, speed=1.5)
         self.needs_panel_update = True 
         mh_after = self.get_max_health()
         self._health += mh_after - mh_before 
@@ -801,9 +807,9 @@ class Planet(SpaceObject):
                     self.emit_ship(ship_name, {"to":random.choice(threats), "defending":self})
 
     def blow_up_buildings(self):
-        for building in self.buildings:
+        for i,building in enumerate(self.buildings):
             bp = V2.from_angle(building['angle'] + self.base_angle) * self.get_radius() + self.pos
-            e = explosion.Explosion(bp, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.25, 11, scale_fn="log", line_width=1)
+            e = explosion.Explosion(bp, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.35 + i * 0.15, 6, scale_fn="log", line_width=1)
             self.scene.game_group.add(e)        
             building['building'].kill()
         self._generate_base_frames()

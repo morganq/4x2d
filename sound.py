@@ -1,4 +1,7 @@
+import random
+
 import pygame
+
 import save
 from resources import resource_path
 
@@ -7,6 +10,7 @@ MUSIC_ENDEVENT = pygame.USEREVENT+1
 SOUNDFILES = {
     'short1':'assets/sounds/short1.wav',
     'short2':'assets/sounds/short2.wav',
+    'short3':'assets/sounds/short3.wav',
     'panel':'assets/sounds/panel.wav',
     'attackpanel':'assets/sounds/attackpanel.wav',
     'click1':'assets/sounds/click1.wav',
@@ -25,10 +29,14 @@ def init():
         SOUNDS[s] = pygame.mixer.Sound(resource_path(fn))
     for name in [
             'laser1', 'laser2', 'laser3', 'explosion1', 'explosion2', 'control', 'upgrade2', 'hit',
-            'talk1', 'talk2', 'talk3'
+            'talk1', 'talk2', 'talk3', 'short3', 'goodcapture', 'badcapture', 'exp1', 'exp2', 'exp3',
+            'exp4', 'radar', 'msg1', 'msg2', 'recall', 'cancel', 
         ]:
         load_sound(name, "assets/sounds/%s.wav" % name)            
     pygame.mixer.music.set_endevent(MUSIC_ENDEVENT)
+
+def play_explosion():
+    play(random.choice(['exp1', 'exp2', 'exp3', 'exp4']))
 
 def play(name):
     if name not in SOUNDS:

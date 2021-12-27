@@ -53,6 +53,7 @@ class OrderArrow(SpriteBase):
         SpriteBase.__init__(self, V2(0,0))
         self._layer = -1
         self.last_end = None
+        sound.play("short3")
 
     def setup(self, start_planet, end, end_planet=None):
         thickness = 6

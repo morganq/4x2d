@@ -3,6 +3,7 @@ import math
 import pygame
 
 import game
+import sound
 import text
 from colors import *
 from helper import clamp
@@ -24,6 +25,7 @@ class StageName(SpriteBase):
         self.visible = False
         self.close_time = KILL_TIME - FINISH_TIME
         self.visible_time = START_TIME + 0.25
+        self.played_close_sound = False
         self._generate_image()
 
     def _generate_image(self):
@@ -68,7 +70,12 @@ class StageName(SpriteBase):
     def update(self, dt):
         self.time += dt
         if self.time > START_TIME:
+            if not self.visible:
+                sound.play("msg1")
             self.visible = True
+        if self.time > self.close_time and not self.played_close_sound:
+            sound.play("msg2")
+            self.played_close_sound = True
         if self.time > KILL_TIME:
             self.kill()
         self._generate_image()

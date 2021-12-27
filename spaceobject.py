@@ -1,7 +1,12 @@
+import random
 from collections import defaultdict
 
+import helper
+import particle
 from animrotsprite import AnimRotSprite
+from colors import *
 from healthy import Healthy
+from v2 import V2
 
 
 class SpaceObject(AnimRotSprite, Healthy):
@@ -63,3 +68,19 @@ class SpaceObject(AnimRotSprite, Healthy):
         while(self.status_effects):
             self.status_effects[-1].kill()
         return super().kill()
+
+
+    def space_explode(self):
+        base_angle = random.random() * 6.2818
+        for x in range(self.image.get_width()):
+            for y in range(self.image.get_height()):
+                color = tuple(self.image.get_at((x,y)))
+                if color[3] >= 128 and color[0:3] != PICO_BLACK:
+                    _,a = (V2(x,y) - V2(self.width //2, self.height // 2)).to_polar()
+                    if abs(helper.get_angle_delta(a, base_angle)) > 3.14159/2:
+                        a = base_angle + 3.14159
+                    else:
+                        a = base_angle
+                    pvel = V2.from_angle(a) * 6
+                    p = particle.Particle([PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY],1,self.pos + V2(x - self.width //2,y - self.height //2),1.5,pvel)
+                    self.scene.game_group.add(p)          

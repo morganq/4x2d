@@ -79,6 +79,8 @@ class LevelScene(levelscenebase.LevelSceneBase):
         self.update_remainder_time = 0
         self.level_controller = None
 
+        self.is_first_frame = True
+
     @property
     def score(self):
         return self._score
@@ -371,6 +373,9 @@ class LevelScene(levelscenebase.LevelSceneBase):
             self.sm.state.paused_update(base_dt)
             return        
 
+        if self.is_first_frame:
+            sound.play("radar")
+
         self.time += dt
 
         if self.level_controller:
@@ -430,6 +435,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
         self.update_times['civs'] = time.time() - t
 
         self.update_times['update'] = time.time() - ut
+        self.is_first_frame = False
         
     def update_asset_buttons(self):
         for i,button in enumerate(self.asset_buttons):
@@ -494,6 +500,10 @@ class LevelScene(levelscenebase.LevelSceneBase):
                     print(spr, "bad image")
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
+
+        if self.shake_sprite:
+            self.shake_sprite.render(self.game.screen)
+
         if self.debug:
             for k,v in self.fleet_managers.items():
                 for fleet in v.current_fleets:

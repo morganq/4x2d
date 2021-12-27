@@ -250,8 +250,10 @@ class UpgradeState(UIEnabledState):
     def joystick_input(self, input, event):
         if input == "back":
             if self.pending_upgrade:
+                sound.play("cancel")
                 self.on_back()
             else:
+                sound.play("cancel")
                 self.finish(cancel = True)
 
         if self.pending_upgrade is None:

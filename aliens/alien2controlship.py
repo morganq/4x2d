@@ -14,7 +14,7 @@ class Alien2ControlShip(Fighter):
     BASE_HEALTH = 45
     BASE_DAMAGE = 5
     DISPLAY_NAME = "Supervisor"
-    MAX_SPEED = 5
+    MAX_SPEED = 4
     FIRE_RANGE = 45
     FIRE_RATE = 0.25
     FUEL = 9999

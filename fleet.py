@@ -7,6 +7,7 @@ import pygame
 
 import helper
 import ships
+import sound
 from aliens import bossmothership
 from button import Button
 from colors import PICO_DARKGREEN, PICO_GREEN
@@ -129,10 +130,16 @@ class FleetManager:
 
     def recall_fleet(self, fleet):
         nearest, dist = helper.get_nearest(fleet.ships[0].pos, self.scene.get_civ_planets(fleet.ships[0].owning_civ))
+        any_returned = False
         if nearest:        
             for ship in fleet.ships: 
-                ship.set_target(nearest)
-                ship.set_state('returning')
+                if ship.state != 'returning':
+                    any_returned = True
+                    ship.set_target(nearest)
+                    ship.set_state('returning')
+                    
+        if any_returned and fleet.ships[0].owning_civ.is_player:
+            sound.play("recall")
 
     def get_ship_fleet(self, ship):
         if ship in self.ship_fleets:

@@ -36,12 +36,12 @@ class ShipCounter(SpriteBase):
         color = PICO_GREEN
         if sum(self.planet.ships.values()) > self.planet.get_max_ships():
             color = PICO_RED
-        text_pos = (r - tr[2]/2 + 4, r - tr[3]/2)
+        text_pos = (r - tr[2]/2 + 4, r - tr[3]/2 + 1)
         text.FONTS['small'].render_to(self.image, text_pos, s, color)
 
         if self.planet.production:
             frame = int((self.time * 6) % 11)
-            self.image.blit(self.hourglass_frames, (text_pos[0] + 5, text_pos[1] - 1), (frame * 9, 0, 9, 9))
+            self.image.blit(self.hourglass_frames, (text_pos[0] + 5, text_pos[1] + 1), (frame * 9, 0, 9, 9))
 
         self._width = w
         self._height = h
