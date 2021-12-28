@@ -502,12 +502,12 @@ class GameOverState(State):
         self.scene.pause_sprite.darken()
         self.scene.ui_group.add(self.scene.pause_sprite)
 
-        ts = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2 + 2, 100 + 2), "DEFEAT", color=PICO_WHITE)
+        ts = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2 + 2, 70 + 2), "DEFEAT", color=PICO_WHITE)
         ts.offset = (0.5, 0)
         ts.layer = 9
         self.scene.ui_group.add(ts)
 
-        t = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2, 100), "DEFEAT", color=PICO_RED)
+        t = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2, 70), "DEFEAT", color=PICO_RED)
         t.offset = (0.5, 0)
         t.layer = 10
         self.scene.ui_group.add(t)
@@ -525,7 +525,7 @@ class VictoryState(State):
         self.scene.ui_group.empty()
         self.scene.game.game_speed_input = 0
 
-        sn = StageName(V2(0,100), self.scene.stage_num, "Victory!", "We've taken full control of this sector!")
+        sn = StageName(V2(0,70), self.scene.stage_num, "Victory!", "We've taken full control of this sector!")
         sn.time = 1.75
         self.scene.ui_group.add(sn)
 
@@ -585,12 +585,12 @@ class BeatGameState(State):
         self.scene.pause_sprite.darken()
         self.scene.ui_group.add(self.scene.pause_sprite)
 
-        ts = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2 + 2, 100 + 2), "VICTORY", color=PICO_RED)
+        ts = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2 + 2, 70 + 2), "VICTORY", color=PICO_RED)
         ts.offset = (0.5, 0)
         ts.layer = 9
         self.scene.ui_group.add(ts)
 
-        t = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2, 100), "VICTORY")
+        t = expandingtext.ExpandingText(V2(self.scene.game.game_resolution.x/2, 70), "VICTORY")
         t.offset = (0.5, 0)
         t.layer = 10
         self.scene.ui_group.add(t)
@@ -608,14 +608,16 @@ class HighScoreState(State):
         self.score_parts = []
         self.time = 0
 
+        ri = self.scene.game.run_info
+
         # Scoring
-        num_sectors = self.scene.game.run_info.sectors_cleared
-        minutes, seconds = divmod(int(self.scene.game.run_info.time_taken), 60)
+        num_sectors = ri.sectors_cleared
+        minutes, seconds = divmod(int(ri.time_taken), 60)
         time_formatted = "%d:%02d" % (minutes, seconds)
 
-        victory_bonus = 10_000 if self.scene.game.run_info.victory else 0
+        victory_bonus = 10_000 if ri.victory else 0
         sectors_bonus = 2000 * num_sectors
-        time_per = self.scene.game.run_info.time_taken / max(num_sectors,1)
+        time_per = ri.time_taken / max(num_sectors,1)
         # 0 second avg = 10k
         # 120 second avg = 5k
         # 360 sec = 2.5k
@@ -624,8 +626,8 @@ class HighScoreState(State):
         # 0 lost = 10k
         # 10 lost = 5k
         # 30 lost = 2.5k
-        ships_bonus = int(100_000 / (self.scene.game.run_info.ships_lost + 10))
-        if not self.scene.game.run_info.victory:
+        ships_bonus = int(100_000 / (ri.ships_lost + 10))
+        if not ri.victory:
             ships_bonus = 0
 
         self.score = victory_bonus + sectors_bonus + time_bonus + ships_bonus
@@ -635,12 +637,16 @@ class HighScoreState(State):
         self.add_score_part("Cleared %d hostile sectors:" % num_sectors, sectors_bonus)
         self.add_score_part("Victory Bonus:", victory_bonus)
         self.add_score_part("Time Bonus (%s):" % time_formatted, time_bonus)
-        if self.scene.game.run_info.victory:
-            self.add_score_part("Safety Bonus (lost %d ships):" % self.scene.game.run_info.ships_lost, ships_bonus)
+        if ri.victory:
+            self.add_score_part("Safety Bonus (lost %d ships):" % ri.ships_lost, ships_bonus)
         else:
-            self.add_score_part("Safety Bonus (lost %d ships):" % self.scene.game.run_info.ships_lost, "0 (Defeat)")
+            self.add_score_part("Safety Bonus (lost %d ships):" % ri.ships_lost, "0 (Defeat)")
+        if ri.run_challenges:
+            challenge_bonus = int(len(ri.run_challenges) * 0.1 * self.score)
+            pct = 10 * len(ri.run_challenges)
+            self.add_score_part("Challenge Bonus +%d%%:" % pct, challenge_bonus)
+            self.score += challenge_bonus
         self.add_score_part("Total:", self.score)
-
 
         self.highscores = []
         self.add_scores()
@@ -650,7 +656,7 @@ class HighScoreState(State):
     def add_scores(self):
         picked_one = False
         x = self.scene.game.game_resolution.x / 2 - 120
-        y = self.scene.game.game_resolution.y / 2 - 40
+        y = self.scene.game.game_resolution.y / 2 - 70
         label = text.Text("Top Scores", "big", V2(x - 60, y), PICO_WHITE, multiline_width=200)
         label.layer = 10
         label.visible = False
@@ -676,7 +682,7 @@ class HighScoreState(State):
 
     def add_score_part(self, name, score):
         x = self.scene.game.game_resolution.x / 2 - 90
-        y = (len(self.score_parts) // 2) * 24 + self.scene.game.game_resolution.y / 2 - 40
+        y = (len(self.score_parts) // 2) * 24 + self.scene.game.game_resolution.y / 2 - 70
         tname = text.Text(name, "small", V2(x,y), PICO_WHITE, multiline_width=200, shadow=PICO_BLACK)
         tname.layer = 10
         self.scene.ui_group.add(tname)

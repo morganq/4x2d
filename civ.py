@@ -61,6 +61,21 @@ class Civ:
         self.blueprints = []
         self.comm_objects = []
 
+        ### Modifiers ###
+        self.worker_loss = 0
+        self.challenge_max_fuel = None
+        self.army_max = None
+
+    def get_ship_fuel(self, ship_name):
+        f = 9999
+        if ship_name == "fighter":
+            f = 250
+        if self.challenge_max_fuel:
+            f = min(f, self.challenge_max_fuel)
+            if ship_name == "fighter":
+                f = 250 * 0.65
+        return f
+
     def get_upgrade_increase_amts(self):
         res_vals = {
             'iron':(25, 170),

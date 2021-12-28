@@ -80,6 +80,8 @@ class Colonist(Ship):
 
 
     def update(self, dt):
+        if self.population <= 0:
+            self.kill()
         super().update(dt)
         self.num_label.pos = self.pos + V2(7, -7)
 

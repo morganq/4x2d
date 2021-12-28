@@ -40,7 +40,10 @@ class OrderPanel(Panel):
                     color = PICO_DARKGRAY
                 self.add(SimpleSprite((0,0), 'assets/i-%s.png' % ship), V2(0,y))
                 self.add(Text("%ss" % name, "small", (0,0), color, False), V2(14,y + 2))
-                slider = Slider(V2(0,0), 80, 0, ships[ship], disabled=disabled)
+                disable_nums = None
+                if self.planet_from.owning_civ.worker_loss > 0:
+                    disable_nums = list(range(1, self.planet_from.owning_civ.worker_loss+1))
+                slider = Slider(V2(0,0), 80, 0, ships[ship], disabled=disabled, disable_nums=disable_nums)
                 self.add(slider, V2(0, y+12))
                 self.sliders[ship] = slider
                 y += 45
@@ -62,4 +65,6 @@ class OrderPanel(Panel):
 
     def on_launch_click(self):
         values = {ship:slider.value for ship,slider in self.sliders.items() if slider.value > 0}
+        if 'colonist' in values and values['colonist'] > 0 and values['colonist'] < self.planet_from.owning_civ.worker_loss + 1:
+            return
         self.on_order(values)

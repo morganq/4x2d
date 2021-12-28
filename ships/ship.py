@@ -68,7 +68,7 @@ class Ship(SpaceObject):
         self.fleet = None
         self.origin = None # Planet we were emitted from
 
-        self.fuel_remaining = self.FUEL
+        self.fuel_remaining = self.get_max_fuel()
 
         self.defending = None
         self.stealth = False
@@ -134,6 +134,9 @@ class Ship(SpaceObject):
         self.updated_color = False
         self.visible = False
 
+    def get_max_fuel(self):
+        return self.owning_civ.get_ship_fuel(self.SHIP_BONUS_NAME)
+
     def _set_player_ship_sprite_sheet(self, size=12):
         lvl = self.scene.game.run_info.ship_levels[self.SHIP_BONUS_NAME]
         if lvl == 1:
@@ -143,11 +146,10 @@ class Ship(SpaceObject):
 
     @classmethod
     def estimate_flight_range(cls, civ, target=None):
-        dist = cls.FUEL * (1 + civ.get_stat("ship_speed_mul"))
+        dist = civ.get_ship_fuel(cls.SHIP_BONUS_NAME) * (1 + civ.get_stat("ship_speed_mul"))
         if target and target.owning_civ != civ:
             dist *= (1 + civ.get_stat('ship_speed_mul_targeting_planets'))
         return dist
-        
 
     @classmethod
     def get_display_name(cls):
@@ -396,7 +398,7 @@ class Ship(SpaceObject):
     def collide(self, other):
         if self.can_land(other) and self.wants_to_land():
             self.kill()
-            other.add_ship(self.SHIP_NAME)
+            other.add_ship(self.SHIP_NAME, notify=False)
             other.needs_panel_update = True
         else:
             if isinstance(other, bullet.Bullet):

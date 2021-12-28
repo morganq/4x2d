@@ -19,6 +19,7 @@ class BossLaser(Fighter):
     FIRE_RANGE = 75
     MAX_SPEED = 5
     FUEL = 9999
+    DISPLAY_NAME = "Censor Predator"
 
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)

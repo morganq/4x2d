@@ -6,7 +6,7 @@ from spritebase import SpriteBase
 
 
 class Slider(SpriteBase):
-    def __init__(self, pos, meter_width, min, max, onchange=None, value=None, disabled=False):
+    def __init__(self, pos, meter_width, min, max, onchange=None, value=None, disabled=False, disable_nums=None):
         SpriteBase.__init__(self, pos)
         self.meter_width = meter_width
         self.min = min
@@ -16,6 +16,9 @@ class Slider(SpriteBase):
         else: self.value = value
         self.selectable = True
         self.onchange = onchange
+        self.disable_nums = []
+        if disable_nums:
+            self.disable_nums = disable_nums
         self._generate_image()
 
     def get_selection_info(self):
@@ -46,7 +49,10 @@ class Slider(SpriteBase):
         for i in range(self.max - self.min):
             it = ((i - self.min) / self.max - self.min)
             ix = int((w-(pad * 2)) * it + pad)
-            self.image.set_at((ix, 4), base_color)
+            color = base_color
+            if (i + self.min) in self.disable_nums:
+                color = PICO_DARKGRAY            
+            self.image.set_at((ix, 4), color)
 
         if self.value != self.min:
             mtw = text.FONTS['small'].get_rect(str(self.min))[2]
@@ -55,8 +61,11 @@ class Slider(SpriteBase):
             mtw = text.FONTS['small'].get_rect(str(self.max))[2]
             text.FONTS['small'].render_to(self.image, (w - pad - mtw / 2 + 1,13), str(self.max), hl_color)            
 
+        color = base_color
+        if self.value in self.disable_nums:
+            color = PICO_DARKGRAY
         tw = text.FONTS['small'].get_rect(str(self.value))[2]
-        text.FONTS['small'].render_to(self.image, (x - tw / 2 + 1,13), str(self.value), base_color)
+        text.FONTS['small'].render_to(self.image, (x - tw / 2 + 1,13), str(self.value), color)
 
         self._width = w
         self._height = h

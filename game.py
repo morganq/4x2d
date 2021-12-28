@@ -69,6 +69,7 @@ class Game:
         self.last_joy_axes = None
         try:
             self.run_info = self.save.get_run_state()
+            print(self.run_info.run_challenges)
         except:
             self.run_info = run.RunInfo()
         

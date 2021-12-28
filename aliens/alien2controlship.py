@@ -67,6 +67,7 @@ class Alien2ControlShip(Fighter):
 
             if self.tether_time > self.get_max_tether_time():
                 self.tethered.change_owner(self.owning_civ, self.chosen_target)
+                self.tethered.set_state("returning")
 
             if self.tethered.owning_civ == self.owning_civ:
                 self.tethered.tether_target = False

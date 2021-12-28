@@ -7,7 +7,7 @@ RUN_INFO_SERIALIZE_FIELDS = [
     'data', 'path', 'saved_technologies', 'blueprints',
     'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
     'bonus_credits', 'ship_levels', 'score', 'time_taken', 'ships_lost',
-    'reward_list', 'sectors_cleared', 'victory', 'started'
+    'reward_list', 'sectors_cleared', 'victory', 'started', 'run_challenges', 'run_modifiers'
 ]
 
 LEVEL_TITLES = {
@@ -22,6 +22,13 @@ LEVEL_TITLES = {
     8: {'name':'Shop', 'description':'Shop level'},
     9: {'name':'Signal Source', 'description':'This is where the signal originated. There, our comrades, frozen in time! We have to save them!'},
 }
+
+# MODIFIERS
+FRAGILE_PLANETS = "fragile_planets"
+LOW_RANGE = "low_range"
+WORKER_LOSS = "worker_loss"
+LOW_OXYGEN = "low_oxygen" # TODO
+SMALL_ARMY = "small_army"
 
 class RunInfo:
     def __init__(self, data = None):
@@ -44,6 +51,8 @@ class RunInfo:
         self.reward_list = [] #[{'name':'blueprint'}]
         self.next_path_segment = (0,0)
         self.started = False
+        self.run_challenges = [FRAGILE_PLANETS] # Negative mods
+        self.run_modifiers = [] # Positive mods
 
     def serialize(self):
         obj = {}

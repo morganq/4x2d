@@ -369,55 +369,7 @@ class Planet(SpaceObject):
             self.warning.frame = int((self.time * 2) % 2)
 
         # Emit ships which are queued
-        if self.emit_ships_queue:
-            self.emit_ships_timer += dt
-            if self.emit_ships_timer >= EMIT_SHIPS_RATE:
-                ship_type, data = self.emit_ships_queue.pop(0)
-                target = data['to']
-
-                if self.get_stat("launchpad_pop_chance"):
-                    if target.owning_civ != self.owning_civ and ship_type == "colonist":
-                        if self._timers['last_launchpad_pop'] >= 20 and random.random() < self.get_stat("launchpad_pop_chance"):
-                            self._timers['last_launchpad_pop'] = 0
-                            self.add_population(1)
-
-                if self.get_stat("launchpad_fighter_chance"):
-                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type in ["bomber","interceptor"]:
-                        if random.random() < self.get_stat("launchpad_fighter_chance"):
-                            self.add_ship("fighter")
-
-                if self.get_stat("launchpad_battleship_health"):
-                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type == "battleship":
-                        self.health += self.get_stat("launchpad_battleship_health")
-
-                if self.get_stat("launchpad_battleship_pop"):
-                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type == "battleship":
-                        self.add_population(self.get_stat("launchpad_battleship_pop"))
-                
-                towards_angle = (target.pos - self.pos).to_polar()[1]
-                towards_angle += random.random() - 0.5
-                ship_class = SHIPS_BY_NAME[ship_type]                                
-                off = V2.from_angle(towards_angle)
-                s = ship_class(self.scene, self.pos + off * self.get_radius(), self.owning_civ)
-                if 'colonist' in ship_type:
-                    s.set_pop(data['num'])
-                s.origin = self
-                s.set_target(target)
-                s.angle = math.atan2(off.y, off.x)
-                s.velocity = off * 10
-                if 'defending' in data:
-                    s.defending = data['defending']
-                if ship_type == "scout" and self.get_stat('scout_bombs'):
-                    s.set_starting_busters(1 + self.get_stat('scout_bombs'))
-                self.scene.game_group.add(s)
-                self.emit_ships_timer -= EMIT_SHIPS_RATE
-                self.needs_panel_update = True
-                sound.play("launch")
-
-                # Any effects to attach to the ship
-                if self.get_stat("ship_pop_boost"):
-                    for i in range(self.population):
-                        s.add_effect(status_effect.ShipBoostEffect(s, self))
+        self.emit_ships_update(dt)
 
         ### Resource production ###
         # Figure out which is the "top" resource
@@ -474,40 +426,8 @@ class Planet(SpaceObject):
                     self.owning_civ.earn_resource("gas", v * self.get_stat("mining_gas_per_iron"), where=self)
 
         # Ship production
-        for prod in self.production:
-            prod_rate = 1 + self.get_stat("ship_production")
-            prod_amt_mul = 1
-
-            prod_rate *= 1 + self.get_stat("ship_production_rate_per_pop") * self.population
-
-            if prod.ship_type == "fighter":
-                prod_amt_mul += self.get_stat("fighter_production_amt")
-                prod_amt_mul /= (2 ** self.get_stat("fighter_production_amt_halving"))
-            
-            if prod.ship_type in ['fighter', 'scout', 'interceptor', 'bomber', 'battleship']:
-                prod_rate *= 1 + self.get_stat("%s_production" % prod.ship_type)
-
-            self.upgrade_indicators['ship_production_proximity'] = None
-            if self.get_stat("ship_production_proximity"):
-                enemy_planets = self.scene.get_enemy_planets(self.owning_civ)
-                nearest, dist = get_nearest(self.pos, enemy_planets)
-                if dist < PLANET_PROXIMITY ** 2:
-                    prod_rate *= 1 + self.get_stat("ship_production_proximity")
-                    self.upgrade_indicators['ship_production_proximity'] = nearest
-                    
-
-            prod.number_mul = prod_amt_mul
-            prod.update(self, dt * prod_rate)
-        self.production = [p for p in self.production if not p.done]
-
-        # Time loop
-        if self.time_loop:
-            self.time_loop_time -= dt
-            if self.time_loop_time < 0:
-                self.time_loop_time += 60
-                if self.last_production:
-                    self.add_ship(self.last_production)
-                self.scene.ui_group.add(RewindParticle(self.pos, self.radius))
+        if self.owning_civ and (not self.owning_civ.army_max or len(self.owning_civ.get_all_combat_ships()) < self.owning_civ.army_max):
+            self.production_update(dt)
 
         # Ship destruction
         
@@ -567,6 +487,93 @@ class Planet(SpaceObject):
         self.upgrade_update(dt)
         self.special_update(dt)
         super().update(real_dt)
+
+    def production_update(self, dt):
+        for prod in self.production:
+            prod_rate = 1 + self.get_stat("ship_production")
+            prod_amt_mul = 1
+
+            prod_rate *= 1 + self.get_stat("ship_production_rate_per_pop") * self.population
+
+            if prod.ship_type == "fighter":
+                prod_amt_mul += self.get_stat("fighter_production_amt")
+                prod_amt_mul /= (2 ** self.get_stat("fighter_production_amt_halving"))
+            
+            if prod.ship_type in ['fighter', 'scout', 'interceptor', 'bomber', 'battleship']:
+                prod_rate *= 1 + self.get_stat("%s_production" % prod.ship_type)
+
+            self.upgrade_indicators['ship_production_proximity'] = None
+            if self.get_stat("ship_production_proximity"):
+                enemy_planets = self.scene.get_enemy_planets(self.owning_civ)
+                nearest, dist = get_nearest(self.pos, enemy_planets)
+                if dist < PLANET_PROXIMITY ** 2:
+                    prod_rate *= 1 + self.get_stat("ship_production_proximity")
+                    self.upgrade_indicators['ship_production_proximity'] = nearest
+                    
+
+            prod.number_mul = prod_amt_mul
+            prod.update(self, dt * prod_rate)
+        self.production = [p for p in self.production if not p.done]
+
+        # Time loop
+        if self.time_loop:
+            self.time_loop_time -= dt
+            if self.time_loop_time < 0:
+                self.time_loop_time = 60
+                if self.last_production:
+                    self.add_ship(self.last_production)
+                self.scene.ui_group.add(RewindParticle(self.pos, self.radius))        
+
+    def emit_ships_update(self, dt):
+        if self.emit_ships_queue:
+            self.emit_ships_timer += dt
+            if self.emit_ships_timer >= EMIT_SHIPS_RATE:
+                ship_type, data = self.emit_ships_queue.pop(0)
+                target = data['to']
+
+                if self.get_stat("launchpad_pop_chance"):
+                    if target.owning_civ != self.owning_civ and ship_type == "colonist":
+                        if self._timers['last_launchpad_pop'] >= 20 and random.random() < self.get_stat("launchpad_pop_chance"):
+                            self._timers['last_launchpad_pop'] = 0
+                            self.add_population(1)
+
+                if self.get_stat("launchpad_fighter_chance"):
+                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type in ["bomber","interceptor"]:
+                        if random.random() < self.get_stat("launchpad_fighter_chance"):
+                            self.add_ship("fighter")
+
+                if self.get_stat("launchpad_battleship_health"):
+                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type == "battleship":
+                        self.health += self.get_stat("launchpad_battleship_health")
+
+                if self.get_stat("launchpad_battleship_pop"):
+                    if target.owning_civ and target.owning_civ != self.owning_civ and ship_type == "battleship":
+                        self.add_population(self.get_stat("launchpad_battleship_pop"))
+                
+                towards_angle = (target.pos - self.pos).to_polar()[1]
+                towards_angle += random.random() - 0.5
+                ship_class = SHIPS_BY_NAME[ship_type]                                
+                off = V2.from_angle(towards_angle)
+                s = ship_class(self.scene, self.pos + off * self.get_radius(), self.owning_civ)
+                if 'colonist' in ship_type:
+                    s.set_pop(data['num'] - self.owning_civ.worker_loss)
+                s.origin = self
+                s.set_target(target)
+                s.angle = math.atan2(off.y, off.x)
+                s.velocity = off * 10
+                if 'defending' in data:
+                    s.defending = data['defending']
+                if ship_type == "scout" and self.get_stat('scout_bombs'):
+                    s.set_starting_busters(1 + self.get_stat('scout_bombs'))
+                self.scene.game_group.add(s)
+                self.emit_ships_timer -= EMIT_SHIPS_RATE
+                self.needs_panel_update = True
+                sound.play("launch")
+
+                # Any effects to attach to the ship
+                if self.get_stat("ship_pop_boost"):
+                    for i in range(self.population):
+                        s.add_effect(status_effect.ShipBoostEffect(s, self))        
 
     def special_update(self, dt):
         pass
@@ -740,7 +747,7 @@ class Planet(SpaceObject):
             self.emit_ships_queue.append((type, data))
             self.ships[type] -= 1
 
-    def add_ship(self, type):
+    def add_ship(self, type, notify=True):
         if type in self.ships:
             self.ships[type] += 1
         else:

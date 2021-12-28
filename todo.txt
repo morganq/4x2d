@@ -1,41 +1,20 @@
-✓
-
 ** Juice **
 
-Animation for taking control of a planet
 
 ** Immediate **
 
-✓ Make controller icons on big buttons look good
-
-Make an animation for when you take over a planet
+Run Challenges
 
 ** Missing Sounds **
 
-✓ Generic UI button press
-✓ Start order arrow drag sound
-✓ Radar sound
-✓ Recall
-✓ Take over a planet - maybe a "negative" version for when the enemy does it
-
 ? Ship just produced sound
 
-✓ Generic UI cancel 
-✓ Fighter out of fuel turnaround
-
 ** Bugs and tweaks **
+
 Supervisor took over bomber and it had the fleet idle circle around it??
-Put current remaining oxygen display in shop
 Tech tree lines sometimes don't appear
-✓ Fighter out-of-fuel graphic sometimes appears when landing on a planet
-
-✓ Sometimes AI ships circle endlessly
-✓ Supervisors don't trigger ships to change target to them
-
-✓ Consider using joystick cursor on upgrade screen
 Adjust upgrade curve [num upgrades per sector]
 
-? Tutorial has bugs associated with the save game state
 ? Menu - Count labels as hover/click targets
 
 ** Release **

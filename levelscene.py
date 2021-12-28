@@ -205,6 +205,19 @@ class LevelScene(levelscenebase.LevelSceneBase):
         self.game.game_speed_input = 0
 
     def setup_mods(self):
+        # Challenges
+        if "worker_loss" in self.game.run_info.run_challenges:
+            self.player_civ.worker_loss = 1
+
+        if "low_range" in self.game.run_info.run_challenges:
+            self.player_civ.challenge_max_fuel = 250
+
+        if "fragile_planets" in self.game.run_info.run_challenges:
+            self.player_civ.base_stats['planet_health_mul'] = -0.75
+
+        if "small_army" in self.game.run_info.run_challenges:
+            self.player_civ.army_max = 10
+
         galaxy = self.game.run_info.get_current_level_galaxy()
         if not galaxy['mods']:
             return
