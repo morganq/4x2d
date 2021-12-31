@@ -509,8 +509,8 @@ class Alien:
         #     9:1.8
         # }
         curve = {
-            1:0.85, 2:1.0, 3:1.2, 4:1.3,
-            5:1.4, 6:1.6, 7:1.8, 8:2.0,
+            1:0.85, 2:1.0, 3:1.15, 4:1.25,
+            5:1.35, 6:1.5, 7:1.7, 8:2.0,
             9:2.25
         }        
         
@@ -518,7 +518,7 @@ class Alien:
 
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
-        self.civ.base_stats['planet_health_mul'] = -0.5 + (difficulty - 1) / 4
+        self.civ.base_stats['planet_health_mul'] = -0.5 + (difficulty - 1) / 6
         self.civ.base_stats['mining_rate'] = 0.45 + 0.125 * difficulty
         self.civ.base_stats['max_ships_per_planet'] = int((difficulty + 5) / 2)
         extra_planets = 0

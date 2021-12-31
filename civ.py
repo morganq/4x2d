@@ -68,12 +68,6 @@ class Civ:
 
     def get_ship_fuel(self, ship_name):
         f = 9999
-        if ship_name == "fighter":
-            f = 250
-        if self.challenge_max_fuel:
-            f = min(f, self.challenge_max_fuel)
-            if ship_name == "fighter":
-                f = 250 * 0.65
         return f
 
     def get_upgrade_increase_amts(self):
@@ -248,6 +242,16 @@ class PlayerCiv(Civ):
         self.color = PICO_GREEN
         self.is_player = True
         self.is_enemy = False
+
+    def get_ship_fuel(self, ship_name):
+        f = 9999
+        if ship_name == "fighter":
+            f = 250
+        if self.challenge_max_fuel:
+            f = min(f, self.challenge_max_fuel)
+            if ship_name == "fighter":
+                f = 250 * 0.65
+        return f        
 
     def earn_resource(self, resource, value, where=None):
         if where and value > 0:
