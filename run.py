@@ -283,42 +283,13 @@ class RunInfo:
             col = 0
 
     def add_stores(self):
-        def count_stores():
-            store_nums = []
-            for path in get_paths(self.data, (0,0)):
-                stores = 0
-                for nr,nc in path:
-                    if self.data[nr][nc]['node_type'] == 'store':
-                        stores += 1
-                store_nums.append(stores)
-            return store_nums
-
-        store_row_places = [3, 4, 8]
-        random.shuffle(store_row_places)
-        for i in range(3):
-            iterations = 0
-            done = False
-            while not done:
-                row = store_row_places[-1]
-                if iterations > 3:
-                    row = 4
-                    while row == 4:                    
-                        row = random.randint(2, len(self.data) - 2)
-                col = random.randint(0, len(self.data[row])-1)
+        row1 = random.choice([3,4])
+        rows = [row1, 8]
+        for row in rows:
+            for col in range(len(self.data[row])):
                 old_node = self.data[row][col]
-                if old_node['node_type'] == 'store':
-                    iterations += 1
-                    continue
                 self.data[row][col] = self.new_store(row, old_node['links'])
-                max_stores = max(count_stores())
-                if max_stores < 3 or iterations > 10:
-                    done = True
-                else:
-                    iterations += 1
-                    done = False
-                    self.data[row][col] = old_node
-            store_row_places.pop()
-
+        return
 
 def get_neighbors(graph, node):
     neighbors = []
