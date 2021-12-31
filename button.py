@@ -26,9 +26,11 @@ class Button(SpriteBase, FadeInMixin):
         self.joy_button = None
         self.radius = 15
         self.asset_border = asset_border
+        self.disabled = False
         self._generate_image()
 
     def onclick(self):
+        if self.disabled: return
         sound.play("click1")
         self.onclick_callback()
 

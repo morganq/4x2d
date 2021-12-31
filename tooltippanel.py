@@ -1,5 +1,6 @@
 import pygame
 
+import game
 from colors import *
 from panel import Panel
 from text import Text
@@ -62,3 +63,53 @@ class TooltipPanel(Panel):
             self.bump_out = min(self.bump_out + dt * 22, self.max_bump)
             self.redraw()
         return super().update(dt)
+
+
+class Tooltippable:
+    def setup(self, title, body, tooltip_position="bottom"):
+        self._tooltip_title = title
+        self._tooltip_body = body
+        self._tooltip_panel = None
+        self._tooltip_enabled = True
+        self._tooltip_position = tooltip_position
+        self.on("mouse_enter", self._tooltip_mouse_enter)
+        self.on("mouse_exit", self._tooltip_mouse_exit)
+        self.on("mouse_down", self._tooltip_mouse_down)
+    
+    def teardown(self):
+        if self._tooltip_panel:
+            self._tooltip_panel.kill()        
+
+    def _tooltip_mouse_enter(self, *args):
+        if not self._tooltip_enabled:
+            return
+            
+        # I don't remember why we'd need to do this... I guess to update/refresh tooltip
+        if self._tooltip_panel:
+            self._tooltip_panel.kill()
+
+        self._tooltip_panel = TooltipPanel(self._tooltip_title, self._tooltip_body)
+
+        if self._tooltip_position == "side":
+            if self._tooltip_panel.width + self.pos.x + 30 > game.Game.inst.game_resolution.x:
+                self._tooltip_panel.pos = self.pos + V2(-5 - self._tooltip_panel.width,0)
+            else:
+                self._tooltip_panel.pos = self.pos + V2(30,0)
+            if self._tooltip_panel.height + self._tooltip_panel.y > game.Game.inst.game_resolution.y:
+                self._tooltip_panel.pos = (self._tooltip_panel.pos.x, game.Game.inst.game_resolution.y - self._tooltip_panel.height)
+
+        elif self._tooltip_position == "bottom":
+            x = int(-self._tooltip_panel.width / 2 + self.width / 2)
+            self._tooltip_panel.pos = self.pos + V2(x,24)
+
+        self._tooltip_panel._reposition_children()
+        self.groups()[0].add(self._tooltip_panel)
+        self._tooltip_panel.add_all_to_group(self.groups()[0])
+
+    def _tooltip_mouse_exit(self, *args):
+        if self._tooltip_panel:
+            self._tooltip_panel.kill()
+
+    def _tooltip_mouse_down(self, *args):
+        if self._tooltip_panel:
+            self._tooltip_panel.kill()        

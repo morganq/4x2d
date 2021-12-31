@@ -51,8 +51,13 @@ class RunInfo:
         self.reward_list = [] #[{'name':'blueprint'}]
         self.next_path_segment = (0,0)
         self.started = False
-        self.run_challenges = [FRAGILE_PLANETS] # Negative mods
+        self.run_challenges = [] # Negative mods
         self.run_modifiers = [] # Positive mods
+
+    def begin_run(self):
+        # challenges
+        if LOW_OXYGEN in self.run_challenges:
+            self.o2 = 60 * 60 * 0.5
 
     def serialize(self):
         obj = {}

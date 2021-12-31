@@ -187,13 +187,7 @@ class JoystickPanelCursor(SpriteBase):
     def confirm(self):
         c = self.get_current_control()
         if c is None: return
-        if (
-            isinstance(c, Button) or
-            isinstance(c, text.Text) or
-            isinstance(c, upgrade.upgradebutton.UpgradeButton) or 
-            isinstance(c, upgrade.upgradeicon.UpgradeIcon) or 
-            isinstance(c, store.storescene.StoreItemButton)
-        ):
+        if hasattr(c, "on_mouse_down"):
             c.on_mouse_down(c.pos)
 
     def joystick_delta(self, delta):

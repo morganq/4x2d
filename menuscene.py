@@ -4,6 +4,7 @@ import sys
 
 import pygame
 
+import button
 import controlsscene
 import creditsscene
 import explosion
@@ -20,6 +21,7 @@ import simplesprite
 import sound
 import states
 import text
+import tooltippanel
 import tutorial.introscene
 from colors import *
 from helper import clamp
@@ -30,6 +32,35 @@ from spritebase import SpriteBase
 from starmap import starmapscene
 from v2 import V2
 
+
+class ModsUIState(states.UIEnabledState):
+    is_basic_joystick_panel = True
+    def __init__(self, scene):
+        super().__init__(scene)
+
+    def get_joystick_cursor_controls(self):
+        return self.scene.mods_controls
+
+    def take_input(self, input, event):
+        if input == "confirm":
+            pass
+        return super().take_input(input, event)
+
+class ModifierButton(framesprite.FrameSprite, tooltippanel.Tooltippable):
+    def __init__(self, name, pos, sprite_sheet=None, onclick=None, tooltip_title=None, tooltip_body=None):
+        self.name = name
+        super().__init__(pos, sprite_sheet=sprite_sheet, frame_width=31)
+        tooltippanel.Tooltippable.setup(self, tooltip_title, tooltip_body)
+        self.onclick = onclick
+        self.on("mouse_down", self.onclick)
+        self.selectable = True
+        self.set_state("locked")
+
+    def set_state(self, name):
+        self.state = name
+        if self.state == "locked": self.frame = 2
+        elif self.state == "disabled": self.frame = 1
+        else: self.frame = 0
 
 class Parallaxed:
     def __init__(self, obj, degree):
@@ -283,6 +314,9 @@ class MenuOptionLabel(SpriteBase):
 
         self._recalc_rect()
 
+MODE_START = "start"
+MODE_TAKEOFF = "takeoff"
+MODE_MODS = "mods"
 
 class MenuScene(scene.Scene):
     def take_raw_input(self, event):
@@ -300,7 +334,7 @@ class MenuScene(scene.Scene):
         self.choices = []
         self.current_choice = 2
         self.using_joy = True
-        self.takeoff = False
+        self.mode = MODE_START
         self.takeoff_time = 0
         
         minx = -200
@@ -425,8 +459,10 @@ class MenuScene(scene.Scene):
 
     def update(self, dt):
         self.time += min(dt,0.1)
-        if self.takeoff:
+        if self.mode == MODE_TAKEOFF:
             self.takeoff_update(dt)
+        elif self.mode == MODE_MODS:
+            self.mods_update(dt)
         else:
             self.basic_update(dt)
 
@@ -435,6 +471,9 @@ class MenuScene(scene.Scene):
 
         for spr in self.game_group.sprites():
             spr.update(dt)
+
+        for spr in self.ui_group.sprites():
+            spr.update(dt)            
 
         for i in range(10):
             s = random.choice(self.stars)
@@ -476,20 +515,23 @@ class MenuScene(scene.Scene):
         if i >= 0:
             for j in range(i):
                 labels[j].visible = True
-        
+    
+    def mods_update(self, dt):
+        self.bg_newgame.hover = True
 
     def takeoff_update(self, dt):
         self.takeoff_time += dt
         for obj in [self.bg_enemies, self.bg_earth, self.bg_multiplayer, self.bg_continue, self.bg_options, self.bg_exit, self.bg_newgame_path]:
             if obj:
                 obj.visible = False
+                obj.hover = False
                 if hasattr(obj, "label"):
                     obj.label.visible = False
         self.bg_newgame.label.visible = False
         self.bg_newgame.hover = True
         ow,oh = self.takeoff_earth.base_image.get_size()
-        nw = int(ow / (self.takeoff_time * 2 + 1))
-        nh = int(oh / (self.takeoff_time * 2 + 1))
+        nw = int(ow / (self.takeoff_time * 3 + 1))
+        nh = int(oh / (self.takeoff_time * 3 + 1))
         offx = 0.05
         offy = 0.8
         self.takeoff_earth.x = (ow - nw) * offx
@@ -502,8 +544,173 @@ class MenuScene(scene.Scene):
                 earth_delta = p.end_pos - ep
                 p.end_pos += V2(-30 * dt * p.degree, 0) - earth_delta * p.degree * dt * 0.3
                 #p.obj.x -= dt * p.degree * 10
-        if self.takeoff_time >= 3.5:
-            pass
+        if self.takeoff_time >= 2.5:
+            self.mode = MODE_MODS
+            self.create_mods_ui()
+            self.sm.transition(ModsUIState(self))
+
+    def create_mods_ui(self):
+        self.mods_controls = []
+        TITLES = {
+            'fragile_planets':'Fragility',
+            'low_range':'Fuel Crisis',
+            'worker_loss':'Perilous Frontier',
+            'low_oxygen':'Oxygen Leak',
+            'small_army':'Skeleton Crew',
+            'terraform':'Barysi Terraform',
+            'hacking':'Network Hack',
+            'void':'Void Beacon',
+            'timeloop':'Time Loop',
+        }
+        BODIES = {
+            'fragile_planets':'Your planets have [!-75% health]. [^+10% Score]',
+            'low_range':'All ships have [!limited fuel]. [Fighters] have [!-35% fuel]. [^+10% Score]',
+            'worker_loss':'Worker ships [!lose 1 population] when launched. [^+10% Score]',
+            'low_oxygen':'Start with [!-50% Oxygen]. [^+10% Score]',
+            'small_army':'Maximum army size is [!10]. [^+10% Score]',
+            'terraform':'Capturing a planet converts [^30%] of its [Iron] to [Ice] or [Gas]. Requires [!+1 challenge]',
+            'hacking':'33% chance to [^gain control] of an enemy ship if you destroy it in deep space. Requires [!+1 challenge]',
+            'void':'Your planets eminate a [^Void Field]. Requires [!+1 challenge]',
+            'timeloop':'In each sector, +3 random planets are time looped. Requires [!+2 challenges]',
+        }
+        REQS = {
+            'fragile_planets':1,
+            'low_range':2,
+            'worker_loss':4,
+            'low_oxygen':6,
+            'small_army':10,
+            'terraform':1,
+            'hacking':3,
+            'void':7,
+            'timeloop':15
+        }
+
+        x1 = self.game.game_resolution.x / 2 - (((31 * 5) + (4 * 4)) / 2)
+        y1 = self.game.game_resolution.y / 2
+
+        bg = simplesprite.SimpleSprite(V2(x1, y1), "assets/mods_bg.png")
+        self.ui_group.add(bg)
+
+        ct1 = text.Text("Modifiers", "small", V2(x1 - 10, y1 + 9), multiline_width=100)
+        ct1.offset = (1,0)
+        self.ui_group.add(ct1)
+        self.modifiers_info = text.Text("0", "small", V2(x1 - 10, y1 + 20), PICO_GREEN, multiline_width=100)
+        self.modifiers_info.offset = (1,0)
+        self.ui_group.add(self.modifiers_info)
+
+        ct2 = text.Text("Challenges", "small", V2(x1 - 10, y1 + 63), multiline_width=100)
+        ct2.offset = (1,0)
+        self.ui_group.add(ct2)
+        self.challenges_info = text.Text("0/0", "small", V2(x1 - 10, y1 + 74), PICO_GREEN, multiline_width=100)
+        self.challenges_info.offset = (1,0)
+        self.ui_group.add(self.challenges_info)
+
+        self.negative_mods = []
+        self.positive_mods = []
+
+        for i,nm in enumerate(['fragile_planets', 'low_range', 'worker_loss', 'low_oxygen', 'small_army']):
+            def make_onclick(nm):
+                return lambda *args:self.click_challenge(nm, *args)
+            x = x1 + i * 35 + 3
+            y = y1 + 56
+            title = "Locked"
+            body = "Victories to unlock: %d" % REQS[nm]
+            if self.game.save.victories >= REQS[nm]:
+                title = TITLES[nm]
+                body = BODIES[nm]                
+            b = ModifierButton(nm, V2(x, y), "assets/mod_%s.png" % nm, make_onclick(nm), title, body)
+            if self.game.save.victories >= REQS[nm]:
+                b.set_state("disabled")
+            self.ui_group.add(b)
+            self.negative_mods.append(b)
+
+        for i,nm in enumerate(['terraform', 'hacking', 'void', 'timeloop']):
+            def make_onclick(nm):
+                return lambda *args:self.click_modifier(nm, *args)
+            x = x1 + i * 35 + 3
+            y = y1 + 3
+            title = "Locked"
+            body = "Victories to unlock: %d" % REQS[nm]
+            if self.game.save.victories >= REQS[nm]:
+                title = TITLES[nm]
+                body = BODIES[nm]                
+            b = ModifierButton(nm, V2(x, y), "assets/mod_%s.png" % nm, make_onclick(nm), title, body)
+            if self.game.save.victories >= REQS[nm]:
+                b.set_state("disabled")
+            self.ui_group.add(b)
+            self.positive_mods.append(b)
+
+        self.continue_button = button.Button(V2(self.game.game_resolution.x/2, y1 + 100), "Continue to mission", "small", self.click_continue_to_mission)
+        self.continue_button.offset = (0.5, 0)
+        self.ui_group.add(self.continue_button)
+        self.mods_controls = [self.positive_mods, self.negative_mods, [self.continue_button]]
+
+    def update_challenge_texts(self):
+        have = len(self.game.run_info.run_challenges)
+        reqd = self.get_required_challenges()
+        if have < reqd:
+            self.challenges_info.color = PICO_RED
+        else:
+            self.challenges_info.color = PICO_GREEN
+        self.challenges_info.set_text("%d/%d" % (have, reqd))
+
+        self.modifiers_info.set_text("%d" % len(self.game.run_info.run_modifiers))
+
+    def get_required_challenges(self):
+        MOD_REQS = {
+            'terraform':1,
+            'hacking':1,
+            'void':1,
+            'timeloop':2
+        }
+        total = 0
+        for name in self.game.run_info.run_modifiers:
+            total += MOD_REQS.get(name, 0)
+        return total
+
+    def update_continue_button(self):
+        enabled = len(self.game.run_info.run_challenges) >= self.get_required_challenges()
+        self.continue_button.disabled = not enabled
+        if enabled:
+            self.continue_button.text = "Continue to mission"
+            self.continue_button.color = PICO_BLUE
+            self.continue_button._generate_image()
+        else:
+            self.continue_button.text = "Need more challenges"
+            self.continue_button.color = PICO_LIGHTGRAY
+            self.continue_button._generate_image()
+
+    def click_modifier(self, pm, btn, pos):
+        if btn.state == "disabled":
+            btn.set_state("enabled")
+            self.game.run_info.run_modifiers.append(pm)
+            self.game.run_info.run_modifiers = list(set(self.game.run_info.run_modifiers))
+            self.update_challenge_texts()
+            self.update_continue_button()
+        elif btn.state == "enabled":
+            btn.set_state("disabled")
+            self.game.run_info.run_modifiers.remove(pm)
+            self.game.run_info.run_modifiers = list(set(self.game.run_info.run_modifiers))            
+            self.update_challenge_texts()
+            self.update_continue_button()
+
+    def click_challenge(self, nm, btn, pos):
+        if btn.state == "disabled":
+            btn.set_state("enabled")
+            self.game.run_info.run_challenges.append(nm)
+            self.game.run_info.run_challenges = list(set(self.game.run_info.run_challenges))
+            self.update_challenge_texts()
+            self.update_continue_button()
+        elif btn.state == "enabled":
+            btn.set_state("disabled")
+            self.game.run_info.run_challenges.remove(nm)
+            self.game.run_info.run_challenges = list(set(self.game.run_info.run_challenges))            
+            self.update_challenge_texts()
+            self.update_continue_button()
+
+    def click_continue_to_mission(self, *args):
+        self.game.scene = newgamescene.NewGameScene(self.game)
+        self.game.scene.start()
 
     def render(self):   
         self.game.screen.fill(PICO_BLACK)        
@@ -536,22 +743,25 @@ class MenuScene(scene.Scene):
         self.takeoff_earth.base_image.blit(self.bg_enemies.image, self.bg_enemies.pos.tuple_int())
         self.takeoff_earth.image = self.takeoff_earth.base_image
         self.game_group.add(self.takeoff_earth)
-        self.takeoff = True
+        self.mode = MODE_TAKEOFF
         self.logo.kill()
 
     def click_intel(self):
         pass                    
 
     def take_input(self, inp, event):
-        if self.time < 6:
-            return
-        if inp == "joymotion":
-            self.joy.take_input(inp, event)
-        elif inp == "confirm":
-            self.choices[self.current_choice].onclick()
-        else:
+        if self.mode == MODE_MODS:
             self.sm.state.take_input(inp, event)
-        if inp == "mouse_move" and self.using_joy:
-            self.choices[self.current_choice].mouse_exit()
-            self.using_joy = False
+        else:
+            if self.time < 6:
+                return
+            if inp == "joymotion":
+                self.joy.take_input(inp, event)
+            elif inp == "confirm":
+                self.choices[self.current_choice].onclick()
+            else:
+                self.sm.state.take_input(inp, event)
+            if inp == "mouse_move" and self.using_joy:
+                self.choices[self.current_choice].mouse_exit()
+                self.using_joy = False
         #return super().take_input(inp, event)

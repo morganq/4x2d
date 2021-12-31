@@ -62,7 +62,7 @@ class Mechanics3Upgrade(Upgrade):
 
     def apply(self, to):
         # TODO: impl in multiplayer
-        to.owning_civ.oxygen_cost_per_order += 5
+        to.oxygen_cost_per_order += 5
         return super().apply(to)
 
 ### 2) Atomic - Macro/Quick Tech: dark green

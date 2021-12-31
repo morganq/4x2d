@@ -22,7 +22,8 @@ class Interceptor(Fighter):
     BASE_HEALTH = 50
     BLAST_RADIUS = 7
     FIRE_RATE = 1.0
-    BASE_DAMAGE = 5
+    BASE_DAMAGE = 3.5
+    MAX_SPEED = 10
 
     FIRE_RANGE = 20
     THREAT_RANGE_DEFAULT = 40

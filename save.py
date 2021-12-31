@@ -17,7 +17,7 @@ DEFAULT_SETTINGS = {
         4:"game_speed",
         9:"menu",
         8:"cheat1"
-    }
+    },
 }
 
 FILENAME = "save.json"
@@ -34,6 +34,8 @@ class Save:
         self.run_state = data.get("run_state", {})
         self.highscores = data.get("highscores", [])
         self.settings = data.get("settings", DEFAULT_SETTINGS)
+        self.achievements = data.get("achievements", [])
+        self.victories = data.get("victories", 0)
         SAVE_OBJ = self
 
     def save(self):
@@ -41,7 +43,9 @@ class Save:
             'run_state': self.run_state,
             'level_state': self.level_state,
             'highscores': self.highscores,
-            'settings': self.settings
+            'settings': self.settings,
+            'achievements': self.achievements,
+            'victories': self.victories
         }
         json.dump(data, open(resource_path(FILENAME), "w"))
 

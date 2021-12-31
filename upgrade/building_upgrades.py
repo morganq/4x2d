@@ -309,7 +309,7 @@ class Launchpad1Upgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Headquarters"
-    description = "Ships you control in a large radius gain +2 damage per attack. Radius is reduced by the number of other planets you control."
+    description = "Ships you control in a large radius gain +4 damage per attack. Radius is reduced by the number of other planets you control."
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':[]}

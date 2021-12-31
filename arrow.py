@@ -106,49 +106,50 @@ class OrderArrow(SpriteBase):
             self.last_end = end
 
         civ = start_planet.owning_civ
-        fighter_range = fighter.Fighter.estimate_flight_range(civ, end_planet) * 0.9
-        ranges = {"Fighter Range": fighter_range}
-        #if civ.challenge_max_fuel:
-        #    ranges["Ship Range"] = colonist.Colonist.estimate_flight_range(civ, end_planet) * 0.9
-        title = "Fighter Range"
-        if delta.sqr_magnitude() > fighter_range ** 2:
-            ang = -delta.to_polar()[1] * 180 / 3.14159
-            if ang < -90:
-                ang += 180
-                side = -side
-            if ang > 90:
-                ang -= 180  
-                side = -side    
-            pt2 = pt1 + forward * (fighter_range - start_offset)
-            points = []
-            ht = thickness / 2
-            ht2 = thickness + 3
-            mid1 = pt1 + forward * ((fighter_range - start_offset) / 2 - 42)
-            mid2 = pt1 + forward * ((fighter_range - start_offset) / 2 + 42)
-            pygame.draw.line(self.image, PICO_YELLOW, (pt1 + side * ht).tuple(), (pt1 + side * ht2).tuple(), 1)
-            pygame.draw.line(self.image, PICO_YELLOW, (pt1 + side * ht2).tuple(), (mid1 + side * ht2).tuple(), 1)
-            pygame.draw.line(self.image, PICO_YELLOW, (mid2 + side * ht2).tuple(), (pt2 + side * ht2).tuple(), 1)
-            pygame.draw.line(self.image, PICO_YELLOW, (pt2 + side * ht).tuple(), (pt2 + side * ht2).tuple(), 1)
-            ts = text.render_multiline(title, "small", PICO_YELLOW)
-            ts2 = pygame.transform.rotate(ts, ang)
-            center = (pt1 + pt2) / 2 + 6 * side
-            self.image.blit(ts2, (center + V2(-ts2.get_width() / 2, -ts2.get_height() / 2)).tuple())
+        if civ is not None:
+            fighter_range = fighter.Fighter.estimate_flight_range(civ, end_planet) * 0.9
+            ranges = {"Fighter Range": fighter_range}
+            #if civ.challenge_max_fuel:
+            #    ranges["Ship Range"] = colonist.Colonist.estimate_flight_range(civ, end_planet) * 0.9
+            title = "Fighter Range"
+            if delta.sqr_magnitude() > fighter_range ** 2:
+                ang = -delta.to_polar()[1] * 180 / 3.14159
+                if ang < -90:
+                    ang += 180
+                    side = -side
+                if ang > 90:
+                    ang -= 180  
+                    side = -side    
+                pt2 = pt1 + forward * (fighter_range - start_offset)
+                points = []
+                ht = thickness / 2
+                ht2 = thickness + 3
+                mid1 = pt1 + forward * ((fighter_range - start_offset) / 2 - 42)
+                mid2 = pt1 + forward * ((fighter_range - start_offset) / 2 + 42)
+                pygame.draw.line(self.image, PICO_YELLOW, (pt1 + side * ht).tuple(), (pt1 + side * ht2).tuple(), 1)
+                pygame.draw.line(self.image, PICO_YELLOW, (pt1 + side * ht2).tuple(), (mid1 + side * ht2).tuple(), 1)
+                pygame.draw.line(self.image, PICO_YELLOW, (mid2 + side * ht2).tuple(), (pt2 + side * ht2).tuple(), 1)
+                pygame.draw.line(self.image, PICO_YELLOW, (pt2 + side * ht).tuple(), (pt2 + side * ht2).tuple(), 1)
+                ts = text.render_multiline(title, "small", PICO_YELLOW)
+                ts2 = pygame.transform.rotate(ts, ang)
+                center = (pt1 + pt2) / 2 + 6 * side
+                self.image.blit(ts2, (center + V2(-ts2.get_width() / 2, -ts2.get_height() / 2)).tuple())
 
-            if civ.challenge_max_fuel:
-                ship_range = colonist.Colonist.estimate_flight_range(civ, end_planet) * 0.9
-                if delta.sqr_magnitude() > ship_range ** 2:
-                    o1s = fighter_range - start_offset
-                    o2s = ship_range - start_offset
-                    mid3 = pt1 + forward * ((o2s - o1s) / 2 - 22 + o1s)
-                    mid4 = pt1 + forward * ((o2s - o1s) / 2 + 22 + o1s)             
-                    pt3 = pt1 + forward * (ship_range - start_offset)
-                    pygame.draw.line(self.image, PICO_YELLOW, (pt2 + side * ht2).tuple(), (mid3 + side * ht2).tuple(), 1)
-                    pygame.draw.line(self.image, PICO_YELLOW, (mid4 + side * ht2).tuple(), (pt3 + side * ht2).tuple(), 1)
-                    pygame.draw.line(self.image, PICO_YELLOW, (pt3 + side * ht).tuple(), (pt3 + side * ht2).tuple(), 1)
-                    ts = text.render_multiline("Others", "small", PICO_YELLOW)
-                    ts2 = pygame.transform.rotate(ts, ang)
-                    center = (mid3 + mid4) / 2 + 6 * side
-                    self.image.blit(ts2, (center + V2(-ts2.get_width() / 2, -ts2.get_height() / 2)).tuple())                    
+                if civ.challenge_max_fuel:
+                    ship_range = colonist.Colonist.estimate_flight_range(civ, end_planet) * 0.9
+                    if delta.sqr_magnitude() > ship_range ** 2:
+                        o1s = fighter_range - start_offset
+                        o2s = ship_range - start_offset
+                        mid3 = pt1 + forward * ((o2s - o1s) / 2 - 22 + o1s)
+                        mid4 = pt1 + forward * ((o2s - o1s) / 2 + 22 + o1s)             
+                        pt3 = pt1 + forward * (ship_range - start_offset)
+                        pygame.draw.line(self.image, PICO_YELLOW, (pt2 + side * ht2).tuple(), (mid3 + side * ht2).tuple(), 1)
+                        pygame.draw.line(self.image, PICO_YELLOW, (mid4 + side * ht2).tuple(), (pt3 + side * ht2).tuple(), 1)
+                        pygame.draw.line(self.image, PICO_YELLOW, (pt3 + side * ht).tuple(), (pt3 + side * ht2).tuple(), 1)
+                        ts = text.render_multiline("Others", "small", PICO_YELLOW)
+                        ts2 = pygame.transform.rotate(ts, ang)
+                        center = (mid3 + mid4) / 2 + 6 * side
+                        self.image.blit(ts2, (center + V2(-ts2.get_width() / 2, -ts2.get_height() / 2)).tuple())                    
 
         if (end - self.last_end).sqr_magnitude() > 10 ** 2:
             if end_planet:

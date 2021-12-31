@@ -317,7 +317,7 @@ class Interceptors3aUpgrade(Upgrade):
     title = "?"
     description = "Train [^3] [Interceptors] at random planets Over [20 seconds]"
     icon = "ship_default"
-    cursor = "allied_planet"
+    cursor = None
     family = {'tree':'basicinterceptors', 'parents':['s_basicinterceptors2']}
     requires = ('s_basicinterceptors1', 's_basicinterceptors2')
     infinite = True
