@@ -28,8 +28,8 @@ class Scout(fighter.Fighter):
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         self._set_player_ship_sprite_sheet()
-        self.busters = 1
-        self.max_busters = 1
+        self.busters = 2
+        self.max_busters = 2
         self.buster_time = 1.0
         self.states['siege']['enter'] = self.enter_state_siege
         self.comm_radius = 100
@@ -99,7 +99,6 @@ class Scout(fighter.Fighter):
     def state_siege(self, dt):
         super().state_siege(dt)
         if self.busters > 0 and isinstance(self.effective_target, planet.Planet):
-            print("disruptors", self.busters)
             self.buster_time -= dt
             if self.buster_time <= 0:
                 self.busters -= 1

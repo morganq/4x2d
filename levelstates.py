@@ -354,7 +354,7 @@ class PlayState(UIEnabledState):
         if input == "action":
             if self.joy_controls_state == "default":
                 spr = self.joystick_overlay.nearest_obj
-                if spr and spr.owning_civ == self.scene.player_civ:
+                if spr and isinstance(spr, planet.planet.Planet) and spr.owning_civ == self.scene.player_civ:
                     self.joy_controls_state = "arrow"
                     self.arrow = OrderArrow()
                     self.scene.ui_group.add(self.arrow)
@@ -577,6 +577,9 @@ class BeatGameState(State):
 
         self.scene.game.game_speed_input = 0
 
+        self.scene.game.save.victories += 1
+        self.scene.game.save.save()
+        
         self.scene.update_run_stats()
         self.scene.game.run_info.victory = True
         self.scene.game.run_info.sectors_cleared += 1

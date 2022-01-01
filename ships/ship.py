@@ -67,6 +67,8 @@ class Ship(SpaceObject):
         self.stationary = False
         self.fleet = None
         self.origin = None # Planet we were emitted from
+        self._stealth_sheet = None
+        self._unstealth_sheet = None
 
         self.fuel_remaining = self.get_max_fuel()
 
@@ -250,12 +252,17 @@ class Ship(SpaceObject):
         self.state = state
 
     def _generate_stealth_image(self):
-        self.image.fill((0,0,0,0))
-        op = self.top_left + V2(math.sin(self.time * 3.4) * 2, math.cos(self.time * 5.1) * 2)
-        self.image.blit(self.scene.background.image, (0,0), (*op.tuple_int(), self.width, self.height))
-        mask = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        pygame.draw.circle(mask, (255,255,255), (self.width // 2, self.height // 2), self.width // 2, 0)
-        self.image.blit(mask, (0,0), None, pygame.BLEND_RGBA_MULT)
+        self._unstealth_sheet = self._sheet.copy()
+        outline_mask = pygame.mask.from_surface(self._base_sheet, 127)
+        color_mask = pygame.mask.from_threshold(self._base_sheet, (*PICO_RED,255), (2,2,2,255))
+        outline_mask.erase(color_mask, (0,0))
+        surf = outline_mask.to_surface(setcolor=(*PICO_WHITE,255), unsetcolor=(0,0,0,0))
+        self._stealth_sheet = surf
+
+    def set_stealth_image(self):
+        if not self._stealth_sheet:
+            self._generate_stealth_image()
+        self._sheet = self._stealth_sheet
 
     def update(self, dt):
         if not self.updated_color:
@@ -366,8 +373,12 @@ class Ship(SpaceObject):
         super().update(dt)
 
         if self.stealth:
-            self._generate_stealth_image()       
+            if self._sheet != self._stealth_sheet:
+                self.set_stealth_image()
             self._timers['thrust_particle_time'] = -1
+        else:
+            if self._unstealth_sheet and self._sheet != self._unstealth_sheet:
+                self._sheet = self._unstealth_sheet
 
     def emit_thrust_particles(self):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5

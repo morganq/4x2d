@@ -20,7 +20,7 @@ ATOMIC_BOMB_RANGE = 20
 @register_ship
 class Colonist(Ship):
     HEALTHBAR_SIZE = (16,2)
-    BASE_HEALTH = 35
+    BASE_HEALTH = 30
     SHIP_NAME = "colonist"
     
     def __init__(self, scene, pos, owning_civ):

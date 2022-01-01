@@ -1,6 +1,8 @@
-from spritebase import SpriteBase
 import pygame
+
 from colors import *
+from spritebase import SpriteBase
+
 
 class Selector(SpriteBase):
     def __init__(self, object):
@@ -15,7 +17,7 @@ class Selector(SpriteBase):
         self.pos = object.pos
 
     def _generate_image(self):
-        w = self.object.selection_radius * 2
+        w = self.object.selection_radius * 2.5
         h = self.object.selection_radius * 1
         h2 = h * 2
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)

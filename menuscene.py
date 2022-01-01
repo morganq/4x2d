@@ -545,9 +545,12 @@ class MenuScene(scene.Scene):
                 p.end_pos += V2(-30 * dt * p.degree, 0) - earth_delta * p.degree * dt * 0.3
                 #p.obj.x -= dt * p.degree * 10
         if self.takeoff_time >= 2.5:
-            self.mode = MODE_MODS
-            self.create_mods_ui()
-            self.sm.transition(ModsUIState(self))
+            if self.game.save.victories > 0:
+                self.mode = MODE_MODS
+                self.create_mods_ui()
+                self.sm.transition(ModsUIState(self))
+            else:
+                self.click_continue_to_mission()
 
     def create_mods_ui(self):
         self.mods_controls = []
