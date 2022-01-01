@@ -134,146 +134,196 @@ def render_multiline_to(surface, pos, text, size, color, wrap_width=None, center
 
 parens_re = re.compile("\((.+?)\).*")
 TEXT_COLORS = {'!':PICO_RED,'^':PICO_GREEN, '>': PICO_YELLOW}
-def get_groups(line, inside_group=None):
-    groups = [(inside_group, "")]
-    x = 0
-    while x < len(line):
-        if line[x] == "[":
-            if "]" in line:
-                if line[x+1] in TEXT_COLORS.keys():
-                    color = line[x+1]
-                    groups.append((TEXT_COLORS[color], ""))
-                    x += 1
-                else:
-                    groups.append((PICO_WHITE, ""))
-            else:
-                return groups
-        elif line[x] == "]":
-            groups.append((False, ""))
-        else:
-            groups[-1] = (groups[-1][0], groups[-1][1] + line[x])
-        x += 1
-    return groups
-
 HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':28, 'bm_army':12, 'pixolde':16, 'logo':50}
 Y_OFFSETS = {'tiny':0, 'small': -2, 'medium': 0, 'big': -4, 'huge':-1, 'bm_army':0, 'pixolde':0, 'logo':0}
 Y_SYMBOL_OFFSETS = {'tiny':0, 'small': 0, 'medium': 0, 'big': 0, 'huge':1, 'bm_army':0, 'pixolde':0, 'logo':0}
-
 
 SYMBOLS = [
     'left', 'right', 'drag', 'x', 'square', 'triangle', 'circle'
 ]
 
+def get_symbol(size, name):
+    if name in ['x', 'square', 'triangle', 'circle']:
+        is_ps = False
+        if game.Game.inst:
+            joys = game.Game.inst.joysticks
+            is_ps = joys and joys[0].get_numbuttons() == 14
+
+        if is_ps:
+            name = "ps_%s" % name
+        else:
+            name = "xbox_%s" % name
+        symbol_img, frame = PRELOADED_SYMBOLS[size][name]
+        w = symbol_img.get_width() / 4
+        x = w * frame
+        h = symbol_img.get_height()
+        frame_image = symbol_img.subsurface((x,0,w,h))
+    else:
+        frame_image, _ = PRELOADED_SYMBOLS[size][name]
+    return frame_image
+
+# Takes some text, returns a list of groups.
+# Group is {'color':whatever, 'text':body}
+def get_groups(line):
+    groups = [{'color':None, 'body':""}]
+    x = 0
+
+    def add_group(grp):
+        if groups[-1]['body'] == "":
+            groups[-1] = grp
+        else:
+            groups.append(grp)
+
+    while x < len(line):
+        if line[x] == "[":
+            if "]" in line:
+                if line[x+1] in TEXT_COLORS.keys():
+                    color = line[x+1]
+                    add_group({'color':TEXT_COLORS[color], 'body':""})
+                    x += 1
+                else:
+                    add_group({'color':PICO_WHITE, 'body':""})
+            else:
+                return groups
+        elif line[x] == "]":
+            add_group({'color':None, 'body':""})
+        else:
+            groups[-1] = {'color':groups[-1]['color'], 'body':groups[-1]['body'] + line[x]}
+        x += 1
+    return groups
+
+# Given a list of groups, returns a list of words.
+# A word looks like
+# {'type':'text', 'body':'hello', 'color':PICO_WHITE}, or
+# {'type':'symbol', 'name':'left'}
+def get_words(groups):
+    # Output list
+    words = []
+
+    # Dict maps '*left*' -> 'left'
+    symbol_names_w_stars = {"*%s*"%s:s for s in SYMBOLS}
+    for group in groups:
+        # A group's body is either text, or a symbol name with * around it
+        # 1. Symbol
+        if group['body'] in symbol_names_w_stars:
+            word = {'type':'symbol', 'name':symbol_names_w_stars[group['body']]}
+            words.append(word)
+            
+        # 2. Text
+        else:
+            group_words = [w + " " for w in group['body'].split(" ") if w]
+            for word in group_words:
+                word = {'type':'text', 'body':word, 'color':group['color']}
+                words.append(word)
+
+    return words
+
+def get_word_layout(words, size, wrap_width=None, center=True):
+    result = {}
+    f = FONTS[size]
+    basic_char_height = f.get_sized_height()
+    height_per_line = int(basic_char_height * 1)    
+    left_x = 0
+    baseline_y = f.get_rect("M").height + Y_OFFSETS[size]
+    width = 0
+    height = height_per_line    
+    layout = []
+    lines = [[]]
+    # Go through each word and "render" it but just find the position
+    for word in words:
+        ### Is it a symbol? ###
+        if word['type'] == 'symbol':
+            image = get_symbol(size, word['name'])
+            w,h = image.get_size()
+            wx2 = left_x + w
+
+            # If we have word wrap, and our right edge is beyond
+            # the wrap border, and we have written at least one
+            # word to this line so far, advance to the next line            
+            if wrap_width and wx2 > wrap_width and lines[-1]:
+                left_x = 0
+                baseline_y += height_per_line
+                lines.append([])                
+            my = baseline_y - f.get_rect("M").height // 2
+            spacing = 2
+            rect = pygame.Rect(left_x, my - h // 2, w + spacing, h)
+            lines[-1].append({'word':word, 'rect':rect})
+            # Adjust running variables
+            left_x += rect.width
+            width = max(left_x, width)
+            height = max(baseline_y, rect.y + rect.height)
+
+        ### Is it text? ###
+        elif word['type'] == 'text':
+            # Get the size of the word
+            rect = f.get_rect(word['body'])
+            
+            # Same word wrap logic as for symbols
+            wx2 = left_x + rect.x + rect.width
+            if wrap_width and wx2 > wrap_width and lines[-1]:
+                left_x = 0
+                baseline_y += height_per_line
+                lines.append([])
+            wx = left_x + rect.x
+            wy = baseline_y - rect.height 
+            ww = rect.width
+            wh = rect.height
+            lines[-1].append({'word':word, 'rect':pygame.Rect(wx,wy,ww,wh)})
+            # Adjust running variables
+            left_x += ww
+            width = max(left_x, width)
+            height = baseline_y
+    for line in lines:
+        for wordspec in line:
+            layout.append(wordspec)
+    return {
+        'layout':layout,
+        'rect':pygame.Rect(0, 0, width, height)
+    }
+
 def render_multiline(text, size, color, wrap_width=None, center=True):
     return render_multiline_extra(text, size, color, wrap_width, center)[0]
 
 def render_multiline_extra(text, size, color, wrap_width=None, center=True):
+    words = get_words(get_groups(text))
+    layout = get_word_layout(words, size=size, wrap_width=wrap_width, center=center)
+    surf = pygame.Surface(layout['rect'].size, pygame.SRCALPHA)
+    #surf.fill((255,0,255))
     f = FONTS[size]
-    if wrap_width is not None:
-        words = text.split(" ")
-        new_lines = [words[0]]
-        for word in words[1:]:
-            l = new_lines[-1] + " " + word
-            rect = f.get_rect(l)
-            if rect[2] >= wrap_width:
-                new_lines.append(word)
-            else:
-                new_lines[-1] = l
-        text = "\n".join(new_lines)
+    for wordspec in layout['layout']:
+        word = wordspec['word']
+        rect = wordspec['rect']
+        if word['type'] == 'symbol':
+            image = get_symbol(size, word['name'])
+            surf.blit(image, rect.topleft)
 
-    lines = text.split("\n")
-    h = 0
-    w = 0
-    for line in lines:
-        _,_,fw,fh = f.get_rect(line)
-        #h += max(HEIGHTS[size], fh)
-        h += HEIGHTS[size]
-        w = max(w, fw)
-    #h += (len(lines) - 1)
-    text_surf = pygame.Surface((w,h), pygame.SRCALPHA)
-    y = 0
-    is_in_color = None
-    max_x = 0
-    for line in lines:
-        _,_,fw,fh = f.get_rect(line)
-        fh = HEIGHTS[size]
-        groups = get_groups(line, is_in_color)
-        running_x = 0
-        for group in groups:      
-            if not group:
-                continue
-            if center:
-                x = (w - fw) // 2
-            else:
-                x = 0
-            group_color = color
-            if group[0]:
-                group_color = group[0]
-            group_text = group[1]
+        if word['type'] == 'text':
+            word_color = word['color'] or color
+            f.render_to(surf, rect.topleft, word['body'], word_color)
 
-            yo = 0
-
-            # Is text or a symbol?
-            if group_text in ["*%s*" % s for s in SYMBOLS]:
-                which_symbol = group_text.replace("*", "")
-                if which_symbol in ["x", "square", "triangle", "circle"]:
-
-                    joys = game.Game.inst.joysticks
-                    if joys and joys[0].get_numbuttons() == 14:
-                        which_symbol = "ps_%s" % which_symbol
-                    else:
-                        which_symbol = "xbox_%s" % which_symbol
-                
-                symbol_img, frame = PRELOADED_SYMBOLS[size][which_symbol]
-                yo = Y_SYMBOL_OFFSETS[size]
-                frame_width = symbol_img.get_width()
-                if frame is not None:
-                    frame_width = symbol_img.get_width() / 4
-                    text_surf.blit(symbol_img, (x + running_x, y + yo), (frame * frame_width, 0, frame_width, symbol_img.get_height()))
-                else:
-                    text_surf.blit(symbol_img, (x + running_x, y + yo))
-                running_x += frame_width + 2
-
-            else:
-                if group_text.startswith(" "):
-                    running_x += 1
-                if not group_text:
-                    continue
-                rect = f.get_rect(group_text)
-                yo = Y_OFFSETS[size]
-
-                surf, rect = f.render(group_text, group_color, (0,0,0,0))
-                text_surf.blit(surf, (x + running_x,y + yo))
-                if group_text.endswith(" "):
-                    running_x += 1
-                
-                running_x += rect[2] + 1
-                is_in_color = group[0]
-        max_x = max(max_x, running_x)
-        y += fh
-    if max_x < text_surf.get_width():
-        ret_surf = pygame.Surface((max_x, text_surf.get_height()), pygame.SRCALPHA)
-        ret_surf.blit(text_surf, (0,0))
-        return (ret_surf, None)
-    return (text_surf, None)
-
+    return (surf, layout)
+    
 if __name__ == "__main__":
-    print(get_groups("hello [world] how is [it] going?"))
     pygame.init()
     screen = pygame.display.set_mode((800,600))
     screen.fill(PICO_WHITE)
-    f = FONTS['small']
-    x = 20
-    def draw_words(f, c):
-        global x
-        y = 20
-        #y -= f.get_sized_descender()
-        rect = f.render_to(screen, (x,y), c, PICO_BLACK)
-        x += rect[2] + 1
 
-    draw_words(FONTS['small'], "Helloqp")
-    draw_words(FONTS['big'], "Helloqp")
-    draw_words(FONTS['huge'], "Helloqp")
+    preload()
+
+    body = "[*left*] Ships gain [^+33%] move [*x*] speed and [^+33%] rate [*drag*] of fire. Every ` time you [*square*] issue an order, [!-5] seconds of oxygen . ` / *"
+
+    groups = get_groups(body)
+    words = get_words(groups)
+    print(groups)
+    print(words)
+
+    layout = get_word_layout(words, "small")
+    print(layout['rect'])
+    for wordspec in layout['layout']:
+        print(wordspec)
+
+    surf = render_multiline_extra(body, "big", PICO_WHITE, wrap_width=180)
+    screen.blit(surf, (10,10))
 
     running = True
     while running:
