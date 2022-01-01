@@ -1,21 +1,24 @@
-from particle import Particle
-from colors import *
-from spaceobject import SpaceObject
-import pygame
-from v2 import V2
 import random
+
+import pygame
+from colors import *
+from particle import Particle
 from rangeindicator import RangeIndicator
+from spaceobject import SpaceObject
+from v2 import V2
+
 
 class Alien3Void(SpaceObject):
-    def __init__(self, scene, attached, radius):
+    def __init__(self, scene, attached, radius, color=PICO_BLACK):
         super().__init__(scene, attached.pos)
         self.attached = attached
         self.radius = radius
         self._layer = -1
+        self.color = color
         self._generate_image()
         self.offset = (0.5,0.5)
         self.target_radius = self.radius
-        self.ring = RangeIndicator(self.pos, self.radius + 1.5, PICO_ORANGE, 2, 5)
+        self.ring = RangeIndicator(self.pos, self.radius + 1.5, self.color, 2, 5)
         self.ring._layer = -2
         self.scene.game_group.add(self.ring)
 

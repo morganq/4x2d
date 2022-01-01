@@ -146,22 +146,25 @@ class Alien3(alien.Alien):
             BOResearch(0,"a3sfighter"),
             BOExpand(10, BOExpand.TARGET_TYPE_MIDDLE),
             BOResearch(20,"a3becon"),
-            BOResearch(30,"a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
             BOResearch(40, "a3bice", "a3becon"),
+            BOResearch(50,"a3sbomber", "a3sfighter", target_type=BOResearch.TARGET_TYPE_RANDOM),
             BOExpand(50, BOExpand.TARGET_TYPE_MIDDLE),
-            BOResearch(70,"a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOResearch(70,"a3sbomber", "a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
             BOResearch(70,"a3tvoid"),
             BOResearch(80,"a3tvoid"),
             BOResearch(90,"a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
-            BOAttack(110, BOAttack.ATTACK_TYPE_OUTLYING),
+            BOResearch(100,"a3battleship", "a3sbomber", target_type=BOResearch.TARGET_TYPE_RANDOM),
+            BOAttack(110, BOAttack.ATTACK_TYPE_OUTLYING, 0.33),
         ]
         if self.difficulty >= 3:
-            bo.append(BOAttack(115, BOAttack.ATTACK_TYPE_OUTLYING))
+            bo.append(BOAttack(115, BOAttack.ATTACK_TYPE_RANDOM, 0.33))
         if self.difficulty >= 5:
-            bo.append(BOAttack(120, BOAttack.ATTACK_TYPE_OUTLYING))
+            bo.append(BOAttack(120, BOAttack.ATTACK_TYPE_RANDOM, 0.33))
         return bo
 
     def set_difficulty(self, difficulty):
+        #if difficulty > 1:
+        #    self.civ.base_stats['void'] = 1
         super().set_difficulty(difficulty)
         #self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
 
@@ -170,7 +173,7 @@ class Alien3(alien.Alien):
             # Create void for planets
             for planet in self.scene.get_civ_planets(self.civ):
                 if planet not in self.planet_void:
-                    void = Alien3Void(self.scene, planet, planet.get_radius() + 10)
+                    void = Alien3Void(self.scene, planet, planet.get_radius() + 10, self.civ.color)
                     self.planet_void[planet] = void
                     self.scene.game_group.add(void)
 
@@ -193,6 +196,7 @@ class Alien3(alien.Alien):
                     self.ship_void[ship].kill()
                     del self.ship_void[ship]                    
 
+        self.civ.voids = list(self.planet_void.values()) + list(self.ship_void.values())
         return super().update(dt)
 
     def grow_void(self):
@@ -204,8 +208,5 @@ class Alien3(alien.Alien):
 
     def get_colonist(self):
         return 'alien3colonist'
-
-    def get_voids(self):
-        return list(self.planet_void.values()) + list(self.ship_void.values())
 
 alien.ALIENS['alien3'] = Alien3

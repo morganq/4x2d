@@ -158,6 +158,7 @@ class Alien1(alien.Alien):
             BOResearch(30, "alien1fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
             BOResearch(40, "alien1econpop", "alien1econrate"),
             BOResearch(50, "alien1techwarp", "alien1econrate"),
+            BOAttack(55, attack_type=BOAttack.ATTACK_TYPE_RANDOM, attack_strength=0.1),
             BOExpand(65),
             BOResearch(65, "alien1warpship", "alien1fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
             BOResearch(75, "alien1warpship", "alien1fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),            
@@ -165,9 +166,11 @@ class Alien1(alien.Alien):
             BOResearch(80, "alien1econpop", "alien1econrate"),
             BOResearch(90, "alien1warpship", "alien1fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
             BOResearch(90, "alien1fighters", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
+            BOAttack(95, attack_type=BOAttack.ATTACK_TYPE_RANDOM, attack_strength=0.1),
             BOResearch(110, "alien1battleship", "alien1warpship"),
             BOResearch(120, "alien1techwarp", "alien1techrof"),
             BOResearch(140, "alien1techwarp", "alien1techrof"),
+            BOResearch(150, "alien1battleship", "alien1warpship"),
         ]
 
         if self.difficulty >= 3:

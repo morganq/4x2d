@@ -226,6 +226,7 @@ class Alien2(alien.Alien):
             BOResearch(130, "alien2techspeed"),            
             BOResearch(140,"alien2homedefense", target_type=BOResearch.TARGET_TYPE_LACKING_ASSET),
             BOAttack(160, BOAttack.ATTACK_TYPE_OUTLYING),
+            BOResearch(160,"alien2battleship", "alien2controlship", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
         ]
         if self.difficulty >= 3:
             bo.append(BOAttack(162, BOAttack.ATTACK_TYPE_CENTRAL))

@@ -13,6 +13,11 @@ from v2 import V2
 
 
 class NewGameScene(scene.Scene):
+    def __init__(self, game, run_challenges = None, run_modifiers = None):
+        self.run_challenges = run_challenges or []
+        self.run_modifiers = run_modifiers or []
+        super().__init__(game)
+
     def start(self):
         self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
@@ -74,6 +79,9 @@ class NewGameScene(scene.Scene):
     def on_launch(self):
         self.game.run_info = run.RunInfo()
         self.game.run_info.started = True
+        self.game.run_info.run_challenges = self.run_challenges
+        self.game.run_info.run_modifiers = self.run_modifiers
+        self.game.run_info.begin_run()
         self.game.save.set_run_state(self.game.run_info)
         self.game.save.save()
         self.game.scene = starmapscene.StarMapScene(self.game)

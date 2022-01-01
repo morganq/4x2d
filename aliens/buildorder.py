@@ -45,13 +45,14 @@ class BOAttack(BuildOrderStep):
     ATTACK_TYPE_RANDOM = "random"
     ATTACK_TYPE_CENTRAL = "central"
     ATTACK_TYPE_OUTLYING = "outlying"
-    def __init__(self, time, attack_type=None):
+    def __init__(self, time, attack_type=None, attack_strength=1):
         super().__init__(time)
         self.attack_type = attack_type or self.ATTACK_TYPE_OUTLYING
+        self.attack_strength = attack_strength
         self.duration = 0
 
     def trigger(self, alien):
-        self.done = alien.execute_attack(self.attack_type)
+        self.done = alien.execute_attack(self.attack_type, self.attack_strength)
         return super().trigger(alien)
 
     # Need update in case it was impossible to attack before
@@ -61,7 +62,7 @@ class BOAttack(BuildOrderStep):
             self.abandoned = True
             return        
         if not self.done:
-            self.done = alien.execute_attack(self.attack_type)
+            self.done = alien.execute_attack(self.attack_type, self.attack_strength)
         return super().update(alien, dt)
 
     def __str__(self) -> str:

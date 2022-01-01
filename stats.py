@@ -34,6 +34,7 @@ VALID_STAT_NAMES = [
     'gas_mining_rate',
     'grey_goo_collection',
     'grey_goo',
+    'hacking', # modifier
     'headquarters', # +1 pop when worker sent from here colonizes
     'ice_mining_rate',
     'ice_per_docked', # "Every 5 seconds, gain [^+1] Ice for each docked ship"
@@ -114,12 +115,14 @@ VALID_STAT_NAMES = [
     'staged_booster_time',
     'stun_nearby_ships',
     'surface_space_missiles', 
+    'terraform', # modifier
     'top_mining_per_building',
     'top_mining_rate',
     'underground', # planet buildings don't die when planet is lost
     'unstable_reaction', # planet mining rate boost but lost when attacked
     'warp_drive',
     'warp_drive_pop_chance', #chance to gain pop when colonist jumps
+    'void', # modifier
 ]
 
 class Stats:

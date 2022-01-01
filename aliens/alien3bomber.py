@@ -2,28 +2,14 @@ from helper import get_nearest
 from ships.all_ships import register_ship
 from ships.bomber import Bomber
 
-from aliens.alien3mixin import Alien3Mixin
-
 
 @register_ship
-class Alien3Bomber(Bomber, Alien3Mixin):
+class Alien3Bomber(Bomber):
     SHIP_NAME = "alien3bomber"    
     DISPLAY_NAME = "Void Bomber"
     def __init__(self, scene, pos, owning_civ):
         super().__init__(scene, pos, owning_civ)
         self.set_sprite_sheet("assets/alien3bomber.png", 13)   
-
-    def get_max_speed(self):
-        sp = super().get_max_speed()
-        if self.in_void():
-            sp *= 2
-        return sp
-
-    def get_max_shield(self):
-        shield = super().get_max_shield()
-        if self.in_void():
-            shield += 20
-        return shield    
 
     def near_enemies(self):
         obj, dsq = get_nearest(self.pos, self.scene.get_civ_ships(self.scene.player_civ))
@@ -40,3 +26,8 @@ class Alien3Bomber(Bomber, Alien3Mixin):
         else:
             self.visible = True
         return super().update(dt)
+
+    def emit_thrust_particles(self):
+        if self.in_void():
+            return
+        return super().emit_thrust_particles()

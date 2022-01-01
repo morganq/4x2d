@@ -2,6 +2,7 @@ import math
 import random
 from collections import defaultdict
 
+import aliens
 import economy
 import funnotification
 import sound
@@ -65,6 +66,10 @@ class Civ:
         self.worker_loss = 0
         self.challenge_max_fuel = None
         self.army_max = None
+        self.voids = []
+        self.planet_void = {}
+        self.void_expand_timer = 60
+        self.void_color = self.color
 
     def get_ship_fuel(self, ship_name):
         f = 9999
@@ -98,7 +103,31 @@ class Civ:
         self.resources_update(dt)
         self.upgrades_update(dt)
         self.upkeep_update()
+        self.modifiers_update(dt)
         self.time += dt
+
+    def modifiers_update(self, dt):
+        if self.get_stat("void"):
+            self.void_expand_timer -= dt
+            if self.void_expand_timer < 0:
+                self.void_expand_timer = 60
+                for p in self.planet_void:
+                    self.planet_void[p].grow()
+
+            # Create void for planets
+            for planet in self.scene.get_civ_planets(self):
+                if planet not in self.planet_void:
+                    void = aliens.alien3void.Alien3Void(self.scene, planet, planet.get_radius() + 10, self.void_color)
+                    self.planet_void[planet] = void
+                    self.scene.game_group.add(void)
+
+            # Destroy void for destroyed planets
+            for planet in list(self.planet_void.keys()):
+                if planet.owning_civ != self:
+                    self.planet_void[planet].kill()
+                    del self.planet_void[planet]
+
+            self.voids = list(self.planet_void.values())
 
     def get_comm_circles(self):
         self.comm_objects = [o for o in self.comm_objects if o.is_alive()]
@@ -192,6 +221,9 @@ class Civ:
                         f['object'].ships['fighter'] -= 1
                         f['object'].needs_panel_update = True
 
+    def get_voids(self):
+        return self.voids
+
     def get_stat(self, stat):
         if stat in self.frame_stats:
             return self.frame_stats[stat]
@@ -242,6 +274,7 @@ class PlayerCiv(Civ):
         self.color = PICO_GREEN
         self.is_player = True
         self.is_enemy = False
+        self.void_color = PICO_DARKGREEN
 
     def get_ship_fuel(self, ship_name):
         f = 9999

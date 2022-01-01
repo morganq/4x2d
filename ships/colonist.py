@@ -73,6 +73,15 @@ class Colonist(Ship):
         mods = self.scene.game.run_info.get_current_level_galaxy()['mods']
         if mods and mods[0] == 'reflector':
             planet.add_building(UPGRADE_CLASSES['b_defense1'])
+        if self.get_stat("terraform"):
+            if planet.resources.iron > 0:
+                val = int(planet.resources.iron * 0.3)
+                planet.resources.iron -= val
+                if random.random() > 0.5:
+                    planet.resources.ice += val
+                else:
+                    planet.resources.gas += val
+                planet.regenerate_art()
         if self.owning_civ.is_player:
             sound.play("goodcapture")
         else:

@@ -336,6 +336,9 @@ class MenuScene(scene.Scene):
         self.using_joy = True
         self.mode = MODE_START
         self.takeoff_time = 0
+
+        self.run_challenges = []
+        self.run_modifiers = []
         
         minx = -200
         miny = -200
@@ -649,7 +652,7 @@ class MenuScene(scene.Scene):
         self.mods_controls = [self.positive_mods, self.negative_mods, [self.continue_button]]
 
     def update_challenge_texts(self):
-        have = len(self.game.run_info.run_challenges)
+        have = len(self.run_challenges)
         reqd = self.get_required_challenges()
         if have < reqd:
             self.challenges_info.color = PICO_RED
@@ -657,7 +660,7 @@ class MenuScene(scene.Scene):
             self.challenges_info.color = PICO_GREEN
         self.challenges_info.set_text("%d/%d" % (have, reqd))
 
-        self.modifiers_info.set_text("%d" % len(self.game.run_info.run_modifiers))
+        self.modifiers_info.set_text("%d" % len(self.run_modifiers))
 
     def get_required_challenges(self):
         MOD_REQS = {
@@ -667,12 +670,12 @@ class MenuScene(scene.Scene):
             'timeloop':2
         }
         total = 0
-        for name in self.game.run_info.run_modifiers:
+        for name in self.run_modifiers:
             total += MOD_REQS.get(name, 0)
         return total
 
     def update_continue_button(self):
-        enabled = len(self.game.run_info.run_challenges) >= self.get_required_challenges()
+        enabled = len(self.run_challenges) >= self.get_required_challenges()
         self.continue_button.disabled = not enabled
         if enabled:
             self.continue_button.text = "Continue to mission"
@@ -686,33 +689,33 @@ class MenuScene(scene.Scene):
     def click_modifier(self, pm, btn, pos):
         if btn.state == "disabled":
             btn.set_state("enabled")
-            self.game.run_info.run_modifiers.append(pm)
-            self.game.run_info.run_modifiers = list(set(self.game.run_info.run_modifiers))
+            self.run_modifiers.append(pm)
+            self.run_modifiers = list(set(self.run_modifiers))
             self.update_challenge_texts()
             self.update_continue_button()
         elif btn.state == "enabled":
             btn.set_state("disabled")
-            self.game.run_info.run_modifiers.remove(pm)
-            self.game.run_info.run_modifiers = list(set(self.game.run_info.run_modifiers))            
+            self.run_modifiers.remove(pm)
+            self.run_modifiers = list(set(self.run_modifiers))            
             self.update_challenge_texts()
             self.update_continue_button()
 
     def click_challenge(self, nm, btn, pos):
         if btn.state == "disabled":
             btn.set_state("enabled")
-            self.game.run_info.run_challenges.append(nm)
-            self.game.run_info.run_challenges = list(set(self.game.run_info.run_challenges))
+            self.run_challenges.append(nm)
+            self.run_challenges = list(set(self.run_challenges))
             self.update_challenge_texts()
             self.update_continue_button()
         elif btn.state == "enabled":
             btn.set_state("disabled")
-            self.game.run_info.run_challenges.remove(nm)
-            self.game.run_info.run_challenges = list(set(self.game.run_info.run_challenges))            
+            self.run_challenges.remove(nm)
+            self.run_challenges = list(set(self.run_challenges))            
             self.update_challenge_texts()
             self.update_continue_button()
 
     def click_continue_to_mission(self, *args):
-        self.game.scene = newgamescene.NewGameScene(self.game)
+        self.game.scene = newgamescene.NewGameScene(self.game, self.run_challenges, self.run_modifiers)
         self.game.scene.start()
 
     def render(self):   

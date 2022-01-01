@@ -29,6 +29,10 @@ LOW_RANGE = "low_range"
 WORKER_LOSS = "worker_loss"
 LOW_OXYGEN = "low_oxygen" # TODO
 SMALL_ARMY = "small_army"
+TERRAFORM = 'terraform'
+HACKING = 'hacking'
+VOID = 'void' # TODO
+TIMELOOP = 'timeloop'
 
 class RunInfo:
     def __init__(self, data = None):

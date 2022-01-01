@@ -1,3 +1,4 @@
+import math
 import random
 
 import planet
@@ -181,11 +182,11 @@ class Alien:
         self.civ.researched_upgrade_names.add(up.name)
         self.civ.upgrades.append(up)        
 
-    def execute_attack(self, attack_type):
+    def execute_attack(self, attack_type, attack_strength):
         all_potential_targets = self.scene.get_civ_planets(self.scene.player_civ)
         all_potential_targets = [
             t for t in all_potential_targets
-            if len(self.get_ordered_ships(target_filter=t)) == 0
+            if len(self.get_ordered_ships(target_filter=t)) <= self.get_max_attackers() * attack_strength
         ]
         if not all_potential_targets:
             return False
@@ -199,6 +200,17 @@ class Alien:
                 {k:v for k,v in s.ships.items() if k in self.get_attacking_ships()}
             .values()) > 0
         ]
+        all_potential_ships = sum([
+            sum(
+                {k:v for k,v in s.ships.items() if k in self.get_attacking_ships()}
+            .values())            
+            for s in all_potential_sources
+        ])
+        num_to_send = math.ceil(all_potential_ships * attack_strength)
+        possible_colonist = True
+        if attack_strength < 0.25:
+            possible_colonist = False
+        print("num to send", num_to_send)
 
         if not all_potential_sources:
             return False
@@ -213,7 +225,7 @@ class Alien:
             num_sources = random.randint(2,4)
             sources = sorted_sources[0:num_sources]
             for source in sources:
-                self.send_attacking_party(source, target)
+                self.send_attacking_party(source, target, num_to_send, possible_colonist)
 
         elif attack_type == buildorder.BOAttack.ATTACK_TYPE_OUTLYING:
             def key(p):
@@ -225,19 +237,20 @@ class Alien:
             sorted_targets.sort(key=key)
             target = sorted_targets[0]
             sorted_sources.sort(key=lambda p:(p.pos - target.pos).sqr_magnitude())
-            self.send_attacking_party(sorted_sources[0], target)
+            self.send_attacking_party(sorted_sources[0], target, num_to_send, possible_colonist)
 
         elif attack_type == buildorder.BOAttack.ATTACK_TYPE_RANDOM:
             target = random.choice(sorted_targets)
             sorted_sources.sort(key=lambda p:(p.pos - target.pos).sqr_magnitude())
-            self.send_attacking_party(sorted_sources[0], target)
+            self.send_attacking_party(sorted_sources[0], target, num_to_send, possible_colonist)
 
         return True
 
-    def send_attacking_party(self, source, target):
+    def send_attacking_party(self, source, target, max_num = 999, possible_colonist=True):
         ships = self.get_planet_ship_instances(source)
         ships = [s for s in ships if s in self.get_attacking_ships()]
         num_to_send = random.randint(1, max(len(ships),1))
+        num_to_send = min(num_to_send, max_num)
         num_attackers = len(self.get_ordered_ships(target_filter=target))
         num_to_send = min(num_to_send, self.get_max_attackers() - num_attackers)
         print("attacking with %d" % num_to_send)
@@ -245,7 +258,7 @@ class Alien:
             return
         for s in ships[0:num_to_send]:
             source.emit_ship(s, {'to':target})
-        if ships:
+        if ships and possible_colonist:
             if source.population > 1 and random.random() < 0.8:
                 source.emit_ship(self.get_colonist(), {'to':target, 'num':1})
 

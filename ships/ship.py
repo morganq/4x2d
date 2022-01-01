@@ -28,7 +28,7 @@ FLEET_SEPARATION_MAX = 12
 FLEET_PROXIMITY_POWER = 0.5
 ATMO_DISTANCE = 15
 WARP_PLANET_MIN_DIST = 15
-DEEP_SPACE_DIST = 40
+DEEP_SPACE_DIST = 70
 FAR_FROM_HOME_DIST = 100
 
 THRUST_PARTICLE_RATE = 0.25
@@ -136,6 +136,13 @@ class Ship(SpaceObject):
         self.updated_color = False
         self.visible = False
 
+    def in_void(self):
+        for aura in self.owning_civ.get_voids():
+            d = (self.pos - aura.pos).sqr_magnitude()
+            if d <= aura.radius ** 2:
+                return True
+        return False
+
     def get_max_fuel(self):
         return self.owning_civ.get_ship_fuel(self.SHIP_BONUS_NAME)
 
@@ -169,7 +176,18 @@ class Ship(SpaceObject):
         armor += self.get_stat("ship_armor")
         if damage > 1 and armor > 0:
             damage = max(damage - armor,1)
-        
+
+        if damage >= self.health:
+            if origin and isinstance(origin, bullet.Bullet) and origin.shooter and hasattr(origin.shooter, "owning_civ"):
+                if origin.shooter.get_stat("hacking"):
+                    if self.is_in_deep_space() and random.random() < 0.25:
+                        self.health = self.get_max_health()
+                        damage = 0
+                        super().take_damage(damage, origin=origin)
+                        self.change_owner(origin.shooter.owning_civ)
+                        self.set_state("returning")
+                        return
+            
         return super().take_damage(damage, origin=origin)
 
     def get_thrust_accel(self):
@@ -200,6 +218,8 @@ class Ship(SpaceObject):
 
         speed *= (1 + self.get_stat("ship_speed_mul"))
         speed *= (1 - self.slow_aura)
+        if self.in_void():
+            speed *= 2
         return speed
 
     def get_cruise_speed(self): return self.get_max_speed() * 0.80
@@ -221,6 +241,8 @@ class Ship(SpaceObject):
             _, near_dist = helper.get_nearest(self.pos, self.scene.get_civ_planets(self.owning_civ))
             if near_dist > FAR_FROM_HOME_DIST ** 2:
                 shield += self.get_stat('ship_shield_far_from_home')
+        if self.in_void():
+            shield *= 2
         return shield 
 
     def wants_to_land(self):
@@ -611,11 +633,9 @@ class Ship(SpaceObject):
         self.warp(9999)
         self.bonus_attack_speed_time = 6
 
-    def change_owner(self, owner, target):
+    def change_owner(self, owner):
         self.owning_civ = owner
-        self.chosen_target = target
-        self.effective_target = target
-        self.set_state(STATE_CRUISING)
+        self.set_state(STATE_RETURNING)
         self.update_color()
 
     def update_color(self):

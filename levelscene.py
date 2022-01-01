@@ -218,6 +218,22 @@ class LevelScene(levelscenebase.LevelSceneBase):
         if "small_army" in self.game.run_info.run_challenges:
             self.player_civ.army_max = 10
 
+        if "terraform" in self.game.run_info.run_modifiers:
+            self.player_civ.base_stats['terraform'] = 1
+
+        if "timeloop" in self.game.run_info.run_modifiers:
+            loopable = [p for p in self.get_planets() if not p.time_loop]
+            random.shuffle(loopable)
+            for i in range(3):
+                if loopable:
+                    loopable.pop().set_time_loop()
+
+        if "hacking":# in self.game.run_info.run_modifiers:
+            self.player_civ.base_stats['hacking'] = 1
+
+        if "void" in self.game.run_info.run_modifiers:
+            self.player_civ.base_stats['void'] = 1
+
         galaxy = self.game.run_info.get_current_level_galaxy()
         if not galaxy['mods']:
             return
