@@ -170,9 +170,10 @@ class LevelSceneBase(scene.Scene):
             else:
                 separation -= 1
 
-        for i in range(random.randint(15,20) - int(self.difficulty / 3)):
-            pos = self.random_object_pos()
-            self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))  
+        if self.difficulty < 9:
+            for i in range(random.randint(15,20) - int(self.difficulty / 3)):
+                pos = self.random_object_pos()
+                self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))  
 
     def get_fleet_manager(self, civ):
         return None

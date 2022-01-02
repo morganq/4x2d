@@ -1,6 +1,9 @@
+import cProfile
 import csv
 import io
+import pstats
 import sys
+import time
 from collections import defaultdict
 
 import pygame
@@ -9,6 +12,7 @@ from pygame.transform import scale
 import allupgradesscene
 import buildingcreatorscene
 import creditsscene
+import gameprofile
 import introscene
 import leveleditorscene
 import levelscene
@@ -128,7 +132,12 @@ class Game:
 
         self.first_load = True
         self.frame_time = 0
+        self.frame_times = []
+        self.scale_mode = "xbr"
         self.fps_limited_pause = False
+        self._profiling = False
+        self._profile_start_time = 0
+        self._profiler = None
         Game.inst = self
 
     def set_resolution(self, resolution, fullscreen = False, resizable = False):
@@ -167,6 +176,17 @@ class Game:
                 self.game_speed_input = clamp(int(1 - self.game_speed_input), 0, 1)
             elif event.key == pygame.K_ESCAPE:
                 self.scene.take_input("menu", event)
+            elif DEV and event.key == pygame.K_p:
+                self._profiling = not self._profiling
+                if self._profiling:
+                    self._profiler = cProfile.Profile()
+                    self._profiler.enable()
+                    self._profile_start_time=time.time()
+                else:
+                    self._profiler.disable()
+                    stats = pstats.Stats(self._profiler).sort_stats("cumulative")
+                    gameprofile.dump_stats(self._profiler, time.time() - self._profile_start_time)
+                    
             else:
                 self.scene.take_input("other", event)
 
@@ -346,12 +366,23 @@ class Game:
         if self.scale == 1 or not xbrz_scale:
             self.scale_normal()
         else:
-            #self.scale_normal()
-            self.scale_xbr()
+            if self.scale_mode == "normal":
+                self.scale_normal()
+            else:
+                self.scale_xbr()
         if DEV:
             t = pygame.time.get_ticks() - self.frame_time
-            self.frame_time = pygame.time.get_ticks()            
-            text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))
+            self.frame_time = pygame.time.get_ticks()
+            self.frame_times.append(t)
+            self.frame_times = self.frame_times[-80:]
+            if len(self.frame_times) >= 10:
+                remove_spikes = [f for f in self.frame_times if f < 1000]
+                avg = sum(remove_spikes) / max(len(remove_spikes),1)
+                if avg > 30:
+                    self.scale_mode = "normal"
+                if avg < 20:
+                    self.scale_mode = "xbr"
+                text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % avg, (255,255,255,255))
             #print(t)
             text.FONTS['small'].render_to(self.scaled_screen, (35,self.scaled_screen.get_size()[1]-15), self.input_mode, (255,255,255,255))
         pygame.display.update()

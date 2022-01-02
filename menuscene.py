@@ -445,11 +445,14 @@ class MenuScene(scene.Scene):
             self.game.first_load = False
             self.time = 0
         else:
-            self.time = 8
-            self.logo.time = 8
-            self.logo._generate_image()
+            self.skip_intro()
 
         self.sm = states.Machine(states.UIEnabledState(self))
+
+    def skip_intro(self):
+        self.time = 8
+        self.logo.time = 8
+        self.logo._generate_image()        
 
     def on_joy_press(self, dir):
         self.using_joy = True
@@ -760,6 +763,8 @@ class MenuScene(scene.Scene):
             self.sm.state.take_input(inp, event)
         else:
             if self.time < 6:
+                if inp == "menu":
+                    self.skip_intro()
                 return
             if inp == "joymotion":
                 self.joy.take_input(inp, event)

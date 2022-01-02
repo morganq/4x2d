@@ -77,25 +77,50 @@ class FleetDiagram(spritebase.SpriteBase):
             #    continue
             center = fleet.pos
 
-            path = self.smooth_path(fleet.path)
+            valid_path = fleet.path
+            if fleet.last_valid_path:
+                valid_path = fleet.last_valid_path
+            path = self.smooth_path(valid_path)
 
             # todo: migrate from center to path.
-            path = path[:-2]
+            original_path = path[::]
+            path = path[2:-2]
             if len(path) > 3:
+                end_backwards = fleet.target.pos - original_path[int(len(original_path) * 0.75)]
                 pygame.draw.circle(self.image, OUTLINE_COLOR, center.tuple_round(), 2, 0)
+                end_pt = fleet.target.pos - end_backwards.normalized() * (fleet.target.radius + 8)
+
+                if (fleet.pos - fleet.target.pos).sqr_magnitude() < (fleet.target.radius + 80) ** 2:
+                    blended_path = [
+                        center,
+                        end_pt
+                    ]
+                    last_delta = (end_pt - center).normalized()
+                else:
+                    # Blend the end of the path
+                    blended_path = path[::]
+                    if (original_path[-1] - fleet.target.pos).sqr_magnitude() < (fleet.target.radius + 50) ** 2:
+                        blendsteps = min(15, len(blended_path) // 2 - 1)
+                        offset = blended_path[-1] - end_pt
+                        for i in range(blendsteps):
+                            z = (1 - (i / blendsteps))
+                            blended_path[-(i+1)] = blended_path[-(i+1)] * (1-z) + end_pt * z
+                    
+                    # Blend the start of the path
+                    blendsteps = min(15, len(blended_path) // 2)
+                    offset = blended_path[0] - center
+                    for i in range(blendsteps):
+                        z = (1 - (i / blendsteps))
+                        blended_path[i] = blended_path[i] - offset * z
+                    last_delta = (blended_path[-1] - blended_path[-3]).normalized()
+
+                pygame.draw.lines(self.image, OUTLINE_COLOR, False, [p.tuple_int() for p in blended_path], 1)
                 
-                blendsteps = min(15, len(path) - 1)
-                offset = path[0] - center
-                for i in range(blendsteps):
-                    z = (1 - (i / blendsteps))
-                    path[i] = path[i] - offset * z
-                pygame.draw.lines(self.image, OUTLINE_COLOR, False, [p.tuple_round() for p in path[0:-2]], 1)
-                last_delta = (path[-1] - path[-3]).normalized()
                 last_side = V2(last_delta.y, -last_delta.x)
-                ap1 = path[-2]
-                ap2 = path[-2] + last_delta * -3 + last_side * 3
-                ap3 = path[-2] + last_delta * -3 + last_side * -3
-                poly = [ap1.tuple_round(), ap2.tuple_round(), ap3.tuple_round()]
+                ap1 = blended_path[-1]
+                ap2 = blended_path[-1] + last_delta * -5 + last_side * 5
+                ap3 = blended_path[-1] + last_delta * -5 + last_side * -5
+                poly = [ap1.tuple_int(), ap2.tuple_int(), ap3.tuple_int()]
                 pygame.draw.polygon(self.image, OUTLINE_COLOR, poly, 0)
 
                 #for step in path:

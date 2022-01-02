@@ -17,7 +17,7 @@ from v2 import V2
 
 FLEET_RADIUS = 25
 SAME_FLEET_RADIUS = 15
-PATH_STEPS_PER_FRAME = 20
+PATH_STEPS_PER_FRAME = 2
 PATH_STEP_SIZE = 5
 NEAR_PATH_DIST = 40
 
@@ -91,6 +91,7 @@ class FleetManager:
                             #print("same fleet found!", new_fleet, old_fleet)
                             new_fleet.path = old_fleet.path[::]
                             new_fleet.path_done = old_fleet.path_done
+                            new_fleet.last_valid_path = old_fleet.last_valid_path[::]
                             break
                     else:
                         pass
@@ -110,10 +111,10 @@ class FleetManager:
             if (fleet.pos - fleet.path[0]).sqr_magnitude() > 10 ** 2:
                 needs_repath = True
             
-            if needs_repath:
+            if needs_repath and fleet.path_done:
                 fleet.path = [fleet.pos]
                 fleet.path_done = False
-                fleet.develop_path(100)
+                fleet.develop_path(10)
 
         t3 = time.time()
         #print(len(self.current_fleets))
@@ -170,7 +171,8 @@ class Fleet:
         self.target = target
         self.selectable_object = None
         self.pos, self.radius = self.get_size_info()
-        self.path = [self.pos]
+        self.path = [self.scene.flowfield.get_grid_quantized_pos(self.pos)]
+        self.last_valid_path = []
         self.path_done = False
 
     def is_waiting(self):
@@ -191,6 +193,7 @@ class Fleet:
         for i in range(num_steps):
             if (self.path[-1] - self.target.pos).sqr_magnitude() < (PATH_STEP_SIZE * 2) ** 2:
                 self.path_done = True
+                self.last_valid_path = self.path[::]
                 return
             if self.scene.flowfield.has_field(self.target):
                 step = PATH_STEP_SIZE * (random.random() + 0.5)
@@ -233,6 +236,8 @@ class Fleet:
             nearest = dsq
         if path_end > 0 and path_end < len(self.path) - 1:
             self.path = self.path[path_end:]
+            if self.last_valid_path:
+                self.last_valid_path = self.last_valid_path[path_end:]
 
     def debug_render(self, surface):
         pass

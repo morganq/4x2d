@@ -295,3 +295,6 @@ class BossMothership(SpaceObject):
 
     def get_selection_info(self):
         return {'type':'boss'}
+
+    def kill(self):
+        pass

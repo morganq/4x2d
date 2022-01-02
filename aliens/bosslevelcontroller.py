@@ -4,7 +4,7 @@ import levelstates
 from helper import clamp
 from v2 import V2
 
-from aliens import bossmothership
+from aliens import bossmothership, bosstimecrystal
 
 PHASE_1 = 1
 PHASE_REVIVING = 2
@@ -22,7 +22,7 @@ class BossLevelController(levelcontroller.LevelController):
         super().update(dt)
         if self.phase == PHASE_REVIVING:
             self.reviving_time += dt
-            #self.scene.game_speed = clamp(self.reviving_time / 4, 1, 20)
+            self.scene.game_speed = clamp(self.reviving_time / 4, 1, 20)
             self.scene.game_speed = 20
             if self.mothership.state == self.mothership.STATE_GAME_WAITING:
                 self.post_cinematic_timer -= dt
@@ -43,17 +43,16 @@ class BossLevelController(levelcontroller.LevelController):
 
     def detect_victory(self):
         if self.phase == PHASE_1:
-            if not self.scene.get_civ_planets(self.scene.enemy.civ):
-                self.scene.game.run_info.o2 += 600 # 10 more minutes
-                # TODO: remove this
-                #self.scene.paused = True
-                #self.scene.sm.transition(levelstates.BeatGameState(self.scene))
-                #return
+            my_planets = self.scene.get_civ_planets(self.scene.enemy.civ)
+            num_crystals = len([p for p in my_planets if isinstance(p, bosstimecrystal.TimeCrystal)])
+            few_planets_no_crystals = len(my_planets) < 3 and num_crystals == 0
+            if few_planets_no_crystals:
+                self.scene.game.run_info.o2 += 300 # 5 more minutes
                 self.phase = PHASE_REVIVING
 
                 for ship in self.scene.get_ships():
                     if ship.state != "returning":
-                        ship.set_state("returning")                
+                        ship.set_state("returning")
                 
                 self.scene.sm.transition(levelstates.CinematicState(self.scene))
                 self.mothership = bossmothership.BossMothership(self.scene, V2(game.Game.inst.game_resolution.x * 0.75, -20))

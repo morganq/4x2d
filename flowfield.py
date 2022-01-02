@@ -68,6 +68,15 @@ class FlowFieldMap:
     def has_field(self, target):
         return target in self.fields
 
+    def get_grid_tuple(self, pos):
+        cx = int(clamp((pos.x) / GRIDSIZE, 0, self.gw-1))
+        cy = int(clamp((pos.y) / GRIDSIZE, 0, self.gh-1))
+        return (cx, cy)
+
+    def get_grid_quantized_pos(self, pos):
+        cx, cy = self.get_grid_tuple(pos)
+        return V2((cx + 0.5) * GRIDSIZE, (cy + 0.5) * GRIDSIZE)
+
     def update(self, dt):
         if self.boss:
             #print("--")
@@ -210,7 +219,7 @@ class FlowField:
                 else:
                     print("no min but also no inf exception", x,y)
                     #print(deltas)
-            if x % (self.gw // 8) == 0:
+            if x % (self.gw // 64) == 0:
                 yield x
         yield 4
 
@@ -239,14 +248,13 @@ class FlowField:
 
         return out.normalized()
 
-
     def walk_field(self, pos, distance):
         walked = 0
         p = pos - self.offset
         iterations = 0
         while walked < distance:
             step = min(GRIDSIZE, distance)
-            p += self.get_vector(p + self.offset, 30) * step
+            p += self.get_vector(p + self.offset, 5) * step
             walked += step
             iterations += 1
             if iterations > distance * 2:
