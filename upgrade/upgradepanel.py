@@ -156,7 +156,7 @@ class UpgradePanel(Panel):
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + 254 - self.padding, y0 + y3), (x0 + 254 - self.padding, y0 + y3+5))
 
         pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 85, 32, 78, 160))
-        FONTS['tiny'].render_to(self.image, (self.width - 83, 24), "TECHNOLOGY TREE", PICO_WHITE)
+        FONTS['tiny'].render_to(self.image, (self.width - 83, 29), "TECHNOLOGY TREE", PICO_WHITE)
 
     def kill(self):
         for child in self.tree_children:

@@ -1,9 +1,11 @@
+** Refactor? **
+Levelscene and base
+ - "PlayScene" / "MultiplayerPlayScene", "SectorPlayScene", "TutorialPlayScene"
+
 ** Juice **
 
 
 ** Immediate **
-
-Run Challenges
 
 ** Missing Sounds **
 
@@ -11,7 +13,6 @@ Run Challenges
 
 ** Bugs and tweaks **
 
-Supervisor took over bomber and it had the fleet idle circle around it??
 Tech tree lines sometimes don't appear
 Adjust upgrade curve [num upgrades per sector]
 

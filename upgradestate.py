@@ -40,11 +40,12 @@ class UpgradeState(UIEnabledState):
         self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
-        self.panel.fade_in(speed=10)
+        
         self.hover_filter = self.filter_only_panel_ui
         self.selected_targets = []
         self.extras = []
         super().enter()
+        self.panel.fade_in(speed=3)
 
     def filter_my_planets(self, x):
         return (
