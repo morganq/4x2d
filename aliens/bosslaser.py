@@ -16,10 +16,10 @@ class BossLaser(Fighter):
     BASE_HEALTH = 35
     BASE_DAMAGE = 1.5
     FIRE_RATE = 0.25
-    FIRE_RANGE = 75
-    MAX_SPEED = 5
+    FIRE_RANGE = 60
+    MAX_SPEED = 4
     FUEL = 9999
-    DISPLAY_NAME = "Censor Predator"
+    DISPLAY_NAME = "Predator"
 
     def __init__(self, scene, pos, owning_civ):
         Fighter.__init__(self, scene, pos, owning_civ)
@@ -34,7 +34,7 @@ class BossLaser(Fighter):
         b = Bullet(at.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)
 
-        l = laserparticle.LaserParticle(self.pos, at.pos, PICO_RED, 0.2)
+        l = laserparticle.LaserParticle(self.pos, at.pos, self.owning_civ.color, 0.2)
         self.scene.game_group.add(l)
 
         self.bullets_chambered -= 1

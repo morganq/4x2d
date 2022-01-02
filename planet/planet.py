@@ -210,7 +210,7 @@ class Planet(SpaceObject):
         return value
 
     def get_base_regen(self):
-        regen = self.get_max_health() / 120
+        regen = self.get_max_health() / 240
         return regen
 
     def _generate_frame(self, border = False):

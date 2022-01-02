@@ -228,7 +228,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
                 if loopable:
                     loopable.pop().set_time_loop()
 
-        if "hacking":# in self.game.run_info.run_modifiers:
+        if "hacking" in self.game.run_info.run_modifiers:
             self.player_civ.base_stats['hacking'] = 1
 
         if "void" in self.game.run_info.run_modifiers:
@@ -404,6 +404,9 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
         if self.is_first_frame:
             sound.play("radar")
+            self.game.run_info.anticheat_level_started = True
+            self.game.save.set_run_state(self.game.run_info)
+            self.game.save.save()            
 
         self.time += dt
 

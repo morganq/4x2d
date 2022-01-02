@@ -77,7 +77,7 @@ class BossMothership(SpaceObject):
         self.souls = []
 
     def get_max_health(self):
-        return 2200
+        return 3200
 
     def brake(self, dt):
         if self.velocity.sqr_magnitude() > 0:

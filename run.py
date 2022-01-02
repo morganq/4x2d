@@ -7,7 +7,8 @@ RUN_INFO_SERIALIZE_FIELDS = [
     'data', 'path', 'saved_technologies', 'blueprints',
     'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
     'bonus_credits', 'ship_levels', 'score', 'time_taken', 'ships_lost',
-    'reward_list', 'sectors_cleared', 'victory', 'started', 'run_challenges', 'run_modifiers'
+    'reward_list', 'sectors_cleared', 'victory', 'started', 'run_challenges', 'run_modifiers',
+    'anticheat_level_started'
 ]
 
 LEVEL_TITLES = {
@@ -27,11 +28,11 @@ LEVEL_TITLES = {
 FRAGILE_PLANETS = "fragile_planets"
 LOW_RANGE = "low_range"
 WORKER_LOSS = "worker_loss"
-LOW_OXYGEN = "low_oxygen" # TODO
+LOW_OXYGEN = "low_oxygen"
 SMALL_ARMY = "small_army"
 TERRAFORM = 'terraform'
 HACKING = 'hacking'
-VOID = 'void' # TODO
+VOID = 'void'
 TIMELOOP = 'timeloop'
 
 class RunInfo:
@@ -57,6 +58,8 @@ class RunInfo:
         self.started = False
         self.run_challenges = [] # Negative mods
         self.run_modifiers = [] # Positive mods
+
+        self.anticheat_level_started = False
 
     def begin_run(self):
         # challenges

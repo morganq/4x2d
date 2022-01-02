@@ -763,11 +763,14 @@ class MenuScene(scene.Scene):
                 return
             if inp == "joymotion":
                 self.joy.take_input(inp, event)
+                self.game.input_mode = "joystick"
             elif inp == "confirm":
                 self.choices[self.current_choice].onclick()
+                self.game.input_mode = "joystick"
             else:
                 self.sm.state.take_input(inp, event)
             if inp == "mouse_move" and self.using_joy:
+                self.game.input_mode = "mouse"
                 self.choices[self.current_choice].mouse_exit()
                 self.using_joy = False
         #return super().take_input(inp, event)

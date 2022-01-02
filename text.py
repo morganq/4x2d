@@ -135,7 +135,7 @@ def render_multiline_to(surface, pos, text, size, color, wrap_width=None, center
 parens_re = re.compile("\((.+?)\).*")
 TEXT_COLORS = {'!':PICO_RED,'^':PICO_GREEN, '>': PICO_YELLOW}
 HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':28, 'bm_army':12, 'pixolde':16, 'logo':50}
-Y_OFFSETS = {'tiny':0, 'small': -2, 'medium': 0, 'big': -4, 'huge':-1, 'bm_army':0, 'pixolde':0, 'logo':0}
+Y_OFFSETS = {'tiny':0, 'small': -2, 'medium': 0, 'big': -4, 'huge':0, 'bm_army':0, 'pixolde':0, 'logo':0}
 Y_SYMBOL_OFFSETS = {'tiny':0, 'small': 0, 'medium': 0, 'big': 0, 'huge':1, 'bm_army':0, 'pixolde':0, 'logo':0}
 
 SYMBOLS = [
@@ -187,6 +187,8 @@ def get_groups(line):
                 return groups
         elif line[x] == "]":
             add_group({'color':None, 'body':""})
+        elif line[x] == "\n":
+            add_group({'color':groups[-1]['color'], 'body':"\n"})
         else:
             groups[-1] = {'color':groups[-1]['color'], 'body':groups[-1]['body'] + line[x]}
         x += 1
@@ -245,7 +247,7 @@ def get_word_layout(words, size, wrap_width=None, center=True):
                 baseline_y += height_per_line
                 lines.append([])                
             my = baseline_y - f.get_rect("M").height // 2
-            spacing = 2
+            spacing = int(w / 6) + 2
             rect = pygame.Rect(left_x, my - h // 2, w + spacing, h)
             lines[-1].append({'word':word, 'rect':rect})
             # Adjust running variables
@@ -260,10 +262,14 @@ def get_word_layout(words, size, wrap_width=None, center=True):
             
             # Same word wrap logic as for symbols
             wx2 = left_x + rect.x + rect.width
-            if wrap_width and wx2 > wrap_width and lines[-1]:
+            is_newline = '\n' in word['body']
+            if (wrap_width and wx2 > wrap_width and lines[-1]) or is_newline:
                 left_x = 0
                 baseline_y += height_per_line
                 lines.append([])
+
+            if is_newline:
+                continue
             wx = left_x + rect.x
             wy = baseline_y - rect.height 
             ww = rect.width
@@ -299,18 +305,21 @@ def render_multiline_extra(text, size, color, wrap_width=None, center=True):
 
         if word['type'] == 'text':
             word_color = word['color'] or color
-            f.render_to(surf, rect.topleft, word['body'], word_color)
+            try:
+                f.render_to(surf, rect.topleft, word['body'], word_color)
+            except:
+                print("TEXT RENDERING ERROR", word)
 
     return (surf, layout)
     
 if __name__ == "__main__":
     pygame.init()
     screen = pygame.display.set_mode((800,600))
-    screen.fill(PICO_WHITE)
+    screen.fill(PICO_BLACK)
 
     preload()
 
-    body = "[*left*] Ships gain [^+33%] move [*x*] speed and [^+33%] rate [*drag*] of fire. Every ` time you [*square*] issue an order, [!-5] seconds of oxygen . ` / *"
+    body = "[*left*] Ships gain [^+33%] move\n[*x*] speed and [^+33%] rate [*drag*] of fire. Every ` time you [*square*] issue an order, [!-5] seconds of oxygen . ` / *"
 
     groups = get_groups(body)
     words = get_words(groups)
@@ -322,7 +331,7 @@ if __name__ == "__main__":
     for wordspec in layout['layout']:
         print(wordspec)
 
-    surf = render_multiline_extra(body, "big", PICO_WHITE, wrap_width=180)
+    surf = render_multiline(body, "big", PICO_WHITE, wrap_width=180)
     screen.blit(surf, (10,10))
 
     running = True

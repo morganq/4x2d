@@ -182,7 +182,7 @@ class Alien:
         self.civ.researched_upgrade_names.add(up.name)
         self.civ.upgrades.append(up)        
 
-    def execute_attack(self, attack_type, attack_strength):
+    def execute_attack(self, attack_type, attack_strength=1):
         all_potential_targets = self.scene.get_civ_planets(self.scene.player_civ)
         all_potential_targets = [
             t for t in all_potential_targets

@@ -41,7 +41,7 @@ class GreyGooEffect(StatusEffect):
             self.kill()
             return
         self.time -= dt
-        if (self.time + dt) % 0.1 < self.time % 0.1:
+        if (self.time + dt) % 0.25 < self.time % 0.25:
             pvel = V2.from_angle(random.random() * 6.2818) * 5
             p = particle.Particle([PICO_WHITE, PICO_LIGHTGRAY, PICO_LIGHTGRAY, PICO_DARKGRAY], 1, self.owner.pos - pvel, 0.5 + random.random() * 0.35, pvel)
             p.layer = 3
@@ -51,7 +51,7 @@ class GreyGooEffect(StatusEffect):
             if self.owner.owning_civ == self.applier.owning_civ:
                 self.kill()
                 return
-            dmg = (0.25 * len([e for e in self.owner.status_effects if e.name == "Grey Goo"]))
+            dmg = (0.1 * len([e for e in self.owner.status_effects if e.name == "Grey Goo"])) + 0.25
             self.owner.take_damage(dmg, self.applier)
             if self.owner.owning_civ and self.owner.owning_civ.get_stat("grey_goo_collection") > 0:
                 self.owner.owning_civ.resources.iron += self.owner.owning_civ.get_stat("grey_goo_collection")

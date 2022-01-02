@@ -175,9 +175,9 @@ class StarMapScene(Scene):
         self.ui_group.add(t2)    
 
         if self.game.run_info.reward_list:
-            t2 = text.Text("Acquired |", "small", V2(res.x / 2 - rewards_width / 2 + 8, ry - 3), PICO_BLACK)
-            self.ui_group.add(t2)
-            rx = t2.x + 61
+            t3 = text.Text("Acquired |", "small", V2(res.x / 2 - rewards_width / 2 + 8, ry - 3), PICO_BLACK)
+            self.ui_group.add(t3)
+            rx = t3.x + 61
             for r in self.game.run_info.reward_list:
                 reward = RewardWithBackground(V2(rx, ry + 1), r['name'])
                 reward.offset = (0.5,0.5)  
@@ -185,8 +185,10 @@ class StarMapScene(Scene):
                 rx += 23
         else:
             t1.offset = (0.5, 0)
-            t1.x = res.x/2
-
+            t1.x = res.x/2 - 30
+            t2.offset = (0.5, 0)
+            t2.x = res.x/2 + 30
+            
         self.sm = states.Machine(StarMapState(self))
 
     def update(self, dt):

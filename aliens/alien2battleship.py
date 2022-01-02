@@ -12,7 +12,7 @@ class Alien2Battleship(Battleship):
     HEALTHBAR_SIZE = (24,2)
     SHIP_NAME = "alien2battleship"
     SHIP_BONUS_NAME = 'battleship'
-    DISPLAY_NAME = "Network Destroyer"
+    DISPLAY_NAME = "Destroyer"
 
     BASE_HEALTH = 400
     FIRE_RATE = 2.0

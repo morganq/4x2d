@@ -12,6 +12,7 @@ from v2 import V2
 @register_ship
 class BossFighter(Fighter):
     SHIP_NAME = "bossfighter"
+    DISPLAY_NAME = "Censor Fighter"
     BASE_HEALTH = 25
     BASE_DAMAGE = 3
     FIRE_RATE = 0.65

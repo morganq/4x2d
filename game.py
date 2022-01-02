@@ -65,12 +65,15 @@ class Game:
         sound.init()
         text.preload()
         self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
-        print(self.joysticks)
         self.last_joy_axes = None
         try:
             self.run_info = self.save.get_run_state()
-            print(self.run_info.run_challenges)
-        except:
+            if self.run_info.anticheat_level_started:
+                self.run_info = run.RunInfo()
+                self.save.set_run_state(self.run_info)
+                self.save.save()
+        except Exception as e:
+            print(e)
             self.run_info = run.RunInfo()
         
         self.input_mode = self.INPUT_MOUSE
@@ -350,6 +353,7 @@ class Game:
             self.frame_time = pygame.time.get_ticks()            
             text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % t, (255,255,255,255))
             #print(t)
+            text.FONTS['small'].render_to(self.scaled_screen, (35,self.scaled_screen.get_size()[1]-15), self.input_mode, (255,255,255,255))
         pygame.display.update()
 
     def get_available_resolutions(self):

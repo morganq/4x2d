@@ -519,7 +519,7 @@ class Alien2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Kinetic Sling"
-    description = "Ship weapons deal up to [^+4] damage, scales based on bonus speed"
+    description = "Ship weapons deal up to [^+4] damage based on bonus speed"
     icon = "tech_default"
     stats = Stats(ship_weapon_damage_speed=4)
     family = {'tree':'t_alien', 'parents':['t_alien1']}

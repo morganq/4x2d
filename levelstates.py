@@ -540,6 +540,9 @@ class VictoryState(State):
         self.scene.game.run_info.sectors_cleared += 1
 
         self.scene.game.run_info.choose_path(*self.scene.game.run_info.next_path_segment)
+        self.scene.game.run_info.anticheat_level_started = False
+        self.scene.game.save.set_run_state(self.scene.game.run_info)
+        self.scene.game.save.save()
         self.time = 0
         #self.scene.paused = True
 

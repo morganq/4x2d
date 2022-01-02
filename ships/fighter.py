@@ -32,7 +32,7 @@ class Fighter(Ship):
     FIRE_RANGE = 30
     THREAT_RANGE_DEFAULT = 40
     THREAT_RANGE_DEFENSE = 60
-    STOP_CHASING_RANGE = 70
+    STOP_CHASING_RANGE = 75
 
     DOGFIGHTS = True
     BOMBS = True
