@@ -2,6 +2,7 @@ import math
 
 import pygame
 
+from elements import polycircle
 from helper import clamp
 from particle import Particle
 from spritebase import SpriteBase
@@ -29,21 +30,21 @@ class Explosion(SpriteBase):
         self._recalc_rect()
         self.generate_image()
 
-
     def generate_image(self):
         t = min(self.time / self.lifetime,1)
         ci = clamp(int(len(self.colors) * t), 0, len(self.colors) - 1)
         size = self.scale_fn(t) * self.max_size
         #print(t, self.colors[ci])
         self.image.fill((0,0,0,0))
-        temp = pygame.Surface((self.max_size * 2, self.max_size * 2), pygame.SRCALPHA)
+        #temp = pygame.Surface((self.max_size * 2, self.max_size * 2), pygame.SRCALPHA)
         if t <= 1:
-            pygame.draw.circle(temp, self.colors[ci], (self.max_size, self.max_size), size, 0)
-        temp.blit(self.image, (0,0))
+            polycircle.draw_polycircle(self.image, self.colors[ci], (self.max_size, self.max_size), size, round(self.line_width))
+            #pygame.draw.circle(temp, self.colors[ci], (self.max_size, self.max_size), size, 0)
+        #temp.blit(self.image, (0,0))
         innersize = clamp(size - self.line_width, 0, 999)
-        pygame.draw.circle(temp, (0,0,0,0), (self.max_size, self.max_size), innersize, 0)
+        #pygame.draw.circle(temp, (0,0,0,0), (self.max_size, self.max_size), innersize, 0)
         self.size = size
-        self.image = temp
+        #self.image = temp
 
     def update(self, dt):
         self.time += dt
