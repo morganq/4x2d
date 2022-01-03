@@ -1,9 +1,11 @@
 import cProfile
 import csv
 import io
+import os
 import pstats
 import sys
 import time
+import traceback
 from collections import defaultdict
 
 import pygame
@@ -310,45 +312,58 @@ class Game:
 
 
     def run(self):
-        clock = pygame.time.Clock()
-        running = True
+        self.clock = pygame.time.Clock()
+        self.running = True
         self.scene.start()
 
-        while running:
-            for event in pygame.event.get():
-                if event.type == sound.MUSIC_ENDEVENT:
-                    sound.end_of_music()
+        while self.running:
+            try:
+                self.game_loop()
+            except:
+                traceback.print_exc()
+                # Set anticheat False so we don't penalize players who hit crash bugs!!
+                self.run_info.anticheat_level_started = False
+                self.save.set_run_state(self.run_info)
+                self.save.save()
+                return
 
-                elif event.type == pygame.VIDEORESIZE:
-                    self.scene.on_display_resize(V2(event.w, event.h))
 
-                elif event.type == pygame.QUIT:
-                    running = False
+    def game_loop(self):
+        for event in pygame.event.get():
+            if event.type == sound.MUSIC_ENDEVENT:
+                sound.end_of_music()
 
-                elif event.type == pygame.JOYDEVICEADDED:                    
-                    self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+            elif event.type == pygame.VIDEORESIZE:
+                self.scene.on_display_resize(V2(event.w, event.h))
 
-                elif self.input_mode in [self.INPUT_MOUSE, self.INPUT_JOYSTICK]:
-                    self.process_input_singleplayer(event)
+            elif event.type == pygame.QUIT:
+                self.running = False
 
-                elif self.input_mode == self.INPUT_MULTIPLAYER:
-                    self.process_input_multiplayer(event)
+            elif event.type == pygame.JOYDEVICEADDED:                    
+                self.joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
 
-            max_framerate = 60
-            if self.fps_limited_pause:
-                pygame.time.wait(20)
-            dt = clock.tick(max_framerate) / 1000.0
-            # limit delta
-            dt = min(dt, 0.1)
+            elif self.input_mode in [self.INPUT_MOUSE, self.INPUT_JOYSTICK]:
+                self.process_input_singleplayer(event)
 
-            s1 = self.scene
-            self.scene.update(dt)
-            s2 = self.scene
-            if s1 == s2: # Skip render if we changed scenes in the middle of an update. Things could go wrong. 
-                self.render()
-            #optimize.print_memos()
-            optimize.reset_frame_memos()
+            elif self.input_mode == self.INPUT_MULTIPLAYER:
+                self.process_input_multiplayer(event)
 
+        max_framerate = 60
+        if self.fps_limited_pause:
+            pygame.time.wait(20)
+        dt = self.clock.tick(max_framerate) / 1000.0
+        # limit delta
+        dt = min(dt, 0.1)
+
+        s1 = self.scene
+        self.scene.update(dt)
+        s2 = self.scene
+        if s1 == s2: # Skip render if we changed scenes in the middle of an update. Things could go wrong. 
+            self.render()
+        #optimize.print_memos()
+        optimize.reset_frame_memos()
+
+        return True
 
     def scale_xbr(self):
         sc = pygame.Surface(self.screen.get_size(), depth=32)
@@ -382,7 +397,12 @@ class Game:
                     self.scale_mode = "normal"
                 if avg < 20:
                     self.scale_mode = "xbr"
-                text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % avg, (255,255,255,255))
+                fps_color = (0,255,0,255)
+                if avg > 30:
+                    fps_color = (255,0,0,255)
+                elif avg > 20:
+                    fps_color = (255,255,0,255)
+                text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % avg, fps_color)
             #print(t)
             text.FONTS['small'].render_to(self.scaled_screen, (35,self.scaled_screen.get_size()[1]-15), self.input_mode, (255,255,255,255))
         pygame.display.update()

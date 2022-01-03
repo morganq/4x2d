@@ -153,7 +153,7 @@ class Alien3(alien.Alien):
             BOResearch(70,"a3tvoid"),
             BOResearch(80,"a3tvoid"),
             BOResearch(90,"a3sfighter", target_type=BOResearch.TARGET_TYPE_UNDEFENDED),
-            BOResearch(100,"a3battleship", "a3sbomber", target_type=BOResearch.TARGET_TYPE_RANDOM),
+            BOResearch(100,"a3sbattleship", "a3sbomber", target_type=BOResearch.TARGET_TYPE_RANDOM),
             BOAttack(110, BOAttack.ATTACK_TYPE_OUTLYING, 0.33),
         ]
         if self.difficulty >= 3:

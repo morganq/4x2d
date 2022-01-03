@@ -24,7 +24,7 @@ class SpaceMine(spaceobject.SpaceObject):
 
     def collide(self, other):
         if self.time > 1 and isinstance(other, ships.ship.Ship) and other.owning_civ != self.owning_civ:
-            self.time = -15
+            self.time = -25
             b = bullet.Bullet(self.pos, other, self, mods={'damage_base':10, 'blast_radius':10})
             self.scene.game_group.add(b)
         return super().collide(other)

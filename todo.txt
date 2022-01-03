@@ -4,19 +4,15 @@ Levelscene and base
 
 ** Juice **
 
-
 ** Immediate **
+
+sector title and reward top of game screen
 
 ** Missing Sounds **
 
-? Ship just produced sound
-
 ** Bugs and tweaks **
 
-Tech tree lines sometimes don't appear
 Adjust upgrade curve [num upgrades per sector]
-
-? Menu - Count labels as hover/click targets
 
 ** Release **
 

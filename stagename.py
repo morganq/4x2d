@@ -3,6 +3,7 @@ import math
 import pygame
 
 import game
+import sectortitleingame
 import sound
 import text
 from colors import *
@@ -77,6 +78,11 @@ class StageName(SpriteBase):
             sound.play("msg2")
             self.played_close_sound = True
         if self.time > KILL_TIME:
+            
+            reward = game.Game.inst.run_info.get_current_level_galaxy()['rewards'][0]
+            st = sectortitleingame.SectorTitleInGame(self.get_center(), "Sector %d: [%s]" % (self.number, self.name), reward)
+            st.offset = (0.5, 0.5)
+            self.groups()[0].add(st)
             self.kill()
         self._generate_image()
         return super().update(dt)
