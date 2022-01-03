@@ -8,6 +8,7 @@ from colors import *
 from framesprite import FrameSprite
 from panel import Panel
 from pygame import font
+from resources import resource_path
 from spritebase import SpriteBase
 from text import FONTS, Text
 from v2 import V2
@@ -24,6 +25,10 @@ class UpgradePanel(Panel):
         self.padding = 15
         self.tab = {"text":"Upgrade: %s" % self.resource.title(), "color":economy.RESOURCE_COLORS[self.resource], "icon":"assets/i-upgrade.png"}
         self.tree_children = []
+
+        self.iron_border = pygame.image.load(resource_path("assets/upgrade-border-iron.png")).convert_alpha()
+        self.ice_border = pygame.image.load(resource_path("assets/upgrade-border-ice.png")).convert_alpha()
+        self.gas_border = pygame.image.load(resource_path("assets/upgrade-border-gas.png")).convert_alpha()
 
         self.add(Text("Pick Your Upgrade", "big", V2(0,0), multiline_width=250), V2(0,0))
         self.header_ys = []
@@ -163,6 +168,30 @@ class UpgradePanel(Panel):
 
         pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 90, 32, 78, 160))
         FONTS['tiny'].render_to(self.image, (self.width - 88, 29), "TECHNOLOGY TREE", PICO_WHITE)
+
+        # DEBUG
+        resource = self.resource
+
+        if resource == "iron":
+            self.image.blit(self.iron_border, (3,17))
+            self.image.blit(self.iron_border, (3,self.height - 10))
+            pygame.draw.rect(self.image, PICO_LIGHTGRAY, (5, 24, 3, self._height - 34))
+            pygame.draw.line(self.image, PICO_DARKGRAY, (6,24), (6, self._height - 34))
+            pygame.draw.rect(self.image, PICO_LIGHTGRAY, (self._width - 8, 24, 3, self._height - 34))
+            pygame.draw.line(self.image, PICO_DARKGRAY, (self._width - 7,24), (self._width - 7, self._height - 34))
+
+        elif resource == "ice":
+            self.image.blit(self.ice_border, (3,17))
+            self.image.blit(pygame.transform.flip(self.ice_border, False, True), (3,self._height - 14))
+
+        elif resource == "gas":
+            self.image.blit(self.gas_border, (3,17))
+            self.image.blit(pygame.transform.flip(self.gas_border, True, True), (3,self._height - 10))
+            left = pygame.transform.rotate(self.gas_border, 90)
+            ch = self._height - 20
+            self.image.blit(left, (3,17), (0,0,7,ch))
+            right = pygame.transform.rotate(self.gas_border, -90)
+            self.image.blit(right, (self.width - 10,17), (0,0,7,ch))
 
     def kill(self):
         for child in self.tree_children:
