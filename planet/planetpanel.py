@@ -16,8 +16,19 @@ from v2 import V2
 class PlanetPanel(Panel):
     def __init__(self, planet, pov_civ = None):
         Panel.__init__(self, (5,5), planet)
+        self.pov_civ = pov_civ
         self.planet = planet
+        self.update_planet()
         
+    def update_planet(self):
+        self.rebuild_panel()
+        if self.groups():
+            self.add_all_to_group(self.groups()[0])
+
+    def rebuild_panel(self):
+        planet = self.planet
+        pov_civ = self.pov_civ
+        self.empty()
         self.add(Line(V2(0,0), V2(120, 0), PICO_DARKBLUE),V2(0, 0))
 
         owner = "Neutral"

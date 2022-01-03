@@ -53,6 +53,11 @@ class Panel(spritebase.SpriteBase, FadeInMixin):
     def remove(self, control):
         self._controls = [c for c in self._controls if c['control'] != control]
 
+    def empty(self):
+        for c in self._controls:
+            c['control'].kill()
+        self._controls = []
+
     def get_control_of_type(self, klass):
         try:
             return self.get_controls_of_type(klass)[0]

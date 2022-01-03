@@ -163,24 +163,20 @@ class PlayState(UIEnabledState):
         if self.last_clicked_sprite:
             selection_info = self.last_clicked_sprite.get_selection_info()
             if selection_info and selection_info['type'] == 'planet':
-                if self.current_panel and self.current_panel.panel_for != self.last_clicked_sprite:
-                    self.current_panel.kill()
-                    self.current_panel = None
+                if self.current_panel:
+                    if self.current_panel.panel_for != self.last_clicked_sprite:
+                        self.current_panel.kill()
+                        self.current_panel = None                
 
-
-                just_update = True #self.last_clicked_sprite.needs_panel_update
-                if self.current_panel and just_update:
-                    self.last_clicked_sprite.needs_panel_update = False
-                    self.current_panel.kill()
-                    self.current_panel = None                    
+                    else:
+                        self.current_panel.update_planet()
 
                 if not self.current_panel:
                     self.current_panel = PlanetPanel(self.last_clicked_sprite)
                     self.current_panel.position_nicely(self.scene)
                     self.current_panel.add_all_to_group(self.scene.ui_group)
-                    if not just_update:
-                        sound.play("panel")
-                        self.current_panel.fade_in()
+                    sound.play("panel")
+                    self.current_panel.fade_in(5)
 
                 if self.selector:
                     self.selector.visible = 1
@@ -284,6 +280,9 @@ class PlayState(UIEnabledState):
             self.current_panel.kill()
             self.current_panel = None
 
+        if self.current_panel and isinstance(self.current_panel.panel_for, planet.planet.Planet):
+            self.current_panel.update_planet()
+
         if self.joy_controls_state == "arrow":
             self.arrow.setup(self.joy_arrow_from, self.joystick_overlay.cursor_pos, self.joystick_overlay.nearest_obj)
 
@@ -318,21 +317,14 @@ class PlayState(UIEnabledState):
                     if selection_info and selection_info['type'] == 'planet':
                         if self.current_panel and self.current_panel.panel_for != spr:
                             self.current_panel.kill()
-                            self.current_panel = None
-
-                        just_update = True #spr.needs_panel_update
-                        if self.current_panel and just_update:
-                            spr.needs_panel_update = False
-                            self.current_panel.kill()
-                            self.current_panel = None                    
+                            self.current_panel = None                
 
                         if not self.current_panel:
                             self.current_panel = PlanetPanel(spr)
                             self.current_panel.position_nicely(self.scene)
                             self.current_panel.add_all_to_group(self.scene.ui_group)
-                            if not just_update:
-                                sound.play("panel")
-                                self.current_panel.fade_in()
+                            sound.play("panel")
+                            self.current_panel.fade_in(5)
 
                         if self.selector:
                             self.selector.visible = 1
