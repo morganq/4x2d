@@ -18,7 +18,7 @@ from upgrade.upgradeicon import UpgradeIcon
 
 
 class UpgradePanel(Panel):
-    def __init__(self, pos, offered_upgrades, resource, on_select, on_reroll):
+    def __init__(self, pos, offered_upgrades, resource, on_select, on_reroll, is_new_roll = False):
         Panel.__init__(self, pos, None)
         self.resource = resource
         self.padding = 15
@@ -29,29 +29,34 @@ class UpgradePanel(Panel):
         self.header_ys = []
         self.header_xs = []
 
+        is_new_roll = is_new_roll
+
         y = 30
         # need fn for closure
-        def add_button(uname):
+        def add_button(uname, button_id):
             u = upgrades.UPGRADE_CLASSES[uname]
-            b = UpgradeButton(V2(0,0), u, lambda:on_select(u), self.hover_update)
+            time = -button_id * 0.3 - 0.75
+            if not is_new_roll:
+                time = 0
+            b = UpgradeButton(V2(0,0), u, lambda:on_select(u), self.hover_update, time=time)
             self.add(b, V2(0,y + 12))
             return b
 
         cts = {'buildings':'Construct Building', 'ships':'Order Ships', 'tech':'Research Technology'}
 
-        for category,uname in offered_upgrades.items():
+        for i, (category,uname) in enumerate(offered_upgrades.items()):
             self.header_ys.append(y + 7)
             t = Text(cts[category], "small", V2(0,0), upgrades.UPGRADE_CATEGORY_COLORS[category], multiline_width=150)
             self.add(t, V2(10,y))
             self.header_xs.append(t.width + 10 + 2)
             if uname:
-                b = add_button(uname)
+                b = add_button(uname, i)
                 y += 20 + b.height
             else:
                 y += 20
 
         box = SpriteBase(V2(0,0))
-        box._width = 75
+        box._width = 80
         box.visible = False
         self.add(box, V2(250,0))
 
@@ -98,12 +103,13 @@ class UpgradePanel(Panel):
                 cur_parents = [u.name for u in rows[-1]]
                 
             positions = {}
+            dist_from_right = 59
             for rx, row in enumerate(rows):
                 row.sort(key=lambda x:x.name)
                 for cy,upg in enumerate(row):
-                    pos = V2(self.width - 55, 0)
+                    pos = V2(self.width - dist_from_right, 0)
                     if len(row) > 1:
-                        pos = V2(self.width - 75 + cy * 37, 0)
+                        pos = V2(self.width - dist_from_right - 20 + cy * 37, 0)
                     icon = UpgradeIcon(pos + V2(self.x - 4, self.y + 50 + rx * 50), upg.name, None, True)
                     icon.layer = 11
                     self.joystick_controls[rx].append(icon)
@@ -155,8 +161,8 @@ class UpgradePanel(Panel):
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + self.header_xs[2], y0 + y3), (x0 + 254 - self.padding, y0 + y3))
         pygame.draw.line(self.image, PICO_ORANGE, (x0 + 254 - self.padding, y0 + y3), (x0 + 254 - self.padding, y0 + y3+5))
 
-        pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 85, 32, 78, 160))
-        FONTS['tiny'].render_to(self.image, (self.width - 83, 29), "TECHNOLOGY TREE", PICO_WHITE)
+        pygame.draw.rect(self.image, PICO_GREYPURPLE, (self.width - 90, 32, 78, 160))
+        FONTS['tiny'].render_to(self.image, (self.width - 88, 29), "TECHNOLOGY TREE", PICO_WHITE)
 
     def kill(self):
         for child in self.tree_children:

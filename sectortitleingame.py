@@ -39,7 +39,7 @@ class SectorTitleInGame(spritebase.SpriteBase):
         self._recalc_rect()
 
     def update(self, dt):
-        self.t = clamp(self.t + dt * 0.65, 0, 1)
+        self.t = clamp(self.t + dt * 0.85, 0, 1)
         zt = math.cos(self.t * 3.14159) * -0.5 + 0.5
         zt = zt ** 1.25
         self.pos = V2(self.initial_pos.x, self.initial_pos.y * (1-zt) + self.target_pos.y * zt)

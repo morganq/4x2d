@@ -37,7 +37,9 @@ class UpgradeState(UIEnabledState):
         sound.play("panel")
         self.scene.paused = True
         resource = self.scene.player_civ.upgrades_stocked[0]
-        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
+        is_new_roll = len(self.scene.player_civ.offered_upgrades) == 0
+        offered_upgrades = self.scene.player_civ.offer_upgrades(resource)
+        self.panel = UpgradePanel(V2(0,0), offered_upgrades, resource, self.on_select, self.on_reroll, is_new_roll)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         
@@ -104,7 +106,7 @@ class UpgradeState(UIEnabledState):
         self.panel.kill()
         self.scene.game.run_info.rerolls -= 1
         resource = self.scene.player_civ.upgrades_stocked[0]
-        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
+        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll, True)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)
@@ -326,7 +328,7 @@ class UpgradeState(UIEnabledState):
         self.cursor_type = None
         self.pending_upgrade = None
         resource = self.scene.player_civ.upgrades_stocked[0]
-        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll)
+        self.panel = UpgradePanel(V2(0,0), self.scene.player_civ.offer_upgrades(resource), resource, self.on_select, self.on_reroll, False)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in(speed=10)

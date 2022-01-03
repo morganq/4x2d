@@ -15,13 +15,19 @@ HOVER_COLORS = {
     PICO_GREEN:PICO_DARKGREEN
 }
 
+WHITE_TIME = -0.2
+DITHER_WHITE_TIME = -0.06
+REVEAL_TIME = 0
+
 class UpgradeButton(SpriteBase):
-    def __init__(self, pos, upgrade, onclick, onhoverchange):
+    def __init__(self, pos, upgrade, onclick, onhoverchange, time = 0):
         super().__init__(pos)
         self.upgrade = upgrade
         self.onclick_callback = onclick
         self.onhoverchange = onhoverchange
         self.selectable = True
+        self.time = time
+        self.dither_image = pygame.image.load(resource_path("assets/dither_white.png")).convert_alpha()
 
         self._generate_image()
 
@@ -53,9 +59,27 @@ class UpgradeButton(SpriteBase):
         text.FONTS["small"].render_to(self.image, (31 + pad, pad - 1), self.upgrade.title, upgrade_color)
         text.render_multiline_to(self.image, (31 + pad, pad + 12), self.upgrade.description, "small", text_color, 200, False)
 
+        
+        if self.time < WHITE_TIME:
+            pygame.draw.rect(self.image, PICO_BLUE, (0,0,w,h), 0)
+            cw = w // 2
+            ch = h // 2
+            question_mark = text.render_multiline("?", "big", PICO_BLACK)
+            self.image.blit(question_mark, (cw - question_mark.get_width() // 2, ch - question_mark.get_height() // 2))
+        elif self.time < DITHER_WHITE_TIME:
+            pygame.draw.rect(self.image, PICO_WHITE, (0,0,w,h), 0)
+        elif self.time < REVEAL_TIME:
+            self.image.blit(self.dither_image, (0,0))
+
         self._width = w
         self._height = h
         self._recalc_rect()    
+
+    def update(self, dt):
+        self.time += dt
+        if self.time < REVEAL_TIME + 1:
+            self._generate_image()
+        return super().update(dt)
 
     def on_mouse_enter(self, pos):
         self._generate_image(True)
