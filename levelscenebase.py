@@ -190,6 +190,9 @@ class LevelSceneBase(scene.Scene):
     def get_planets(self):
         return [s for s in self.game_group.sprites() if isinstance(s,Planet)]
 
+    def get_planets_in_range(self, pos, range):
+        return [o for o in self.objgrid.get_objects_near(pos, range) if isinstance(o,Planet)]
+
     def get_civ_planets(self, civ, skip_objgrid = False):
         if skip_objgrid:
             return [s for s in self.get_objects_initial() if isinstance(s,Planet) and s.owning_civ == civ] 

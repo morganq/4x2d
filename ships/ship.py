@@ -344,7 +344,7 @@ class Ship(SpaceObject):
                 self._timers['thrust_particle_time'] = 0   
 
         # Nearest hazard
-        nearest,dsq = helper.get_nearest(self.pos, [o for o in self.scene.get_objects() if o.collidable and o.stationary])
+        nearest,dsq = helper.get_nearest(self.pos, [o for o in self.scene.get_objects_in_range(self.pos, 20) if o.collidable and o.stationary])
         if nearest and nearest != self.effective_target:
             dsf = dsq - nearest.radius ** 2
             delta = (nearest.pos - self.pos).normalized()
@@ -370,6 +370,7 @@ class Ship(SpaceObject):
         if self.pos.y > game.Game.inst.game_resolution.y - 5:
             self.velocity.y -= dt * self.get_thrust_accel() * 2                        
 
+        # Fuel empty
         if self.state == STATE_CRUISING:
             speed_adjust = self.get_max_speed() / self.MAX_SPEED
             cruise_travel_dist_frame = self.velocity.magnitude() * dt / speed_adjust
@@ -445,8 +446,8 @@ class Ship(SpaceObject):
 
     def get_fleet_forces(self, dt):
         # OPT - only calc fleet forces every so often
-        if self._timers['opt_time'] > 0.2:
-            self._timers['opt_time'] -= 0.2
+        if self._timers['opt_time'] > 0.5:
+            self._timers['opt_time'] -= 0.5
         else:
             return self.opt_fleet_forces
 
@@ -510,8 +511,9 @@ class Ship(SpaceObject):
         # Warp
         if self.get_stat("warp_drive"):
             if self._timers['warp_drive'] > 0:
-                _,distsq = helper.get_nearest(self.pos, self.scene.get_planets())
-                if distsq > 30 ** 2:
+                WARP_MIN_PLANET_DIST = 40
+                _,distsq = helper.get_nearest(self.pos, self.scene.get_planets_in_range(self.pos, WARP_MIN_PLANET_DIST))
+                if distsq > WARP_MIN_PLANET_DIST ** 2:
                     self.warp(self.get_stat("warp_drive") * 10 + 20)
                     self._timers['warp_drive'] = -20
 

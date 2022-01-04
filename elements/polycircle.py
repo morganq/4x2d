@@ -4,7 +4,7 @@ import pygame
 
 
 def draw_polycircle(image, color, pos, radius, width):
-    num_points = max(int(radius * 2),8)
+    num_points = min(max(int(radius + 12),8),100)
     points = []
     for i in range(num_points):
         theta = i * 6.2818 / num_points
