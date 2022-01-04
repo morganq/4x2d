@@ -151,8 +151,8 @@ class Game:
             flags = flags | pygame.RESIZABLE
         self.full_resolution = resolution.copy()
         self.scale = int(min(self.full_resolution.x / RES[0], self.full_resolution.y / RES[1]))
-        self.scaled_screen = pygame.display.set_mode(self.full_resolution.tuple(), flags=flags)
-        self.game_resolution = V2(*(self.full_resolution / self.scale).tuple_int())
+        self.scaled_screen = pygame.display.set_mode(self.full_resolution.tuple_int(), flags=flags)
+        self.game_resolution = V2(*(self.full_resolution * (1/self.scale)).tuple_int())
         self.screen = pygame.Surface(self.game_resolution.tuple_int(), pygame.SRCALPHA)
         self.game_offset = V2((self.game_resolution.x - RES[0]) / 2,(self.game_resolution.y - RES[1]) / 2)
 
@@ -327,7 +327,6 @@ class Game:
                 self.save.save()
                 return
 
-
     def game_loop(self):
         for event in pygame.event.get():
             if event.type == sound.MUSIC_ENDEVENT:
@@ -395,15 +394,15 @@ class Game:
             remove_spikes = [f for f in self.frame_times if f < 1000]
             avg = sum(remove_spikes) / max(len(remove_spikes),1)
             if not self.fps_limited_pause:
-                if avg > 30:
+                if avg > 33:
                     self.scale_mode = "normal"
-                if avg < 20:
+                if avg < 25:
                     self.scale_mode = "xbr"
         if DEV:
             fps_color = (0,255,0,255)
-            if avg > 30:
+            if avg > 33:
                 fps_color = (255,0,0,255)
-            elif avg > 20:
+            elif avg > 25:
                 fps_color = (255,255,0,255)
             text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % avg, fps_color)
             text.FONTS['small'].render_to(self.scaled_screen, (35,self.scaled_screen.get_size()[1]-15), self.input_mode, (255,255,255,255))

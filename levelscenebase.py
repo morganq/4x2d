@@ -318,14 +318,15 @@ class LevelSceneBase(scene.Scene):
         self.flowfield.update(dt)
 
     def update_collisions(self, dt):
-        t = time.time()
+        #t = time.time()
         # Collisions
-        colliders = [s for s in self.get_objects() if s.collidable]
+        colliders = [s for s in self.get_objects() if s.collidable and not s.stationary]
         lc = len(colliders)
         #print(lc, "colliders")
         checked = set()
         for first in colliders:
-            near = self.objgrid.get_objects_near(first.pos, 50) # 50 is arbitrary...
+            MAX_COLLISION_RANGE = 30 # Arbitrary guess...
+            near = self.objgrid.get_objects_near(first.pos, MAX_COLLISION_RANGE) 
             for second in near:
                 if second in checked: # Don't double collide
                     continue
@@ -340,8 +341,8 @@ class LevelSceneBase(scene.Scene):
 
             checked.add(first)
 
-        elapsed = time.time() - t
-        self.update_times["collisions"] = elapsed
+        #elapsed = time.time() - t
+        #self.update_times["collisions"] = elapsed
 
     def update_game_objects(self, dt):
         for sprite in self.game_group.sprites():

@@ -38,7 +38,8 @@ class FleetDiagram(spritebase.SpriteBase):
                 self.max_debug_time = max(self.debug_times)
         return super().update(dt)
 
-    def smooth_path(self, path):
+
+    def smooth_path(self, path:list):
         # give up if we don't have enough points to smooth
         if len(path) < 5:
             return path
@@ -81,6 +82,7 @@ class FleetDiagram(spritebase.SpriteBase):
             if fleet.last_valid_path:
                 valid_path = fleet.last_valid_path
             path = self.smooth_path(valid_path)
+            #path = valid_path
 
             # todo: migrate from center to path.
             original_path = path[::]

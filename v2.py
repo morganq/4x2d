@@ -24,6 +24,7 @@ class V2:
         if not isinstance(other, V2):
             raise TypeError('Can only take dot product of two V2 objects')
         return self.x * other.x + self.y * other.y
+        
     # Alias the __matmul__ method to dot so we can use a @ b as well as a.dot(b).
     __matmul__ = dot
 
@@ -56,6 +57,9 @@ class V2:
     def __truediv__(self, scalar):
         """True division of the vector by a scalar."""
         return V2(self.x / scalar, self.y / scalar)
+
+    def __floordiv__(self, scalar):
+        return V2(self.x // scalar, self.y // scalar)
 
     def __mod__(self, scalar):
         """One way to implement modulus operation: for each component."""

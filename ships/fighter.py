@@ -60,7 +60,7 @@ class Fighter(Ship):
         self.fire_timer = 0
         self._timers['dogfight'] = 0
         self._timers['time'] = 0
-        self._timers['opt_threats'] = 0
+        self._timers['opt_threats'] = random.random()
         self.opt_threats = []
 
         self.need_attack_speed_particle = False
