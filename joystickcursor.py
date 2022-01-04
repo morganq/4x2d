@@ -119,16 +119,17 @@ class JoystickPanelCursor(SpriteBase):
         )
         #pygame.draw.rect(self.image, PICO_PINK, rect, 1)
         color = PICO_PINK
-        if (self.time * 1.5) % 2 == 0:
+        if int(self.time * 2.5) % 2 == 0:
             color = PICO_WHITE
         #pygame.draw.line(self.image, color, (c.top_left.x - 2, c.top_left.y), (c.top_left.x - 2, c.top_left.y + c.height))
+        control_left = c.top_left + V2(0, c.height // 2)
         pts = [
             #(c.top_left + V2(-6, c.height // 2 - 4)).tuple(),
             #(c.top_left + V2(-2, c.height // 2)).tuple(),
             #(c.top_left + V2(-6, c.height // 2 + 4)).tuple(),
-            (c.top_left + V2(-6, 3 - 4)).tuple(),
-            (c.top_left + V2(-2, 3)).tuple(),
-            (c.top_left + V2(-6, 3 + 4)).tuple(),            
+            (control_left + V2(-6, - 4)).tuple(),
+            (control_left + V2(-2, 0)).tuple(),
+            (control_left + V2(-6, 4)).tuple(),            
         ]
         pygame.draw.polygon(self.image, color, pts, 0)
 

@@ -56,6 +56,7 @@ class Game:
     INPUT_JOYSTICK = "joystick"
     INPUT_MULTIPLAYER = "multiplayer"
     def __init__(self, save):
+        global DEV
         #pygame.display.set_icon(pygame.image.load(resource_path("assets/icon_2_256.png")))
         pygame.mixer.pre_init(buffer=256)
         pygame.init()
@@ -74,7 +75,7 @@ class Game:
         self.last_joy_axes = None
         try:
             self.run_info = self.save.get_run_state()
-            if self.run_info.anticheat_level_started:
+            if not DEV and self.run_info.anticheat_level_started:
                 self.run_info = run.RunInfo()
                 self.save.set_run_state(self.run_info)
                 self.save.save()
@@ -86,7 +87,6 @@ class Game:
         self.player_inputs = []
 
         if len(sys.argv) > 1:
-            global DEV
             DEV = True            
             if sys.argv[1] == "draw":
                 self.scene = buildingcreatorscene.BuildingCreatorScene(self)
@@ -393,10 +393,11 @@ class Game:
             if len(self.frame_times) >= 10:
                 remove_spikes = [f for f in self.frame_times if f < 1000]
                 avg = sum(remove_spikes) / max(len(remove_spikes),1)
-                if avg > 30:
-                    self.scale_mode = "normal"
-                if avg < 20:
-                    self.scale_mode = "xbr"
+                if not self.fps_limited_pause:
+                    if avg > 30:
+                        self.scale_mode = "normal"
+                    if avg < 20:
+                        self.scale_mode = "xbr"
                 fps_color = (0,255,0,255)
                 if avg > 30:
                     fps_color = (255,0,0,255)
