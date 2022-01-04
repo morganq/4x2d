@@ -14,7 +14,7 @@ class Explosion(SpriteBase):
         super().__init__(pos)
         self.colors = colors
         self.lifetime = lifetime
-        self.max_size = max_size
+        self.max_size = max_size + 2
         self.line_width = line_width
         self.velocity = velocity or V2(0,0)
         if isinstance(scale_fn, str):
@@ -33,7 +33,7 @@ class Explosion(SpriteBase):
     def generate_image(self):
         t = min(self.time / self.lifetime,1)
         ci = clamp(int(len(self.colors) * t), 0, len(self.colors) - 1)
-        size = self.scale_fn(t) * self.max_size
+        size = self.scale_fn(t) * (self.max_size - 2)
         #print(t, self.colors[ci])
         self.image.fill((0,0,0,0))
         #temp = pygame.Surface((self.max_size * 2, self.max_size * 2), pygame.SRCALPHA)

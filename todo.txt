@@ -4,9 +4,9 @@ Levelscene and base
 
 ** Juice **
 
-** Immediate **
+ Joystick cursor blink
 
-sector title and reward top of game screen
+** Immediate **
 
 ** Missing Sounds **
 

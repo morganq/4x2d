@@ -119,6 +119,8 @@ class JoystickPanelCursor(SpriteBase):
         )
         #pygame.draw.rect(self.image, PICO_PINK, rect, 1)
         color = PICO_PINK
+        if (self.time * 1.5) % 2 == 0:
+            color = PICO_WHITE
         #pygame.draw.line(self.image, color, (c.top_left.x - 2, c.top_left.y), (c.top_left.x - 2, c.top_left.y + c.height))
         pts = [
             #(c.top_left + V2(-6, c.height // 2 - 4)).tuple(),
@@ -204,3 +206,8 @@ class JoystickPanelCursor(SpriteBase):
                 self.press(dir)
         else:
             self.last_dir = None
+
+    def update(self, dt):
+        self.time += dt
+        self._generate_image()
+        return super().update(dt)
