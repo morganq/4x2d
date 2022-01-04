@@ -385,26 +385,27 @@ class Game:
                 self.scale_normal()
             else:
                 self.scale_xbr()
-        if DEV:
-            t = pygame.time.get_ticks() - self.frame_time
-            self.frame_time = pygame.time.get_ticks()
-            self.frame_times.append(t)
-            self.frame_times = self.frame_times[-80:]
-            if len(self.frame_times) >= 10:
-                remove_spikes = [f for f in self.frame_times if f < 1000]
-                avg = sum(remove_spikes) / max(len(remove_spikes),1)
-                if not self.fps_limited_pause:
-                    if avg > 30:
-                        self.scale_mode = "normal"
-                    if avg < 20:
-                        self.scale_mode = "xbr"
-                fps_color = (0,255,0,255)
+        
+        t = pygame.time.get_ticks() - self.frame_time
+        self.frame_time = pygame.time.get_ticks()
+        self.frame_times.append(t)
+        self.frame_times = self.frame_times[-80:]
+        avg = 0
+        if len(self.frame_times) >= 10:
+            remove_spikes = [f for f in self.frame_times if f < 1000]
+            avg = sum(remove_spikes) / max(len(remove_spikes),1)
+            if not self.fps_limited_pause:
                 if avg > 30:
-                    fps_color = (255,0,0,255)
-                elif avg > 20:
-                    fps_color = (255,255,0,255)
-                text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % avg, fps_color)
-            #print(t)
+                    self.scale_mode = "normal"
+                if avg < 20:
+                    self.scale_mode = "xbr"
+        if DEV:
+            fps_color = (0,255,0,255)
+            if avg > 30:
+                fps_color = (255,0,0,255)
+            elif avg > 20:
+                fps_color = (255,255,0,255)
+            text.FONTS['small'].render_to(self.scaled_screen, (5,self.scaled_screen.get_size()[1]-15), "%d ms" % avg, fps_color)
             text.FONTS['small'].render_to(self.scaled_screen, (35,self.scaled_screen.get_size()[1]-15), self.input_mode, (255,255,255,255))
         pygame.display.update()
 
