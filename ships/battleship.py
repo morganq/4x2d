@@ -70,10 +70,11 @@ class Battleship(Fighter):
         b = Bullet(at.pos, at, self, mods=mods)
         self.scene.game_group.add(b)        
         
-        enemies = self.scene.get_enemy_objects(self.owning_civ)
+        
         threat_range = self.THREAT_RANGE_DEFAULT
         if self.chosen_target.owning_civ == self.owning_civ: # Target is our own planet (defense)
             threat_range = self.THREAT_RANGE_DEFENSE
+        enemies = self.scene.get_enemy_objects_in_range(self.owning_civ, self.pos, threat_range)
         threats = [
             e for e in enemies
             if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.is_alive())

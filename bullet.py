@@ -121,8 +121,9 @@ class Bullet(SpriteBase):
 
         if self.bounces > 0:
             self.bounces -= 1
-            targets = self.shooter.scene.get_enemy_objects(self.owning_civ)
-            nearby_targets = helper.all_nearby(self.pos, targets, 25)
+            BOUNCE_RANGE = 25
+            targets = self.shooter.scene.get_enemy_objects_in_range(self.owning_civ, self.pos, BOUNCE_RANGE)
+            nearby_targets = helper.all_nearby(self.pos, targets, BOUNCE_RANGE)
             if self.target and self.target in nearby_targets:
                 nearby_targets.remove(self.target)
             if nearby_targets:
