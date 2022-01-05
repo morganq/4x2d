@@ -11,13 +11,17 @@ from colors import *
 from v2 import V2
 
 
+class MultiplayerUIState(states.UIEnabledState):
+    pass
+    #def take_input(self, inp, event):
+    #    print(inp, event)
+
 class MultiplayerMenu(scene.Scene):
     def start(self):
         self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
 
-        self.game.input_mode = game.Game.INPUT_MULTIPLAYER
         self.game.player_inputs = []
         
         self.player_index = 0
@@ -40,7 +44,8 @@ class MultiplayerMenu(scene.Scene):
         self.start_btn.offset = (0.5, 0)
         self.ui_group.add(self.start_btn)
 
-        self.sm = states.Machine(states.UIEnabledState(self))
+        self.sm = states.Machine(MultiplayerUIState(self))
+        self.game.input_mode = game.Game.INPUT_MULTIPLAYER
 
     def take_raw_input(self, event):
         if event.type == pygame.JOYBUTTONDOWN:
@@ -89,4 +94,8 @@ class MultiplayerMenu(scene.Scene):
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
         self.ui_group.draw(self.game.screen)
-        super().render()            
+        super().render()          
+
+    def update(self, dt):
+        self.game.input_mode = game.Game.INPUT_MULTIPLAYER
+        return super().update(dt)  
