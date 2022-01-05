@@ -16,7 +16,7 @@ class BossLaser(Fighter):
     BASE_HEALTH = 35
     BASE_DAMAGE = 1.5
     FIRE_RATE = 0.25
-    FIRE_RANGE = 60
+    FIRE_RANGE = 70
     MAX_SPEED = 4
     FUEL = 9999
     DISPLAY_NAME = "Predator"
@@ -35,7 +35,7 @@ class BossLaser(Fighter):
         self.scene.game_group.add(b)
 
         l = laserparticle.LaserParticle(self.pos, at.pos, self.owning_civ.color, 0.2)
-        self.scene.game_group.add(l)
+        self.scene.add_particle(l)
 
         self.bullets_chambered -= 1
 

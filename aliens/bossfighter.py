@@ -42,7 +42,7 @@ class BossFighter(Fighter):
         for i in range(7):
             pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_YELLOW, PICO_RED, PICO_PURPLE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-            self.scene.game_group.add(p)
+            self.scene.add_particle(p)
 
         self.bullets_chambered -= 1
 

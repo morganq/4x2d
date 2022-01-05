@@ -199,4 +199,4 @@ class Bullet(SpriteBase):
                     25 / self.speed * self.mods.get("trail_length", 1),
                     V2.from_angle(random.random() * 6.2818) * self.speed / 8
                 )
-                self.shooter.scene.game_group.add(p)
+                self.shooter.scene.add_particle(p)

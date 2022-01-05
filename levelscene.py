@@ -317,7 +317,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
         if self.options == "performance":
             from aliens.alien1fighter import Alien1Fighter
-            for i in range(30):
+            for i in range(60):
                 #civ = self.player_civ if i % 2 == 0 else self.enemy.civ
                 civ = self.enemy.civ
                 p = V2(random.randint(50, self.game.game_resolution.x-50), random.randint(50, self.game.game_resolution.y-50))
@@ -446,6 +446,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
         #    self.update_game_objects(TICK_TIME)
         #    self.update_collisions(TICK_TIME)
         self.update_game_objects(dt)
+        self.update_particles(dt)
         self.update_collisions(dt)
 
         if not self.cinematic and not self.is_tutorial:
@@ -531,6 +532,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
                 if spr.image is None and spr.visible:
                     print(spr, "bad image")
         self.background_group.draw(self.game.screen)
+        self.particle_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
 
         if self.shake_sprite:

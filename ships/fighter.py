@@ -176,7 +176,7 @@ class Fighter(Ship):
         for i in range(10):
             pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-            self.scene.game_group.add(p)        
+            self.scene.add_particle(p)   
 
         self.need_attack_speed_particle = True
         self.attack_speed_particle_angle = towards.to_polar()[1]
@@ -408,11 +408,11 @@ class Fighter(Ship):
                 colors = [PICO_BLUE, PICO_WHITE, PICO_GREEN, PICO_PINK, PICO_PURPLE]
                 colors = colors[0:extra]                
                 p = Particle([random.choice(colors)], 1, pos, 0.1, -V2.from_angle(ang) * 30)
-                self.scene.game_group.add(p)
+                self.scene.add_particle(p)
 
     def emit_thrust_particles(self):
         for i in range(2):
             pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
             pvel += -self.velocity / 2
             p = particle.Particle([PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY, PICO_DARKGRAY, PICO_DARKGRAY], 1, self.pos + -self.velocity.normalized() * self.radius, 1, pvel)
-            self.scene.game_group.add(p)
+            self.scene.add_particle(p)

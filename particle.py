@@ -1,7 +1,9 @@
-import framesprite
 import pygame
-from v2 import V2
+
+import framesprite
 from helper import clamp
+from v2 import V2
+
 
 class Particle(framesprite.FrameSprite):
     def __init__(self, sheet, width, pos, time, vel=None):
@@ -25,5 +27,7 @@ class Particle(framesprite.FrameSprite):
         i = int((1 - self.time / self.initial_time) * self._num_frames)
         if self.time <= 0:
             self.kill()
-        else:        
-            self.frame = clamp(i, 0, self._num_frames - 1)
+        else:
+            f = clamp(i, 0, self._num_frames - 1)
+            if self._frame != f:
+                self.frame = f

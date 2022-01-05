@@ -1,3 +1,4 @@
+import functools
 import math
 import random
 
@@ -207,6 +208,7 @@ class Ship(SpaceObject):
         nearest, distsq = helper.get_nearest(self.pos, self.scene.get_planets())
         return distsq > DEEP_SPACE_DIST ** 2
 
+    @functools.lru_cache(maxsize = None)
     def get_max_speed(self):
         speed = self.MAX_SPEED
         if self.get_stat("deep_space_drive") and self.is_in_deep_space():
@@ -287,6 +289,7 @@ class Ship(SpaceObject):
         self._sheet = self._stealth_sheet
 
     def update(self, dt):
+        self.get_max_speed.cache_clear()
         if not self.updated_color:
             self.update_color()
             self.updated_color = True
@@ -407,7 +410,7 @@ class Ship(SpaceObject):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
         pvel += -self.velocity / 2
         p = particle.Particle("assets/thrustparticle.png", 1, self.pos + -self.velocity.normalized() * self.radius, 1, pvel)
-        self.scene.game_group.add(p)
+        self.scene.add_particle(p)
              
 
     def special_stat_update(self, dt):
@@ -426,7 +429,7 @@ class Ship(SpaceObject):
                 #ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 3
                 ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 0.45 + math.sin(self.time * 3 * speed_factor)
                 p = particle.Particle([random.choice(colors)], 1, self.pos + -self.velocity.normalized() * self.radius, 0.6, V2.from_angle(ang) * 8)
-                self.scene.game_group.add(p)
+                self.scene.add_particle(p)
                 self._timers['bonus_speed_particle_time'] = 0
 
     def collide(self, other):
@@ -531,7 +534,7 @@ class Ship(SpaceObject):
 
         for color in [PICO_BLUE, PICO_WHITE, PICO_DARKBLUE]:
             p = LaserParticle(self.pos + V2.random_angle() * 3, target_pos + V2.random_angle() * 3, color, random.random() / 2)
-            self.scene.game_group.add(p)
+            self.scene.add_particle(p)
         self.pos = target_pos
         self.on_warp()
 
@@ -622,7 +625,7 @@ class Ship(SpaceObject):
         if ((self._timers['stun_time'] + dt) * 20) % 1 < (self._timers['stun_time'] * 20) % 1:
             ra = V2.random_angle()
             p = particle.Particle([PICO_YELLOW, PICO_BLUE, PICO_YELLOW, PICO_BLUE], 1, self.pos + ra * 4, 0.35, ra * 10)
-            self.scene.game_group.add(p)
+            self.scene.add_particle(p)
 
     def enter_state_stunned(self):
         self.post_stun_state = self.state

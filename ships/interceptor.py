@@ -84,7 +84,7 @@ class Interceptor(Fighter):
         for i in range(10):
             pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-            self.scene.game_group.add(p)               
+            self.scene.add_particle(p)             
 
         self.bullets_chambered -= 1
 
@@ -118,6 +118,6 @@ class Interceptor(Fighter):
         vn = self.velocity.normalized()
         side = V2(vn.y, -vn.x) # Sideways vector from forward
         p1 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -self.velocity.normalized() * self.radius + side * 1.5, 1, pvel)
-        self.scene.game_group.add(p1)
+        self.scene.add_particle(p1)
         p2 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -self.velocity.normalized() * self.radius - side * 1.5, 1, pvel)
-        self.scene.game_group.add(p2)        
+        self.scene.add_particle(p2)

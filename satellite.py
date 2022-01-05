@@ -146,7 +146,7 @@ class OrbitalLaser(Satellite):
             self.find_new_target()
             if self.target:
                 lp = LaserParticle(self.pos, self.target.pos, PICO_PINK, 0.25)
-                self.scene.game_group.add(lp)
+                self.scene.add_particle(lp)
                 b = bullet.Bullet(self.target.pos, self.target, self, mods={'damage_base':3 * self.planet.planet_weapon_mul})
                 self.scene.game_group.add(b)
         return super().update(dt)

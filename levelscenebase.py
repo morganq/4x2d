@@ -8,6 +8,7 @@ from collections import defaultdict
 import pygame
 
 import aliens
+import bullet
 import fleet
 import fleetdiagram
 import flowfield
@@ -96,6 +97,7 @@ class LevelSceneBase(scene.Scene):
         self.objgrid = ObjGrid(self.game.game_resolution.x, self.game.game_resolution.y, 50)
         self.background_group = pygame.sprite.LayeredDirty()
         self.game_group = pygame.sprite.LayeredDirty()
+        self.particle_group = pygame.sprite.LayeredDirty()
         self.ui_group = pygame.sprite.LayeredDirty()
         self.tutorial_group = pygame.sprite.LayeredDirty()
 
@@ -175,6 +177,11 @@ class LevelSceneBase(scene.Scene):
                 pos = self.random_object_pos()
                 self.game_group.add(Asteroid(self, pos, Resources(random.randint(20,80), random.randint(0,30), random.randint(0,10))))  
 
+    def add_particle(self, particle):
+        if len(self.particle_group.sprites()) > 50:
+            self.particle_group.sprites()[0].kill()
+        self.particle_group.add(particle)
+
     def get_fleet_manager(self, civ):
         return None
 
@@ -223,7 +230,14 @@ class LevelSceneBase(scene.Scene):
         return [s for s in self.get_objects_in_range(pos,range) if isinstance(s,Ship) and s.owning_civ != civ]
 
     def get_enemy_objects_in_range(self, civ, pos, range):
-        return [s for s in self.get_objects_in_range(pos, range) if hasattr(s, "owning_civ") and s.owning_civ and s.owning_civ != civ]
+        return [
+            s for s in self.get_objects_in_range(pos, range)
+            if (
+                hasattr(s, "owning_civ") and
+                s.owning_civ and s.owning_civ != civ and
+                not isinstance(s, bullet.Bullet)
+            )
+        ]
 
     def get_enemy_objects(self, civ):
         return [s for s in self.get_objects() if (isinstance(s,Ship) or isinstance(s,Planet)) and s.owning_civ and s.owning_civ != civ]
@@ -344,12 +358,13 @@ class LevelSceneBase(scene.Scene):
         #elapsed = time.time() - t
         #self.update_times["collisions"] = elapsed
 
+    def update_particles(self, dt):
+        for s in self.particle_group.sprites():
+            s.update(dt)
+
     def update_game_objects(self, dt):
         for sprite in self.game_group.sprites():
-            t = time.time()
             sprite.update(dt)
-            elapsed = time.time() - t
-            self.update_times[type(sprite)] += elapsed
 
         if self.shake_sprite:
             self.shake_sprite.update(dt)  
@@ -366,6 +381,7 @@ class LevelSceneBase(scene.Scene):
                     print(spr, "bad image")
         self.background_group.draw(self.game.screen)
         self.game_group.draw(self.game.screen)
+        self.particle_group.draw(self.game.screen)
         if self.shake_sprite:
             self.shake_sprite.render(self.game.screen)
 

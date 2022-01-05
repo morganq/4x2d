@@ -128,7 +128,7 @@ class Scout(fighter.Fighter):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
         pvel += -self.velocity / 2
         p = particle.Particle([PICO_WHITE, PICO_BLUE], 1, self.pos + -self.velocity.normalized() * self.radius, 2, pvel)
-        self.scene.game_group.add(p)
+        self.scene.add_particle(p)
 
     def kill(self):
         self.buster_display.kill()

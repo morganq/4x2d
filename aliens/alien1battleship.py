@@ -136,7 +136,7 @@ class Alien1Battleship(Battleship):
             for i in range(3):
                 pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
                 p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-                self.scene.game_group.add(p)
+                self.scene.add_particle(p)
 
             enemies = self.scene.get_enemy_objects(self.owning_civ)
             threat_range = self.THREAT_RANGE_DEFAULT

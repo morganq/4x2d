@@ -49,7 +49,7 @@ class Explosion(SpriteBase):
     def update(self, dt):
         self.time += dt
         self.pos += self.velocity * dt
-        if self.time > (self.lifetime * 2):
+        if self.time > self.lifetime:
             self.kill()
         self.generate_image()
         return super().update(dt)

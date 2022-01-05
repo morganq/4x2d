@@ -101,7 +101,7 @@ class Asteroid(SpaceObject):
                 v = V2.random_angle() * 4 * random.random()
                 color = random.choice([PICO_YELLOW, PICO_ORANGE, PICO_ORANGE, PICO_RED])
                 p = Particle([color], 1, self.pos + v, random.random() + 0.5, v * 3)
-                self.scene.game_group.add(p)
+                self.scene.add_particle(p)
             for r,v in self.resources.data.items():
                 yield_mul = civ.get_stat("asteroid_yield_mul") + 1
                 v *= yield_mul

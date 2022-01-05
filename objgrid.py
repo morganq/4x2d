@@ -1,5 +1,8 @@
+import functools
 import math
+
 from helper import clamp
+
 
 class ObjGrid:
     def __init__(self, width, height, grid_size):
@@ -22,8 +25,11 @@ class ObjGrid:
             cy = clamp(obj.pos.y // self.grid_size, 0, len(self.grid) - 1)
             self.grid[int(cy)][int(cx)].append(obj)
             self.all_objects.append(obj)
+        #print(self.get_objects_near.cache_info())
+        self.get_objects_near.cache_clear()
 
-    def get_objects_near(self, pos, radius):
+    @functools.lru_cache(maxsize=None)
+    def get_objects_near(self, pos, radius, ignore_cache=False):
         x1 = clamp(math.floor((pos.x - radius) / self.grid_size), 0, len(self.grid[0]) - 1)
         x2 = clamp(math.ceil((pos.x + radius) / self.grid_size), 0, len(self.grid[0]) - 1)
         y1 = clamp(math.floor((pos.y - radius) / self.grid_size), 0, len(self.grid) - 1)

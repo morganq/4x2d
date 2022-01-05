@@ -109,8 +109,8 @@ class Bomber(Fighter):
         vn = self.velocity.normalized()
         side = V2(vn.y, -vn.x) # Sideways vector from forward
         p1 = particle.Particle([PICO_WHITE, PICO_RED, PICO_RED], 1, self.pos + -self.velocity.normalized() * self.radius + side * 2, 0.75, pvel)
-        self.scene.game_group.add(p1)
+        self.scene.add_particle(p1)
         p2 = particle.Particle([PICO_WHITE, PICO_RED, PICO_RED], 1, self.pos + -self.velocity.normalized() * self.radius - side * 2, 0.75, pvel)
-        self.scene.game_group.add(p2)                
+        self.scene.add_particle(p2)
         p3 = particle.Particle([PICO_WHITE, PICO_RED, PICO_RED], 1, self.pos + -self.velocity.normalized() * self.radius, 1.5, pvel)
-        self.scene.game_group.add(p3)                        
+        self.scene.add_particle(p3)

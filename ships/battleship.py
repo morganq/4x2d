@@ -65,7 +65,7 @@ class Battleship(Fighter):
 
     def fire_laser(self, at):
         lp = LaserParticle(self.pos, at.pos, PICO_PINK, 0.75)
-        self.scene.game_group.add(lp)
+        self.scene.add_particle(lp)
         mods = self.prepare_bullet_mods()
         b = Bullet(at.pos, at, self, mods=mods)
         self.scene.game_group.add(b)        
@@ -101,13 +101,13 @@ class Battleship(Fighter):
         for i in range(10):
             pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
-            self.scene.game_group.add(p)               
+            self.scene.add_particle(p)
 
 
     def emit_thrust_particles(self):
         def sfn(t):
             if t < 0.125:
                 return t * 8
-            return 1 - (t - 0.125)
-        e = explosion.Explosion(self.pos + -self.velocity, [PICO_WHITE, PICO_YELLOW, PICO_YELLOW, PICO_ORANGE, PICO_RED], 3, 4, sfn, 4)
+            return 1 - (t - 0.125) / (1 - 0.125)
+        e = explosion.Explosion(self.pos + -self.velocity, [PICO_WHITE, PICO_YELLOW, PICO_YELLOW, PICO_ORANGE, PICO_RED], 1.5, 4, sfn, 4)
         self.scene.game_group.add(e)

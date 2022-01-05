@@ -56,6 +56,7 @@ class FleetDiagram(spritebase.SpriteBase):
     def generate_image(self, scene):
         t1 = time.time()
         self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
+        #return
         self._width, self._height = self.image.get_size()
 
         jump_dist = 3

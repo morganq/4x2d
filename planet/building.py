@@ -406,7 +406,7 @@ class DecoyBuilding(AuraBuilding):
                 else:
                     p2 = p1 + V2.from_angle(ang + ((i % 2) - 0.5)) * dist / steps
                 l = laserparticle.LaserParticle(p1, p2, PICO_BLUE, 0.25 + i / 8)
-                planet.scene.game_group.add(l)
+                planet.scene.add_particle(l)
                 p1 = p2.copy()
         return super().apply(ship, planet)
 
