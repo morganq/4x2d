@@ -490,34 +490,32 @@ class MenuScene(scene.Scene):
     def basic_update(self, dt):
         # Enemies
         off = 0.25
-        if self.time > 6 + off:
+        if self.time > 5.5 + off:
             self.bg_newgame_path.visible = True
             self.bg_newgame.visible = True
             self.bg_enemies.frame = 4
-        if self.time > 7 + off:
-            self.bg_enemies.visible = True
-            self.bg_multiplayer.visible = True
-            self.bg_options.visible = True
-            self.bg_exit.visible = True
-        elif self.time > 5 + off:
-            self.bg_enemies.frame = 4
+        if self.time > 9 + off:
+            for i, o in enumerate([self.bg_enemies, self.bg_multiplayer, self.bg_options, self.bg_exit]):
+                o.visible = True
         elif self.time > 4.25 + off:
+            self.bg_enemies.frame = 4
+        elif self.time > 4.0 + off:
             self.bg_enemies.frame = 3
-        elif self.time > 4 + off:
+        elif self.time > 3.7 + off:
             self.bg_enemies.frame = 2
         elif self.time > 3.25 + off:
             self.bg_enemies.frame = 1
         elif self.time > 3 + off:
             self.bg_enemies.visible = True
 
-        if self.time > 6 and not self.set_starting_button:
+        if self.time > 10 and not self.set_starting_button:
             self.set_starting_button = True
             self.choices[self.current_choice].mouse_enter()
 
         labels = [self.bg_enemies.label, self.bg_multiplayer.label, self.bg_newgame.label, self.bg_options.label, self.bg_exit.label]
         if self.bg_continue:
             labels.insert(2, self.bg_continue.label)
-        i = clamp(int((self.time - 6.5) * 9), -1, len(labels))
+        i = clamp(int((self.time - 9.5) * 9), -1, len(labels))
         if i >= 0:
             for j in range(i):
                 labels[j].visible = True
