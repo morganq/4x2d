@@ -4,6 +4,8 @@
 
 ** Immediate **
 
+Update upgrade spreadsheet
+
 ** Missing Sounds **
 
 ** Bugs and tweaks **

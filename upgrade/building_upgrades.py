@@ -25,7 +25,7 @@ class EconUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Refinery"
-    description = "[^+50%] [Mining Rate] for [Primary Resource]"
+    description = "[^+50%] Mining Rate for primary resource"
     icon = "refinery"
     cursor = "allied_planet"
     family = {'tree':'econ', 'parents':[]}
@@ -36,9 +36,9 @@ class Econ2AUpgrade(AddBuildingUpgrade):
     name = "b_econ2a"
     resource_type = "iron"
     category = "buildings"
-    title = "Nuclear Reactor"
-    description = "[^+100%] [Mining Rate] for [Primary Resource], [!No more Buildings or Ships can be built here]"
-    icon = "nuclearreactor"
+    title = "Core Drill"
+    description = "[^+100%] Mining Rate for primary resource, [!No more Buildings or Ships can be built here]"
+    icon = "coredrill"
     cursor = "allied_planet"
     building = make_simple_stats_building(stats=Stats(top_mining_rate=1, prevent_buildings=1), shape="nuclearreactor")
     requires = ("b_econ1",)
@@ -49,9 +49,9 @@ class Econ2BUpgrade(AddBuildingUpgrade):
     name = "b_econ2b"
     resource_type = "iron"
     category = "buildings"
-    title = "Military Surplus"
-    description = "[^+50%] [Mining Rate] for [Primary Resource], [!-50%] [Fighter Production]"
-    icon = "militarysurplus"
+    title = "Night Shift"
+    description = "[^+50%] Mining Rate for primary resource, [!-50%] [Fighter] Production Quantity"
+    icon = "nightshift"
     cursor = "allied_planet"
     building = make_simple_stats_building(stats=Stats(top_mining_rate=0.50, fighter_production_amt_halving=1), shape="militarysurplus")
     requires = ("b_econ1",)    
@@ -63,7 +63,7 @@ class Econ3Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "IO Matrix"
-    description = "[^+15%] [Mining Rate] for [Primary Resource] per Building"
+    description = "[^+15%] Mining Rate for primary resource per building"
     icon = "iomatrix"
     cursor = "allied_planet"
     building = make_simple_stats_building(stats=Stats(top_mining_per_building=0.15), shape="iomatrix")
@@ -104,9 +104,9 @@ class Pop2bUpgrade(AddBuildingUpgrade):
     name = "b_pop2b"
     resource_type = "iron"
     category = "buildings"
-    title = "???"
-    description = "Every 5 seconds, gain [^+2] Ice for each docked ship"
-    icon = "university"
+    title = "Water Recycler"
+    description = "Every 5 seconds, gain [^+2] [Ice] for each docked ship"
+    icon = "waterrecycler"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop1']}
     building = make_simple_stats_building(stats=Stats(ice_per_docked=2), shape="lifesupport")
@@ -117,9 +117,9 @@ class Pop3Upgrade(AddBuildingUpgrade):
     name = "b_pop3"
     resource_type = "iron"
     category = "buildings"
-    title = "?"
-    description = "Ships launched from this planet gain [^+10%] speed and [^+5%] attack speed per population"
-    icon = "undergroundshelter"
+    title = "Ground Crew"
+    description = "Ships launched from this planet gain [^+10%] Speed and [^+5%] Attack Speed per [Worker]"
+    icon = "groundcrew"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop2a', 'b_pop2b']}
     building = make_simple_stats_building(stats=Stats(ship_pop_boost=1), shape="undergroundshelter")
@@ -135,7 +135,7 @@ class Hangar1Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Basic Hangar"
-    description = "[^+50%] [Fighter] and [Scout] Production Speed"
+    description = "[^+100%] [Fighter] and [Scout] Production Rate"
     icon = "fighterhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':[]}
@@ -173,7 +173,7 @@ class Hangar3Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Battleship Hangar"
-    description = "[^+150%] [Battleship] Production Speed"
+    description = "[^+150%] [Battleship] Production Rate"
     icon = "battleshiphangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':['b_hangar2a', 'b_hangar2b']}
@@ -191,7 +191,7 @@ class Defense1Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Reflector"
-    description = "[^+1 pop]. Gain a [^50] health reflector shield (does not regenerate)"
+    description = "[^+1] [Worker]. Gain a [Reflector Shield]"
     icon = "reflectorshield"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':[]}
@@ -207,11 +207,11 @@ class Defense2aUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Resilient Ecosystem"
-    description = "[^+2 pop]. [^+100%] health and [^+5] health regeneration per second"
+    description = "[^+2] [Workers]. [^+100%] Health and [^+5] Health Regeneration per second"
     icon = "resilientecosystem"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
-    building = make_simple_stats_building(stats=Stats(planet_health_mul=1, regen=2), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(planet_health_mul=1, regen=5), shape="lifesupport")
     requires = ('b_defense1',)
 
     def apply(self, to):
@@ -224,7 +224,7 @@ class Defense2bUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Armory"
-    description = "When this planet takes damage, [!-1 pop], [^+1 fighter]. [!(10 second cooldown)]"
+    description = "When this planet takes damage, [!-1] [Worker], [^+1] [Fighter]. 10 second cooldown"
     icon = "armory"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
@@ -237,7 +237,7 @@ class Defense3Upgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Low Orbit Defenses"
-    description = "Grants [^+20] health to nearby Ships"
+    description = "Grants [^+20] Maximum Health to nearby ships"
     icon="loworbitdefenses"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense2a', 'b_defense2b']}
@@ -256,7 +256,7 @@ class Dangerous1Upgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "SSM Battery"
-    description = "Fire explosive missiles at nearby enemy ships"
+    description = "Planet fires explosive missiles at nearby enemy ships"
     icon = "ssmbattery"
     cursor = "allied_planet"
     family = {'tree':'dangerous', 'parents':[]}
@@ -268,7 +268,7 @@ class Dangerous2aUpgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Interplanetary SSM"
-    description = "Fire explosive missiles at enemy ships and planets within 100 units"
+    description = "Planet fires explosive missiles at enemy ships and planets within a large radius"
     icon = "interplanetaryssm"
     cursor = "allied_planet"
     family = {'tree':'dangerous', 'parents':['b_dangerous1']}
@@ -281,8 +281,8 @@ class Dangerous2bUpgrade(AddBuildingUpgrade):
     name = "b_dangerous2b"
     resource_type = "ice"
     category = "buildings"
-    title = "Atmospheric EM Generator"
-    description = "Enemy ships are disabled for 5 seconds the first time they move into range"
+    title = "Tesla Coil"
+    description = "Enemy ships are [^stunned] for 5 seconds the first time they move into range"
     icon = "emgenerator"
     cursor = "allied_planet"
     family = {'tree':'dangerous', 'parents':['b_dangerous1']}
@@ -294,8 +294,8 @@ class Dangerous3Upgrade(AddBuildingUpgrade):
     name = "b_dangerous3"
     resource_type = "ice"
     category = "buildings"
-    title = "Decoy Kit"
-    description = "Enemy fighters that fly nearby will retarget to attack this planet"
+    title = "Honeypot"
+    description = "Enemy fighters that fly nearby are forced to target this planet"
     icon = "causticamplifier"
     cursor = "allied_planet"
     family = {'tree':'dangerous', 'parents':['b_dangerous2a', 'b_dangerous2b']}
@@ -308,9 +308,9 @@ class Launchpad1Upgrade(AddBuildingUpgrade):
     name = "b_launchpad1"
     resource_type = "ice"
     category = "buildings"
-    title = "Headquarters"
-    description = "Ships you control in a large radius gain +4 damage per attack. Radius is reduced by the number of other planets you control."
-    icon = "building_default"
+    title = "Ballistics Lab"
+    description = "Ships you control in a large radius gain [^+4] Damage. Radius is reduced by the number of other planets you control."
+    icon = "ballisticslab"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':[]}
     building = buildings.ScalingDamageAuraBuilding
@@ -320,9 +320,9 @@ class Launchpad2aUpgrade(AddBuildingUpgrade):
     name = "b_launchpad2a"
     resource_type = "ice"
     category = "buildings"
-    title = "Workforce Housing"
-    description = "[^+1] Max Population every 30 seconds; growth stops after 300 seconds or when you colonize a new planet"
-    icon = "building_default"
+    title = "Capitol"
+    description = "[^+1] Max Population every 30 seconds. Growth stops after 300 seconds, or when you colonize a new planet"
+    icon = "capitol"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad1']}
     building = make_simple_stats_building(stats=Stats(max_pop_growth=300), shape="lifesupport")
@@ -338,8 +338,8 @@ class Launchpad2bUpgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Memorial"
-    description = "When a ship launched from this planet dies, Instantly train [1] [Fighter]. [!20 second cooldown]"    
-    icon = "building_default"
+    description = "When a ship launched from this planet dies, [^+1] [Fighter]. 20 second cooldown"
+    icon = "memorial"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad1']}
     building = make_simple_stats_building(stats=Stats(memorial=1), shape="lifesupport")
@@ -350,9 +350,9 @@ class Launchpad3Upgrade(AddBuildingUpgrade):
     name = "b_launchpad3"
     resource_type = "ice"
     category = "buildings"
-    title = "?"
-    description = "[Scouts] launched from this planet carry [^+2] [Disruptor Bombs]"    
-    icon = "building_default"
+    title = "Espionage Lab"
+    description = "[Scouts] launched from this planet carry [^+2] [Disruptor Bombs]"
+    icon = "espionagelab"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad2a', 'b_launchpad2b']}
     building = make_simple_stats_building(stats=Stats(scout_bombs=2), shape="lifesupport")
@@ -366,9 +366,9 @@ class Scarcest1Upgrade(AddBuildingUpgrade):
     name = "b_scarcest1"
     resource_type = "ice"
     category = "buildings"
-    title = "Strip Mining"
-    description = "[^+50%] faster [Ice] and [Gas] mining rate"
-    icon = "building_default"
+    title = "Cold Storage"
+    description = "[^+50%] [Ice] and [Gas] Mining Rate"
+    icon = "coldstorage"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':[]}
     building = make_simple_stats_building(stats=Stats(ice_mining_rate=0.5, gas_mining_rate=0.5), shape="refinery")
@@ -378,8 +378,8 @@ class Scarcest2aUpgrade(AddBuildingUpgrade):
     name = "b_scarcest2a"
     resource_type = "ice"
     category = "buildings"
-    title = "?"
-    description = "Permanently swap the resources of any two planets"
+    title = "Siphon"
+    description = "Swap the resources of any two planets"
     icon = "building_default"
     cursor = ["any_planet", "any_planet"]
     family = {'tree':'scarcest', 'parents':['b_scarcest1']}
@@ -398,7 +398,7 @@ class Scarcest2bUpgrade(AddBuildingUpgrade):
     resource_type = "ice"
     category = "buildings"
     title = "Terraform"
-    description = "Permanently flip iron and gas resource values on a planet"
+    description = "Permanently flip a planet's [Iron] and [Gas] resources"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':['b_scarcest1']}
@@ -415,8 +415,8 @@ class Scarcest3Upgrade(AddBuildingUpgrade):
     name = "b_scarcest3"
     resource_type = "ice"
     category = "buildings"
-    title = "?"
-    description = "[!Condemn this planet]. Your ships near this planet gain up to [^+100%] speed based on planet's Iron, up to [^+50%] attack speed based on planet's Ice, and up to [^+100% health] based on planet's Gas."
+    title = "Militarize"
+    description = "[!Condemn this planet]. Your ships near this planet gain up to [^+100%] Speed based on planet's [Iron], up to [^+50%] Attack Speed based on planet's [Ice], and up to [^+100%] Maximum Health based on planet's [Gas]"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':['b_scarcest2a', 'b_scarcest2b']}
@@ -437,7 +437,7 @@ class Ultra1Upgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Comm Station"
-    description = "Enemy planets near the comm station reveal their ships and population when selected"
+    description = "Enemy planets near the [Comm Station] reveal their ships and workers when selected"
     icon = "clockwiseportal"
     cursor = ["allied_planet", "nearby"]
     family = {'tree':'ultra', 'parents':[]}
@@ -456,7 +456,7 @@ class Ultra2aUpgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Defense Matrix"
-    description = "Produces a field that deals [^10%] of maximum health every second to enemy ships"
+    description = "Produces a field that deals [^10%] Maximum Health every second to enemy ships"
     icon = "defensematrixalpha"
     cursor = ["allied_planet", "nearby"]
     family = {'tree':'ultra', 'parents':['b_ultra1']}
@@ -476,7 +476,7 @@ class Ultra2bUpgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Portal"
-    description = "Portal allows teleportation between two allied planets"
+    description = "Produces a portal that allows ship teleportation between two of your planets"
     icon = "clockwiseportal"
     cursor = ["allied_planet", "allied_planet"]
     family = {'tree':'ultra', 'parents':['b_ultra1']}
@@ -502,8 +502,8 @@ class Ultra3Upgrade(AddBuildingUpgrade):
     name = "b_ultra3"
     resource_type = "gas"
     category = "buildings"
-    title = "Line of Mines"
-    description = "Make a line of mines between two of your planets"
+    title = "Proximity Mines"
+    description = "Make a line of Mines between two of your planets"
     icon = "clockwiseportal"
     cursor = ["allied_planet", "allied_planet"]
     family = {'tree':'ultra', 'parents':['b_ultra2a', 'b_ultra2b']}
@@ -539,7 +539,7 @@ class Deserted2bUpgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Bunker Trap"
-    description = "If this planet is razed, emit a [^20] damage shockwave. All buildings go underground and return if you re-take the planet"
+    description = "If this planet is razed, emit a [^20] Damage shockwave. All your buildings go underground and return if you re-capture the planet"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'deserted', 'parents':[]}
@@ -552,7 +552,7 @@ class Deserted2aUpgrade(AddBuildingUpgrade):
     name = "b_deserted2a"
     resource_type = "gas"
     category = "buildings"
-    title = "War Economy"
+    title = "Fighter Specialization"
     description = "[!Condemn this planet]. Produce [^1] [Fighter] every 45 seconds"
     icon = "building_default"
     cursor = "allied_planet"
@@ -570,7 +570,7 @@ class Deserted2bUpgrade(AddBuildingUpgrade):
     name = "b_deserted2b"
     resource_type = "gas"
     category = "buildings"
-    title = "?"
+    title = "Scout Specialization"
     description = "[!Condemn this planet]. Produce [^1] [Scout] every 45 seconds"
     icon = "building_default"
     cursor = "allied_planet"
@@ -588,8 +588,8 @@ class Deserted3Upgrade(AddBuildingUpgrade):
     name = "b_deserted3"
     resource_type = "gas"
     category = "buildings"
-    title = "?"
-    description = "In 30 seconds, this planet [!explodes], dealing [^100 damage] to enemy ships and planets in a large radius"
+    title = "Self-Destruct"
+    description = "In 30 seconds, this planet [!explodes], dealing [^100] Damage to enemy ships and planets in a large radius"
     icon = "building_default"
     cursor = "allied_planet"
     building = make_simple_stats_building(stats=Stats(planet_self_destruct=1), shape="lifesupport")
@@ -604,7 +604,7 @@ class Satellite1Upgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Orbital Habitat"
-    description = "[^+4] maximum population"
+    description = "[^+4] Maximum Population"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'satellite', 'parents':[]}
@@ -615,7 +615,7 @@ class Satellite2aUpgrade(AddBuildingUpgrade):
     name = "b_satellite2a"
     resource_type = "gas"
     category = "buildings"
-    title = "?"
+    title = "Air Compressor"
     description = "[^+3] [Oxygen] every 10 seconds"
     icon = "building_default"
     cursor = "allied_planet"
@@ -629,8 +629,8 @@ class Satellite2bUpgrade(AddBuildingUpgrade):
     name = "b_satellite2b"
     resource_type = "gas"
     category = "buildings"
-    title = "Off-World Mining"
-    description = "[^+5% of maximum] [Iron] every 10 seconds."
+    title = "Space Junk Collector"
+    description = "[^+5% of maximum] [Iron] every 10 seconds"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'satellite', 'parents':['b_satellite1']}
@@ -644,7 +644,7 @@ class Satellite3Upgrade(AddBuildingUpgrade):
     resource_type = "gas"
     category = "buildings"
     title = "Orbital Laser"
-    description = "Orbital Laser fires a constant beam at the nearest enemy target in line-of-sight"
+    description = "Creates an Orbital Laser which fires a constant beam at the nearest enemy target in line-of-sight"
     icon = "building_default"
     cursor = "allied_planet"
     family = {'tree':'satellite', 'parents':['b_satellite2a', 'b_satellite2b']}
