@@ -29,7 +29,7 @@ class EconUpgrade(AddBuildingUpgrade):
     icon = "refinery"
     cursor = "allied_planet"
     family = {'tree':'econ', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.5), shape="refinery")
+    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.5), shape="mine")
 
 @register_upgrade
 class Econ2AUpgrade(AddBuildingUpgrade):
@@ -40,7 +40,7 @@ class Econ2AUpgrade(AddBuildingUpgrade):
     description = "[^+100%] Mining Rate for primary resource, [!No more Buildings or Ships can be built here]"
     icon = "coredrill"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats=Stats(top_mining_rate=1, prevent_buildings=1), shape="nuclearreactor")
+    building = make_simple_stats_building(stats=Stats(top_mining_rate=1, prevent_buildings=1), shape="mine")
     requires = ("b_econ1",)
     family = {'tree':'econ', 'parents':['b_econ1']}
 
@@ -53,7 +53,7 @@ class Econ2BUpgrade(AddBuildingUpgrade):
     description = "[^+50%] Mining Rate for primary resource, [!-50%] [Fighter] Production Quantity"
     icon = "nightshift"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.50, fighter_production_amt_halving=1), shape="militarysurplus")
+    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.50, fighter_production_amt_halving=1), shape="mine")
     requires = ("b_econ1",)    
     family = {'tree':'econ', 'parents':['b_econ1']}
 
@@ -66,7 +66,7 @@ class Econ3Upgrade(AddBuildingUpgrade):
     description = "[^+15%] Mining Rate for primary resource per building"
     icon = "iomatrix"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats=Stats(top_mining_per_building=0.15), shape="iomatrix")
+    building = make_simple_stats_building(stats=Stats(top_mining_per_building=0.15), shape="mine")
     requires = lambda x:"econ1" in x and ("b_econ2a" in x or "b_econ2b" in x)
     infinite = True
     family = {'tree':'econ', 'parents':['b_econ2a','b_econ2b']}
@@ -84,7 +84,7 @@ class Pop1Upgrade(AddBuildingUpgrade):
     icon = "modulardwellings"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(pop_max_add=2), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(pop_max_add=2), shape="habitat")
 
 @register_upgrade
 class Pop2aUpgrade(AddBuildingUpgrade):
@@ -96,7 +96,7 @@ class Pop2aUpgrade(AddBuildingUpgrade):
     icon = "lifesupport"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop1']}
-    building = make_simple_stats_building(stats=Stats(pop_max_mul=0.4), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(pop_max_mul=0.4), shape="habitat")
     requires = ('b_pop1',)
 
 @register_upgrade
@@ -109,7 +109,7 @@ class Pop2bUpgrade(AddBuildingUpgrade):
     icon = "waterrecycler"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop1']}
-    building = make_simple_stats_building(stats=Stats(ice_per_docked=2), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(ice_per_docked=2), shape="habitat")
     requires = ('b_pop1',)    
 
 @register_upgrade
@@ -122,7 +122,7 @@ class Pop3Upgrade(AddBuildingUpgrade):
     icon = "groundcrew"
     cursor = "allied_planet"
     family = {'tree':'pop', 'parents':['b_pop2a', 'b_pop2b']}
-    building = make_simple_stats_building(stats=Stats(ship_pop_boost=1), shape="undergroundshelter")
+    building = make_simple_stats_building(stats=Stats(ship_pop_boost=1), shape="habitat")
     requires = lambda x:'b_pop1' in x and ('b_pop2a' in x or 'b_pop2b' in x)
     infinite = True
 
@@ -139,7 +139,7 @@ class Hangar1Upgrade(AddBuildingUpgrade):
     icon = "fighterhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(fighter_production=0.5, scout_production=0.5), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(fighter_production=0.5, scout_production=0.5), shape="hangar")
 
 @register_upgrade
 class Hangar2aUpgrade(AddBuildingUpgrade):
@@ -151,7 +151,7 @@ class Hangar2aUpgrade(AddBuildingUpgrade):
     icon = "interceptorhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':['b_hangar1']}
-    building = make_simple_stats_building(stats=Stats(interceptor_production=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(interceptor_production=1), shape="hangar")
     requires = ('b_hangar1',)
 
 @register_upgrade
@@ -164,7 +164,7 @@ class Hangar2bUpgrade(AddBuildingUpgrade):
     icon = "bomberhangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':['b_hangar1']}
-    building = make_simple_stats_building(stats=Stats(bomber_production=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(bomber_production=1), shape="hangar")
     requires = ('b_hangar1',)
 
 @register_upgrade
@@ -177,7 +177,7 @@ class Hangar3Upgrade(AddBuildingUpgrade):
     icon = "battleshiphangar"
     cursor = "allied_planet"
     family = {'tree':'hangar', 'parents':['b_hangar2a', 'b_hangar2b']}
-    building = make_simple_stats_building(stats=Stats(battleship_production=1.5), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(battleship_production=1.5), shape="hangar")
     requires = lambda x:'b_hangar1' in x and ('b_hangar2a' in x or 'b_hangar2b' in x)
     infinite = True
 
@@ -211,7 +211,7 @@ class Defense2aUpgrade(AddBuildingUpgrade):
     icon = "resilientecosystem"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
-    building = make_simple_stats_building(stats=Stats(planet_health_mul=1, regen=5), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(planet_health_mul=1, regen=5), shape="defenses")
     requires = ('b_defense1',)
 
     def apply(self, to):
@@ -228,7 +228,7 @@ class Defense2bUpgrade(AddBuildingUpgrade):
     icon = "armory"
     cursor = "allied_planet"
     family = {'tree':'defense', 'parents':['b_defense1']}
-    building = make_simple_stats_building(stats=Stats(armory=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(armory=1), shape="defenses")
     requires = ('b_defense1',)
 
 @register_upgrade
@@ -325,7 +325,7 @@ class Launchpad2aUpgrade(AddBuildingUpgrade):
     icon = "capitol"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad1']}
-    building = make_simple_stats_building(stats=Stats(max_pop_growth=300), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(max_pop_growth=300), shape="capitol")
     requires = ('b_launchpad1',)
 
     def apply(self, to):
@@ -342,7 +342,7 @@ class Launchpad2bUpgrade(AddBuildingUpgrade):
     icon = "memorial"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad1']}
-    building = make_simple_stats_building(stats=Stats(memorial=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(memorial=1), shape="memorial")
     requires = ('b_launchpad1',)
 
 @register_upgrade
@@ -355,7 +355,7 @@ class Launchpad3Upgrade(AddBuildingUpgrade):
     icon = "espionagelab"
     cursor = "allied_planet"
     family = {'tree':'launchpad', 'parents':['b_launchpad2a', 'b_launchpad2b']}
-    building = make_simple_stats_building(stats=Stats(scout_bombs=2), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(scout_bombs=2), shape="lab")
     requires = lambda x:'b_launchpad1' in x and ('b_launchpad2a' in x or 'b_launchpad2b' in x)
     infinite = True
 
@@ -371,7 +371,7 @@ class Scarcest1Upgrade(AddBuildingUpgrade):
     icon = "coldstorage"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(ice_mining_rate=0.5, gas_mining_rate=0.5), shape="refinery")
+    building = make_simple_stats_building(stats=Stats(ice_mining_rate=0.5, gas_mining_rate=0.5), shape="terraform")
 
 @register_upgrade
 class Scarcest2aUpgrade(AddBuildingUpgrade):
@@ -383,7 +383,7 @@ class Scarcest2aUpgrade(AddBuildingUpgrade):
     icon = "siphon"
     cursor = ["any_planet", "any_planet"]
     family = {'tree':'scarcest', 'parents':['b_scarcest1']}
-    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(), shape="terraform")
     requires = ('b_scarcest1',)
     infinite = True
 
@@ -402,7 +402,7 @@ class Scarcest2bUpgrade(AddBuildingUpgrade):
     icon = "terraform"
     cursor = "allied_planet"
     family = {'tree':'scarcest', 'parents':['b_scarcest1']}
-    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(), shape="terraform")
     requires = ('b_scarcest1',)
 
     def apply(self, to):
@@ -508,7 +508,7 @@ class Ultra3Upgrade(AddBuildingUpgrade):
     cursor = ["allied_planet", "allied_planet"]
     family = {'tree':'ultra', 'parents':['b_ultra2a', 'b_ultra2b']}
     requires = lambda x:'b_ultra1' in x and ('b_ultra2a' in x or 'b_ultra2b' in x)
-    building = make_simple_stats_building(stats=Stats(), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(), shape="ultra")
 
     def apply(self, to, second):
         if to == second:
@@ -543,7 +543,7 @@ class Deserted2bUpgrade(AddBuildingUpgrade):
     icon = "bunkertrap"
     cursor = "allied_planet"
     family = {'tree':'deserted', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(underground=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(underground=1), shape="bunkertrap")
     requires = None
     infinite = True
 
@@ -558,7 +558,7 @@ class Deserted2aUpgrade(AddBuildingUpgrade):
     cursor = "allied_planet"
     family = {'tree':'deserted', 'parents':['b_deserted1']}
     requires = ('b_deserted1',)
-    building = make_simple_stats_building(stats=Stats(pop_max_mul=-1, prevent_buildings=1), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(pop_max_mul=-1, prevent_buildings=1), shape="specialization")
 
     def apply(self, to):
         p = PermanentHangarProductionOrder("fighter", 45)
@@ -574,7 +574,7 @@ class Deserted2bUpgrade(AddBuildingUpgrade):
     description = "[!Condemn this planet]. Produce [^1] [Scout] every 45 seconds"
     icon = "scoutspecialization"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats = Stats(pop_max_mul=-1, prevent_buildings=1), shape="modulardwellings")
+    building = make_simple_stats_building(stats = Stats(pop_max_mul=-1, prevent_buildings=1), shape="specialization")
     family = {'tree':'deserted', 'parents':['b_deserted1']}
     requires = ('b_deserted1',)    
 
@@ -592,7 +592,7 @@ class Deserted3Upgrade(AddBuildingUpgrade):
     description = "In 30 seconds, this planet [!explodes], dealing [^100] Damage to enemy ships and planets in a large radius"
     icon = "selfdestruct"
     cursor = "allied_planet"
-    building = make_simple_stats_building(stats=Stats(planet_self_destruct=1), shape="lifesupport")
+    building = make_simple_stats_building(stats=Stats(planet_self_destruct=1), shape="selfdestruct")
     family = {'tree':'deserted', 'parents':['b_deserted2a', 'b_deserted2b']}
     requires = lambda x:'b_deserted1' in x and ('b_deserted2a' in x or 'b_deserted2b' in x)
 

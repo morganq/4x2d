@@ -102,20 +102,20 @@ class Alien3EconUpgrade(AddBuildingUpgrade):
     requires = None
     alien = True
     alien_name = 'alien3'
-    building = make_simple_stats_building(stats=Stats(mining_rate=0.33), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(mining_rate=0.25), shape="voidecon")
     infinite = True
 
 @register_upgrade
 class Alien3EconUpgrade2(Alien3EconUpgrade):
     name = "a3bice"
     resource_type = "ice"
-    building = make_simple_stats_building(stats=Stats(), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.65), shape="voidecon2")
 
 @register_upgrade
 class Alien3EconUpgrade3(Alien3EconUpgrade):
     name = "a3bgas"
     resource_type = "gas"   
-    building = make_simple_stats_building(stats=Stats(), shape="modulardwellings") 
+    building = make_simple_stats_building(stats=Stats(top_mining_per_building=0.25), shape="voidecon2") 
 
 class Alien3(alien.Alien):
     name = "alien3"

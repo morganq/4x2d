@@ -133,14 +133,14 @@ class Alien2EconUpgrade(AddBuildingUpgrade):
     requires = None
     alien = True
     alien_name = 'alien2'
-    building = make_simple_stats_building(stats=Stats(mining_rate=0.33), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(mining_rate=0.33), shape="networkecon")
     infinite = True
 
 @register_upgrade
 class Alien2EconUpgrade2(Alien2EconUpgrade):
     name = "alien2econpop2"
     resource_type = "ice"
-    building = make_simple_stats_building(stats=Stats(mining_gas_per_iron=0.5), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(mining_gas_per_iron=0.5), shape="networkecon2")
 
 @register_upgrade
 class Alien2EconUpgrade3(Alien2EconUpgrade):

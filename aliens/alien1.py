@@ -111,7 +111,7 @@ class Alien1EconUpgrade(AddBuildingUpgrade):
     requires = None
     alien = True
     alien_name = 'alien1'
-    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.15), shape="refinery")
+    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.15), shape="barysidrill")
     infinite = True
 
 @register_upgrade
@@ -125,7 +125,7 @@ class Alien1EconUpgradeIce(AddBuildingUpgrade):
     requires = None
     alien = True
     alien_name = 'alien1'
-    building = make_simple_stats_building(stats=Stats(pop_max_add=2), shape="modulardwellings")
+    building = make_simple_stats_building(stats=Stats(pop_max_add=2), shape="barysipop")
     infinite = True
 
 @register_upgrade

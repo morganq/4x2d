@@ -1,11 +1,13 @@
-from scene import Scene
-import pygame
-from colors import *
-import text
-import game
-from v2 import V2
 import json
+
+import pygame
+
+import game
+import text
+from colors import *
 from planet import building
+from scene import Scene
+from v2 import V2
 
 GRIDSIZE = 20
 YOFFSET = 60
@@ -17,8 +19,13 @@ class BuildingCreatorScene(Scene):
 
     def start(self):
         self.current_color = PICO_WHITE
-        self.shapes = [{'color':PICO_WHITE, 'points':[]}]
+        self.shapes = [{'color':PICO_WHITE, 'points':[], 'blink':False}]
         self.building = building.Building()
+        self.is_blink = False
+
+    def update(self, dt):
+        self.building.update(None, dt)
+        return super().update(dt)
 
     def render(self):
         self.game.screen.fill(PICO_BLACK)
@@ -35,11 +42,16 @@ class BuildingCreatorScene(Scene):
             pygame.draw.line(self.game.screen, c, (0, y * GRIDSIZE), (game.RES[0], y * GRIDSIZE), 1)
         
         pygame.draw.circle(self.game.screen, PICO_PURPLE, (50,50), 15, 0)
-        drawable = [([self.transform_pt(p) for p in s['points']], s['color']) for s in self.shapes if len(s['points']) > 2]
+        drawable = [{
+            'points':[self.transform_pt(p) for p in s['points']],
+            'color':s['color'],
+            'blink':s['blink']
+            } for s in self.shapes if len(s['points']) > 2
+        ]
         if drawable:
             self.building.shapes = drawable        
         if self.building.shapes:
-            for ang in [-3.14159/2, 1.0, 3.0]:
+            for ang in [-3.14159/2, 3.14159 * 3 / 4, 0]:
                 offset = V2.from_angle(ang) * 15
                 self.building.draw_outline(self.game.screen, PICO_YELLOW, V2(50,50) + offset, ang)
                 self.building.draw_foreground(self.game.screen, V2(50,50) + offset, ang)
@@ -57,10 +69,13 @@ class BuildingCreatorScene(Scene):
             if len(pts) > 2:
                 pygame.draw.polygon(self.game.screen, shape['color'], pts, 0)
 
+        if self.is_blink:
+            text.render_multiline_to(self.game.screen, (78, 32), "BLINKING", "small", PICO_PINK)
+
     def transform_shapes(self, shapes):
         return [
-                ([self.transform_pt(p).tuple() for p in s['points']], s['color'])
-                for s in shapes
+                {'points':[self.transform_pt(p).tuple() for p in s['points']], 'color':s['color'], 'blink':s['blink']}
+                for s in shapes if len(s['points']) > 2
             ]
 
     def transform_pt(self, p):
@@ -76,14 +91,14 @@ class BuildingCreatorScene(Scene):
             if event.key in controls.keys():
                 i = controls[event.key]
                 if len(self.shapes[-1]['points']) > 2:
-                    self.shapes.append({'color':ALL_COLORS[i], 'points':[]})
+                    self.shapes.append({'color':ALL_COLORS[i], 'points':[], 'blink':self.is_blink})
                 else:
-                    self.shapes[-1] = {'color':ALL_COLORS[i], 'points':[]}
+                    self.shapes[-1] = {'color':ALL_COLORS[i], 'points':[], 'blink':self.is_blink}
 
             if event.key == pygame.K_BACKSPACE:
                 self.shapes.pop()
                 if not self.shapes:
-                    self.shapes.append({'color':self.current_color, 'points':[]})
+                    self.shapes.append({'color':self.current_color, 'points':[], 'blink':self.is_blink})
 
             if event.key == pygame.K_z and self.shapes[-1]['points']:
                 self.shapes[-1]['points'].pop()
@@ -92,3 +107,7 @@ class BuildingCreatorScene(Scene):
                 fname = input("filename> ")
                 val = self.transform_shapes(self.shapes)
                 json.dump(val, open("assets/buildings/%s.json" % fname, "w"))
+
+            if event.key == pygame.K_b:
+                self.is_blink = not self.is_blink
+                self.shapes[-1]['blink'] = self.is_blink

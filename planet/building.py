@@ -24,15 +24,22 @@ class Building:
     def __init__(self):
         self.shapes = []
         self.stats = Stats()
+        self.blink_time = 0
 
     def load_shapes(self, name):
-        data = json.load(open(resource_path("assets/buildings/%s.json" % name)))
-        self.shapes = [
-            ([V2(*pt) for pt in shape[0]], shape[1]) for shape in data
-        ]
+        try:
+            data = json.load(open(resource_path("assets/buildings/%s.json" % name)))
+            self.shapes = [
+                {'points':[V2(*pt) for pt in shape['points']], 'color':shape['color'], 'blink':shape['blink']} for shape in data
+            ]
+        except:
+            data = json.load(open(resource_path("assets/buildings/building.json")))
+            self.shapes = [
+                {'points':[V2(*pt) for pt in shape['points']], 'color':shape['color'], 'blink':shape['blink']} for shape in data
+            ]            
 
     def update(self, planet, dt):
-        pass
+        self.blink_time += dt
 
     def draw_shape(self, surface, shape, color, offset, angle, expand=False):
         angle += 3.14159 / 2
@@ -53,15 +60,18 @@ class Building:
 
     def draw_foreground(self, surface, offset, angle, construction=0):
         ind = int((1 - construction / 3) * len(self.shapes))
-        for i, (points, color) in enumerate(self.shapes[0:ind]):
+        for i, shape in enumerate(self.shapes[0:ind]):
             if construction > 0 and i == ind - 1:
                 color = PICO_WHITE
-            self.draw_shape(surface, points, color, offset, angle)
+            if not shape['blink'] or (self.blink_time % 4) < 2:
+                self.draw_shape(surface, shape['points'], shape['color'], offset, angle)
 
     def draw_outline(self, surface, color, offset, angle, expand=False, construction=0):
+        #return
         if construction > 0 and ((construction * 9) % 1) > 0.5:
             color = PICO_WHITE
-        for points, _ in self.shapes:
+        for shape in self.shapes:
+            points = shape['points']
             self.draw_shape(surface, points, color, offset + V2(-1,0), angle, expand)
             self.draw_shape(surface, points, color, offset + V2(+1,0), angle, expand)
             self.draw_shape(surface, points, color, offset + V2(0,-1), angle, expand)
@@ -107,7 +117,7 @@ class SSMBatteryBuilding(Building):
     FIRE_RATE = 2.5
     def __init__(self):
         Building.__init__(self)
-        self.load_shapes("armory")
+        self.load_shapes("weapon")
         self.fire_time = 0
         self.indicator = None
         
@@ -138,7 +148,7 @@ class InterplanetarySSMBatteryBuilding(Building):
     RANGE = 100
     def __init__(self):
         Building.__init__(self)
-        self.load_shapes("armory")
+        self.load_shapes("weapon")
         self.fire_time = 0
         self.indicator = None
         
@@ -171,7 +181,7 @@ class InterplanetarySSMBatteryBuilding(Building):
 class EMGeneratorBuilding(Building):
     def __init__(self):
         Building.__init__(self)
-        self.load_shapes("armory")
+        self.load_shapes("weapon")
         self.stunned_ships = {}
         self.indicator = None
         
@@ -213,15 +223,20 @@ class SpaceStationBuilding(SatelliteBuilding):
     def __init__(self):
         super().__init__()
         self.stats = Stats(pop_max_add=4)
+        self.load_shapes("satellite")
 
 class ReflectorShieldBuilding(SatelliteBuilding):
     SATELLITE_CLASS = ReflectorShield
+    def __init__(self):
+        super().__init__()
+        self.load_shapes("satellite")
 
 class OffWorldMiningBuilding(SatelliteBuilding):
     SATELLITE_CLASS = OffWorldMining
     def __init__(self):
         super().__init__()
         self.timer = 0
+        self.load_shapes("satellite")
 
     def update(self, planet, dt):
         self.timer += dt
@@ -236,6 +251,7 @@ class OxygenBuilding(SatelliteBuilding):
     def __init__(self):
         super().__init__()
         self.timer = 0
+        self.load_shapes("satellite")
 
     def update(self, planet, dt):
         self.timer += dt
@@ -247,6 +263,9 @@ class OxygenBuilding(SatelliteBuilding):
 
 class OrbitalLaserBuilding(SatelliteBuilding):
     SATELLITE_CLASS = OrbitalLaser
+    def __init__(self):
+        super().__init__()
+        self.load_shapes("satellite")
 
 class AlienHomeDefenseBuilding(Building):
     FIRE_RATE = 2
@@ -254,7 +273,7 @@ class AlienHomeDefenseBuilding(Building):
     upgrade = "alienhomedefense"
     def __init__(self):
         Building.__init__(self)
-        self.load_shapes("armory")
+        self.load_shapes("aliendefense")
         self.stats = Stats(planet_health_mul=1)
         self.fire_time = 0
         
@@ -334,6 +353,7 @@ class LowOrbitDefensesBuilding(AuraBuilding):
         super().__init__()
         self.targeting = "mine"
         self.indicator = None
+        self.load_shapes("defenses")
 
     def update(self, planet, dt):
         if not self.indicator:
@@ -355,6 +375,7 @@ class ScalingDamageAuraBuilding(AuraBuilding):
         super().__init__()
         self.targeting = "mine"
         self.indicator = None
+        self.load_shapes("lab")
 
     def update(self, planet, dt):
         if not self.indicator:
@@ -379,6 +400,7 @@ class DecoyBuilding(AuraBuilding):
         self.targeting = "enemy"
         self.aura_radius = 85
         self.indicator = None
+        self.load_shapes("weapon")
 
     def update(self, planet, dt):
         if not self.indicator:
@@ -418,6 +440,7 @@ class MultiBonusAuraBuilding(AuraBuilding):
         self.stats = Stats(pop_max_mul=-1, prevent_buildings=1)
         self.indicator = None
         self.effects = {}
+        self.load_shapes("terraform")
 
     def update(self, planet, dt):
         if not self.indicator:
@@ -452,10 +475,14 @@ class UltraBuilding(Building):
         return super().kill()
 
 class DefenseMatrix(UltraBuilding):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.load_shapes("ultra")
 
 class Portal(Building):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.load_shapes("ultra")
 
 class CommStationObject(SpaceObject):
     def __init__(self, scene, pos):
@@ -467,7 +494,9 @@ class CommStationObject(SpaceObject):
         return super().update(dt)
 
 class CommStation(UltraBuilding):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.load_shapes("ultra")
 
 
 class ReflectorShieldCircleObj(SpaceObject):
@@ -508,6 +537,7 @@ class ReflectorBuilding(Building):
     def __init__(self):
         super().__init__()
         self.shield = None
+        self.load_shapes("defenses")
 
     def update(self, planet, dt):
         if not self.shield:

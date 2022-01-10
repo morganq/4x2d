@@ -59,7 +59,7 @@ class Planet(SpaceObject):
         self.resource_timers = economy.Resources(0,0,0)
         self.owning_civ = None
         self.buildings = []
-        self.building_slots = [False] * 12
+        self.building_slots = [False] * 8
         self.production = []
 
         self.upgradeable = True
@@ -215,7 +215,7 @@ class Planet(SpaceObject):
 
     def _generate_frame(self, border = False):
         radius = self.size + 8
-        padding = 8
+        padding = 15
         cx,cy = radius + padding, radius + padding
         self._width = radius * 2 + padding * 2
         self._height = radius * 2 + padding * 2
@@ -244,7 +244,7 @@ class Planet(SpaceObject):
         pygame.draw.circle(frame, color, (cx,cy), radius + border_radius)
 
         for building in self.buildings:
-            offset = V2.from_angle(building['angle'] + self.base_angle) * radius + V2(cx, cy)
+            offset = V2.from_angle(building['angle'] + self.base_angle) * (radius + 2) + V2(cx, cy)
             b = building['building']
             c = 0
             if b == self.last_building and self.building_construction_time > 0:
@@ -258,7 +258,7 @@ class Planet(SpaceObject):
         frame.blit(rotated, (cx - rotated.get_width() // 2, cy - rotated.get_height() // 2))
 
         for building in self.buildings:
-            offset = V2.from_angle(building['angle'] + self.base_angle) * radius + V2(cx, cy)
+            offset = V2.from_angle(building['angle'] + self.base_angle) * (radius + 2) + V2(cx, cy)
             b = building['building']
             c = 0
             if b == self.last_building and self.building_construction_time > 0:
@@ -473,7 +473,7 @@ class Planet(SpaceObject):
         for b in self.buildings:
             b['building'].update(self, dt)
 
-        if self.building_construction_time > 0:
+        if True: #self.building_construction_time > 0:
             self.building_construction_time -= dt
             self._generate_base_frames()
             self._generate_frames()
@@ -761,14 +761,17 @@ class Planet(SpaceObject):
     def add_building(self, upgrade):
         mh_before = self.get_max_health()
         angle = 0
+        choice = 0
         if not all(self.building_slots):
             avail = [i for i,s in enumerate(self.building_slots) if not s]
+            print(avail)
             choice = random.choice(avail)
-            angle = (choice / 12) * 6.2818
+            angle = (choice / 8) * 6.2818
             self.building_slots[choice] = True
         else:
             angle = random.random() * 6.2818
         b = upgrade.building()
+        b.blink_time = choice + self.time
         self.buildings.append({"building":b, "angle":angle})
         self.last_building = b
         self.building_construction_time = 3        
