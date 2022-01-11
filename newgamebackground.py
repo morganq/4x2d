@@ -49,8 +49,8 @@ class NewGameBackground(SpriteBase):
             else:
                 self.signal_data.append(self.signal_data[-1])
 
-        self.current_path = [self.initial_spot]
-        self.current_path_pt = self.initial_spot
+        self.current_path = [V2(self.initial_spot)]
+        self.current_path_pt = V2(self.initial_spot)
         self.path_flashing = False
         self.path_flash_time = 0
 
@@ -66,9 +66,9 @@ class NewGameBackground(SpriteBase):
 
         ## GRID ##
         grid_t = 0.5#(self.time / 6) % 1
-        for i in range(int(grid_t * 32), res.x, 32):
+        for i in range(int(grid_t * 32), int(res.x), 32):
             pygame.draw.line(self.image, PICO_LIGHTGRAY, (i, 0), (i, res.y), 1)
-        for i in range(int(grid_t * 32), res.y, 32):
+        for i in range(int(grid_t * 32), int(res.y), 32):
             pygame.draw.line(self.image, PICO_LIGHTGRAY, (0, i), (res.x, i), 1)
 
 
@@ -81,8 +81,8 @@ class NewGameBackground(SpriteBase):
             if i < jumps_i:
                 xg = (jump.x - 16) // 32 * 32 + 16
                 yg = (jump.y - 16) // 32 * 32 + 16
-                x_grid = (jump.x - 16) // 32
-                y_grid = (jump.y - 16) // 32
+                x_grid = int((jump.x - 16) // 32)
+                y_grid = int((jump.y - 16) // 32)
                 pygame.draw.rect(self.image, PICO_BLUE, (xg+2,yg+2,33,33), 1)
                 text.render_multiline_to(self.image, (xg + 4, yg-2), "%s%d" % (letters[x_grid % 26], y_grid), 'tiny', PICO_BLUE)
 
@@ -155,11 +155,11 @@ class NewGameBackground(SpriteBase):
         if self.time > 6:
             delta = self.current_path_pt - self.current_path[-1]
             if delta.length_squared() < 4 ** 2:
-                jumps_left = list(set(self.jumps) - set(self.current_path))
+                jumps_left = list(set([tuple(p) for p in self.jumps]) - set([tuple(p) for p in self.current_path]))
                 nearest = nearest_order_pos(self.current_path_pt, jumps_left)[0:4]
                 if nearest:
                     random.shuffle(nearest)
-                    self.current_path.append(nearest[0])
+                    self.current_path.append(V2(nearest[0]))
 
             color = PICO_GREEN
             if self.path_flashing:
@@ -171,13 +171,13 @@ class NewGameBackground(SpriteBase):
                 dist = towards.length()
                 self.current_path_pt += towards.normalize() * 200 * dt / clamp(((dist / 50) + 0.25), 0.15, 2)
 
-            lines = self.current_path[0:-1] + [self.current_path_pt]
+            lines = self.current_path[0:-1] + [V2(self.current_path_pt)]
             
             if color == PICO_GREEN:
                 #pygame.draw.lines(self.image, color, False, [tuple(p) for p in lines], 2)
                 done = False
                 i = 1
-                pt = self.current_path[0]
+                pt = V2(self.current_path[0])
                 while not done:
                     towards = (self.current_path[i] - pt)
                     if towards.length_squared() < 8 ** 2:
@@ -202,8 +202,8 @@ class NewGameBackground(SpriteBase):
 
             if self.path_flashing and self.path_flash_time < 0:
                 self.path_flashing = False
-                self.current_path = [self.initial_spot]
-                self.current_path_pt = self.initial_spot
+                self.current_path = [V2(self.initial_spot)]
+                self.current_path_pt = V2(self.initial_spot)
 
         ## INDICATOR ##
         p1 = self.signal_spot + V2(1, -1) * 5

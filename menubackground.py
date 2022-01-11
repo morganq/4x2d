@@ -7,7 +7,7 @@ import pygame
 import game
 import helper
 from colors import *
-from helper import clamp
+from helper import clamp, rect_contain
 from resources import resource_path
 from spritebase import SpriteBase
 
@@ -363,8 +363,8 @@ class MenuBackground(SpriteBase):
             zero = True
         else:
             dnorm = delta.normalize()
-        ip1 = (p2 - V2(rad,rad)).rect_contain(0,0, FIELD_SIZE-1, FIELD_SIZE-1)
-        ip2 = (p2 + V2(rad,rad)).rect_contain(0,0, FIELD_SIZE-1, FIELD_SIZE-1)
+        ip1 = rect_contain(p2 - V2(rad,rad), 0,0, FIELD_SIZE-1, FIELD_SIZE-1)
+        ip2 = rect_contain(p2 + V2(rad,rad), 0,0, FIELD_SIZE-1, FIELD_SIZE-1)
         for x in range(int(ip1.x), int(ip2.x) + 1):
             for y in range(int(ip1.y), int(ip2.y) + 1):
                 pd = V2(x,y) - p2

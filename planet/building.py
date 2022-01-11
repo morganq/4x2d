@@ -45,7 +45,7 @@ class Building:
 
     def draw_shape(self, surface, shape, color, offset, angle, expand=False):
         angle += 3.14159 / 2
-        center = offset
+        center = V2(offset)
         for pt in shape:
             center += pt * (1 / len(shape))
         final_pts = []

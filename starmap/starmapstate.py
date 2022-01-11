@@ -4,6 +4,7 @@ import joystickcursor
 import levelscene
 import levelstates
 import menuscene
+import pygame
 import rewardscene
 import sound
 import states
@@ -11,12 +12,12 @@ import text
 from button import Button
 from colors import *
 from elements import digitalpointer, typewriter
-from helper import clamp, get_nearest
+from helper import clamp, get_nearest, rect_contain
 from loadingscene import LoadingScene
 from store import storepanel
 from store.storenode import StoreNodeGraphic, StoreNodePanel
 from store.storescene import StoreScene
-import pygame
+
 V2 = pygame.math.Vector2
 
 from starmap.galaxy import Galaxy
@@ -246,7 +247,8 @@ class StoreNodeState(states.UIEnabledState):
         else:
             self.joystick_overlay.set_nearest(None)
             nearest = None                    
-        self.joystick_overlay.cursor_pos = (self.joystick_overlay.cursor_pos).rect_contain(
+        self.joystick_overlay.cursor_pos = rect_contain(
+            self.joystick_overlay.cursor_pos,
             self.panel.x, self.panel.y, self.panel.width, self.panel.height
         )
 

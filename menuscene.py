@@ -452,8 +452,8 @@ class MenuScene(scene.Scene):
         self.sm = states.Machine(states.UIEnabledState(self))
 
     def skip_intro(self):
-        self.time = 8
-        self.logo.time = 8
+        self.time = 10
+        self.logo.time = 10
         self.logo._generate_image()        
 
     def on_joy_press(self, dir):

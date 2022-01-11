@@ -8,7 +8,7 @@ import text
 import upgrade
 from button import Button
 from colors import *
-from helper import clamp, nearest_order
+from helper import clamp, nearest_order, rect_contain
 from simplesprite import SimpleSprite
 from slider import Slider
 from spritebase import SpriteBase
@@ -65,7 +65,7 @@ class JoystickCursor(SpriteBase):
         self.update_hover()
 
     def update(self, dt):
-        self.cursor_pos = (self.cursor_pos + self.joystick_state * dt * 350).rect_contain(0, 0, game.Game.inst.game_resolution.x, game.Game.inst.game_resolution.y)
+        self.cursor_pos = rect_contain(self.cursor_pos + self.joystick_state * dt * 350, 0, 0, game.Game.inst.game_resolution.x, game.Game.inst.game_resolution.y)
         self.scene.game.last_joystick_pos[self.player_id] = self.cursor_pos
         self.options_text.pos = self.cursor_pos + V2(8, -8)
         self._generate_image()
@@ -212,6 +212,8 @@ class JoystickPanelCursor(SpriteBase):
             self.last_dir = None
 
     def update(self, dt):
+        if self.get_current_control is None:
+            return        
         self.time += dt
         self._generate_image()
         return super().update(dt)

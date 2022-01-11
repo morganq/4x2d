@@ -58,3 +58,8 @@ def from_angle(a):
     x = math.cos(a)
     y = math.sin(a)
     return pygame.math.Vector2(x,y)
+
+def rect_contain(v, x1, y1, w, h):
+    x = min(max(v.x, x1), x1 + w)
+    y = min(max(v.y, y1), y1 + h)
+    return pygame.math.Vector2(x,y)
