@@ -328,7 +328,8 @@ class LevelSceneBase(scene.Scene):
             self.update_times[type(sprite)] += elapsed
 
         self.update_game_objects(dt)
-        #self.update_collisions(dt)
+        self.update_collisions(dt)
+        self.update_particles(dt)
 
         self.flowfield.update(dt)
 
