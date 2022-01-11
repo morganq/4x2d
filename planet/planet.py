@@ -23,7 +23,8 @@ from line import IndicatorLine, Line
 from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from planet import flag, timeloop
 from planet.rewindparticle import RewindParticle
@@ -233,9 +234,9 @@ class Planet(SpaceObject):
                 theta = i * 6.2818 / (num_spikes * 2)
                 rad = radius + border_radius + 2
                 if i % 2 == 1:
-                    #pygame.draw.circle(frame, color, (V2.from_angle(theta) * (rad-2) + V2(cx + 0,cy + 0)).tuple_round(), 1, 0)
+                    #pygame.draw.circle(frame, color, (helper.from_angle(theta) * (rad-2) + V2(cx + 0,cy + 0)).tuple_round(), 1, 0)
                     rad = radius + border_radius - 1
-                pts.append((V2.from_angle(theta) * rad + V2(cx,cy)).tuple_int())
+                pts.append((helper.from_angle(theta) * rad + V2(cx,cy)))
 
             #pygame.draw.lines(frame, color, False, pts, 1)
             pygame.draw.polygon(frame, color, pts, 0)
@@ -244,7 +245,7 @@ class Planet(SpaceObject):
         pygame.draw.circle(frame, color, (cx,cy), radius + border_radius)
 
         for building in self.buildings:
-            offset = V2.from_angle(building['angle'] + self.base_angle) * (radius + 2) + V2(cx, cy)
+            offset = helper.from_angle(building['angle'] + self.base_angle) * (radius + 2) + V2(cx, cy)
             b = building['building']
             c = 0
             if b == self.last_building and self.building_construction_time > 0:
@@ -258,7 +259,7 @@ class Planet(SpaceObject):
         frame.blit(rotated, (cx - rotated.get_width() // 2, cy - rotated.get_height() // 2))
 
         for building in self.buildings:
-            offset = V2.from_angle(building['angle'] + self.base_angle) * (radius + 2) + V2(cx, cy)
+            offset = helper.from_angle(building['angle'] + self.base_angle) * (radius + 2) + V2(cx, cy)
             b = building['building']
             c = 0
             if b == self.last_building and self.building_construction_time > 0:
@@ -553,7 +554,7 @@ class Planet(SpaceObject):
                 towards_angle = (target.pos - self.pos).to_polar()[1]
                 towards_angle += random.random() - 0.5
                 ship_class = SHIPS_BY_NAME[ship_type]                                
-                off = V2.from_angle(towards_angle)
+                off = helper.from_angle(towards_angle)
                 s = ship_class(self.scene, self.pos + off * self.get_radius(), self.owning_civ)
                 if 'colonist' in ship_type:
                     s.set_pop(data['num'] - self.owning_civ.worker_loss)
@@ -731,7 +732,7 @@ class Planet(SpaceObject):
         for s in enemy_ships:
             if s.stealth:
                 continue
-            dist = (s.pos - self.pos).sqr_magnitude()
+            dist = (s.pos - self.pos).length_squared()
             if dist < (self.get_radius() + self.DEFENSE_RANGE) ** 2:        
                 ret.append(s)
         return ret
@@ -818,7 +819,7 @@ class Planet(SpaceObject):
 
     def blow_up_buildings(self):
         for i,building in enumerate(self.buildings):
-            bp = V2.from_angle(building['angle'] + self.base_angle) * self.get_radius() + self.pos
+            bp = helper.from_angle(building['angle'] + self.base_angle) * self.get_radius() + self.pos
             e = explosion.Explosion(bp, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.35 + i * 0.15, 6, scale_fn="log", line_width=1)
             self.scene.game_group.add(e)        
             building['building'].kill()
@@ -832,7 +833,7 @@ class Planet(SpaceObject):
         bi = random.randint(0, len(self.buildings)-1)
         b = self.buildings[bi]
         b['building'].kill()
-        bp = V2.from_angle(b['angle'] + self.base_angle) * self.get_radius() + self.pos
+        bp = helper.from_angle(b['angle'] + self.base_angle) * self.get_radius() + self.pos
         e = explosion.Explosion(bp, [PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY], 0.25, 11, scale_fn="log", line_width=1)
         self.scene.game_group.add(e)  
         self.buildings.pop(bi)

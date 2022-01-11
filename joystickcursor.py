@@ -12,7 +12,8 @@ from helper import clamp, nearest_order
 from simplesprite import SimpleSprite
 from slider import Slider
 from spritebase import SpriteBase
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class JoystickCursor(SpriteBase):
@@ -30,10 +31,10 @@ class JoystickCursor(SpriteBase):
         self._generate_image()
 
     def _generate_image(self):
-        self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
+        self.image = pygame.Surface(tuple(game.Game.inst.game_resolution), pygame.SRCALPHA)
 
-        pygame.draw.circle(self.image, self.color, self.cursor_pos.tuple(), 7, 1)
-        pygame.draw.circle(self.image, PICO_WHITE, self.cursor_pos.tuple(), 2, 0)
+        pygame.draw.circle(self.image, self.color, self.cursor_pos, 7, 1)
+        pygame.draw.circle(self.image, PICO_WHITE, self.cursor_pos, 2, 0)
 
         if self.nearest_obj:
             center = self.nearest_obj.get_center()
@@ -48,10 +49,10 @@ class JoystickCursor(SpriteBase):
             pygame.draw.arc(self.image, self.color, rect, ang - 1, ang + 1)
 
             if dist > 15:
-                dn = delta.normalized()
+                dn = delta.normalize()
                 p1 = self.cursor_pos - dn * 7
                 p2 = self.nearest_obj.get_center() + dn * (self.nearest_obj.radius + 4)
-                pygame.draw.line(self.image, self.color, p1.tuple(), p2.tuple(), 1)
+                pygame.draw.line(self.image, self.color, p1, p2, 1)
 
         self._width, self._height = self.image.get_size()
 
@@ -108,7 +109,7 @@ class JoystickPanelCursor(SpriteBase):
             self.visible = False
 
     def _generate_image(self):
-        self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
+        self.image = pygame.Surface(tuple(game.Game.inst.game_resolution), pygame.SRCALPHA)
 
         c = self.get_current_control()
         rect = (
@@ -124,12 +125,12 @@ class JoystickPanelCursor(SpriteBase):
         #pygame.draw.line(self.image, color, (c.top_left.x - 2, c.top_left.y), (c.top_left.x - 2, c.top_left.y + c.height))
         control_left = c.top_left + V2(0, c.height // 2)
         pts = [
-            #(c.top_left + V2(-6, c.height // 2 - 4)).tuple(),
-            #(c.top_left + V2(-2, c.height // 2)).tuple(),
-            #(c.top_left + V2(-6, c.height // 2 + 4)).tuple(),
-            (control_left + V2(-6, - 4)).tuple(),
-            (control_left + V2(-2, 0)).tuple(),
-            (control_left + V2(-6, 4)).tuple(),            
+            #(c.top_left + V2(-6, c.height // 2 - 4)),
+            #(c.top_left + V2(-2, c.height // 2)),
+            #(c.top_left + V2(-6, c.height // 2 + 4)),
+            (control_left + V2(-6, - 4)),
+            (control_left + V2(-2, 0)),
+            (control_left + V2(-6, 4)),            
         ]
         pygame.draw.polygon(self.image, color, pts, 0)
 
@@ -196,7 +197,7 @@ class JoystickPanelCursor(SpriteBase):
     def joystick_delta(self, delta):
         if self.get_current_control() is None: return
         self.joystick_state = delta
-        if delta.sqr_magnitude() > 0.75 ** 2:
+        if delta.length_squared() > 0.75 ** 2:
             _,ang = delta.to_polar()
             ang /= math.pi / 2
             ang4 = round(ang)

@@ -16,7 +16,8 @@ from explosion import Explosion
 from multiplayer import inputstates
 from multiplayer.levelstates import MultiplayerNormalState
 from planet.planet import Planet
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 PLAYER_COLORS = [
     PICO_BLUE,

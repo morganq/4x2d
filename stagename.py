@@ -9,7 +9,8 @@ import text
 from colors import *
 from helper import clamp
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 START_TIME = 2.0
 FINISH_TIME = 0.25

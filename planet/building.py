@@ -14,7 +14,8 @@ from satellite import (OffWorldMining, OrbitalLaser, OxygenSatellite,
                        ReflectorShield, SpaceStation)
 from spaceobject import SpaceObject
 from stats import Stats
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 import planet
 
@@ -50,12 +51,12 @@ class Building:
         for pt in shape:
             dist,ang = pt.to_polar()
             ang += angle
-            new_pt = V2.from_angle(ang) * dist * 1.25 + offset
+            new_pt = helper.from_angle(ang) * dist * 1.25 + offset
             if expand:
-                new_pt += (new_pt - center).normalized() * .75
+                new_pt += (new_pt - center).normalize() * .75
             final_pts.append(new_pt)
         
-        pygame.draw.polygon(surface, color, [pt.tuple() for pt in final_pts], 0)
+        pygame.draw.polygon(surface, color, [pt for pt in final_pts], 0)
 
 
     def draw_foreground(self, surface, offset, angle, construction=0):
@@ -107,9 +108,9 @@ class ArmoryBuilding(Building):
             for i in range(planet.population):
                 angle = random.random() * 6.2818
                 b = bullet.Bullet(
-                    planet.pos + V2.from_angle(angle) * planet.get_radius(),
+                    planet.pos + helper.from_angle(angle) * planet.get_radius(),
                     random.choice(threats), 
-                    planet, vel=V2.from_angle(angle) * 20, mods={'homing':1, "damage_base":3 * planet.planet_weapon_mul, "color":PICO_WHITE, "life":5}
+                    planet, vel=helper.from_angle(angle) * 20, mods={'homing':1, "damage_base":3 * planet.planet_weapon_mul, "color":PICO_WHITE, "life":5}
                     )
                 planet.scene.game_group.add(b)
 
@@ -135,9 +136,9 @@ class SSMBatteryBuilding(Building):
             angle += random.random() * 1.5 - 0.75            
             self.fire_time = 0
             b = bullet.Bullet(
-                planet.pos + V2.from_angle(angle) * planet.get_radius(),
+                planet.pos + helper.from_angle(angle) * planet.get_radius(),
                 t, 
-                planet, vel=V2.from_angle(angle) * 20, mods={
+                planet, vel=helper.from_angle(angle) * 20, mods={
                         'homing':1, "damage_base":10 * planet.planet_weapon_mul, "blast_radius":10, "color":PICO_WHITE, "life":5, "missile_speed":0.5
                     }
                 )
@@ -160,7 +161,7 @@ class InterplanetarySSMBatteryBuilding(Building):
         self.fire_time += dt
         threats = [
             o for o in planet.scene.get_enemy_objects(planet.owning_civ)
-            if (o.pos - planet.pos).sqr_magnitude() < self.RANGE ** 2 and o.health > 0 and not o.stealth
+            if (o.pos - planet.pos).length_squared() < self.RANGE ** 2 and o.health > 0 and not o.stealth
         ]
         if self.fire_time > self.FIRE_RATE and threats:
             self.fire_time = 0
@@ -169,9 +170,9 @@ class InterplanetarySSMBatteryBuilding(Building):
             _, angle = delta.to_polar()
             angle += random.random() * 1.5 - 0.75
             b = bullet.Bullet(
-                planet.pos + V2.from_angle(angle) * planet.get_radius(),
+                planet.pos + helper.from_angle(angle) * planet.get_radius(),
                 t, 
-                planet, vel=V2.from_angle(angle) * 20, mods={
+                planet, vel=helper.from_angle(angle) * 20, mods={
                         'homing':1, "damage_base":10 * planet.planet_weapon_mul, "blast_radius":10, "color":PICO_WHITE, "life":5, "missile_speed":0.5
                     }
                 )
@@ -280,7 +281,7 @@ class AlienHomeDefenseBuilding(Building):
     def get_threats(self, planet):
         return [s for s in 
             planet.scene.get_enemy_ships_in_range(planet.owning_civ, planet.pos, self.THREAT_RANGE + planet.get_radius())
-            if not s.stealth and (s.pos - planet.pos).sqr_magnitude() <= (self.THREAT_RANGE + planet.get_radius()) ** 2
+            if not s.stealth and (s.pos - planet.pos).length_squared() <= (self.THREAT_RANGE + planet.get_radius()) ** 2
         ]
 
     def update(self, planet, dt):
@@ -295,9 +296,9 @@ class AlienHomeDefenseBuilding(Building):
             _,angle = (threat.pos - planet.pos).to_polar()
             angle += random.random() * 0.5 - 0.25
             b = bullet.Bullet(
-                planet.pos + V2.from_angle(angle) * planet.get_radius(),
+                planet.pos + helper.from_angle(angle) * planet.get_radius(),
                 threat, 
-                planet, vel=V2.from_angle(angle) * 20, mods={
+                planet, vel=helper.from_angle(angle) * 20, mods={
                     'homing':1,
                     'color':PICO_YELLOW,
                     'damage_base':3,
@@ -415,7 +416,7 @@ class DecoyBuilding(AuraBuilding):
             ship.effective_target = planet
             # Decoy sound effect
             delta = ship.pos - planet.pos
-            dn = delta.normalized()
+            dn = delta.normalize()
             dist, ang = delta.to_polar()
             t = 0
             p1 = planet.pos
@@ -426,10 +427,10 @@ class DecoyBuilding(AuraBuilding):
                 if i == steps - 1:
                     p2 = ship.pos
                 else:
-                    p2 = p1 + V2.from_angle(ang + ((i % 2) - 0.5)) * dist / steps
+                    p2 = p1 + helper.from_angle(ang + ((i % 2) - 0.5)) * dist / steps
                 l = laserparticle.LaserParticle(p1, p2, PICO_BLUE, 0.25 + i / 8)
                 planet.scene.add_particle(l)
-                p1 = p2.copy()
+                p1  = V2(p2)
         return super().apply(ship, planet)
 
 class MultiBonusAuraBuilding(AuraBuilding):
@@ -528,7 +529,7 @@ class ReflectorShieldCircleObj(SpaceObject):
         self._height = r * 2 + 8
         self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
         center = V2(r + 4, r + 4)
-        pygame.draw.circle(self.image, PICO_PINK, center.tuple(), self.radius, 1)
+        pygame.draw.circle(self.image, PICO_PINK, center, self.radius, 1)
 
         self._recalc_rect()
 

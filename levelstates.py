@@ -36,7 +36,8 @@ from states import State, UIEnabledState
 from upgrade.upgradebutton import UpgradeButton
 from upgrade.upgradepanel import UpgradePanel
 from upgrade.upgrades import UPGRADE_CLASSES
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class BeginState(State):
@@ -408,7 +409,7 @@ class HelpState(UIEnabledState):
     def mouse_input(self, input, event):
         if input == "click":
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
-            if not pr.collidepoint(event.gpos.tuple()):
+            if not pr.collidepoint(event.gpos):
                 self.scene.sm.transition(PlayState(self.scene))
         return super().mouse_input(input, event)        
 
@@ -462,7 +463,7 @@ class OrderShipsState(UIEnabledState):
     def mouse_input(self, input, event):
         if input == "click":
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
-            if not pr.collidepoint(event.gpos.tuple()):
+            if not pr.collidepoint(event.gpos):
                 sound.play("cancel")
                 self.scene.sm.transition(PlayState(self.scene))
         return super().mouse_input(input, event)

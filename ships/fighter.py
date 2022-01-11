@@ -10,7 +10,8 @@ from bullet import Bullet
 from colors import *
 from helper import all_nearby, clamp, get_nearest
 from particle import Particle
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from ships.all_ships import register_ship
 
@@ -144,7 +145,7 @@ class Fighter(Ship):
         self.opt_threats = [
             e for e in enemies
             if (
-                (e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and
+                (e.pos - self.pos).length_squared() < threat_range ** 2 and
                 e.is_alive() and
                 not e.stealth
             )
@@ -159,7 +160,7 @@ class Fighter(Ship):
             self.effective_target = None
 
     def fire(self, at):
-        towards = (at.pos - self.pos).normalized()
+        towards = (at.pos - self.pos).normalize()
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
@@ -174,7 +175,7 @@ class Fighter(Ship):
         sound.play(random.choice(['laser1', 'laser2', 'laser3']))
 
         for i in range(10):
-            pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalized() * 30 * (random.random() + 0.25)
+            pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalize() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.add_particle(p)   
 
@@ -187,7 +188,7 @@ class Fighter(Ship):
         if not self.post_dogfight_state:
             self.post_dogfight_state = self.state
             self.post_dogfight_target = self.effective_target or self.chosen_target
-        self.dogfight_initial_pos = self.pos.copy()
+        self.dogfight_initial_pos  = V2(self.pos)
         self.find_target()
 
     def state_dogfight(self, dt):
@@ -195,7 +196,7 @@ class Fighter(Ship):
             return (
                 not self.effective_target or
                 not self.effective_target.is_alive() or
-                (self.effective_target.pos - self.pos).sqr_magnitude() > self.THREAT_RANGE_DEFENSE ** 2 or
+                (self.effective_target.pos - self.pos).length_squared() > self.THREAT_RANGE_DEFENSE ** 2 or
                 self.effective_target.owning_civ == self.owning_civ
             )
             
@@ -210,34 +211,34 @@ class Fighter(Ship):
         # If we're defending a planet...
         if self.defending:
             # And our dogfight target is too far...
-            if (self.effective_target.pos - self.defending.pos).sqr_magnitude() > self.STOP_CHASING_RANGE ** 2:
+            if (self.effective_target.pos - self.defending.pos).length_squared() > self.STOP_CHASING_RANGE ** 2:
                 self.set_state("returning")
 
         # Fire if reloaded (and close enough)
         if self.fire_timer > 1:
-            if (self.effective_target.pos - self.pos).sqr_magnitude() < self.get_weapon_range() ** 2:
+            if (self.effective_target.pos - self.pos).length_squared() < self.get_weapon_range() ** 2:
                 self.fire_timer = 0
                 self.fire(self.effective_target)
                 self.target_heading = None
 
         # Need to get close to the enemy
         delta = self.effective_target.pos - self.pos
-        if delta.sqr_magnitude() > self.get_weapon_range() ** 2: # Too far
-            dir = delta.normalized()
-        elif delta.sqr_magnitude() < (self.get_weapon_range() / 2) ** 2: # Too close
-            dir = -delta.normalized()
+        if delta.length_squared() > self.get_weapon_range() ** 2: # Too far
+            dir = delta.normalize()
+        elif delta.length_squared() < (self.get_weapon_range() / 2) ** 2: # Too close
+            dir = -delta.normalize()
         elif self.fire_timer > 0.65: # If we're close and about to fire
-            dir = delta.normalized()
+            dir = delta.normalize()
             self.target_heading = dir.to_polar()[1]
         else:
             _, a = (-delta).to_polar()
             a += self.combat_dodge_direction * 3.14159 / 2
-            dir = V2.from_angle(a)           
+            dir = helper.from_angle(a)           
 
         # Need to stay close to starting spot
         #delta = self.dogfight_initial_pos - self.pos
-        #if delta.sqr_magnitude() > 30 ** 2:
-        #    dir = delta.normalized()
+        #if delta.length_squared() > 30 ** 2:
+        #    dir = delta.normalize()
 
         self.target_velocity = dir * self.get_max_speed()
 
@@ -274,9 +275,9 @@ class Fighter(Ship):
                 self.set_state(STATE_RETURNING)
             return
 
-        tp = self.effective_target.pos + (self.pos - self.effective_target.pos).normalized() * self.effective_target.radius
+        tp = self.effective_target.pos + (self.pos - self.effective_target.pos).normalize() * self.effective_target.radius
         delta = tp - self.pos
-        dsq_from_target = delta.sqr_magnitude() - self.effective_target.radius ** 2
+        dsq_from_target = delta.length_squared() - self.effective_target.radius ** 2
 
         def in_range():
             return dsq_from_target <= self.get_weapon_range() ** 2
@@ -291,18 +292,18 @@ class Fighter(Ship):
         
         dir = V2(0,0)
         if not in_range():
-            dir = delta.normalized()
+            dir = delta.normalize()
             self.target_heading = None
         elif self.fire_timer > 0.95:
-            dir = delta.normalized()
+            dir = delta.normalize()
             self.target_heading = dir.to_polar()[1]
         elif dsq_from_target < (self.get_weapon_range() * 0.66) ** 2:
-            dir = -delta.normalized()
+            dir = -delta.normalize()
             self.target_heading = None
         else:
             _, a = (-delta).to_polar()
             a += self.combat_dodge_direction * 3.14159 / 2
-            dir = V2.from_angle(a)
+            dir = helper.from_angle(a)
             if self.combat_dodge_direction == 0:
                 dir = V2(0,0)             
             self.target_heading = None
@@ -322,7 +323,7 @@ class Fighter(Ship):
 
         delta = self.effective_target.pos - self.pos
         if isinstance(self.effective_target, (planet.planet.Planet, asteroid.Asteroid, aliens.bossmothership.BossMothership)):
-            if (delta.sqr_magnitude() - self.effective_target.radius ** 2 - self.get_weapon_range() ** 2) <= 0:
+            if (delta.length_squared() - self.effective_target.radius ** 2 - self.get_weapon_range() ** 2) <= 0:
                 if self.BOMBS: # If we can attack planets, figure out what to do
                     # If it's an allied mothership, we want to enter waiting and orbit it.
                     if self.effective_target.owning_civ == self.owning_civ and isinstance(self.effective_target, aliens.bossmothership.BossMothership):
@@ -404,15 +405,15 @@ class Fighter(Ship):
             for i in range(3 + extra):
                 ang = self.attack_speed_particle_angle
                 ang += (random.random() - 0.5) * 1.6
-                pos = self.pos + V2.from_angle(ang) * (4 + random.random() * 3)
+                pos = self.pos + helper.from_angle(ang) * (4 + random.random() * 3)
                 colors = [PICO_BLUE, PICO_WHITE, PICO_GREEN, PICO_PINK, PICO_PURPLE]
                 colors = colors[0:extra]                
-                p = Particle([random.choice(colors)], 1, pos, 0.1, -V2.from_angle(ang) * 30)
+                p = Particle([random.choice(colors)], 1, pos, 0.1, -helper.from_angle(ang) * 30)
                 self.scene.add_particle(p)
 
     def emit_thrust_particles(self):
         for i in range(2):
             pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
             pvel += -self.velocity / 2
-            p = particle.Particle([PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY, PICO_DARKGRAY, PICO_DARKGRAY], 1, self.pos + -self.velocity.normalized() * self.radius, 1, pvel)
+            p = particle.Particle([PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY, PICO_DARKGRAY, PICO_DARKGRAY], 1, self.pos + -self.velocity.normalize() * self.radius, 1, pvel)
             self.scene.add_particle(p)

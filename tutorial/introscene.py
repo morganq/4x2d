@@ -18,7 +18,8 @@ from resources import resource_path
 from run import RunInfo
 from slider import Slider
 from starmap import starmapscene
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from tutorial.tutorial1scene import Tutorial1Scene
 from tutorial.tutorialmessage import TutorialMessage

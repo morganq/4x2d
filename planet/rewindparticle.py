@@ -4,7 +4,8 @@ import pygame
 from colors import *
 from helper import clamp
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class RewindParticle(SpriteBase):
@@ -29,16 +30,16 @@ class RewindParticle(SpriteBase):
         for i in range(steps):
             theta = i / 20
             if theta > a1:
-                pts.append((V2.from_angle(-theta) * self.radius + center - V2(1,1)).tuple_int())
+                pts.append((helper.from_angle(-theta) * self.radius + center - V2(1,1)))
         if len(pts) >= 2:
             pygame.draw.lines(self.image, PICO_BLUE, False, pts, 2)
-        vs = V2.from_angle(-a2)
+        vs = helper.from_angle(-a2)
         vf = V2(vs.y, -vs.x)
         
         pt = vs * self.radius + center
         p1 = pt + vs * 3 + vf * -3
         p2 = pt + -vs * 3 + vf * -3
-        pygame.draw.lines(self.image, PICO_BLUE, False, [p1.tuple_int(), pt.tuple_int(), p2.tuple_int()], 2)
+        pygame.draw.lines(self.image, PICO_BLUE, False, [tuple(p1), pt, tuple(p2)], 2)
 
         self._recalc_rect()
 

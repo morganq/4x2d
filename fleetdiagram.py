@@ -8,7 +8,8 @@ import game
 import spritebase
 from colors import *
 from helper import clamp, get_angle_delta, get_nearest
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 OUTLINE_COLOR = PICO_LIGHTGRAY
 DOT_COLOR = PICO_YELLOW
@@ -55,7 +56,7 @@ class FleetDiagram(spritebase.SpriteBase):
 
     def generate_image(self, scene):
         t1 = time.time()
-        self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
+        self.image = pygame.Surface(tuple(game.Game.inst.game_resolution), pygame.SRCALPHA)
         #return
         self._width, self._height = self.image.get_size()
 
@@ -71,7 +72,7 @@ class FleetDiagram(spritebase.SpriteBase):
             if not fleet.target:
                 continue
             if fleet.mode_state() == 'waiting':
-                pygame.draw.circle(self.image, OUTLINE_COLOR, fleet.target.pos.tuple(), fleet.target.radius + 15, 3)
+                pygame.draw.circle(self.image, OUTLINE_COLOR, fleet.target.pos, fleet.target.radius + 15, 3)
                 continue       
             if all([s.stealth == True for s in fleet.ships]):
                 continue
@@ -91,18 +92,18 @@ class FleetDiagram(spritebase.SpriteBase):
             if len(path) > 3:
                 end_backwards = fleet.target.pos - original_path[int(len(original_path) * 0.75)]
                 pygame.draw.circle(self.image, OUTLINE_COLOR, center.tuple_round(), 2, 0)
-                end_pt = fleet.target.pos - end_backwards.normalized() * (fleet.target.radius + 8)
+                end_pt = fleet.target.pos - end_backwards.normalize() * (fleet.target.radius + 8)
 
-                if (fleet.pos - fleet.target.pos).sqr_magnitude() < (fleet.target.radius + 80) ** 2:
+                if (fleet.pos - fleet.target.pos).length_squared() < (fleet.target.radius + 80) ** 2:
                     blended_path = [
                         center,
                         end_pt
                     ]
-                    last_delta = (end_pt - center).normalized()
+                    last_delta = (end_pt - center).normalize()
                 else:
                     # Blend the end of the path
                     blended_path = path[::]
-                    if (original_path[-1] - fleet.target.pos).sqr_magnitude() < (fleet.target.radius + 50) ** 2:
+                    if (original_path[-1] - fleet.target.pos).length_squared() < (fleet.target.radius + 50) ** 2:
                         blendsteps = min(15, len(blended_path) // 2 - 1)
                         offset = blended_path[-1] - end_pt
                         for i in range(blendsteps):
@@ -115,19 +116,16 @@ class FleetDiagram(spritebase.SpriteBase):
                     for i in range(blendsteps):
                         z = (1 - (i / blendsteps))
                         blended_path[i] = blended_path[i] - offset * z
-                    last_delta = (blended_path[-1] - blended_path[-3]).normalized()
+                    last_delta = (blended_path[-1] - blended_path[-3]).normalize()
 
-                pygame.draw.lines(self.image, OUTLINE_COLOR, False, [p.tuple_int() for p in blended_path], 1)
+                pygame.draw.lines(self.image, OUTLINE_COLOR, False, [tuple(p) for p in blended_path], 1)
                 
                 last_side = V2(last_delta.y, -last_delta.x)
                 ap1 = blended_path[-1]
                 ap2 = blended_path[-1] + last_delta * -5 + last_side * 5
                 ap3 = blended_path[-1] + last_delta * -5 + last_side * -5
-                poly = [ap1.tuple_int(), ap2.tuple_int(), ap3.tuple_int()]
+                poly = [tuple(ap1), tuple(ap2), tuple(ap3)]
                 pygame.draw.polygon(self.image, OUTLINE_COLOR, poly, 0)
-
-                #for step in path:
-                #    self.image.set_at(step.tuple_int(), DOT_COLOR)
         
 
         self._recalc_rect()

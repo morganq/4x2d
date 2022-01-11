@@ -2,7 +2,8 @@ import game
 import pygame
 import text
 import scene
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 from levelscene import LevelScene
 from colors import *
 

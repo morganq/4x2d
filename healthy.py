@@ -1,10 +1,16 @@
+import pygame
+
 from meter import Meter
-from v2 import V2
-from colors import *
-from particle import Particle
-from explosion import Explosion
+
+V2 = pygame.math.Vector2
 import random
+
+import helper
 import sound
+from colors import *
+from explosion import Explosion
+from particle import Particle
+
 
 class Healthy:
     def __init__(self, scene, meter_size = (30,4)):
@@ -82,14 +88,14 @@ class Healthy:
         self.health -= damage
         if origin:
             delta = origin.pos - self.pos
-            dn = delta.normalized()
+            dn = delta.normalize()
             hitpos = self.pos + dn * self.radius
             if was_shield:
                 sound.play("shield")
                 for i in range(10):
                     ang = dn.to_polar()[1]
                     rad = max(self.radius, 5) + 2
-                    hp = self.pos + rad * V2.from_angle(ang + random.random() - 0.5)
+                    hp = self.pos + rad * helper.from_angle(ang + random.random() - 0.5)
                     p = Particle([PICO_GREEN, PICO_WHITE, PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_DARKBLUE], 1, hp, 0.65 + random.random() * 0.2, dn)
                     self.scene.game_group.add(p)
             else:
@@ -100,5 +106,5 @@ class Healthy:
                     e = Explosion(hitpos, [PICO_WHITE, PICO_YELLOW, PICO_RED], 0.2, 5, "log", 2)
                     self.scene.game_group.add(e)
                 for i in range(particles):
-                    p = Particle([PICO_WHITE, PICO_YELLOW, PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY], 1, hitpos, 0.25, V2.random_angle() * 9)                
+                    p = Particle([PICO_WHITE, PICO_YELLOW, PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY], 1, hitpos, 0.25, helper.random_angle() * 9)                
                     self.scene.game_group.add(p)

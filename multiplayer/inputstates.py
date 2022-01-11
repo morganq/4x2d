@@ -14,7 +14,8 @@ import text
 from colors import *
 from helper import *
 from planet import planetpanel
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from multiplayer import upgradepanel
 
@@ -381,7 +382,7 @@ class OrderShipsState(MultiplayerState):
     def mouse_input(self, input, event):
         if input == "click":
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
-            if not pr.collidepoint(event.gpos.tuple()):
+            if not pr.collidepoint(event.gpos):
                 self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
         return super().mouse_input(input, event)
 
@@ -577,7 +578,7 @@ class UpgradeTargetState(MultiplayerState):
                 return
 
             if input == "click" and self.current_cursor == "nearby":
-                if (event.gpos - self.targets[0].pos).sqr_magnitude() < self.NEARBY_RANGE ** 2:
+                if (event.gpos - self.targets[0].pos).length_squared() < self.NEARBY_RANGE ** 2:
                     self.targets.append(event.gpos)
                     self.next_cursor()
                     return                
@@ -620,7 +621,7 @@ class UpgradeTargetState(MultiplayerState):
                 return
 
             if self.current_cursor == "nearby":
-                if (self.joystick_overlay.cursor_pos - self.targets[0].pos).sqr_magnitude() < self.NEARBY_RANGE ** 2:
+                if (self.joystick_overlay.cursor_pos - self.targets[0].pos).length_squared() < self.NEARBY_RANGE ** 2:
                     self.targets.append(self.joystick_overlay.cursor_pos)
                     self.next_cursor()
                     return      

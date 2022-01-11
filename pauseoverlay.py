@@ -2,7 +2,8 @@ import pygame
 
 import game
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class PauseOverlay(SpriteBase):
@@ -23,7 +24,7 @@ class PauseOverlay(SpriteBase):
 
 
     def _generate_image(self, darkness=80):
-        self.image = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
+        self.image = pygame.Surface(game.tuple(Game.inst.game_resolution), pygame.SRCALPHA)
         self.image.fill((0,0,0,darkness))
         for spr in self._exceptions:
             mask = pygame.mask.from_surface(spr.image,)

@@ -10,7 +10,8 @@ from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from text import Text
 from upgrade.upgradeicon import UpgradeIcon
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class PlanetPanel(Panel):

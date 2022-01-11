@@ -9,7 +9,8 @@ from colors import *
 from helper import clamp
 from resources import resource_path
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 FIELD_SIZE = 80
 ACCEL = 200
@@ -55,7 +56,7 @@ class MBBand:
 
         # Extras
         self.curve_freq = random.random() * 2 + 0.5
-        self.curve_magnitude = random.random() * 20 + 20
+        self.curve_length = random.random() * 20 + 20
 
 # Particle is just position and velocity
 class MBParticle:
@@ -97,9 +98,9 @@ class MenuBackground(SpriteBase):
 
     def _draw_mask(self,surf=None):
         surf = surf or self.image
-        mask = pygame.Surface(game.Game.inst.game_resolution.tuple_int(), pygame.SRCALPHA)
+        mask = pygame.Surface(game.tuple(Game.inst.game_resolution), pygame.SRCALPHA)
         mask.fill((*PICO_BLACK,0))
-        pygame.draw.circle(mask, (255,255,255,255), self.planet_center.tuple_int(), self.planet_radius, 0)
+        pygame.draw.circle(mask, (255,255,255,255), self.planet_center, self.planet_radius, 0)
         surf.blit(mask, (0,0), None, pygame.BLEND_RGBA_MULT)        
 
     def field_to_screen(self, pos):
@@ -129,7 +130,7 @@ class MenuBackground(SpriteBase):
                 self.motion_field[y][x] = V2(1,0)
 
     def _generate_image(self, background, size):
-        w,h = game.Game.inst.game_resolution.tuple_int()
+        w,h = game.tuple(Game.inst.game_resolution)
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
         self.image.fill((0,0,0,0))
         planet_center = V2(200,200)
@@ -137,7 +138,7 @@ class MenuBackground(SpriteBase):
         self.planet_radius = planet_radius
         self.planet_center = planet_center
 
-        pygame.draw.circle(self.image, background, planet_center.tuple_int(), planet_radius, 0)
+        pygame.draw.circle(self.image, background, planet_center, planet_radius, 0)
         self._width, self._height = w,h
         self._recalc_rect()
 
@@ -176,7 +177,7 @@ class MenuBackground(SpriteBase):
                 if dist < 6:
                     p.vel += -inwards * 10 * dt
                 elif dist < band.split_distance * 0.7:
-                    p.vel += inwards * s * band.curve_magnitude * dt
+                    p.vel += inwards * s * band.curve_length * dt
                 else:
                     p.vel += inwards * 200 * dt
 
@@ -202,8 +203,8 @@ class MenuBackground(SpriteBase):
                 eventual_speedup = len(band.top_points) / 20
                 p.vel += V2(1,0) * dt * eventual_speedup
                 # Cap max speed
-                if p.vel.sqr_magnitude() > MAX_PARTICLE_SPEED ** 2:
-                    p.vel = p.vel.normalized() * MAX_PARTICLE_SPEED
+                if p.vel.length_squared() > MAX_PARTICLE_SPEED ** 2:
+                    p.vel = p.vel.normalize() * MAX_PARTICLE_SPEED
                 p.pos += p.vel * dt
                 if p.pos.x > self.planet_center.x + self.planet_radius:
                     p.done = True
@@ -244,7 +245,7 @@ class MenuBackground(SpriteBase):
             self.rotation = 0
         def rotate(p):
             d,a = (p - self.planet_center).to_polar()
-            return V2.from_angle(a + self.rotation) * d + self.planet_center
+            return helper.from_angle(a + self.rotation) * d + self.planet_center
 
         if self.is_menu:
             a,b,c,d = random.choice(GOOD_COLOR_SCHEMES)
@@ -286,7 +287,7 @@ class MenuBackground(SpriteBase):
             band.bottom_points = [rotate(p) for p in band.bottom_points]
         for band in self.bands:
             img = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
-            poly = [p.tuple_int() for p in band.top_points + band.bottom_points[::-1]]
+            poly = [tuple(p) for p in band.top_points + band.bottom_points[::-1]]
             pygame.draw.polygon(img, band.color, poly, 1)
             for pts in band.top_points,band.bottom_points:
                 wobble_line = pts[::4]
@@ -298,7 +299,7 @@ class MenuBackground(SpriteBase):
                 z = int((mz / num) * i)
                 fill_pos = (band.top_points[z] + band.bottom_points[z]) / 2
                 try:
-                    if img.get_at(fill_pos.tuple_int()) != band.color:
+                    if img.get_at(fill_pos) != band.color:
                         pre_fill = img.copy()
                         self._fill(img, fill_pos, band.color)
                         if img.get_at((0,0)) == band.color:
@@ -312,7 +313,7 @@ class MenuBackground(SpriteBase):
 
     def _fill(self, surface, position, fill_color):
         fill_color = surface.map_rgb(fill_color)
-        position = position.tuple_int()
+        position = position
         surf_array = pygame.surfarray.pixels2d(surface)  # Create an array from the surface.
         current_color = surf_array[position[0]][position[1]]  # Get the mapped integer color value.
 
@@ -348,9 +349,9 @@ class MenuBackground(SpriteBase):
             for y in range(p1.y, p2.y + 1):
                 v = self.motion_field[y][x]
                 if v:
-                    out += v.normalized() # instead of here?
+                    out += v.normalize() # instead of here?
 
-        return out.normalized()   
+        return out.normalize()   
 
     def motion_draw(self, p1, p2, rad, power, pull):
         delta = p2 - p1
@@ -359,24 +360,24 @@ class MenuBackground(SpriteBase):
             dnorm = delta
             zero = True
         else:
-            dnorm = delta.normalized()
+            dnorm = delta.normalize()
         ip1 = (p2 - V2(rad,rad)).rect_contain(0,0, FIELD_SIZE-1, FIELD_SIZE-1)
         ip2 = (p2 + V2(rad,rad)).rect_contain(0,0, FIELD_SIZE-1, FIELD_SIZE-1)
         for x in range(int(ip1.x), int(ip2.x) + 1):
             for y in range(int(ip1.y), int(ip2.y) + 1):
                 pd = V2(x,y) - p2
-                towards = -pd.normalized()
-                if pd.sqr_magnitude() <= rad ** 2:
-                    strength = (rad - pd.magnitude()) / rad * power
-                    pull_strength = pull * (rad - pd.magnitude()) / rad * power
+                towards = -pd.normalize()
+                if pd.length_squared() <= rad ** 2:
+                    strength = (rad - pd.length()) / rad * power
+                    pull_strength = pull * (rad - pd.length()) / rad * power
                     if not zero:
                         self.motion_field[y][x] = self.motion_field[y][x] * (1 - strength) + dnorm * strength
                     self.motion_field[y][x] = self.motion_field[y][x] * (1 - pull_strength) + towards * pull_strength
-                    self.motion_field[y][x] = self.motion_field[y][x].normalized()
+                    self.motion_field[y][x] = self.motion_field[y][x].normalize()
 
     def save(self):
         print(self.chosen_colors)
-        motion = [[p.tuple() for p in row] for row in self.motion_field]
+        motion = [[p for p in row] for row in self.motion_field]
         json.dump(motion, open(resource_path("assets/menu_motion.json"), "w"))
 
     def _shade(self):
@@ -393,12 +394,12 @@ class MenuBackground(SpriteBase):
                     continue
                 
                 delta = V2(x,y) - (self.planet_center + darken_offset)
-                if delta.sqr_magnitude() > darken_rad ** 2:
+                if delta.length_squared() > darken_rad ** 2:
                     self.shading.set_at((x,y), (10,0,50,125))
 
                 else:
                     delta = V2(x,y) - (self.planet_center + lighten_offset)
-                    if delta.sqr_magnitude() > lighten_rad ** 2:
+                    if delta.length_squared() > lighten_rad ** 2:
                         self.shading.set_at((x,y), (255,240,150,190))                    
 
     def update(self, dt):
@@ -406,12 +407,12 @@ class MenuBackground(SpriteBase):
         self.wobble_image = pygame.Surface(self.image.get_size(), pygame.SRCALPHA)
         self.wobble_image.blit(self.image, (0,0))
         z = 0
-        rot = V2.from_angle(self.rotation + 3.14159/2)
+        rot = helper.from_angle(self.rotation + 3.14159/2)
         for z in range(len(self.band_images)):
             self.wobble_image.blit(self.band_images[z], (0,0))
             for i in range(2):
                 color,line = self.wobble_lines[z * 2 + i]
-                l2 = [(p + rot * math.sin(i + self.time * (math.sin(z) + 2) / 3) * 1).tuple_int() for i,p in enumerate(line)]
+                l2 = [(p + rot * math.sin(i + self.time * (math.sin(z) + 2) / 3) * 1) for i,p in enumerate(line)]
                 pygame.draw.lines(self.wobble_image, color, False, l2, 2)
         
         self._draw_mask(self.wobble_image)

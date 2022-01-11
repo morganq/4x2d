@@ -1,7 +1,8 @@
 from helper import clamp
 import pygame
 from resources import resource_path
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 import random
 from colors import *
 
@@ -14,10 +15,10 @@ def generate_color_art(radius, angle = None):
     wavy_angle = angle if angle is not None else random.random() * 6.2818
 
     def sphere_get(offset, planet_pos):
-        spherize = 0.25 + pow(planet_pos.magnitude(), 1.75) / 55.0
+        spherize = 0.25 + pow(planet_pos.length(), 1.75) / 55.0
         dist,angle = planet_pos.to_polar()
         angle += wavy_angle
-        p2 = offset + V2.from_angle(angle) * dist * spherize
+        p2 = offset + helper.from_angle(angle) * dist * spherize
         p2.x = clamp(p2.x, 0, ww-1)
         p2.y = clamp(p2.y, 0, wh-1)
         color = wavy.get_at((int(p2.x), int(p2.y)))
@@ -31,7 +32,7 @@ def generate_color_art(radius, angle = None):
     for x in range(w):
         for y in range(h):
             planet_pos = (V2(x,y) - center)
-            in_circle = planet_pos.sqr_magnitude() < (radius - 0.5) ** 2
+            in_circle = planet_pos.length_squared() < (radius - 0.5) ** 2
             if in_circle:
                 color = sphere_get(wavy_offset, planet_pos)
                 color_image.set_at((x,y), color)
@@ -100,7 +101,7 @@ def generate_planet_art(radius, white_pct, blue_pct, red_pct, seed=None, angle=N
 
     for x in range(radius * 2):
         for y in range(radius * 2):
-            d = (V2(x,y) - V2(radius * 0.84, radius * 0.54)).sqr_magnitude()
+            d = (V2(x,y) - V2(radius * 0.84, radius * 0.54)).length_squared()
             if d > (radius * 1.0) ** 2:
                 c = out_image.get_at((x,y))
                 if c[3] > 128:

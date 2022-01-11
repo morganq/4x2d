@@ -4,7 +4,8 @@ from colors import *
 from particle import Particle
 from ships.all_ships import register_ship
 from ships.battleship import Battleship
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 @register_ship

@@ -7,7 +7,8 @@ import text
 from colors import PICO_BLACK, PICO_DARKBLUE, PICO_WHITE
 from fadeinmixin import FadeInMixin
 from helper import clamp
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class Panel(spritebase.SpriteBase, FadeInMixin):

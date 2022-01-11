@@ -7,7 +7,8 @@ from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from slider import Slider
 from text import Text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class OrderPanel(Panel):

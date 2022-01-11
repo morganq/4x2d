@@ -3,7 +3,8 @@ from colors import PICO_GREEN
 from panel import Panel
 from colors import *
 from text import Text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 from simplesprite import SimpleSprite
 
 class HelpPanel(Panel):

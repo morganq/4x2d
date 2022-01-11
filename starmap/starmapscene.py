@@ -15,7 +15,8 @@ from scrollpanel import ScrollPanel
 from simplesprite import SimpleSprite
 from spritebase import SpriteBase
 from store.storenode import StoreNodeGraphic
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from starmap import starmapbackground
 
@@ -179,7 +180,7 @@ class StarMapScene(Scene):
 
     def update(self, dt):
         self.time += dt
-        self.colonist.offset = (V2.from_angle(self.time * 3) * 0.05 + V2(0.5,0.5)).tuple()
+        self.colonist.offset = (helper.from_angle(self.time * 3) * 0.05 + V2(0.5,0.5))
         for s in self.game_group.sprites() + self.ui_group.sprites():
             s.update(dt)
 

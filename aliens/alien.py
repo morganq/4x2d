@@ -69,16 +69,16 @@ class Alien:
 
         # Find a target
         if target_type == buildorder.BOExpand.TARGET_TYPE_NEAR_HOME:
-            sorted_targets.sort(key=lambda p:(p.pos - self.civ.homeworld.pos).sqr_magnitude())
+            sorted_targets.sort(key=lambda p:(p.pos - self.civ.homeworld.pos).length_squared())
 
         elif target_type == buildorder.BOExpand.TARGET_TYPE_NEAR_ENEMY:
-            sorted_targets.sort(key=lambda p:(p.pos - self.scene.player_civ.homeworld.pos).sqr_magnitude())
+            sorted_targets.sort(key=lambda p:(p.pos - self.scene.player_civ.homeworld.pos).length_squared())
 
         elif target_type == buildorder.BOExpand.TARGET_TYPE_MIDDLE:
             def key(p):
                 # Middle = smallest delta between near me and near enemy distances.
-                d1 = (p.pos - self.scene.player_civ.homeworld.pos).sqr_magnitude()
-                d2 = (p.pos - self.civ.homeworld.pos).sqr_magnitude()
+                d1 = (p.pos - self.scene.player_civ.homeworld.pos).length_squared()
+                d2 = (p.pos - self.civ.homeworld.pos).length_squared()
                 return abs(d1 - d2)
             sorted_targets.sort(key=key)
 
@@ -95,7 +95,7 @@ class Alien:
         all_potential_sources = self.scene.get_civ_planets(self.civ)
         all_potential_sources = [p for p in all_potential_sources if p.population > 1]
         sorted_sources = all_potential_sources[::]
-        sorted_sources.sort(key=lambda p:(p.pos - target.pos).sqr_magnitude())
+        sorted_sources.sort(key=lambda p:(p.pos - target.pos).length_squared())
 
         
         if not sorted_sources:
@@ -221,7 +221,7 @@ class Alien:
             sorted_targets.sort(key=lambda p:p.population, reverse=True)
             target = sorted_targets[0]
 
-            sorted_sources.sort(key=lambda p:(p.pos - target.pos).sqr_magnitude())
+            sorted_sources.sort(key=lambda p:(p.pos - target.pos).length_squared())
             num_sources = random.randint(2,4)
             sources = sorted_sources[0:num_sources]
             for source in sources:
@@ -230,18 +230,18 @@ class Alien:
         elif attack_type == buildorder.BOAttack.ATTACK_TYPE_OUTLYING:
             def key(p):
                 # Middle = smallest delta between near me and near enemy distances.
-                d1 = (p.pos - self.scene.player_civ.homeworld.pos).sqr_magnitude()
-                d2 = (p.pos - self.civ.homeworld.pos).sqr_magnitude()
+                d1 = (p.pos - self.scene.player_civ.homeworld.pos).length_squared()
+                d2 = (p.pos - self.civ.homeworld.pos).length_squared()
                 return abs(d1 - d2)
 
             sorted_targets.sort(key=key)
             target = sorted_targets[0]
-            sorted_sources.sort(key=lambda p:(p.pos - target.pos).sqr_magnitude())
+            sorted_sources.sort(key=lambda p:(p.pos - target.pos).length_squared())
             self.send_attacking_party(sorted_sources[0], target, num_to_send, possible_colonist)
 
         elif attack_type == buildorder.BOAttack.ATTACK_TYPE_RANDOM:
             target = random.choice(sorted_targets)
-            sorted_sources.sort(key=lambda p:(p.pos - target.pos).sqr_magnitude())
+            sorted_sources.sort(key=lambda p:(p.pos - target.pos).length_squared())
             self.send_attacking_party(sorted_sources[0], target, num_to_send, possible_colonist)
 
         return True
@@ -416,7 +416,7 @@ class Alien:
                 {k:v for k,v in s.ships.items() if k in self.get_attacking_ships()}
             .values()) > 0
         ]
-        all_potential_sources.sort(key=lambda p:(p.pos - planet.pos).sqr_magnitude())
+        all_potential_sources.sort(key=lambda p:(p.pos - planet.pos).length_squared())
         if not all_potential_sources:
             return
 
@@ -549,7 +549,7 @@ class Alien:
         my_planet.population += extra_pops
 
         near_planets = self.scene.get_planets()
-        near_planets.sort(key=lambda x:(x.pos - my_planet.pos).sqr_magnitude())
+        near_planets.sort(key=lambda x:(x.pos - my_planet.pos).length_squared())
         near_unclaimed = [p for p in near_planets if p.owning_civ == None][0:extra_planets]
         time_looped = False
         for i in range(extra_planets):
@@ -567,7 +567,7 @@ class Alien:
 
     def _get_possible_attack_targets(self, planet):
         near_planets = self.scene.get_planets()
-        near_planets.sort(key=lambda x:(x.pos - planet.pos).sqr_magnitude())
+        near_planets.sort(key=lambda x:(x.pos - planet.pos).length_squared())
         near_enemy = [p for p in near_planets if p.owning_civ and p.owning_civ != self.civ][0:2] # 2 nearest    
         
         return near_enemy    

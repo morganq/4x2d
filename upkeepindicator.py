@@ -3,7 +3,8 @@ import pygame
 import spritebase
 from colors import *
 from text import render_multiline_to
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 DEFAULT_WIDTH = 120
 

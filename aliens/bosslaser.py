@@ -7,7 +7,8 @@ from colors import *
 from particle import Particle
 from ships.all_ships import register_ship
 from ships.fighter import Fighter
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 @register_ship
@@ -29,7 +30,7 @@ class BossLaser(Fighter):
         self.firing_target = None
 
     def special_fire(self, at):
-        towards = (at.pos - self.pos).normalized()
+        towards = (at.pos - self.pos).normalize()
 
         b = Bullet(at.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)

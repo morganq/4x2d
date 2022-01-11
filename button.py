@@ -6,7 +6,8 @@ from colors import *
 from fadeinmixin import FadeInMixin
 from resources import resource_path
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 SIZE_PADDING = {'tiny':3, 'small':4, 'medium':5, 'big':7, 'huge':10}
 HEIGHTS = {'tiny':5, 'small':10, 'medium':16, 'big':10, 'huge':29}

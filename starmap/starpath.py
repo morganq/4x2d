@@ -6,7 +6,8 @@ from colors import *
 from helper import clamp
 from resources import resource_path
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class StarPath(SpriteBase):
@@ -32,9 +33,9 @@ class StarPath(SpriteBase):
         h = abs(int(delta.y)) + 32
         
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)        
-        direction = delta.normalized()
+        direction = delta.normalize()
         center = V2(w / 2,h / 2)
-        distance = delta.magnitude()
+        distance = delta.length()
         steps = int((distance - 40) / 8)
         
         time_offset = (self.time * 1) % 1
@@ -49,8 +50,8 @@ class StarPath(SpriteBase):
             color = PICO_WHITE
 
         pygame.draw.line(self.image, color,
-            (center - direction * (distance - 28) / 2).tuple_int(),
-            (center + direction * (distance - 28) / 2).tuple_int(),
+            (center - direction * (distance - 28) / 2),
+            (center + direction * (distance - 28) / 2),
             2
         )
 

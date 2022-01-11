@@ -13,7 +13,8 @@ from ships.battleship import Battleship
 from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 REVIVING_PLANET_CLOSE_RANGE = 50
 ACCEL = 4
@@ -80,9 +81,9 @@ class BossMothership(SpaceObject):
         return 3200
 
     def brake(self, dt):
-        if self.velocity.sqr_magnitude() > 0:
-            brake = -self.velocity.normalized() * BRAKE * dt
-            if self.velocity.sqr_magnitude() > brake.sqr_magnitude():
+        if self.velocity.length_squared() > 0:
+            brake = -self.velocity.normalize() * BRAKE * dt
+            if self.velocity.length_squared() > brake.length_squared():
                 self.velocity += brake
             else:
                 self.velocity = V2(0,0)
@@ -90,21 +91,21 @@ class BossMothership(SpaceObject):
     def collide(self, other):
         if other.stationary:
             delta = other.pos - self.pos
-            dist = delta.magnitude()
+            dist = delta.length()
             overlap = (self.collision_radius + other.collision_radius) - dist
-            push = delta.normalized() * -overlap
+            push = delta.normalize() * -overlap
             self.pos += push
 
     def wander(self, dt):
         self.wander_time -= dt
         if self.wander_time < 0:
             self.wander_time = 5
-            self.wander_point = self.wander_center + V2.random_angle() * random.random() * 30
+            self.wander_point = self.wander_center + helper.random_angle() * random.random() * 30
         delta = self.wander_point - self.pos
-        if delta.sqr_magnitude() < 10 ** 2 or self.wander_time < 1:
+        if delta.length_squared() < 10 ** 2 or self.wander_time < 1:
             self.brake(dt)
         else:
-            self.velocity += delta.normalized() * ACCEL * dt
+            self.velocity += delta.normalize() * ACCEL * dt
 
     def update(self, dt):
         self.time += dt
@@ -116,13 +117,13 @@ class BossMothership(SpaceObject):
             bad_location = True
             i = 0
             while bad_location:
-                np = V2(self.scene.game.game_resolution.x * 0.66, self.scene.game.game_resolution.y * 0.4) + V2.random_angle() * random.random() * (50 + i * 10)
+                np = V2(self.scene.game.game_resolution.x * 0.66, self.scene.game.game_resolution.y * 0.4) + helper.random_angle() * random.random() * (50 + i * 10)
                 _, dsq = helper.get_nearest(np, self.scene.get_planets())
                 if dsq > 50 ** 2:
                     bad_location = False
                 i += 1
             delta = np - self.pos
-            dn = delta.normalized()
+            dn = delta.normalize()
             side = V2(dn.y, -dn.x)
             for i in range(12):
                 color = random.choice([PICO_RED, PICO_RED, PICO_ORANGE, PICO_YELLOW, PICO_WHITE])
@@ -207,25 +208,25 @@ class BossMothership(SpaceObject):
                 else:
                     self.state = self.STATE_GAME_WAITING
                     self.wait_time = 5
-                    self.wander_center = self.pos.copy()
+                    self.wander_center  = V2(self.pos)
             if self.travel_target:
                 delta = self.travel_target.pos - self.pos
-                if delta.sqr_magnitude() > (REINCARNATE_RANGE - 10) ** 2:
+                if delta.length_squared() > (REINCARNATE_RANGE - 10) ** 2:
                     accel = self.scene.flowfield.get_vector(self.pos, self.travel_target, 10) * ACCEL
                     self.velocity += accel * dt
                 else:
                     self.state = self.STATE_GAME_WAITING
-                    self.wander_center = self.pos.copy()
+                    self.wander_center  = V2(self.pos)
                     self.wait_time = 30
 
         objs = self.scene.get_planets() + self.scene.get_hazards()
         nearest, dsq = helper.get_nearest(self.pos, objs)
         if dsq < 40 ** 2:
             delta = nearest.pos - self.pos
-            self.velocity += -delta.normalized() * ACCEL / 2 * dt
+            self.velocity += -delta.normalize() * ACCEL / 2 * dt
 
-        if self.velocity.sqr_magnitude() > self.max_speed ** 2:
-            self.velocity = self.velocity.normalized() * self.max_speed
+        if self.velocity.length_squared() > self.max_speed ** 2:
+            self.velocity = self.velocity.normalize() * self.max_speed
 
         self.pos += self.velocity * dt
         if self.range_indicator:
@@ -258,7 +259,7 @@ class BossMothership(SpaceObject):
             out = []
             for pt in pts:
                 d,a = pt.to_polar()
-                out.append((V2.from_angle(a + angle) * d + center).tuple_int())
+                out.append((helper.from_angle(a + angle) * d + center))
             return out
 
         a1 = 0
@@ -270,22 +271,22 @@ class BossMothership(SpaceObject):
             theta = i * a3 / frames
             wing = [V2(0, -1), V2(8, -2), V2(8, 2), V2(0, 1)]
             tip = [V2(8, -3), V2(9, -3), V2(9, 3), V2(8, 3)]
-            pygame.draw.circle(surf, PICO_BLACK, center.tuple_int(), 6, 0)
+            pygame.draw.circle(surf, PICO_BLACK, center, 6, 0)
             
             for z,a in enumerate([a1,a2,a3]):
                 pygame.draw.polygon(surf, PICO_BLACK, convert(wing, a + theta), 2)
                 pygame.draw.polygon(surf, PICO_BLACK, convert(tip, a + theta), 2)
 
-            pygame.draw.circle(surf, PICO_RED, center.tuple_int(), 5, 0)
+            pygame.draw.circle(surf, PICO_RED, center, 5, 0)
             for z,a in enumerate([a1,a2,a3]):
                 pygame.draw.polygon(surf, PICO_RED, convert(wing, a + theta), 0)
                 pygame.draw.polygon(surf, PICO_RED, convert(tip, a + theta), 0)
                 if (i+z*2) % 6 == 0:
                     pygame.draw.circle(surf, PICO_WHITE, convert([V2(7, 0)], a + theta)[0], 1, 0)
 
-            pygame.draw.circle(surf, PICO_BLACK, (center + V2(0,-2)).tuple_int(), 1, 0)
-            pygame.draw.circle(surf, PICO_BLACK, (center + V2(2,1)).tuple_int(), 1, 0)
-            pygame.draw.circle(surf, PICO_BLACK, (center + V2(-2,1)).tuple_int(), 1, 0)
+            pygame.draw.circle(surf, PICO_BLACK, (center + V2(0,-2)), 1, 0)
+            pygame.draw.circle(surf, PICO_BLACK, (center + V2(2,1)), 1, 0)
+            pygame.draw.circle(surf, PICO_BLACK, (center + V2(-2,1)), 1, 0)
 
             self._sheet.blit(surf, (i * self._width, 0))
 

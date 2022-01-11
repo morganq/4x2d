@@ -6,7 +6,8 @@ from colors import *
 from helper import clamp
 from scene import Scene
 from simplesprite import SimpleSprite
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class PlanetGenScene(Scene):
@@ -38,11 +39,11 @@ class PlanetGenScene(Scene):
         self.ui_group.draw(self.game.screen)
 
         radius = (self.bg.field_to_screen(V2(self.brush_radius, 0)) - self.bg.field_to_screen(V2(0, 0))).x
-        pygame.draw.circle(self.game.screen, PICO_GREEN, self.mouse_pos.tuple_int(), radius, max(round(self.brush_strength * 4),1))
+        pygame.draw.circle(self.game.screen, PICO_GREEN, tuple(self.mouse_pos), radius, max(round(self.brush_strength * 4),1))
         if self.brush_pull > 0:
-            pygame.draw.circle(self.game.screen, PICO_GREEN, self.mouse_pos.tuple_int(), round(self.brush_pull * 4), 0)
+            pygame.draw.circle(self.game.screen, PICO_GREEN, tuple(self.mouse_pos), round(self.brush_pull * 4), 0)
         else:
-            pygame.draw.circle(self.game.screen, PICO_PINK, self.mouse_pos.tuple_int(), round(-self.brush_pull * 4), 0)
+            pygame.draw.circle(self.game.screen, PICO_PINK, tuple(self.mouse_pos), round(-self.brush_pull * 4), 0)
 
         return super().render()
 
@@ -55,19 +56,19 @@ class PlanetGenScene(Scene):
                     # Motion field
                     value = self.bg.motion_field[y][x]
                     p2 = pos + value * 3
-                    pygame.draw.circle(self.game.screen, PICO_DARKGREEN, pos.tuple_int(), 1)
-                    pygame.draw.line(self.game.screen, PICO_GREEN, pos.tuple_int(), p2.tuple_int())
+                    pygame.draw.circle(self.game.screen, PICO_DARKGREEN, pos, 1)
+                    pygame.draw.line(self.game.screen, PICO_GREEN, pos, tuple(p2))
 
 
     def take_input(self, inp, event):
         if inp == "mouse_drag":
             fpos = self.bg.screen_to_field_float(event.gpos)
-            if self.drag_pts and (self.drag_pts[0] - event.gpos).sqr_magnitude() > 8 ** 2:
+            if self.drag_pts and (self.drag_pts[0] - event.gpos).length_squared() > 8 ** 2:
                 last_fpos = self.bg.screen_to_field_float(self.drag_pts[0])
                 self.bg.motion_draw(last_fpos, fpos, self.brush_radius, self.brush_strength, self.brush_pull)
                 self.drag_pts = self.drag_pts[:-50]
             
-            if not self.drag_pts or (self.drag_pts[-1] - event.gpos).sqr_magnitude() > 1 ** 2:
+            if not self.drag_pts or (self.drag_pts[-1] - event.gpos).length_squared() > 1 ** 2:
                 self.drag_pts.append(event.gpos)
 
             self.mouse_pos = event.gpos

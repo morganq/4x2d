@@ -9,7 +9,7 @@ class JoyResolver:
     def take_input(self, input, event):
         delta = event['delta']
         self.joystick_state = delta
-        if delta.sqr_magnitude() > 0.75 ** 2:
+        if delta.length_squared() > 0.75 ** 2:
             _,ang = delta.to_polar()
             ang /= math.pi / 2
             ang4 = round(ang)

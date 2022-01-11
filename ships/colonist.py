@@ -9,7 +9,8 @@ from particle import Particle
 from planet import planet
 from text import Text
 from upgrade.upgrades import UPGRADE_CLASSES
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from ships.all_ships import register_ship
 
@@ -120,7 +121,7 @@ class Colonist(Ship):
     def state_cruising(self, dt):
         delta = self.effective_target.pos - self.pos
         if isinstance(self.effective_target, planet.Planet):
-            if (delta.magnitude() - self.effective_target.radius - ATMO_DISTANCE) <= 0:
+            if (delta.length() - self.effective_target.radius - ATMO_DISTANCE) <= 0:
                 if not self.can_land(self.effective_target):
                     self.set_state(STATE_WAITING)
                     return        

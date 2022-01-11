@@ -3,7 +3,8 @@ from colors import PICO_LIGHTGRAY, PICO_RED
 from helper import get_nearest
 from ships.all_ships import register_ship
 from ships.fighter import Fighter
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 @register_ship
@@ -30,7 +31,7 @@ class Alien1WarpShip(Fighter):
 
     def update_lines(self):
         delta = (self.tethered_to.pos - self.pos)
-        nd = delta.normalized()
+        nd = delta.normalize()
         self.line2.visible = False
         self.line1.pt1 = self.pos + nd * 4
         self.line1.pt2 = self.tethered_to.pos + -nd * (self.tethered_to.radius)
@@ -52,7 +53,7 @@ class Alien1WarpShip(Fighter):
         if (self.tethered_to.owning_civ != self.owning_civ) or not self.tethered_to.alive():
             self.kill()
             
-        if (self.tethered_to.pos - self.pos).sqr_magnitude() > self.TETHER_LENGTH ** 2:
+        if (self.tethered_to.pos - self.pos).length_squared() > self.TETHER_LENGTH ** 2:
             self.path = None
             self.set_state("returning")
         return super().update(dt)

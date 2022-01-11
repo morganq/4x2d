@@ -10,6 +10,7 @@ import creditsscene
 import explosion
 import framesprite
 import game
+import helper
 import hqlogo
 import joyresolver
 import menu
@@ -30,7 +31,8 @@ from run import RunInfo
 from slider import Slider
 from spritebase import SpriteBase
 from starmap import starmapscene
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class ModsUIState(states.UIEnabledState):
@@ -172,7 +174,7 @@ class NewGameOption(MainMenuOption):
                 offset = V2(16,15)
                 if random.random() > 0.5:
                     offset = V2(18,27)
-                ep = self.pos + offset + V2.random_angle() * 0
+                ep = self.pos + offset + helper.random_angle() * 0
                 vel = V2(-30, 4)
                 e = explosion.Explosion(ep, [PICO_WHITE, PICO_YELLOW, PICO_ORANGE, PICO_RED], 1, random.randint(3,6), scale_fn, velocity=vel)
                 self.scene.game_group.add(e)
@@ -203,9 +205,9 @@ class OptionsOption(MainMenuOption):
                 p = Particle(
                     colors,
                     1,
-                    self.pos + V2(41,11) + V2.random_angle() * 1,
+                    self.pos + V2(41,11) + helper.random_angle() * 1,
                     0.25,
-                    V2.random_angle() * 20
+                    helper.random_angle() * 20
                 )
                 self.scene.game_group.add(p)
 
@@ -218,7 +220,7 @@ class OptionsOption(MainMenuOption):
                     1,
                     random.randint(3,6),
                     scale_fn,
-                    velocity=V2(0,9) + V2.random_angle() * 4
+                    velocity=V2(0,9) + helper.random_angle() * 4
                 )
                 e.layer = -1
                 self.scene.game_group.add(e)                
@@ -250,7 +252,7 @@ class ExitOption(MainMenuOption):
                 offset = V2(2,29)
                 if random.random() > 0.5:
                     offset = V2(12,32)
-                ep = self.pos + offset + V2.random_angle() * 0
+                ep = self.pos + offset + helper.random_angle() * 0
                 vel = V2(-7, 20)
                 e = explosion.Explosion(ep, [PICO_WHITE, PICO_YELLOW, PICO_ORANGE, PICO_RED], 1, random.randint(2,3), scale_fn, velocity=vel)
                 self.scene.game_group.add(e)
@@ -745,9 +747,9 @@ class MenuScene(scene.Scene):
         #self.game.scene = newgamescene.NewGameScene(self.game)
         #self.game.scene.start()
         self.takeoff_earth = simplesprite.SimpleSprite(V2(0,0))
-        self.takeoff_earth.base_image = pygame.Surface(self.game.game_resolution.tuple(), pygame.SRCALPHA)
-        self.takeoff_earth.base_image.blit(self.bg_earth.image, self.bg_earth.pos.tuple_int())
-        self.takeoff_earth.base_image.blit(self.bg_enemies.image, self.bg_enemies.pos.tuple_int())
+        self.takeoff_earth.base_image = pygame.Surface(self.game.game_resolution, pygame.SRCALPHA)
+        self.takeoff_earth.base_image.blit(self.bg_earth.image, self.bg_earth.pos)
+        self.takeoff_earth.base_image.blit(self.bg_enemies.image, self.bg_enemies.pos)
         self.takeoff_earth.image = self.takeoff_earth.base_image
         self.game_group.add(self.takeoff_earth)
         self.mode = MODE_TAKEOFF

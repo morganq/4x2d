@@ -13,7 +13,8 @@ from text import Text
 from tooltippanel import TooltipPanel
 from upgrade import upgradeicon
 from upgrade.upgrades import UPGRADE_CLASSES
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 OFFER_NAMES = {
     'memory_crystal':'Memory Crystals',

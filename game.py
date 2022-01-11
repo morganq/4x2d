@@ -34,10 +34,11 @@ import text
 import tilemap
 import tutorial.tutorial1scene
 from colors import *
-from helper import clamp
+from helper import clamp, tuple_int
 from resources import resource_path
 from starmap import starmapscene
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 xbrz_scale = False
 try:
@@ -149,11 +150,11 @@ class Game:
             flags = flags | pygame.FULLSCREEN | pygame.HWSURFACE
         if resizable:
             flags = flags | pygame.RESIZABLE
-        self.full_resolution = resolution.copy()
+        self.full_resolution  = V2(resolution)
         self.scale = int(min(self.full_resolution.x / RES[0], self.full_resolution.y / RES[1]))
-        self.scaled_screen = pygame.display.set_mode(self.full_resolution.tuple_int(), flags=flags)
-        self.game_resolution = V2(*(self.full_resolution * (1/self.scale)).tuple_int())
-        self.screen = pygame.Surface(self.game_resolution.tuple_int(), pygame.SRCALPHA)
+        self.scaled_screen = pygame.display.set_mode(tuple_int(self.full_resolution), flags=flags)
+        self.game_resolution = V2(self.full_resolution // self.scale)
+        self.screen = pygame.Surface(tuple_int(self.game_resolution), pygame.SRCALPHA)
         self.game_offset = V2((self.game_resolution.x - RES[0]) / 2,(self.game_resolution.y - RES[1]) / 2)
 
     def make_resizable(self, resizable):
@@ -214,11 +215,11 @@ class Game:
 
         elif event.type == pygame.JOYAXISMOTION:
             delta = V2(self.joysticks[0].get_axis(axes[0]), self.joysticks[0].get_axis(axes[1]))
-            if delta.sqr_magnitude() < 0.35 ** 2:
+            if delta.length_squared() < 0.35 ** 2:
                 delta = V2(0,0)
-            if delta.tuple() != self.last_joy_axes:
+            if delta != self.last_joy_axes:
                 self.scene.take_input("joymotion", {'delta':delta})
-                self.last_joy_axes = delta.tuple()
+                self.last_joy_axes = delta
 
         elif event.type == pygame.JOYHATMOTION:
             delta = V2(event.value[0], -event.value[1])
@@ -287,11 +288,11 @@ class Game:
             
             if p:
                 delta = V2(self.joysticks[p.joystick_id].get_axis(p.get_horizontal_axis()), self.joysticks[p.joystick_id].get_axis(p.get_vertical_axis()))
-                if delta.sqr_magnitude() < 0.35 ** 2:
+                if delta.length_squared() < 0.35 ** 2:
                     delta = V2(0,0)
-                if delta.tuple() != self.last_joy_axes:
+                if delta != self.last_joy_axes:
                     self.scene.take_player_input(p.player_id, "joymotion", {'delta':delta})
-                    self.last_joy_axes = delta.tuple()
+                    self.last_joy_axes = delta
 
                 #if self.input_mode == "joystick":
                 #    self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]
@@ -367,8 +368,9 @@ class Game:
     def scale_xbr(self):
         sc = pygame.Surface(self.screen.get_size(), depth=32)
         factor = self.scale
-        buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, self.game_resolution.x, self.game_resolution.y, xbrz.ColorFormat.RGB)
-        surf = pygame.image.frombuffer(buf2, (self.game_resolution.x * factor, self.game_resolution.y * factor), "RGBX")
+        grx, gry = int(self.game_resolution.x), int(self.game_resolution.y)
+        buf2 = xbrz.scale(bytearray(pygame.image.tostring(self.screen,"RGBA")), factor, grx, gry, xbrz.ColorFormat.RGB)
+        surf = pygame.image.frombuffer(buf2, (grx * factor, gry * factor), "RGBX")
         self.scaled_screen.blit(surf, (0,0))
 
     def scale_normal(self):

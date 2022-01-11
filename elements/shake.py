@@ -1,9 +1,11 @@
 import math
 
+import helper
 import pygame
 import spritebase
 from helper import clamp
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class Shake(spritebase.SpriteBase):
@@ -32,8 +34,8 @@ class Shake(spritebase.SpriteBase):
         src1 = pygame.Surface((self.radius * 2, self.radius * 2), pygame.SRCALPHA)
         src1.blit(self.scene.game.screen, (0,0), (x - self.radius, y - self.radius, self.radius * 2, self.radius * 2))
         src1.blit(self.mask1, (0,0), None, pygame.BLEND_RGBA_MULT)
-        offset = V2(pad, pad) + V2.random_angle() * amt
-        self.image.blit(src1, offset.tuple_int())
+        offset = V2(pad, pad) + helper.random_angle() * amt
+        self.image.blit(src1, offset)
         self._recalc_rect()
 
     def render(self, screen):

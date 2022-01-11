@@ -9,7 +9,8 @@ import states
 from colors import *
 from starmap import starmapscene
 from tutorial import tutorialmessage
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class NewGameScene(scene.Scene):

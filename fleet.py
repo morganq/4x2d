@@ -13,7 +13,8 @@ from button import Button
 from colors import PICO_DARKGREEN, PICO_GREEN
 from rangeindicator import RangeIndicator
 from spaceobject import SpaceObject
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 FLEET_RADIUS = 25
 SAME_FLEET_RADIUS = 15
@@ -41,7 +42,7 @@ class FleetSelectable(SpaceObject):
         self._height = self.radius * 2 + 8
         center = V2(self.radius + 4, self.radius + 4)
         self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, PICO_DARKGREEN, center.tuple(), self.radius, 0)
+        pygame.draw.circle(self.image, PICO_DARKGREEN, center, self.radius, 0)
         self._recalc_rect()
 
 class FleetManager:
@@ -87,7 +88,7 @@ class FleetManager:
                 for new_fleet in a:
                     for old_fleet in b:
                         #print("comparing", new_fleet, old_fleet)
-                        if (new_fleet.pos - old_fleet.pos).sqr_magnitude() < SAME_FLEET_RADIUS ** 2:
+                        if (new_fleet.pos - old_fleet.pos).length_squared() < SAME_FLEET_RADIUS ** 2:
                             #print("same fleet found!", new_fleet, old_fleet)
                             new_fleet.path = old_fleet.path[::]
                             new_fleet.path_done = old_fleet.path_done
@@ -108,7 +109,7 @@ class FleetManager:
             # If this is targeting the boss, need to recreate the path every frame
             needs_repath = isinstance(fleet.target, bossmothership.BossMothership)
             # If the fleet is too far from where it's supposed to be, recreate.
-            if (fleet.pos - fleet.path[0]).sqr_magnitude() > 10 ** 2:
+            if (fleet.pos - fleet.path[0]).length_squared() > 10 ** 2:
                 needs_repath = True
             
             if needs_repath and fleet.path_done:
@@ -150,7 +151,7 @@ class FleetManager:
 
     def point_recall(self, point):
         for fleet in self.current_fleets:
-            if (point - fleet.pos).sqr_magnitude() < (fleet.radius + 5) ** 2:
+            if (point - fleet.pos).length_squared() < (fleet.radius + 5) ** 2:
                 self.recall_fleet(fleet)
 
     def update_fleet_markers(self, point):
@@ -159,7 +160,7 @@ class FleetManager:
 
         self.fleet_markers = []
         for fleet in self.current_fleets:
-            if (point - fleet.pos).sqr_magnitude() < (fleet.radius + 5) ** 2:
+            if (point - fleet.pos).length_squared() < (fleet.radius + 5) ** 2:
                 m = RangeIndicator(fleet.pos, fleet.radius + 3, PICO_DARKGREEN, 2, 2)
                 self.scene.ui_group.add(m)
                 self.fleet_markers.append(m)
@@ -191,7 +192,7 @@ class Fleet:
         if not self.target:
             return
         for i in range(num_steps):
-            if (self.path[-1] - self.target.pos).sqr_magnitude() < (PATH_STEP_SIZE * 2) ** 2:
+            if (self.path[-1] - self.target.pos).length_squared() < (PATH_STEP_SIZE * 2) ** 2:
                 self.path_done = True
                 self.last_valid_path = self.path[::]
                 return
@@ -200,7 +201,7 @@ class Fleet:
                 new_pt = self.scene.flowfield.walk_field(self.path[-1], self.target, step)
             else:
                 delta = self.target.pos - self.pos
-                new_pt = self.path[-1] + delta.normalized() * PATH_STEP_SIZE
+                new_pt = self.path[-1] + delta.normalize() * PATH_STEP_SIZE
             self.path.append(new_pt)
 
 
@@ -227,7 +228,7 @@ class Fleet:
         path_end = 0
         for i, pt in enumerate(self.path):
             delta = pt - self.pos
-            dsq = delta.sqr_magnitude()
+            dsq = delta.length_squared()
             if dsq > NEAR_PATH_DIST ** 2:
                 continue
             if dsq > nearest:
@@ -241,7 +242,6 @@ class Fleet:
 
     def debug_render(self, surface):
         pass
-        #pygame.draw.circle(surface, (255,0,0), self.pos.tuple_int(), self.radius, 1)
 
     def generate_selectable_object(self):
         radius = max(self.radius, 8)
@@ -250,7 +250,6 @@ class Fleet:
 
     def __str__(self):
         return "p %s, r %s, t %s" % (self.pos, self.radius, str(self.target))
-        #return ', '.join([str(s.pos.tuple_int()) for s in self.ships])
 
 def generate_fleets(scene, civ):
     ships = scene.get_civ_ships(civ)
@@ -273,7 +272,7 @@ def get_clusters(scene, ships):
         for fleet in fleets:
             for ship2 in fleet.ships:
                 delta = ship2.pos-ship.pos
-                if delta.sqr_magnitude() < FLEET_RADIUS ** 2 and ship.chosen_target == ship2.chosen_target:
+                if delta.length_squared() < FLEET_RADIUS ** 2 and ship.chosen_target == ship2.chosen_target:
                     fleet.ships.append(ship)
                     #fleet.update_size_info()
                     fleetless = False

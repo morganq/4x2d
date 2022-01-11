@@ -6,7 +6,8 @@ from colors import *
 from particle import Particle
 from ships.all_ships import register_ship
 from ships.fighter import Fighter
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 @register_ship
@@ -27,9 +28,9 @@ class BossFighter(Fighter):
         self.firing_target = None
 
     def special_fire(self, at):
-        towards = (at.pos - self.pos).normalized()
+        towards = (at.pos - self.pos).normalize()
 
-        fwd = self.velocity.normalized()
+        fwd = self.velocity.normalize()
         side = V2(fwd.y, -fwd.x)
         coef = (self.bullets_chambered % 2) * 2 - 1
         b = Bullet(self.pos + side * coef * 2, at, self, mods=self.prepare_bullet_mods())
@@ -40,7 +41,7 @@ class BossFighter(Fighter):
         self.pos += -towards * 1
 
         for i in range(7):
-            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
+            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalize() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_YELLOW, PICO_RED, PICO_PURPLE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.add_particle(p)
 

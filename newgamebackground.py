@@ -9,7 +9,8 @@ from colors import *
 from helper import clamp, get_nearest_pos, nearest_order_pos
 from resources import resource_path
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class NewGameBackground(SpriteBase):
@@ -17,7 +18,7 @@ class NewGameBackground(SpriteBase):
         super().__init__(pos)
 
         res = game.Game.inst.game_resolution
-        self.background = pygame.Surface(res.tuple_int(), pygame.SRCALPHA)
+        self.background = pygame.Surface(res, pygame.SRCALPHA)
         self.background.fill(PICO_DARKGREEN)
         for i in range(400):
             color = PICO_LIGHTGRAY
@@ -87,28 +88,28 @@ class NewGameBackground(SpriteBase):
 
         for i,jump in enumerate(self.jumps[0:jumps_i]):
             #poly = [V2(-1, -1), V2(1, -1), V2(1,1), V2(-1,1)]
-            #poly = [V2.from_angle(p.to_polar()[1] + self.time / 2 + i) * 5 + jump for p in poly]
+            #poly = [helper.from_angle(p.to_polar()[1] + self.time / 2 + i) * 5 + jump for p in poly]
             width = 1
             if jump in self.current_path:
                 width = 0
-            #pygame.draw.polygon(self.image, PICO_GREEN, [p.tuple() for p in poly], width)
-            pygame.draw.circle(self.image, PICO_BLACK, jump.tuple_int(), 3, width)
+            #pygame.draw.polygon(self.image, PICO_GREEN, [p for p in poly], width)
+            pygame.draw.circle(self.image, PICO_BLACK, jumtuple(p), 3, width)
 
         
         ## DISTRESS SIGNAL ##
         signal_t = self.time % 1
-        pygame.draw.circle(self.image, PICO_WHITE, self.signal_spot.tuple_int(), 5, 0)
+        pygame.draw.circle(self.image, PICO_WHITE, self.signal_spot, 5, 0)
         signal_circle_color = PICO_WHITE
         if signal_t > 0.66:
             signal_circle_color = PICO_GREEN
-        pygame.draw.circle(self.image, signal_circle_color, self.signal_spot.tuple_int(), 5 + signal_t * 19, 1)
+        pygame.draw.circle(self.image, signal_circle_color, self.signal_spot, 5 + signal_t * 19, 1)
 
         radar_t = (self.time / 4) % 1
-        #pygame.draw.circle(self.image, PICO_GREEN, self.initial_spot.tuple_int(), radar_t * 500, 1)
+        #pygame.draw.circle(self.image, PICO_GREEN, self.initial_spot, radar_t * 500, 1)
 
         ## SHIP ##
         poly = [self.initial_spot + V2(0, -6), self.initial_spot + V2(6, 6), self.initial_spot + V2(-6, 6)]
-        pygame.draw.polygon(self.image, PICO_GREEN, [p.tuple_int() for p in poly], 0)            
+        pygame.draw.polygon(self.image, PICO_GREEN, [tuple(p) for p in poly], 0)            
 
         ## READOUT ##
         self.readout_time += dt
@@ -153,7 +154,7 @@ class NewGameBackground(SpriteBase):
         ## PATH ##
         if self.time > 6:
             delta = self.current_path_pt - self.current_path[-1]
-            if delta.sqr_magnitude() < 4 ** 2:
+            if delta.length_squared() < 4 ** 2:
                 jumps_left = list(set(self.jumps) - set(self.current_path))
                 nearest = nearest_order_pos(self.current_path_pt, jumps_left)[0:4]
                 if nearest:
@@ -167,32 +168,32 @@ class NewGameBackground(SpriteBase):
                     color = PICO_DARKGREEN
             else:
                 towards = self.current_path[-1] - self.current_path_pt
-                dist = towards.magnitude()
-                self.current_path_pt += towards.normalized() * 200 * dt / clamp(((dist / 50) + 0.25), 0.15, 2)
+                dist = towards.length()
+                self.current_path_pt += towards.normalize() * 200 * dt / clamp(((dist / 50) + 0.25), 0.15, 2)
 
             lines = self.current_path[0:-1] + [self.current_path_pt]
             
             if color == PICO_GREEN:
-                #pygame.draw.lines(self.image, color, False, [p.tuple_int() for p in lines], 2)
+                #pygame.draw.lines(self.image, color, False, [tuple(p) for p in lines], 2)
                 done = False
                 i = 1
                 pt = self.current_path[0]
                 while not done:
                     towards = (self.current_path[i] - pt)
-                    if towards.sqr_magnitude() < 8 ** 2:
-                        pt = self.current_path[i].copy()
+                    if towards.length_squared() < 8 ** 2:
+                        pt  = V2(self.current_path[i])
                         i += 1
                         
                     if i >= len(self.current_path) - 1:
                         towards = (self.current_path_pt - pt)
-                        if towards.sqr_magnitude() < 8 ** 2:
+                        if towards.length_squared() < 8 ** 2:
                             done = True
                             break
 
                     towards = (self.current_path[i] - pt)
 
-                    pt += towards.normalized() * 5
-                    #pygame.draw.circle(self.image, color, pt.tuple_int(), 1, 0)
+                    pt += towards.normalize() * 5
+                    #pygame.draw.circle(self.image, color, pt, 1, 0)
                     pygame.draw.rect(self.image, color, (pt.x - 1, pt.y - 1, 2, 2), 0)
 
             if len(self.current_path) > 7 and not self.path_flashing:
@@ -208,8 +209,8 @@ class NewGameBackground(SpriteBase):
         p1 = self.signal_spot + V2(1, -1) * 5
         p2 = self.signal_spot + V2(1,-1) * (45 - m_t * 30) + V2(0,1)
         p3 = V2(wave_x, p2.y)
-        pygame.draw.line(self.image, PICO_YELLOW, p1.tuple_int(), p2.tuple_int())
-        pygame.draw.line(self.image, PICO_YELLOW, p2.tuple_int(), p3.tuple_int())
+        pygame.draw.line(self.image, PICO_YELLOW, tuple(p1), tuple(p2))
+        pygame.draw.line(self.image, PICO_YELLOW, tuple(p2), tuple(p3))
 
         btn_t = clamp((self.time - 3.5) * 2, 0, 1)
         ## BUTTONS ##

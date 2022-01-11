@@ -8,7 +8,8 @@ import spritebase
 from colors import *
 from helper import clamp, get_nearest
 from resources import resource_path
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class CloudBackground(spritebase.SpriteBase):
@@ -75,12 +76,12 @@ class CloudBackground(spritebase.SpriteBase):
             blob['pos'] += blob['vel'] * dt
             #blob['size'] = max(blob['size'] - 0.2 * dt, 3)
         
-        self.blobs = [b for b in self.blobs if (b['pos'] - V2(*game.RES) / 2).sqr_magnitude() < 400 ** 2]
+        self.blobs = [b for b in self.blobs if (b['pos'] - V2(*game.RES) / 2).length_squared() < 400 ** 2]
             
     def generate_image(self):
         self.image = pygame.Surface(game.RES, pygame.SRCALPHA)
         self.image.fill(PICO_BLACK)
         for blob in self.blobs:
             rad = blob['size']# * (math.sin(self.time * blob['seed'] + blob['seed'] * 6.2818) * 0.25 + 1)
-            pygame.draw.circle(self.image, blob['color'], blob['pos'].tuple(), int(rad), 0)
+            pygame.draw.circle(self.image, blob['color'], tuple(blob['pos']), int(rad), 0)
         self.image.blit(self.mask, (0,0), None, pygame.BLEND_RGBA_MULT)

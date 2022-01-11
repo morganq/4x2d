@@ -6,7 +6,8 @@ from colors import *
 from helper import clamp
 from resources import resource_path
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 def draw_spiral(image, angle, curviness, squash=1, rotate=0):
@@ -25,22 +26,22 @@ def draw_spiral(image, angle, curviness, squash=1, rotate=0):
         rr = int((radius / 8))
         rr2 = int((radius / 14))
         pm, pa = (pos - center).to_polar()
-        tp = V2.from_angle(pa + rotate) * pm + center
-        tp2 = (V2.from_angle(pa + rotate + 0.05) * pm * 0.95) + center
+        tp = helper.from_angle(pa + rotate) * pm + center
+        tp2 = (helper.from_angle(pa + rotate + 0.05) * pm * 0.95) + center
         brightness = clamp(int(((3 / csize) + 1) * 60 * (1 - t)),0,255)
         tempimage = pygame.Surface((w,h), pygame.SRCALPHA)
         #pygame.gfxdraw.filled_circle(tempimage, int(pos.x), int(pos.y), int(csize), (255,255,255,brightness))
         if csize > 1:
-            pygame.draw.circle(tempimage, (255,255,255,brightness), tp.tuple_int(), int(csize))
-            pygame.draw.circle(tempimage, (255,255,255,brightness * 0.8), (tp2 + V2(random.randint(-rr2,rr2), random.randint(-rr2,rr2))).tuple_int(), int(csize))
+            pygame.draw.circle(tempimage, (255,255,255,brightness), ttuple(p), int(csize))
+            pygame.draw.circle(tempimage, (255,255,255,brightness * 0.8), (tp2 + V2(random.randint(-rr2,rr2), random.randint(-rr2,rr2))), int(csize))
         else:
-            tempimage.set_at(tp.tuple_int(), (255,255,255, brightness))
-            tempimage.set_at((tp2 + V2(random.randint(-rr2,rr2), random.randint(-rr2,rr2))).tuple_int(), (255,255,255, brightness))
-        tempimage.set_at((tp + V2(random.randint(-rr,rr), random.randint(-rr,rr))).tuple_int(), (255,255,255, random.randint(10, 120)))
+            tempimage.set_at(ttuple(p), (255,255,255, brightness))
+            tempimage.set_at((tp2 + V2(random.randint(-rr2,rr2), random.randint(-rr2,rr2))), (255,255,255, brightness))
+        tempimage.set_at((tp + V2(random.randint(-rr,rr), random.randint(-rr,rr))), (255,255,255, random.randint(10, 120)))
         if random.random() < 0.25:
-            tempimage.set_at((tp + V2(random.randint(-rr,rr), random.randint(-rr,rr))).tuple_int(), (255,255,255, random.randint(50, 255)))
+            tempimage.set_at((tp + V2(random.randint(-rr,rr), random.randint(-rr,rr))), (255,255,255, random.randint(50, 255)))
         image.blit(tempimage, (0,0))
-        off = V2.from_angle(angle) * 1.75
+        off = helper.from_angle(angle) * 1.75
         off = V2(off.x, off.y * squash)
         pos += off
         angle += curviness

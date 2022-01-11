@@ -10,7 +10,8 @@ from spritebase import SpriteBase
 from text import Text
 from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgrades import UPGRADE_CLASSES
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class StoreItemButton(SpriteBase):

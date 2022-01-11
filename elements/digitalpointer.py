@@ -4,7 +4,8 @@ import pygame
 import spritebase
 from colors import *
 from helper import clamp
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from elements import arc
 

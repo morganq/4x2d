@@ -1,12 +1,15 @@
 import time
 from math import inf
 
+import pygame
+
 import asteroid
 import game
 import hazard
 import planet
 from helper import clamp, get_nearest
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 GRIDSIZE = 7
 EXTRA = 9
@@ -53,7 +56,7 @@ class FlowFieldMap:
                         extra = 6
                     if dist < (closest.radius + extra) ** 2:
                         #print(center, closest.pos, closest)
-                        delta = (center - closest.pos).normalized()
+                        delta = (center - closest.pos).normalize()
                         cell = (closest, delta)
                 grid[-1].append(cell)  
         return grid      
@@ -149,7 +152,7 @@ class FlowField:
                         cell = (9999, cell[1])
                 grid[-1].append(cell)
 
-        end = ((self.obj.pos - self.offset) / GRIDSIZE).tuple_int()
+        end = tuple(((self.obj.pos - self.offset) // GRIDSIZE))
         to_visit = [end]
         grid[end[1]][end[0]] = 0
 
@@ -215,7 +218,7 @@ class FlowField:
                 if inf_exception_dir:
                     self.grid[y][x] = inf_exception_dir
                 elif min is not None:
-                    self.grid[y][x] = (V2(*min) - V2(x,y))#.normalized() # maybe do it here?
+                    self.grid[y][x] = (V2(*min) - V2(x,y))#.normalize() # maybe do it here?
                 else:
                     print("no min but also no inf exception", x,y)
                     #print(deltas)
@@ -244,9 +247,9 @@ class FlowField:
                 if v:
                     if half > 0:
                         coefficient = 1 / max(((cx - x)) ** 2 + ((cy - y)) ** 2, 1)                    
-                    out += v.normalized() * coefficient # instead of here?
+                    out += v.normalize() * coefficient # instead of here?
 
-        return out.normalized()
+        return out.normalize()
 
     def walk_field(self, pos, distance):
         walked = 0

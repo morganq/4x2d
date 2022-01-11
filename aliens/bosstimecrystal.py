@@ -13,7 +13,8 @@ from pygame.transform import threshold
 from resources import resource_path
 from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 FREEZE_INTERVAL = 90
 
@@ -37,7 +38,7 @@ class TimeCrystal(Planet):
             stranded_ships.append('interceptor')
         theta = random.random() * 6.2818
         for ship in stranded_ships:
-            p = self.pos + V2.from_angle(theta) * random.randint(18,32)
+            p = self.pos + helper.from_angle(theta) * random.randint(18,32)
             s = SHIPS_BY_NAME[ship](self.scene, p, self.scene.player_civ)
             if ship == 'colonist':
                 s.set_pop(random.randint(2,5))
@@ -73,7 +74,7 @@ class TimeCrystal(Planet):
 
         if self.exp:
             for s in self.scene.get_civ_ships(self.scene.player_civ):
-                if (s.pos - self.exp.pos).sqr_magnitude() < self.exp.size ** 2:
+                if (s.pos - self.exp.pos).length_squared() < self.exp.size ** 2:
                     self.freeze(s)
             if not self.exp.alive():
                 self.exp = None
@@ -121,7 +122,7 @@ class TimeCrystal(Planet):
                         a = base_angle + 3.14159
                     else:
                         a = base_angle
-                    pvel = V2.from_angle(a) * 6
+                    pvel = helper.from_angle(a) * 6
                     p = particle.Particle([
                         color[0:3],
                         color[0:3],

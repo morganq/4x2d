@@ -12,7 +12,8 @@ from scene import Scene
 from simplesprite import SimpleSprite
 from states import Machine, UIEnabledState
 from text import Text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 MOD_STRINGS = {
     'warp_drive':'Enemy starts with warp drive technology.',

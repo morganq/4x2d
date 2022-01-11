@@ -4,7 +4,8 @@ import pygame
 from colors import *
 import states
 from upgrade import upgrades
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 from upgrade.upgradeicon import UpgradeIcon
 import game
 

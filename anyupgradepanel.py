@@ -1,6 +1,7 @@
 from panel import Panel
 from upgrade import upgrades, upgradeicon
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 from colors import *
 from text import Text
 

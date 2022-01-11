@@ -5,7 +5,8 @@ from line import Line
 from ships.all_ships import register_ship
 from ships.fighter import Fighter
 from ships.ship import Ship
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 @register_ship
@@ -53,8 +54,8 @@ class Alien2ControlShip(Fighter):
     def update(self, dt):
         if self.tethered:
             delta = self.tethered.pos - self.tether_end_pos
-            if delta.sqr_magnitude() > 2 ** 2:
-                self.tether_end_pos += delta.normalized() * dt * 15
+            if delta.length_squared() > 2 ** 2:
+                self.tether_end_pos += delta.normalize() * dt * 15
             else:
                 self.tether_end_pos = self.tethered.pos
                 self.tether_time += dt

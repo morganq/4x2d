@@ -8,7 +8,8 @@ import spritebase
 from colors import *
 from helper import clamp, get_nearest
 from resources import resource_path
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 COLOR_FADE = 0.7
 
@@ -20,7 +21,7 @@ class LevelBackground(spritebase.SpriteBase):
         #self._generate_image()
 
     def generate_image(self, objgrid):
-        self.image = pygame.Surface(self.size.tuple(), pygame.SRCALPHA)
+        self.image = pygame.Surface(self.size, pygame.SRCALPHA)
         self.image.fill((0,0,0,255))
         #dither = pygame.image.load(resource_path("assets/dither.png")).convert_alpha()
         bw = 2
@@ -39,7 +40,7 @@ class LevelBackground(spritebase.SpriteBase):
                     self.image.set_at((x,y), PICO_DARKGRAY)                
                 density = 0
                 for object in objgrid.get_objects_near(V2(x,y), 100):
-                    d = (V2(x,y) - object.pos).sqr_magnitude() ** 0.85
+                    d = (V2(x,y) - object.pos).length_squared() ** 0.85
                     density += (8000 / max(d,100)) * (object.radius / 6.5)
 
                 density = density ** 0.65 * 1.75
@@ -50,7 +51,7 @@ class LevelBackground(spritebase.SpriteBase):
                     self.image.set_at((x,y), PICO_DARKGRAY)
 
                 color = PICO_DARKBLUE
-                outside_plus_density = ((V2(x,y) - V2(*game.RES)/2).sqr_magnitude() + density * 20)
+                outside_plus_density = ((V2(x,y) - V2(*game.RES)/2).length_squared() + density * 20)
                 if outside_plus_density > 120 ** 2:
                     val = (math.sqrt(outside_plus_density) - 120) / 50
                     if random.random() < val:

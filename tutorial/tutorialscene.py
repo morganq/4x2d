@@ -6,7 +6,8 @@ from aliens import alien
 from civ import Civ
 from helper import get_nearest
 from levelscene import LevelScene
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from tutorial.tutorialmessage import TutorialMessage
 

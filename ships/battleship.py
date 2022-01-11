@@ -9,7 +9,8 @@ from colors import *
 from helper import all_nearby, clamp
 from laserparticle import LaserParticle
 from particle import Particle
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from ships.all_ships import register_ship
 from ships.fighter import STATE_DOGFIGHT, Fighter
@@ -77,7 +78,7 @@ class Battleship(Fighter):
         enemies = self.scene.get_enemy_objects_in_range(self.owning_civ, self.pos, threat_range)
         threats = [
             e for e in enemies
-            if ((e.pos - self.pos).sqr_magnitude() < threat_range ** 2 and e.is_alive())
+            if ((e.pos - self.pos).length_squared() < threat_range ** 2 and e.is_alive())
         ]
 
         sound.play(random.choice(['laser1', 'laser2', 'laser3']))
@@ -90,7 +91,7 @@ class Battleship(Fighter):
             self.fire_laser(at)
             return
 
-        towards = (at.pos - self.pos).normalized()
+        towards = (at.pos - self.pos).normalize()
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
@@ -99,7 +100,7 @@ class Battleship(Fighter):
         self.scene.game_group.add(b)
 
         for i in range(10):
-            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalized() * 30 * (random.random() + 0.25)
+            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalize() * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.add_particle(p)
 

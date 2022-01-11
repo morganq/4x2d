@@ -8,7 +8,8 @@ from colors import *
 from constants import REWARD_ICON_WIDTH, REWARD_ICONS_ORDER
 from helper import clamp
 from resources import resource_path
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class SectorTitleInGame(spritebase.SpriteBase):

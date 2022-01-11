@@ -3,7 +3,8 @@ import text
 from colors import *
 from resources import resource_path
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class ShipCounter(SpriteBase):

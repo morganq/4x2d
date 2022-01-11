@@ -14,7 +14,8 @@ from explosion import Explosion
 from planet import building
 from spritebase import SpriteBase
 from status_effect import GreyGooEffect
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 VEL = 50
 DEATH_TIME = 1
@@ -33,9 +34,9 @@ class Bullet(SpriteBase):
         self.mods = mods or {}
         self.speed = VEL * (1 + self.mods.get("missile_speed", 0))
         if vel:
-            self.vel = vel.normalized() * self.speed
+            self.vel = vel.normalize() * self.speed
         else:
-            self.vel = (self.get_target_pos() - self.pos).normalized() * self.speed
+            self.vel = (self.get_target_pos() - self.pos).normalize() * self.speed
 
         self.death_time = self.mods.get("life", None) or DEATH_TIME
         self.offset = (0.5, 0.5)
@@ -128,14 +129,14 @@ class Bullet(SpriteBase):
                 nearby_targets.remove(self.target)
             if nearby_targets:
                 self.target = random.choice(nearby_targets)
-                self.vel = (self.target.pos - self.pos).normalized() * self.vel.magnitude()
+                self.vel = (self.target.pos - self.pos).normalize() * self.vel.length()
             else:
                 self.kill()
 
         else:
             if reflect:
                 self.target, self.shooter = self.shooter, self.target
-                self.vel = (self.get_target_pos() - self.pos).normalized() * self.vel.magnitude()
+                self.vel = (self.get_target_pos() - self.pos).normalize() * self.vel.length()
                 self._generate_image()
             else:
                 self.kill()
@@ -149,10 +150,10 @@ class Bullet(SpriteBase):
         self.image = pygame.Surface((9,9), pygame.SRCALPHA)
         shape = self.mods.get('shape', 'line')
         if shape == 'line':
-            vn = self.vel.normalized()
+            vn = self.vel.normalize()
             p1 = V2(4,4)
             p2 = V2(4,4) + vn * self.mods.get("size", 2)
-            pygame.draw.line(self.image, self.mods.get("color", PICO_BLUE), p1.tuple(), p2.tuple(), 1)
+            pygame.draw.line(self.image, self.mods.get("color", PICO_BLUE), tuple(p1), tuple(p2), 1)
         elif shape == 'circle':
             pygame.draw.circle(self.image, self.mods.get("color", PICO_BLUE), (4,4), self.mods.get("size", 2), 0)
 
@@ -162,9 +163,9 @@ class Bullet(SpriteBase):
         self._recalc_rect()
 
     def homing(self, dt):
-        towards = (self.target.pos - self.pos).normalized()
+        towards = (self.target.pos - self.pos).normalize()
         speed, angle = self.vel.to_polar()
-        facing = self.vel.normalized()
+        facing = self.vel.normalize()
         cp = facing.cross(towards)
         homing_amt = self.mods.get("homing") + self.time / 2
         try:
@@ -178,7 +179,7 @@ class Bullet(SpriteBase):
                 angle += 3 * dt * homing_amt
             else:
                 angle -= 3 * dt * homing_amt
-        self.vel = V2.from_angle(angle) * speed
+        self.vel = helper.from_angle(angle) * speed
         self._generate_image()
 
     def update(self, dt):
@@ -197,6 +198,6 @@ class Bullet(SpriteBase):
                     1,
                     self.pos,
                     25 / self.speed * self.mods.get("trail_length", 1),
-                    V2.from_angle(random.random() * 6.2818) * self.speed / 8
+                    helper.from_angle(random.random() * 6.2818) * self.speed / 8
                 )
                 self.shooter.scene.add_particle(p)

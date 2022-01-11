@@ -6,7 +6,8 @@ from panel import Panel
 from rectangle import Rectangle
 from simplesprite import SimpleSprite
 from text import Text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class StoreNodeGraphic(SimpleSprite):

@@ -18,7 +18,8 @@ from resources import resource_path
 from satellite import ReflectorShieldObj
 from spaceobject import SpaceObject
 from upgrade.spacemine import SpaceMine
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 ROTATE_SPEED = 6.2818
 FLEET_RADIUS = 25
@@ -94,7 +95,7 @@ class Ship(SpaceObject):
         self.target_velocity = V2(0,0)
         self.target_heading = None # An angle, or None.
         self.fleet_forces = V2(0,0)
-        self.fleet_minimum_forces = 0 # The magnitude of the fleet forces before we start caring
+        self.fleet_minimum_forces = 0 # The length of the fleet forces before we start caring
 
         # Other stuff
         self.time = 0
@@ -139,7 +140,7 @@ class Ship(SpaceObject):
 
     def in_void(self):
         for aura in self.owning_civ.get_voids():
-            d = (self.pos - aura.pos).sqr_magnitude()
+            d = (self.pos - aura.pos).length_squared()
             if d <= aura.radius ** 2:
                 return True
         return False
@@ -304,7 +305,7 @@ class Ship(SpaceObject):
 
         # Factor in fleet forces
         self.fleet_forces = self.get_fleet_forces(dt) * FLEET_POWER
-        if self.fleet_forces.sqr_magnitude() > self.fleet_minimum_forces ** 2:
+        if self.fleet_forces.length_squared() > self.fleet_minimum_forces ** 2:
             self.target_velocity += self.fleet_forces
 
         # Try to get to the target velocity
@@ -312,24 +313,24 @@ class Ship(SpaceObject):
 
         # We want to reduce thrust if we're trying to thrust away from our heading
         angle_thrust_adjust = 1
-        velocity_adjust_final = velocity_adjust_total.normalized()
-        current_heading_vec = V2.from_angle(self.angle)
+        velocity_adjust_final = velocity_adjust_total.normalize()
+        current_heading_vec = helper.from_angle(self.angle)
         dp = velocity_adjust_final.dot(current_heading_vec)
         if dp < 0: # dot product < 0 means that the two vectors are facing away from eachother.
             angle_thrust_adjust = 0.5
 
         velocity_adjust_frame = velocity_adjust_final * dt * self.get_thrust_accel() * angle_thrust_adjust
-        if velocity_adjust_frame.sqr_magnitude() > velocity_adjust_total.sqr_magnitude() * angle_thrust_adjust:
+        if velocity_adjust_frame.length_squared() > velocity_adjust_total.length_squared() * angle_thrust_adjust:
             self.velocity = self.target_velocity * angle_thrust_adjust
         else:
             self.velocity += velocity_adjust_frame
 
-        if self.velocity.sqr_magnitude() > (self.get_max_speed() * angle_thrust_adjust) ** 2:
-            self.velocity = self.velocity.normalized() * self.get_max_speed() * angle_thrust_adjust
+        if self.velocity.length_squared() > (self.get_max_speed() * angle_thrust_adjust) ** 2:
+            self.velocity = self.velocity.normalize() * self.get_max_speed() * angle_thrust_adjust
 
         # Set angle based on velocity
         if self.target_heading is None:
-            if self.velocity.sqr_magnitude() > 0:
+            if self.velocity.length_squared() > 0:
                 _, self.angle = self.velocity.to_polar()
 
         else:
@@ -341,7 +342,7 @@ class Ship(SpaceObject):
             else:
                 self.angle += ROTATE_SPEED * dt
 
-        if self.velocity.sqr_magnitude() > 0:
+        if self.velocity.length_squared() > 0:
             if self._timers['thrust_particle_time'] > THRUST_PARTICLE_RATE:
                 self.emit_thrust_particles()
                 self._timers['thrust_particle_time'] = 0   
@@ -350,13 +351,13 @@ class Ship(SpaceObject):
         nearest,dsq = helper.get_nearest(self.pos, [o for o in self.scene.get_objects_in_range(self.pos, 20) if o.collidable and o.stationary])
         if nearest and nearest != self.effective_target:
             dsf = dsq - nearest.radius ** 2
-            delta = (nearest.pos - self.pos).normalized()
+            delta = (nearest.pos - self.pos).normalize()
             near = 20
             if dsf > 0 and dsf < near ** 2:
                 t = 1 - math.sqrt(dsf) / near
                 self.velocity += -delta * t * 5 * dt
                 side = V2(delta.y, -delta.x)
-                fwd = self.velocity.normalized()
+                fwd = self.velocity.normalize()
                 cross = fwd.cross(side)
                 if cross > 0:
                     side = -side
@@ -376,7 +377,7 @@ class Ship(SpaceObject):
         # Fuel empty
         if self.state == STATE_CRUISING:
             speed_adjust = self.get_max_speed() / self.MAX_SPEED
-            cruise_travel_dist_frame = self.velocity.magnitude() * dt / speed_adjust
+            cruise_travel_dist_frame = self.velocity.length() * dt / speed_adjust
             self.fuel_remaining -= cruise_travel_dist_frame
 
             if self.fuel_remaining < 0:
@@ -409,7 +410,7 @@ class Ship(SpaceObject):
     def emit_thrust_particles(self):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
         pvel += -self.velocity / 2
-        p = particle.Particle("assets/thrustparticle.png", 1, self.pos + -self.velocity.normalized() * self.radius, 1, pvel)
+        p = particle.Particle("assets/thrustparticle.png", 1, self.pos + -self.velocity.normalize() * self.radius, 1, pvel)
         self.scene.add_particle(p)
              
 
@@ -422,13 +423,13 @@ class Ship(SpaceObject):
         speed_factor = self.get_max_speed() / self.MAX_SPEED
         if speed_factor > 1:
             if self._timers['bonus_speed_particle_time'] > 0.15 / speed_factor:
-                #e = explosion.Explosion(self.pos + V2.random_angle(), [PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_WHITE, PICO_WHITE, PICO_BLUE], 0.25, 3, line_width=1)
+                #e = explosion.Explosion(self.pos + helper.random_angle(), [PICO_BLUE, PICO_BLUE, PICO_BLUE, PICO_WHITE, PICO_WHITE, PICO_BLUE], 0.25, 3, line_width=1)
                 colors = [PICO_WHITE, PICO_BLUE, PICO_GREEN, PICO_PINK, PICO_PURPLE]
                 n = int((speed_factor - 1) * 3) + 1
                 colors = colors[0:n]
                 #ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 3
                 ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 0.45 + math.sin(self.time * 3 * speed_factor)
-                p = particle.Particle([random.choice(colors)], 1, self.pos + -self.velocity.normalized() * self.radius, 0.6, V2.from_angle(ang) * 8)
+                p = particle.Particle([random.choice(colors)], 1, self.pos + -self.velocity.normalize() * self.radius, 0.6, helper.from_angle(ang) * 8)
                 self.scene.add_particle(p)
                 self._timers['bonus_speed_particle_time'] = 0
 
@@ -444,7 +445,7 @@ class Ship(SpaceObject):
                 return
             if not other.solid:
                 return
-            delta=(other.pos-self.pos).normalized()
+            delta=(other.pos-self.pos).normalize()
             self.pos += -delta
 
     def get_fleet_forces(self, dt):
@@ -460,15 +461,15 @@ class Ship(SpaceObject):
         if self.fleet is None:
             return forces
         our_ships = self.fleet.ships #self.scene.get_civ_ships(self.owning_civ)
-        fleet_ships = [s for s in our_ships if (s.pos - self.pos).sqr_magnitude() <= FLEET_RADIUS ** 2]
+        fleet_ships = [s for s in our_ships if (s.pos - self.pos).length_squared() <= FLEET_RADIUS ** 2]
         fleet_ships.remove(self)
 
         # Separation
         for ship in fleet_ships:
             delta = ship.pos - self.pos
-            sm = max(delta.sqr_magnitude(),1)
+            sm = max(delta.length_squared(),1)
             if sm < FLEET_SEPARATION_MAX ** 2:
-                forces -= (delta.normalized() * (FLEET_SEPARATION_DEGRADE / sm)) * FLEET_SEPARATION_POWER
+                forces -= (delta.normalize() * (FLEET_SEPARATION_DEGRADE / sm)) * FLEET_SEPARATION_POWER
 
         # Proximity
         if fleet_ships:
@@ -479,7 +480,7 @@ class Ship(SpaceObject):
             delta = center - self.pos
             forces += delta.max(1) * FLEET_PROXIMITY_POWER
 
-        self.opt_fleet_forces = forces.copy()
+        self.opt_fleet_forces  = V2(forces)
         return forces        
 
     def enter_state_cruising(self):
@@ -492,7 +493,7 @@ class Ship(SpaceObject):
 
         delta = self.effective_target.pos - self.pos
         use_path = True
-        if not self.scene.flowfield.has_field(self.effective_target) or delta.sqr_magnitude() < NO_PATH_RANGE ** 2:
+        if not self.scene.flowfield.has_field(self.effective_target) or delta.length_squared() < NO_PATH_RANGE ** 2:
             use_path = False
 
         if use_path:
@@ -500,8 +501,8 @@ class Ship(SpaceObject):
             towards_center = towards_flow
             distance = 1
             if self.fleet and len(self.fleet.path) > 2 and len(self.fleet.ships) > 1:
-                distance = (self.fleet.path[2] - self.pos).magnitude()
-                towards_center = (self.fleet.path[2] - self.pos).normalized()
+                distance = (self.fleet.path[2] - self.pos).length()
+                towards_center = (self.fleet.path[2] - self.pos).normalize()
             ratio = 0.5
             
             ratio = helper.clamp(20 / (distance + 1), 0, 1)
@@ -509,7 +510,7 @@ class Ship(SpaceObject):
             self.target_velocity = (towards_flow * ratio + towards_center * (1 - ratio)) * self.get_cruise_speed()
 
         else:
-            self.target_velocity = delta.normalized() * self.get_cruise_speed()
+            self.target_velocity = delta.normalize() * self.get_cruise_speed()
 
         # Warp
         if self.get_stat("warp_drive"):
@@ -524,16 +525,16 @@ class Ship(SpaceObject):
         end = self.effective_target.pos
         offset_dist = self.effective_target.radius + 20
         delta = (end - self.pos)
-        delta_magnitude = delta.magnitude()
-        if warp_dist >= (delta_magnitude - offset_dist) or not self.scene.flowfield.has_field(self.effective_target):
-            maxdist = delta_magnitude - offset_dist
-            delta = delta.normalized()
+        delta_length = delta.length()
+        if warp_dist >= (delta_length - offset_dist) or not self.scene.flowfield.has_field(self.effective_target):
+            maxdist = delta_length - offset_dist
+            delta = delta.normalize()
             target_pos = self.pos + delta * min(warp_dist, maxdist)
         else:
             target_pos = self.scene.flowfield.walk_field(self.pos, self.effective_target, warp_dist)
 
         for color in [PICO_BLUE, PICO_WHITE, PICO_DARKBLUE]:
-            p = LaserParticle(self.pos + V2.random_angle() * 3, target_pos + V2.random_angle() * 3, color, random.random() / 2)
+            p = LaserParticle(self.pos + helper.random_angle() * 3, target_pos + helper.random_angle() * 3, color, random.random() / 2)
             self.scene.add_particle(p)
         self.pos = target_pos
         self.on_warp()
@@ -577,9 +578,9 @@ class Ship(SpaceObject):
         _,a = delta.to_polar()
         # Create a target point which is a step around the circle compared to my angle around the circle.
         a += 0.2
-        target_pt = self.effective_target.pos + V2.from_angle(a) * (ATMO_DISTANCE + self.effective_target.radius)
+        target_pt = self.effective_target.pos + helper.from_angle(a) * (ATMO_DISTANCE + self.effective_target.radius)
         # Adjust our velocity to aim at this target point
-        self.target_velocity = (target_pt - self.pos).normalized() * self.get_max_speed() * 0.5
+        self.target_velocity = (target_pt - self.pos).normalize() * self.get_max_speed() * 0.5
 
         if isinstance(self.effective_target, planet.planet.Planet):
             if self.can_land(self.effective_target):
@@ -623,7 +624,7 @@ class Ship(SpaceObject):
             self.set_state(self.post_stun_state)
 
         if ((self._timers['stun_time'] + dt) * 20) % 1 < (self._timers['stun_time'] * 20) % 1:
-            ra = V2.random_angle()
+            ra = helper.random_angle()
             p = particle.Particle([PICO_YELLOW, PICO_BLUE, PICO_YELLOW, PICO_BLUE], 1, self.pos + ra * 4, 0.35, ra * 10)
             self.scene.add_particle(p)
 

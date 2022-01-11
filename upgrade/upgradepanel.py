@@ -11,7 +11,8 @@ from pygame import font
 from resources import resource_path
 from spritebase import SpriteBase
 from text import FONTS, Text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from upgrade import upgrades
 from upgrade.upgradebutton import UpgradeButton
@@ -131,7 +132,7 @@ class UpgradePanel(Panel):
                     color = PICO_GREEN
                 for parent in u.family['parents']:
                     pp = positions[parent]
-                    pygame.draw.line(self.image, color, (pos + V2(14, 12) - self.pos).tuple(), (pp + V2(14,12) - self.pos).tuple(), 1)
+                    pygame.draw.line(self.image, color, (pos + V2(14, 12) - self.pos), (pp + V2(14,12) - self.pos), 1)
                 if name == button.upgrade.name:
                     pygame.draw.rect(self.image, PICO_GREEN, (pos.x - self.pos.x - 1, pos.y - self.pos.y, 28, 28), 2)
                 if u.infinite:

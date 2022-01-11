@@ -16,7 +16,8 @@ from loadingscene import LoadingScene
 from store import storepanel
 from store.storenode import StoreNodeGraphic, StoreNodePanel
 from store.storescene import StoreScene
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from starmap.galaxy import Galaxy
 

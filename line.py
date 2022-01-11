@@ -4,7 +4,8 @@ import text
 from colors import PICO_WHITE
 from helper import clamp
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 def ptmin(a,b):
@@ -33,7 +34,7 @@ class Line(SpriteBase):
         pt2 = V2(abs(delta.x) if delta.x > 0 else 0, abs(delta.y) if delta.y > 0 else 0)
 
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
-        pygame.draw.line(self.image, self.color, pt1.tuple(), pt2.tuple(), 1)
+        pygame.draw.line(self.image, self.color, pt1, pt2, 1)
         self._width = w
         self._height = h
 
@@ -45,11 +46,11 @@ class AssetLine(Line):
         super().__init__(start, end, color)
         self.next_line = None
         self.time = -999999999
-        self.pt_start = self.pt1.copy()
-        self.pt_final = self.pt2.copy()
-        self.delta = (self.pt2 - self.pt1).normalized()
-        self.len = (self.pt2 - self.pt1).magnitude()
-        self.pt2 = self.pt1.copy()
+        self.pt_start  = V2(self.pt1)
+        self.pt_final  = V2(self.pt2)
+        self.delta = (self.pt2 - self.pt1).normalize()
+        self.len = (self.pt2 - self.pt1).length()
+        self.pt2  = V2(self.pt1)
         self.visible = False
         self._generate_image()
     

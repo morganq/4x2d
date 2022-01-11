@@ -5,7 +5,8 @@ import pygame
 import spritebase
 import text
 from colors import *
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class StarmapBackground(spritebase.SpriteBase):
@@ -18,9 +19,9 @@ class StarmapBackground(spritebase.SpriteBase):
 
     def _generate_image(self):
         res = game.Game.inst.game_resolution
-        self._width, self._height = res.tuple()
+        self._width, self._height = res
 
-        self.image = pygame.Surface(res.tuple_int(), pygame.SRCALPHA)
+        self.image = pygame.Surface(res, pygame.SRCALPHA)
         self.image.fill(PICO_BLACK) 
 
         x = game.Game.inst.game_offset.x

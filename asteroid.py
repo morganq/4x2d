@@ -4,6 +4,7 @@ import random
 import pygame
 
 import economy
+import helper
 import sound
 from colors import *
 from explosion import Explosion
@@ -11,7 +12,8 @@ from helper import get_nearest
 from icontext import IconText
 from particle import Particle
 from spaceobject import SpaceObject
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class Asteroid(SpaceObject):
@@ -30,9 +32,9 @@ class Asteroid(SpaceObject):
         self._circles = []
 
         for i in range(self.total_resources // 20 + 2):
-            pos = V2.from_angle(random.random() * 6.2818) * (random.random() * (self.radius * 0.75) + 1)
+            pos = helper.from_angle(random.random() * 6.2818) * (random.random() * (self.radius * 0.75) + 1)
             size = 1
-            if pos.sqr_magnitude() > (self.radius * 0.75) ** 2:
+            if pos.length_squared() > (self.radius * 0.75) ** 2:
                 size = random.random() * 2 + 1
             else:
                 size = random.random() * 4 + 2
@@ -51,16 +53,14 @@ class Asteroid(SpaceObject):
 
         offset = V2(w/2,h/2)
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_YELLOW, (pos + offset).tuple(), size + (2 if border else 1), 0) 
+            pygame.draw.circle(image, PICO_YELLOW, tuple(pos + offset), size + (2 if border else 1), 0) 
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_RED, (pos + offset).tuple(), size, 0)
+            pygame.draw.circle(image, PICO_RED, tuple(pos + offset), size, 0)
         for (pos, size) in self._circles:
-            pygame.draw.circle(image, PICO_ORANGE, (pos + offset + V2(-1,-1)).tuple(), size-1, 0)            
+            pygame.draw.circle(image, PICO_ORANGE, tuple(pos + offset + V2(-1,-1)), size-1, 0)            
         for (pos, size) in self._circles:
             if size > 3:
-                pygame.draw.circle(image, PICO_YELLOW, (pos + offset + V2(-1,-3)).tuple(), size - 3, 0)            
-
-        #pygame.draw.circle(image, PICO_WHITE, V2(w/2,h/2).tuple(), self.radius, 1)
+                pygame.draw.circle(image, PICO_YELLOW, tuple(pos + offset + V2(-1,-3)), size - 3, 0)            
 
         return image
 
@@ -98,7 +98,7 @@ class Asteroid(SpaceObject):
             e = Explosion(self.pos, [PICO_YELLOW, PICO_ORANGE, PICO_RED, PICO_BROWN], 0.4, 13, line_width=1)
             self.scene.game_group.add(e)
             for i in range(40):
-                v = V2.random_angle() * 4 * random.random()
+                v = helper.random_angle() * 4 * random.random()
                 color = random.choice([PICO_YELLOW, PICO_ORANGE, PICO_ORANGE, PICO_RED])
                 p = Particle([color], 1, self.pos + v, random.random() + 0.5, v * 3)
                 self.scene.add_particle(p)

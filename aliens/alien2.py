@@ -1,5 +1,6 @@
 import random
 
+import helper
 import pygame
 from colors import *
 from helper import clamp
@@ -11,7 +12,8 @@ from stats import Stats
 from upgrade.building_upgrades import (AddBuildingUpgrade,
                                        make_simple_stats_building)
 from upgrade.upgrades import Upgrade, register_upgrade
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 from aliens import (alien, alien2battleship, alien2colonist, alien2controlship,
                     alien2fighter)
@@ -76,7 +78,7 @@ class Alien2FighterProductionUpgrade3(Alien2FighterProductionUpgrade1):
                 target = random.choice(to.scene.get_civ_planets(to.scene.player_civ))
                 found_ship.set_target(target)
         else:
-            pos = to.pos + V2.random_angle() * (to.radius + 20)
+            pos = to.pos + helper.random_angle() * (to.radius + 20)
             ship = Alien2Battleship(to.scene, pos, to.owning_civ)
             ship.frame = 0
             ship.constructed = False
@@ -164,14 +166,14 @@ class Alien2CurseIndicator(SpriteBase):
         c = V2(self._width // 2, self._height // 2)
         for i in range(8):
             theta = i * 3.14159 / 4
-            p1 = V2.from_angle(theta) * (self.planet.radius + d)
-            p2 = V2.from_angle(theta + 0.05) * (self.planet.radius + d + 5)
-            p3 = V2.from_angle(theta) * (self.planet.radius + d + 4)
-            p4 = V2.from_angle(theta - 0.05) * (self.planet.radius + d + 5)
-            pts = [(p + c).tuple() for p in [p1,p2,p3,p4]]
+            p1 = helper.from_angle(theta) * (self.planet.radius + d)
+            p2 = helper.from_angle(theta + 0.05) * (self.planet.radius + d + 5)
+            p3 = helper.from_angle(theta) * (self.planet.radius + d + 4)
+            p4 = helper.from_angle(theta - 0.05) * (self.planet.radius + d + 5)
+            pts = [(p + c) for p in [p1,p2,p3,p4]]
             pygame.draw.polygon(self.image, PICO_RED, pts, 0)
 
-        self.image.blit(cancel, (c - V2(4,4)).tuple())
+        self.image.blit(cancel, (c - V2(4,4)))
 
         self._recalc_rect()
 
@@ -248,7 +250,7 @@ class Alien2(alien.Alien):
                     self.scene.game_group.add(self.curse)
                 else:
                     self.curse.planet = self.attack_to
-                    self.curse.pos = self.attack_to.pos.copy()
+                    self.curse.pos  = V2(self.attack_to.pos)
                     self.curse._generate_image()
                 self.attack_to.upgradeable = False
                 

@@ -7,7 +7,8 @@ import text
 from colors import *
 from planet import building
 from scene import Scene
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 GRIDSIZE = 20
 YOFFSET = 60
@@ -52,7 +53,7 @@ class BuildingCreatorScene(Scene):
             self.building.shapes = drawable        
         if self.building.shapes:
             for ang in [-3.14159/2, 3.14159 * 3 / 4, 0]:
-                offset = V2.from_angle(ang) * 15
+                offset = helper.from_angle(ang) * 15
                 self.building.draw_outline(self.game.screen, PICO_YELLOW, V2(50,50) + offset, ang)
                 self.building.draw_foreground(self.game.screen, V2(50,50) + offset, ang)
 
@@ -63,7 +64,7 @@ class BuildingCreatorScene(Scene):
             text.FONTS['small'].render_to(self.game.screen, (i * GRIDSIZE + 1, 1), CONTROLS[i], PICO_WHITE)
 
         for shape in self.shapes:
-            pts = [(p * GRIDSIZE).tuple_int() for p in shape['points']]
+            pts = [tuple(p * GRIDSIZE) for p in shape['points']]
             for pt in pts:
                 pygame.draw.circle(self.game.screen, shape['color'], pt, 3, 1)
             if len(pts) > 2:
@@ -74,7 +75,7 @@ class BuildingCreatorScene(Scene):
 
     def transform_shapes(self, shapes):
         return [
-                {'points':[self.transform_pt(p).tuple() for p in s['points']], 'color':s['color'], 'blink':s['blink']}
+                {'points':[tuple(self.transform_pt(p)) for p in s['points']], 'color':s['color'], 'blink':s['blink']}
                 for s in shapes if len(s['points']) > 2
             ]
 

@@ -1,6 +1,7 @@
 import pygame
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 class RangeIndicator(SpriteBase):
     def __init__(self, pos, radius, color, line_length=2, line_space=2):
@@ -18,10 +19,10 @@ class RangeIndicator(SpriteBase):
         num_lines = int(self.radius * 6.2818 / (self.line_space + self.line_length))
         for i in range(num_lines):
             a = i / num_lines * 6.2818 + self.angle
-            pc = V2(self.radius, self.radius) + V2.from_angle(a) * self.radius
-            p1 = pc + V2.from_angle(a + 3.14159 / 2) * self.line_length / 2
-            p2 = pc - V2.from_angle(a + 3.14159 / 2) * self.line_length / 2
-            pygame.draw.line(self.image, self.color, p1.tuple(), p2.tuple(), 1)
+            pc = V2(self.radius, self.radius) + helper.from_angle(a) * self.radius
+            p1 = pc + helper.from_angle(a + 3.14159 / 2) * self.line_length / 2
+            p2 = pc - helper.from_angle(a + 3.14159 / 2) * self.line_length / 2
+            pygame.draw.line(self.image, self.color, p1, p2, 1)
 
         self._width = self.radius * 2
         self._height = self._width

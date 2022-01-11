@@ -6,7 +6,8 @@ import particle
 from animrotsprite import AnimRotSprite
 from colors import *
 from healthy import Healthy
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class SpaceObject(AnimRotSprite, Healthy):
@@ -81,6 +82,6 @@ class SpaceObject(AnimRotSprite, Healthy):
                         a = base_angle + 3.14159
                     else:
                         a = base_angle
-                    pvel = V2.from_angle(a) * 6
+                    pvel = helper.from_angle(a) * 6
                     p = particle.Particle([PICO_WHITE, PICO_LIGHTGRAY, PICO_DARKGRAY],1,self.pos + V2(x - self.width //2,y - self.height //2),1.5,pvel)
                     self.scene.game_group.add(p)          

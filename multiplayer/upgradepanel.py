@@ -13,7 +13,8 @@ from text import FONTS, Text
 from upgrade import upgrades
 from upgrade.upgradebutton import UpgradeButton
 from upgrade.upgradeicon import UpgradeIcon
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class UpgradePanel(Panel):

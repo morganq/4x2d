@@ -12,7 +12,8 @@ from icontext import IconText
 from optimize import frame_memoize
 from stats import Stats
 from upgrade import upgrades
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class Civ:
@@ -135,7 +136,7 @@ class Civ:
     
     def in_comm_circle(self, pos):
         for (comm_pos, comm_radius) in self.get_comm_circles():
-            if (pos - comm_pos).sqr_magnitude() <= comm_radius ** 2:
+            if (pos - comm_pos).length_squared() <= comm_radius ** 2:
                 return True
         return False
 

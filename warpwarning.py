@@ -1,7 +1,8 @@
 from framesprite import FrameSprite
 from ships.alienbattleship import AlienBattleship
 import text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 from colors import *
 
 WARNINGTIME = 8

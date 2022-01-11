@@ -13,7 +13,8 @@ from scene import Scene
 from spritebase import SpriteBase
 from text import Text
 from upgrade import upgradeicon
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 REWARDS = {
     'jump_drive':{'title':'Jump Drive', 'description':'Begin with +2 fighter in future battles'},

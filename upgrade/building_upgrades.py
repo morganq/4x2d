@@ -486,7 +486,7 @@ class Ultra2bUpgrade(AddBuildingUpgrade):
     def apply(self, to, second):
         if to == second:
             return
-        delta = (second.pos - to.pos).normalized()
+        delta = (second.pos - to.pos).normalize()
         pos1 = to.pos + delta * (to.radius + 15)
         pos2 = second.pos - delta * (second.radius + 15)
         p1 = portal.Portal(to.scene, pos1, second, to.owning_civ)
@@ -519,10 +519,10 @@ class Ultra3Upgrade(AddBuildingUpgrade):
             pass
         
         delta = second.pos - to.pos
-        dn = delta.normalized()
+        dn = delta.normalize()
         pos = to.pos + dn * (to.get_radius() + 10)
         i = 0
-        while (pos - second.pos).sqr_magnitude() > (10 + second.get_radius()) ** 2:
+        while (pos - second.pos).length_squared() > (10 + second.get_radius()) ** 2:
             sm = SpaceMine(scene, pos, to.owning_civ, i / 9)
             scene.game_group.add(sm)
             step = scene.flowfield.get_vector(pos, second, 0) * 15

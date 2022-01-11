@@ -1,11 +1,13 @@
 import random
 
+import helper
 import pygame
 from colors import *
 from particle import Particle
 from rangeindicator import RangeIndicator
 from spaceobject import SpaceObject
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class Alien3Void(SpaceObject):
@@ -31,8 +33,8 @@ class Alien3Void(SpaceObject):
         num = r
         #for i in range(num):
         #    theta = i / (num-1) * 6.2818
-        #    p = V2.from_angle(theta) * r
-        #    self.image.set_at((p + V2(r, r)).tuple_int(), PICO_LIGHTGRAY)
+        #    p = helper.from_angle(theta) * r
+        #    self.image.set_at((p + V2(r, r)), PICO_LIGHTGRAY)
 
         self._recalc_rect()
 
@@ -52,8 +54,8 @@ class Alien3Void(SpaceObject):
             self.ring._generate_image()
         
         if random.random() > 0.93:
-            pos = V2.random_angle() * random.random() * self.radius + self.pos
-            p = Particle([PICO_LIGHTGRAY, PICO_DARKGRAY], 1, pos, 0.25, V2.random_angle() * 3)
+            pos = helper.random_angle() * random.random() * self.radius + self.pos
+            p = Particle([PICO_LIGHTGRAY, PICO_DARKGRAY], 1, pos, 0.25, helper.random_angle() * 3)
             p._layer = -1
             self.scene.game_group.add(p)
 

@@ -3,7 +3,8 @@ import pygame
 import game
 from helper import clamp
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class ScrollPanel(SpriteBase):

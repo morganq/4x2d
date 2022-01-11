@@ -10,7 +10,8 @@ from helper import clamp
 from levelbackground import LevelBackground
 from scene import Scene
 from spritebase import SpriteBase
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class LEObject(SpriteBase):
@@ -96,7 +97,7 @@ class LevelEditorScene(Scene):
 
         if inp == "mouse_drag":
             if self.current_object:
-                d = (event.gpos - self.current_object.pos).magnitude()
+                d = (event.gpos - self.current_object.pos).length()
                 self.current_object.set_radius(d)
 
         if inp == "other":
@@ -126,7 +127,7 @@ class LevelEditorScene(Scene):
         for obj in self.game_group.sprites():
             data.append({
                 'type':obj.obj_type,
-                'pos':obj.pos.tuple_int(),
+                'pos':tuple(obj.pos),
                 'size':int(obj.size),
                 'data':obj.data
             })
@@ -142,7 +143,7 @@ class LevelEditorScene(Scene):
         text.render_multiline_to(self.game.screen, (18,16), str(self.current_object_resources[1]), "small", PICO_BLUE)
         text.render_multiline_to(self.game.screen, (33,16), str(self.current_object_resources[2]), "small", PICO_PINK)
         pygame.draw.rect(self.game.screen, PICO_LIGHTGRAY, (3 + self.current_object_resources_index * 15, 24,6,2))
-        pygame.draw.rect(self.game.screen, PICO_WHITE, (*self.game.game_offset.tuple(), *game.RES),1)
+        pygame.draw.rect(self.game.screen, PICO_WHITE, (*self.game.game_offset, *game.RES),1)
         return super().render()
 
     def update(self, dt):

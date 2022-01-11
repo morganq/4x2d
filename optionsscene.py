@@ -23,7 +23,8 @@ from helper import clamp
 from run import RunInfo
 from slider import Slider
 from starmap import starmapscene
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class OptionsScene(scene.Scene):
@@ -130,7 +131,7 @@ class OptionsScene(scene.Scene):
 
     def adjust_resolution(self, resolution):
         self.game.menu_bg_cache_obj = None
-        self.game.save.set_setting("resolution", resolution.tuple_int())
+        self.game.save.set_setting("resolution", tuple(resolution))
         fs = self.game.save.get_setting("fullscreen")
         self.game.set_resolution(resolution, fs, resizable = not fs)
         x = self.game.game_resolution.x / 2 - 120

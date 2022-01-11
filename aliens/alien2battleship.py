@@ -1,10 +1,13 @@
 import random
 
+import helper
+import pygame
 from colors import *
 from particle import Particle
 from ships.all_ships import register_ship
 from ships.battleship import Battleship
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 @register_ship
@@ -37,7 +40,7 @@ class Alien2Battleship(Battleship):
                     y = random.randint(0,self.height-1)
                     color = self.image.get_at((x,y))
                     if color[3] > 128 and color[0:3] != PICO_BLACK:
-                        p = Particle([PICO_WHITE, PICO_RED, PICO_BROWN], 1, self.pos + V2(x - 9, y - 9), 0.25, V2.random_angle() * 5)
+                        p = Particle([PICO_WHITE, PICO_RED, PICO_BROWN], 1, self.pos + V2(x - 9, y - 9), 0.25, helper.random_angle() * 5)
                         self.scene.add_particle(p)
 
         if self.health <= 0:

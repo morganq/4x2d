@@ -5,7 +5,8 @@ import pygame
 import framesprite
 import helper
 import joystickcursor
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class Machine:

@@ -7,7 +7,8 @@ import pygame
 from colors import *
 from planet import planet
 from simplesprite import SimpleSprite
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from ships import fighter
 from ships.all_ships import register_ship
@@ -81,7 +82,7 @@ class Scout(fighter.Fighter):
             return True
         if not self.effective_target.owning_civ or self.effective_target.owning_civ == self.owning_civ:
             return True
-        if (self.effective_target.pos - self.pos).sqr_magnitude() > 100 ** 2:
+        if (self.effective_target.pos - self.pos).length_squared() > 100 ** 2:
             return True
         if self.busters <= 0:
             return True
@@ -104,7 +105,7 @@ class Scout(fighter.Fighter):
                 self.busters -= 1
                 self.buster_time = 0.5
                 ang = (self.effective_target.pos - self.pos).to_polar()[1]
-                rvel = V2.from_angle(ang + 3.14159 + random.random() - 0.5)
+                rvel = helper.from_angle(ang + 3.14159 + random.random() - 0.5)
                 b = bullet.Bullet(
                     self.pos,
                     self.effective_target,
@@ -127,7 +128,7 @@ class Scout(fighter.Fighter):
     def emit_thrust_particles(self):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
         pvel += -self.velocity / 2
-        p = particle.Particle([PICO_WHITE, PICO_BLUE], 1, self.pos + -self.velocity.normalized() * self.radius, 2, pvel)
+        p = particle.Particle([PICO_WHITE, PICO_BLUE], 1, self.pos + -self.velocity.normalize() * self.radius, 2, pvel)
         self.scene.add_particle(p)
 
     def kill(self):

@@ -6,7 +6,8 @@ from elements import polycircle
 from helper import clamp
 from particle import Particle
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class Explosion(SpriteBase):

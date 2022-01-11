@@ -1,13 +1,17 @@
 import math
 import random
 
+import pygame
+
 import explosion
 import game
+import helper
 import particle
 import ships
 from colors import *
 from economy import RESOURCE_COLORS
-from v2 import V2
+
+V2 = pygame.math.Vector2
 
 
 class StatusEffect:
@@ -42,7 +46,7 @@ class GreyGooEffect(StatusEffect):
             return
         self.time -= dt
         if (self.time + dt) % 0.25 < self.time % 0.25:
-            pvel = V2.from_angle(random.random() * 6.2818) * 5
+            pvel = helper.from_angle(random.random() * 6.2818) * 5
             p = particle.Particle([PICO_WHITE, PICO_LIGHTGRAY, PICO_LIGHTGRAY, PICO_DARKGRAY], 1, self.owner.pos - pvel, 0.5 + random.random() * 0.35, pvel)
             p.layer = 3
             game.Game.inst.scene.game_group.add(p)
@@ -104,8 +108,8 @@ class MultiBonusEffect(StatusEffect):
             for res in self.resources.data.keys():
                 amt = self.resources.data[res]
                 if amt > 0:
-                    pos = V2.from_angle(self.time * 2) * 6 + self.owner.pos
-                    p = particle.Particle([RESOURCE_COLORS[res]], 1, pos, amt / 100, V2.random_angle() * 2)
+                    pos = helper.from_angle(self.time * 2) * 6 + self.owner.pos
+                    p = particle.Particle([RESOURCE_COLORS[res]], 1, pos, amt / 100, helper.random_angle() * 2)
                     self.owner.scene.game_group.add(p)
             self.particle_time = 0
         return super().update(dt)

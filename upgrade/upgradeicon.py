@@ -6,7 +6,8 @@ from economy import RESOURCE_COLORS
 from resources import resource_path
 from spritebase import SpriteBase
 from tooltippanel import TooltipPanel
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from upgrade.upgrades import UPGRADE_CATEGORY_COLORS, UPGRADE_CLASSES
 

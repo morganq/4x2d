@@ -50,7 +50,8 @@ from spaceobject import SpaceObject
 from text import FONTS, Text, render_multiline_to
 from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgrades import UPGRADE_CLASSES
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 TICK_TIME = 0.05
 
@@ -580,10 +581,10 @@ class LevelScene(levelscenebase.LevelSceneBase):
                         p1 = V2((x + 0.5) * flowfield.GRIDSIZE, (y + 0.5) * flowfield.GRIDSIZE) + ff.offset
                         if gc is not None:
                             p2 = p1 + gc * flowfield.GRIDSIZE * 0.75
-                            pygame.draw.line(gi, (0,0,255), p1.tuple(),p2.tuple())
-                            pygame.draw.circle(gi, (0,0,255), p1.tuple(), 1)
+                            pygame.draw.line(gi, (0,0,255), p1,p2)
+                            pygame.draw.circle(gi, (0,0,255), p1, 1)
                         else:
-                            pygame.draw.circle(gi, (255,0,255), p1.tuple(), 3, 1)
+                            pygame.draw.circle(gi, (255,0,255), p1, 3, 1)
             
             if False:
                 for y in range(len(self.objgrid.grid)):
@@ -623,7 +624,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
         res = self.game.game_resolution
         if self.cinematic:
-            surf = pygame.Surface(res.tuple(), pygame.SRCALPHA)
+            surf = pygame.Surface(res, pygame.SRCALPHA)
             pygame.draw.rect(surf, PICO_DARKBLUE, (0,0,res.x,40), 0)
             pygame.draw.rect(surf, PICO_DARKBLUE, (0,res.y-40,res.x,40), 0)
             #surf.set_alpha(160)
@@ -636,8 +637,8 @@ class LevelScene(levelscenebase.LevelSceneBase):
             
             pygame.draw.rect(self.game.screen, PICO_BLUE, (0, 0, res.x, res.y), 1)
             
-            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 12, res.y - 12)).tuple() for z in tri], 0)
-            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 7, res.y - 12)).tuple() for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 12, res.y - 12)) for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 7, res.y - 12)) for z in tri], 0)
 
         elif not self.cinematic:
             ctl = "Space"
@@ -645,8 +646,8 @@ class LevelScene(levelscenebase.LevelSceneBase):
                 ctl = "R1"
             t = text.render_multiline(ctl, "small", PICO_LIGHTGRAY, wrap_width=130)
             self.game.screen.blit(t, (res.x - t.get_width() - 16, res.y - 12))
-            pygame.draw.polygon(self.game.screen, PICO_LIGHTGRAY, [(z + V2(res.x - 12, res.y - 12)).tuple() for z in tri], 0)
-            pygame.draw.polygon(self.game.screen, PICO_LIGHTGRAY, [(z + V2(res.x - 7, res.y - 12)).tuple() for z in tri], 0)            
+            pygame.draw.polygon(self.game.screen, PICO_LIGHTGRAY, [(z + V2(res.x - 12, res.y - 12)) for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, PICO_LIGHTGRAY, [(z + V2(res.x - 7, res.y - 12)) for z in tri], 0)            
             #FONTS['small'].render_to(self.game.screen, PICO_BLUE, "")
 
         return None

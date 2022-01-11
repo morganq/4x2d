@@ -5,7 +5,8 @@ from framesprite import FrameSprite
 from panel import Panel
 from simplesprite import SimpleSprite
 from text import Text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class TutorialMessage(Panel):

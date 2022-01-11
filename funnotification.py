@@ -4,7 +4,8 @@ import res
 from colors import *
 from helper import clamp
 from text import Text
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 COLORS = [PICO_BLUE, PICO_WHITE, PICO_PINK, PICO_YELLOW, PICO_GREEN]
 

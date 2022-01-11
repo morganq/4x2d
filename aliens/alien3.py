@@ -8,7 +8,8 @@ from stats import Stats
 from upgrade.building_upgrades import (AddBuildingUpgrade,
                                        make_simple_stats_building)
 from upgrade.upgrades import Upgrade, register_upgrade
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 from aliens import (alien, alien3battleship, alien3bomber, alien3colonist,
                     alien3fighter)

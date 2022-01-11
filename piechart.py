@@ -4,7 +4,8 @@ import pygame
 
 from colors import *
 from spritebase import SpriteBase
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class PieChart(SpriteBase):
@@ -29,7 +30,7 @@ class PieChart(SpriteBase):
             for y in range(r * 2):
                 pt = V2(x,y)
                 delta = (pt - center)
-                if delta.sqr_magnitude() < r**2:
+                if delta.length_squared() < r**2:
                     angle = math.atan2(delta.y,delta.x) + 3.1415 / 2
                     if angle < 0: angle += 6.2818
                     color = PICO_BLACK

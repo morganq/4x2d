@@ -19,7 +19,8 @@ from states import State, UIEnabledState
 from upgrade.upgradebutton import UpgradeButton
 from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgradepanel import UpgradePanel
-from v2 import V2
+import pygame
+V2 = pygame.math.Vector2
 
 
 class UpgradeState(UIEnabledState):
@@ -236,7 +237,7 @@ class UpgradeState(UIEnabledState):
                 return
 
             if input == "click" and self.current_cursor == "nearby":
-                if (event.gpos - self.selected_targets[0].pos).sqr_magnitude() < self.NEARBY_RANGE ** 2:
+                if (event.gpos - self.selected_targets[0].pos).length_squared() < self.NEARBY_RANGE ** 2:
                     self.selected_targets.append(event.gpos)
                     self.next_selection_step()
                     return                
@@ -247,7 +248,7 @@ class UpgradeState(UIEnabledState):
 
             if input == "click":
                 pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
-                if not pr.collidepoint(event.gpos.tuple()):
+                if not pr.collidepoint(event.gpos):
                     self.finish(cancel = True)    
 
     def joystick_input(self, input, event):
@@ -293,7 +294,7 @@ class UpgradeState(UIEnabledState):
                 return
 
             if self.current_cursor == "nearby":
-                if (self.joystick_overlay.cursor_pos - self.selected_targets[0].pos).sqr_magnitude() < self.NEARBY_RANGE ** 2:
+                if (self.joystick_overlay.cursor_pos - self.selected_targets[0].pos).length_squared() < self.NEARBY_RANGE ** 2:
                     self.selected_targets.append(self.joystick_overlay.cursor_pos)
                     self.next_selection_step()
                     return      
