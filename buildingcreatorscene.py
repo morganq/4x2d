@@ -3,6 +3,7 @@ import json
 import pygame
 
 import game
+import helper
 import text
 from colors import *
 from planet import building

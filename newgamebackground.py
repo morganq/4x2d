@@ -9,7 +9,7 @@ from colors import *
 from helper import clamp, get_nearest_pos, nearest_order_pos
 from resources import resource_path
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -88,12 +88,12 @@ class NewGameBackground(SpriteBase):
 
         for i,jump in enumerate(self.jumps[0:jumps_i]):
             #poly = [V2(-1, -1), V2(1, -1), V2(1,1), V2(-1,1)]
-            #poly = [helper.from_angle(p.to_polar()[1] + self.time / 2 + i) * 5 + jump for p in poly]
+            #poly = [helper.from_angle(p.as_polar()[1] + self.time / 2 + i) * 5 + jump for p in poly]
             width = 1
             if jump in self.current_path:
                 width = 0
             #pygame.draw.polygon(self.image, PICO_GREEN, [p for p in poly], width)
-            pygame.draw.circle(self.image, PICO_BLACK, jumtuple(p), 3, width)
+            pygame.draw.circle(self.image, PICO_BLACK, jump, 3, width)
 
         
         ## DISTRESS SIGNAL ##

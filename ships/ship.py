@@ -313,7 +313,10 @@ class Ship(SpaceObject):
 
         # We want to reduce thrust if we're trying to thrust away from our heading
         angle_thrust_adjust = 1
-        velocity_adjust_final = velocity_adjust_total.normalize()
+        if velocity_adjust_total.x or velocity_adjust_total.y:
+            velocity_adjust_final = velocity_adjust_total.normalize()
+        else:
+            velocity_adjust_final = velocity_adjust_total
         current_heading_vec = helper.from_angle(self.angle)
         dp = velocity_adjust_final.dot(current_heading_vec)
         if dp < 0: # dot product < 0 means that the two vectors are facing away from eachother.
@@ -331,7 +334,8 @@ class Ship(SpaceObject):
         # Set angle based on velocity
         if self.target_heading is None:
             if self.velocity.length_squared() > 0:
-                _, self.angle = self.velocity.to_polar()
+                _, self.angle = self.velocity.as_polar()
+                self.angle *= 3.14159 / 180
 
         else:
             angle_delta = helper.get_angle_delta(self.angle, self.target_heading)
@@ -427,8 +431,8 @@ class Ship(SpaceObject):
                 colors = [PICO_WHITE, PICO_BLUE, PICO_GREEN, PICO_PINK, PICO_PURPLE]
                 n = int((speed_factor - 1) * 3) + 1
                 colors = colors[0:n]
-                #ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 3
-                ang = self.velocity.to_polar()[1] + 3.14159 + (random.random() - 0.5) * 0.45 + math.sin(self.time * 3 * speed_factor)
+                #ang = self.velocity.as_polar()[1] + 3.14159 + (random.random() - 0.5) * 3
+                ang = (self.velocity.as_polar()[1] * 3.14159 / 180) + 3.14159 + (random.random() - 0.5) * 0.45 + math.sin(self.time * 3 * speed_factor)
                 p = particle.Particle([random.choice(colors)], 1, self.pos + -self.velocity.normalize() * self.radius, 0.6, helper.from_angle(ang) * 8)
                 self.scene.add_particle(p)
                 self._timers['bonus_speed_particle_time'] = 0
@@ -478,7 +482,9 @@ class Ship(SpaceObject):
                 center += ship.pos / len(fleet_ships)
 
             delta = center - self.pos
-            forces += delta.max(1) * FLEET_PROXIMITY_POWER
+            if delta.length_squared() > 1:
+                delta.normalize_ip()
+            forces += delta * FLEET_PROXIMITY_POWER
 
         self.opt_fleet_forces  = V2(forces)
         return forces        
@@ -575,7 +581,8 @@ class Ship(SpaceObject):
 
         # If we have a target, we want to orbit it.
         delta = self.pos - self.effective_target.pos
-        _,a = delta.to_polar()
+        _,a = delta.as_polar()
+        a *= 3.14159 / 180
         # Create a target point which is a step around the circle compared to my angle around the circle.
         a += 0.2
         target_pt = self.effective_target.pos + helper.from_angle(a) * (ATMO_DISTANCE + self.effective_target.radius)

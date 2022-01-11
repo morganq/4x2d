@@ -13,7 +13,7 @@ from ships.battleship import Battleship
 from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 REVIVING_PLANET_CLOSE_RANGE = 50
@@ -258,7 +258,8 @@ class BossMothership(SpaceObject):
         def convert(pts, angle):
             out = []
             for pt in pts:
-                d,a = pt.to_polar()
+                d,a = pt.as_polar()
+                a *= 3.14159 / 180
                 out.append((helper.from_angle(a + angle) * d + center))
             return out
 

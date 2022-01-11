@@ -1,13 +1,14 @@
 import random
 
 import laserparticle
+import pygame
 import sound
 from bullet import Bullet
 from colors import *
 from particle import Particle
 from ships.all_ships import register_ship
 from ships.fighter import Fighter
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -49,7 +50,7 @@ class BossLaser(Fighter):
 
     def update(self, dt):
         if self.bullets_chambered > 0:
-            self.target_heading = (self.firing_target.pos - self.pos).to_polar()[1]
+            self.target_heading = (self.firing_target.pos - self.pos).as_polar()[1] * 3.14159 / 180
             self.fast_fire_timer += dt
             if self.fast_fire_timer >= 0.2:
                 self.fast_fire_timer -= 0.2

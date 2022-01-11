@@ -10,7 +10,7 @@ from colors import PICO_BLUE, PICO_PINK
 from laserparticle import LaserParticle
 from spaceobject import SpaceObject
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -52,7 +52,8 @@ class ReflectorShieldObj(SpaceObject):
 
     def bullet_hits(self, bullet):
         delta = (bullet.pos - self.pos).normalize()
-        d, a = delta.to_polar()
+        d, a = delta.as_polar()
+        a *= 3.14159 / 180
         print(a, self.sat.angle)
         if abs(helper.get_angle_delta(a, self.sat.angle)) < math.pi / 2:
             return True

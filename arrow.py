@@ -63,10 +63,10 @@ class OrderArrow(SpriteBase):
         end_offset = 0
         start_offset = 20
         if end_planet:
-            end = end_planet.pos
+            end = V2(end_planet.pos)
             color = PICO_WHITE
             end_offset = (end_planet.radius + 6)
-        pt1 = start_planet.pos
+        pt1 = V2(start_planet.pos)
         pt2 = end
         if not end:
             self.visible = False
@@ -114,7 +114,7 @@ class OrderArrow(SpriteBase):
             #    ranges["Ship Range"] = colonist.Colonist.estimate_flight_range(civ, end_planet) * 0.9
             title = "Fighter Range"
             if delta.length_squared() > fighter_range ** 2:
-                ang = -delta.to_polar()[1] * 180 / 3.14159
+                ang = -delta.as_polar()[1]
                 if ang < -90:
                     ang += 180
                     side = -side

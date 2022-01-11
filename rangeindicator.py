@@ -1,6 +1,8 @@
 import pygame
+
+import helper
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 class RangeIndicator(SpriteBase):

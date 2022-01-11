@@ -7,7 +7,7 @@ import asteroid
 import game
 import hazard
 import planet
-from helper import clamp, get_nearest
+from helper import clamp, get_nearest, tuple_int
 
 V2 = pygame.math.Vector2
 
@@ -152,7 +152,7 @@ class FlowField:
                         cell = (9999, cell[1])
                 grid[-1].append(cell)
 
-        end = tuple(((self.obj.pos - self.offset) // GRIDSIZE))
+        end = tuple_int(((self.obj.pos - self.offset) // GRIDSIZE))
         to_visit = [end]
         grid[end[1]][end[0]] = 0
 

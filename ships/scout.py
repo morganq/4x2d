@@ -1,13 +1,14 @@
 import random
 
 import bullet
+import helper
 import meter
 import particle
 import pygame
 from colors import *
 from planet import planet
 from simplesprite import SimpleSprite
-import pygame
+
 V2 = pygame.math.Vector2
 
 from ships import fighter
@@ -104,7 +105,8 @@ class Scout(fighter.Fighter):
             if self.buster_time <= 0:
                 self.busters -= 1
                 self.buster_time = 0.5
-                ang = (self.effective_target.pos - self.pos).to_polar()[1]
+                ang = (self.effective_target.pos - self.pos).as_polar()[1]
+                ang *= 3.14159 / 180
                 rvel = helper.from_angle(ang + 3.14159 + random.random() - 0.5)
                 b = bullet.Bullet(
                     self.pos,

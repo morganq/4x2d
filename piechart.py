@@ -3,8 +3,9 @@ import math
 import pygame
 
 from colors import *
+from helper import tuple_int
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -37,7 +38,7 @@ class PieChart(SpriteBase):
                     for angle1, angle2, anglecolor in color_by_angles:
                         if angle >= angle1 and angle < angle2:
                             color = anglecolor
-                    self.image.set_at((pt.x,pt.y), color)
+                    self.image.set_at(tuple_int(pt), color)
 
         self._width = self.image.get_width()
         self._height = self.image.get_width()

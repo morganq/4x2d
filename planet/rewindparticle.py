@@ -1,10 +1,11 @@
 import math
 
+import helper
 import pygame
 from colors import *
 from helper import clamp
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 

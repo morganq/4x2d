@@ -5,6 +5,7 @@ from collections import defaultdict
 import bullet
 import economy
 import explosion
+import helper
 import pygame
 import ships.battleship
 import ships.bomber
@@ -23,7 +24,7 @@ from line import IndicatorLine, Line
 from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
-import pygame
+
 V2 = pygame.math.Vector2
 
 from planet import flag, timeloop
@@ -234,7 +235,6 @@ class Planet(SpaceObject):
                 theta = i * 6.2818 / (num_spikes * 2)
                 rad = radius + border_radius + 2
                 if i % 2 == 1:
-                    #pygame.draw.circle(frame, color, (helper.from_angle(theta) * (rad-2) + V2(cx + 0,cy + 0)).tuple_round(), 1, 0)
                     rad = radius + border_radius - 1
                 pts.append((helper.from_angle(theta) * rad + V2(cx,cy)))
 
@@ -551,7 +551,8 @@ class Planet(SpaceObject):
                     if target.owning_civ and target.owning_civ != self.owning_civ and ship_type == "battleship":
                         self.add_population(self.get_stat("launchpad_battleship_pop"))
                 
-                towards_angle = (target.pos - self.pos).to_polar()[1]
+                towards_angle = (target.pos - self.pos).as_polar()[1] * 3.14159 / 180
+                
                 towards_angle += random.random() - 0.5
                 ship_class = SHIPS_BY_NAME[ship_type]                                
                 off = helper.from_angle(towards_angle)

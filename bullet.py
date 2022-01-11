@@ -24,7 +24,7 @@ NEAR_ENEMY_PLANETS_DIST = 60
 
 class Bullet(SpriteBase):
     def __init__(self, pos, target, shooter, vel=None, mods=None):
-        SpriteBase.__init__(self, pos)
+        SpriteBase.__init__(self, V2(pos))
         self.target = target
         self.shooter = shooter
         self.owning_civ = self.shooter.owning_civ
@@ -164,7 +164,8 @@ class Bullet(SpriteBase):
 
     def homing(self, dt):
         towards = (self.target.pos - self.pos).normalize()
-        speed, angle = self.vel.to_polar()
+        speed, angle = self.vel.as_polar()
+        angle *= 3.14159 / 180
         facing = self.vel.normalize()
         cp = facing.cross(towards)
         homing_amt = self.mods.get("homing") + self.time / 2

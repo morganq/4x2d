@@ -1,9 +1,12 @@
+import pygame
+
+import helper
 from colors import *
-import pygame
 from spaceobject import SpaceObject
-import pygame
+
 V2 = pygame.math.Vector2
 import random
+
 
 class Hazard(SpaceObject):
     def __init__(self, scene, pos, size):

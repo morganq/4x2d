@@ -6,13 +6,13 @@ from elements import polycircle
 from helper import clamp
 from particle import Particle
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 
 class Explosion(SpriteBase):
     def __init__(self, pos, colors, lifetime, max_size, scale_fn=None, line_width=1.5, velocity=None):
-        super().__init__(pos)
+        super().__init__(V2(pos))
         self.colors = colors
         self.lifetime = lifetime
         self.max_size = max_size + 2

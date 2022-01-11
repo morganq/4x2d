@@ -50,11 +50,11 @@ def tuple_int(v2):
 
 def random_angle():
     a = random.random() * 6.2818
-    x = -math.sin(a)
-    y = math.cos(a)
+    x = math.cos(a)
+    y = math.sin(a)
     return pygame.math.Vector2(x,y)
 
 def from_angle(a):
-    x = -math.sin(a)
-    y = math.cos(a)
-    return pygame.math.Vector2(x,y)    
+    x = math.cos(a)
+    y = math.sin(a)
+    return pygame.math.Vector2(x,y)

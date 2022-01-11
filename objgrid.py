@@ -26,14 +26,17 @@ class ObjGrid:
             self.grid[int(cy)][int(cx)].append(obj)
             self.all_objects.append(obj)
         #print(self.get_objects_near.cache_info())
-        self.get_objects_near.cache_clear()
+        self._get_objects_near.cache_clear()
+
+    def get_objects_near(self, pos, radius, ignore_cache=False):
+        return self._get_objects_near(pos.x, pos.y, radius, ignore_cache=False)
 
     @functools.lru_cache(maxsize=None)
-    def get_objects_near(self, pos, radius, ignore_cache=False):
-        x1 = clamp(math.floor((pos.x - radius) / self.grid_size), 0, len(self.grid[0]) - 1)
-        x2 = clamp(math.ceil((pos.x + radius) / self.grid_size), 0, len(self.grid[0]) - 1)
-        y1 = clamp(math.floor((pos.y - radius) / self.grid_size), 0, len(self.grid) - 1)
-        y2 = clamp(math.ceil((pos.y + radius) / self.grid_size), 0, len(self.grid) - 1)
+    def _get_objects_near(self, x, y, radius, ignore_cache=False):
+        x1 = clamp(math.floor((x - radius) / self.grid_size), 0, len(self.grid[0]) - 1)
+        x2 = clamp(math.ceil((x + radius) / self.grid_size), 0, len(self.grid[0]) - 1)
+        y1 = clamp(math.floor((y - radius) / self.grid_size), 0, len(self.grid) - 1)
+        y2 = clamp(math.ceil((y + radius) / self.grid_size), 0, len(self.grid) - 1)
 
         objs = []
         for y in range(y1, y2+1):

@@ -45,7 +45,8 @@ class JoystickCursor(SpriteBase):
                 self.nearest_obj.radius * 2 + 8
             )
             delta = (self.cursor_pos - center)
-            dist, ang = V2(delta.x, -delta.y).to_polar()
+            dist, ang = V2(delta.x, -delta.y).as_polar()
+            ang *= 3.14159 / 180
             pygame.draw.arc(self.image, self.color, rect, ang - 1, ang + 1)
 
             if dist > 15:
@@ -198,7 +199,8 @@ class JoystickPanelCursor(SpriteBase):
         if self.get_current_control() is None: return
         self.joystick_state = delta
         if delta.length_squared() > 0.75 ** 2:
-            _,ang = delta.to_polar()
+            _,ang = delta.as_polar()
+            ang *= 3.14159 / 180
             ang /= math.pi / 2
             ang4 = round(ang)
             angs = {0:"right", 1:"down", 2:"left", -2:"left", -1:"up"}

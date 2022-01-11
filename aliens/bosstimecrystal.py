@@ -13,7 +13,7 @@ from pygame.transform import threshold
 from resources import resource_path
 from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
-import pygame
+
 V2 = pygame.math.Vector2
 
 FREEZE_INTERVAL = 90
@@ -116,7 +116,8 @@ class TimeCrystal(Planet):
             for y in range(self.image.get_height()):
                 color = tuple(self.image.get_at((x,y)))
                 if color[3] >= 128 and color[0:3] != PICO_BLACK:
-                    _,a = (V2(x,y) - V2(self.width/2,self.height/2)).to_polar()
+                    _,a = (V2(x,y) - V2(self.width/2,self.height/2)).as_polar()
+                    a *= 3.14159 / 180
                     ad = abs(helper.get_angle_delta(a, base_angle))
                     if ad > 3.14159/2:
                         a = base_angle + 3.14159

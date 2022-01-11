@@ -397,7 +397,8 @@ class Game:
             avg = sum(remove_spikes) / max(len(remove_spikes),1)
             if not self.fps_limited_pause:
                 if avg > 33:
-                    self.scale_mode = "normal"
+                    pass
+                    #self.scale_mode = "normal"
                 if avg < 25:
                     self.scale_mode = "xbr"
         if DEV:

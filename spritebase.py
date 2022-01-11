@@ -1,6 +1,5 @@
 import pygame
 
-import pygame
 V2 = pygame.math.Vector2
 
 
@@ -11,7 +10,7 @@ class SpriteBase(pygame.sprite.DirtySprite):
         self._width = 0
         self._height = 0
         if isinstance(pos, V2):
-            self._pos = pos
+            self._pos = V2(pos)
         else:
             self._pos = V2(*pos)
         self._offset = (0,0)

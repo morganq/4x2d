@@ -1,10 +1,13 @@
+import pygame
 from helper import clamp
-import pygame
 from resources import resource_path
-import pygame
+
 V2 = pygame.math.Vector2
 import random
+
+import helper
 from colors import *
+
 
 def generate_color_art(radius, angle = None):
     wavy = pygame.image.load(resource_path("assets/planetwavy2.png")).convert_alpha()
@@ -16,7 +19,8 @@ def generate_color_art(radius, angle = None):
 
     def sphere_get(offset, planet_pos):
         spherize = 0.25 + pow(planet_pos.length(), 1.75) / 55.0
-        dist,angle = planet_pos.to_polar()
+        dist,angle = planet_pos.as_polar()
+        angle *= 3.14159 / 180
         angle += wavy_angle
         p2 = offset + helper.from_angle(angle) * dist * spherize
         p2.x = clamp(p2.x, 0, ww-1)

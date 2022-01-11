@@ -2,7 +2,7 @@ import pygame
 
 import framesprite
 from helper import clamp
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -15,7 +15,7 @@ class Particle(framesprite.FrameSprite):
             for i,color in enumerate(colors):
                 sheet.set_at((i, 0), color)
                 
-        framesprite.FrameSprite.__init__(self, pos, sheet, width)
+        framesprite.FrameSprite.__init__(self, V2(pos), sheet, width)
         self.time = time
         self.initial_time = time
         self.vel = vel or V2(0,0)

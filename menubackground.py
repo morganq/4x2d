@@ -5,11 +5,12 @@ import random
 import pygame
 
 import game
+import helper
 from colors import *
 from helper import clamp
 from resources import resource_path
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 FIELD_SIZE = 80
@@ -244,7 +245,8 @@ class MenuBackground(SpriteBase):
         else:
             self.rotation = 0
         def rotate(p):
-            d,a = (p - self.planet_center).to_polar()
+            d,a = (p - self.planet_center).as_polar()
+            a *= 3.14159 / 180
             return helper.from_angle(a + self.rotation) * d + self.planet_center
 
         if self.is_menu:

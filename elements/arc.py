@@ -1,8 +1,9 @@
 import math
 
 import pygame
-import pygame
+
 V2 = pygame.math.Vector2
+import helper
 
 
 def make_arc(color, radius, a1, a2, width=1):
@@ -15,11 +16,11 @@ def make_arc(color, radius, a1, a2, width=1):
         direction = -1
     angle = a1
     poly = [(radius, radius)]
-    poly.append((helper.from_angle(angle) * (radius + width + 2) + V2(radius, radius)).tuple_round())
+    poly.append((helper.from_angle(angle) * (radius + width + 2) + V2(radius, radius)))
     while angle < a2:
         #p1 = helper.from_angle(angle) * (radius + width + 1)
         angle += min(max_angle_delta, a2 - angle)
-        poly.append((helper.from_angle(angle) * (radius + width + 2) + V2(radius, radius)).tuple_round())
+        poly.append((helper.from_angle(angle) * (radius + width + 2) + V2(radius, radius)))
         print(angle)
     pygame.draw.polygon(mask, (255,255,255), poly, 0)
     surf.blit(mask, (0,0), None, pygame.BLEND_RGBA_MULT)

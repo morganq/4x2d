@@ -10,7 +10,8 @@ class JoyResolver:
         delta = event['delta']
         self.joystick_state = delta
         if delta.length_squared() > 0.75 ** 2:
-            _,ang = delta.to_polar()
+            _,ang = delta.as_polar()
+            ang *= 3.14159 / 180
             ang /= math.pi / 2
             ang4 = round(ang)
             angs = {0:"right", 1:"down", 2:"left", -2:"left", -1:"up"}

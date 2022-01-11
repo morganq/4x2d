@@ -49,7 +49,7 @@ from spaceobject import SpaceObject
 from text import FONTS, Text, render_multiline_to
 from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgrades import UPGRADE_CLASSES
-import pygame
+
 V2 = pygame.math.Vector2
 
 TICK_TIME = 0.05
@@ -328,7 +328,7 @@ class LevelSceneBase(scene.Scene):
             self.update_times[type(sprite)] += elapsed
 
         self.update_game_objects(dt)
-        self.update_collisions(dt)
+        #self.update_collisions(dt)
 
         self.flowfield.update(dt)
 

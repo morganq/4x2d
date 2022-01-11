@@ -1,12 +1,14 @@
 import random
 from collections import defaultdict
 
+import pygame
+
 import helper
 import particle
 from animrotsprite import AnimRotSprite
 from colors import *
 from healthy import Healthy
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -77,7 +79,8 @@ class SpaceObject(AnimRotSprite, Healthy):
             for y in range(self.image.get_height()):
                 color = tuple(self.image.get_at((x,y)))
                 if color[3] >= 128 and color[0:3] != PICO_BLACK:
-                    _,a = (V2(x,y) - V2(self.width //2, self.height // 2)).to_polar()
+                    _,a = (V2(x,y) - V2(self.width //2, self.height // 2)).as_polar()
+                    a *= 3.14159 / 180
                     if abs(helper.get_angle_delta(a, base_angle)) > 3.14159/2:
                         a = base_angle + 3.14159
                     else:

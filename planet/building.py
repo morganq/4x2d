@@ -2,6 +2,7 @@ import json
 import random
 
 import bullet
+import helper
 import laserparticle
 import pygame
 import status_effect
@@ -14,7 +15,7 @@ from satellite import (OffWorldMining, OrbitalLaser, OxygenSatellite,
                        ReflectorShield, SpaceStation)
 from spaceobject import SpaceObject
 from stats import Stats
-import pygame
+
 V2 = pygame.math.Vector2
 
 import planet
@@ -49,7 +50,8 @@ class Building:
             center += pt * (1 / len(shape))
         final_pts = []
         for pt in shape:
-            dist,ang = pt.to_polar()
+            dist,ang = pt.as_polar()
+            ang *= 3.14159 / 180
             ang += angle
             new_pt = helper.from_angle(ang) * dist * 1.25 + offset
             if expand:
@@ -132,7 +134,8 @@ class SSMBatteryBuilding(Building):
         if self.fire_time > self.FIRE_RATE and threats:
             t = random.choice(threats)
             delta = t.pos - planet.pos
-            _, angle = delta.to_polar()
+            _, angle = delta.as_polar()
+            angle *= 3.14159 / 180
             angle += random.random() * 1.5 - 0.75            
             self.fire_time = 0
             b = bullet.Bullet(
@@ -167,7 +170,8 @@ class InterplanetarySSMBatteryBuilding(Building):
             self.fire_time = 0
             t = random.choice(threats)
             delta = t.pos - planet.pos
-            _, angle = delta.to_polar()
+            _, angle = delta.as_polar()
+            angle *= 3.14159 / 180
             angle += random.random() * 1.5 - 0.75
             b = bullet.Bullet(
                 planet.pos + helper.from_angle(angle) * planet.get_radius(),
@@ -293,7 +297,8 @@ class AlienHomeDefenseBuilding(Building):
         if self.fire_time > self.FIRE_RATE and threats:
             self.fire_time = 0
             threat = random.choice(threats)
-            _,angle = (threat.pos - planet.pos).to_polar()
+            _,angle = (threat.pos - planet.pos).as_polar()
+            angle *= 3.14159 / 180
             angle += random.random() * 0.5 - 0.25
             b = bullet.Bullet(
                 planet.pos + helper.from_angle(angle) * planet.get_radius(),
@@ -417,7 +422,8 @@ class DecoyBuilding(AuraBuilding):
             # Decoy sound effect
             delta = ship.pos - planet.pos
             dn = delta.normalize()
-            dist, ang = delta.to_polar()
+            dist, ang = delta.as_polar()
+            ang *= 3.14159 / 180
             t = 0
             p1 = planet.pos
             steps = 8

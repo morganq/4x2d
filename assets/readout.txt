@@ -74,7 +74,7 @@ class NewGameBackground(SpriteBase):
 
         for i,jump in enumerate(self.jumps[0:jumps_i]):
             #poly = [V2(-1, -1), V2(1, -1), V2(1,1), V2(-1,1)]
-            #poly = [helper.from_angle(p.to_polar()[1] + self.time / 2 + i) * 5 + jump for p in poly]
+            #poly = [helper.from_angle(p.as_polar()[1] + self.time / 2 + i) * 5 + jump for p in poly]
             width = 1
             if jump in self.current_path:
                 width = 0

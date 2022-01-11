@@ -3,14 +3,16 @@ import random
 
 import aliens
 import asteroid
+import helper
 import particle
 import planet
+import pygame
 import sound
 from bullet import Bullet
 from colors import *
 from helper import all_nearby, clamp, get_nearest
 from particle import Particle
-import pygame
+
 V2 = pygame.math.Vector2
 
 from ships.all_ships import register_ship
@@ -165,7 +167,7 @@ class Fighter(Ship):
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
 
-        b = Bullet(self.pos, at, self, mods=self.prepare_bullet_mods())
+        b = Bullet(V2(self.pos), at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)
 
         #self.velocity += -towards * 2
@@ -176,11 +178,11 @@ class Fighter(Ship):
 
         for i in range(10):
             pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalize() * 30 * (random.random() + 0.25)
-            p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
+            p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, V2(self.pos), 0.2 + random.random() * 0.15, pvel)
             self.scene.add_particle(p)   
 
         self.need_attack_speed_particle = True
-        self.attack_speed_particle_angle = towards.to_polar()[1]
+        self.attack_speed_particle_angle = towards.as_polar()[1] * 3.14159 / 180
         self.stealth = False
 
     ### Dogfight ###
@@ -229,9 +231,10 @@ class Fighter(Ship):
             dir = -delta.normalize()
         elif self.fire_timer > 0.65: # If we're close and about to fire
             dir = delta.normalize()
-            self.target_heading = dir.to_polar()[1]
+            self.target_heading = dir.as_polar()[1] * 3.14159 / 180
         else:
-            _, a = (-delta).to_polar()
+            _, a = (-delta).as_polar()
+            a *= 3.14159 / 180
             a += self.combat_dodge_direction * 3.14159 / 2
             dir = helper.from_angle(a)           
 
@@ -296,12 +299,13 @@ class Fighter(Ship):
             self.target_heading = None
         elif self.fire_timer > 0.95:
             dir = delta.normalize()
-            self.target_heading = dir.to_polar()[1]
+            self.target_heading = dir.as_polar()[1] * 3.14159 / 180
         elif dsq_from_target < (self.get_weapon_range() * 0.66) ** 2:
             dir = -delta.normalize()
             self.target_heading = None
         else:
-            _, a = (-delta).to_polar()
+            _, a = (-delta).as_polar()
+            a *= 3.14159 / 180
             a += self.combat_dodge_direction * 3.14159 / 2
             dir = helper.from_angle(a)
             if self.combat_dodge_direction == 0:

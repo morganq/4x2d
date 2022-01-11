@@ -83,15 +83,15 @@ class FleetDiagram(spritebase.SpriteBase):
             valid_path = fleet.path
             if fleet.last_valid_path:
                 valid_path = fleet.last_valid_path
-            path = self.smooth_path(valid_path)
-            #path = valid_path
+            #path = self.smooth_path(valid_path)
+            path = valid_path
 
             # todo: migrate from center to path.
             original_path = path[::]
             path = path[2:-2]
             if len(path) > 3:
                 end_backwards = fleet.target.pos - original_path[int(len(original_path) * 0.75)]
-                pygame.draw.circle(self.image, OUTLINE_COLOR, center.tuple_round(), 2, 0)
+                pygame.draw.circle(self.image, OUTLINE_COLOR, center, 2, 0)
                 end_pt = fleet.target.pos - end_backwards.normalize() * (fleet.target.radius + 8)
 
                 if (fleet.pos - fleet.target.pos).length_squared() < (fleet.target.radius + 80) ** 2:
@@ -116,7 +116,9 @@ class FleetDiagram(spritebase.SpriteBase):
                     for i in range(blendsteps):
                         z = (1 - (i / blendsteps))
                         blended_path[i] = blended_path[i] - offset * z
-                    last_delta = (blended_path[-1] - blended_path[-3]).normalize()
+                    last_delta = (blended_path[-1] - blended_path[-3])
+                    if last_delta.x or last_delta.y:
+                        last_delta = last_delta.normalize()
 
                 pygame.draw.lines(self.image, OUTLINE_COLOR, False, [tuple(p) for p in blended_path], 1)
                 

@@ -1,12 +1,13 @@
 import random
 
+import helper
 import pygame
 import pygame.gfxdraw
 from colors import *
 from helper import clamp
 from resources import resource_path
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -25,7 +26,8 @@ def draw_spiral(image, angle, curviness, squash=1, rotate=0):
         #csize = 1
         rr = int((radius / 8))
         rr2 = int((radius / 14))
-        pm, pa = (pos - center).to_polar()
+        pm, pa = (pos - center).as_polar()
+        pa *= 3.14159 / 180
         tp = helper.from_angle(pa + rotate) * pm + center
         tp2 = (helper.from_angle(pa + rotate + 0.05) * pm * 0.95) + center
         brightness = clamp(int(((3 / csize) + 1) * 60 * (1 - t)),0,255)

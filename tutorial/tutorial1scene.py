@@ -1,14 +1,16 @@
 import random
 
 import game
+import helper
 import menuscene
+import pygame
 from asteroid import Asteroid
 from economy import Resources
 from planet.planet import Planet
 from ships.colonist import Colonist
 from upgrade.upgrades import UPGRADE_CLASSES
 from upgradestate import UpgradeState
-import pygame
+
 V2 = pygame.math.Vector2
 
 from tutorial.tutorialscene import TutorialScene

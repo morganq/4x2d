@@ -1,5 +1,6 @@
 import button
 import game
+import helper
 import pygame
 import states
 import text
@@ -15,7 +16,7 @@ from scrollpanel import ScrollPanel
 from simplesprite import SimpleSprite
 from spritebase import SpriteBase
 from store.storenode import StoreNodeGraphic
-import pygame
+
 V2 = pygame.math.Vector2
 
 from starmap import starmapbackground

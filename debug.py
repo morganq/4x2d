@@ -2,6 +2,7 @@ import math
 
 import pygame
 
+import helper
 import text
 
 V2 = pygame.math.Vector2
