@@ -256,8 +256,16 @@ class Game:
             if p:
                 if event.key == pygame.K_ESCAPE:
                     self.scene.take_player_input(p.player_id, "menu", event)
+                elif event.key in [pygame.K_SPACE, pygame.K_u]:
+                    self.scene.take_player_input(p.player_id, "game_speed", event)
                 else:
                     self.scene.take_player_input(p.player_id, "other", event) # Usually for debug purposes
+
+        elif event.type == pygame.KEYUP:
+            p = get_mouse_player()
+            if p:
+                if event.key in [pygame.K_SPACE, pygame.K_u]:
+                    self.scene.take_player_input(p.player_id, "un_game_speed", event)
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             p = get_mouse_player()
@@ -309,7 +317,12 @@ class Game:
                 try:
                     self.scene.take_player_input(p.player_id, p.get_binding(event.button), event)
                 except KeyError:
-                    self.scene.take_player_input(p.player_id, None, event)
+                    self.scene.take_player_input(p.player_id, None, event)       
+
+        elif event.type == pygame.JOYBUTTONUP:
+            p = get_joystick_player(event.instance_id)
+            if p:      
+                self.scene.take_player_input(p.player_id, "un_game_speed", event)       
 
 
     def run(self):
@@ -322,11 +335,18 @@ class Game:
                 self.game_loop()
             except:
                 traceback.print_exc()
+                val = traceback.format_exc()
                 # Set anticheat False so we don't penalize players who hit crash bugs!!
                 self.run_info.anticheat_level_started = False
                 self.save.set_run_state(self.run_info)
                 self.save.save()
-                return
+                while self.running:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            self.running = False
+                    self.scaled_screen.fill((0,0,0))
+                    text.render_multiline_to(self.scaled_screen, (10,10), str(val), "small", PICO_WHITE)
+                    pygame.display.update()
 
     def game_loop(self):
         for event in pygame.event.get():

@@ -1,5 +1,6 @@
 import arrow
 import asteroid
+import game
 import joystickcursor
 import orderpanel
 import planet
@@ -14,7 +15,7 @@ import text
 from colors import *
 from helper import *
 from planet import planetpanel
-import pygame
+
 V2 = pygame.math.Vector2
 
 from multiplayer import upgradepanel
@@ -25,6 +26,8 @@ def position_panel(panel, civ):
         panel.pos = civ.pos
     else:
         panel.pos = civ.pos + V2(0,40 - panel.height)
+    if panel.x + panel.width > game.Game.inst.game_resolution.x:
+        panel.x = game.Game.inst.game_resolution.x - panel.width
     panel._reposition_children()
 
 class MultiplayerState(states.UIEnabledState):
@@ -44,8 +47,16 @@ class MultiplayerState(states.UIEnabledState):
     def take_input(self, inp, event):
         if self.input_mode == 'mouse':
             self.mouse_input(inp, event)
+            if inp == "game_speed":
+                self.scene.player_game_speed_inputs[self.civ] = 1         
+            elif inp == "un_game_speed":
+                self.scene.player_game_speed_inputs[self.civ] = 0
         elif self.input_mode == 'joystick':
             self.joystick_input(inp, event)
+            if inp == "game_speed":
+                self.scene.player_game_speed_inputs[self.civ] = 1
+            elif inp == "un_game_speed":
+                self.scene.player_game_speed_inputs[self.civ] = 0
 
     def joystick_update(self, dt):
         pass
@@ -430,7 +441,10 @@ class UpgradeState(MultiplayerState):
 
     def on_select(self, up):
         if up.cursor is None:
-            apply_upgrade_with_target(self.civ, up, [self.civ])
+            try:
+                apply_upgrade_with_target(self.civ, up, [self.civ])
+            except Exception as e:
+                print(e)
             self.scene.finish_player_upgrade(self.civ)
             self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
         else:

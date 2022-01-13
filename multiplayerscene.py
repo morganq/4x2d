@@ -1,3 +1,7 @@
+from collections import defaultdict
+
+import pygame
+
 import button
 import civ
 import economy
@@ -15,8 +19,9 @@ from economy import RESOURCE_COLORS, Resources
 from explosion import Explosion
 from multiplayer import inputstates
 from multiplayer.levelstates import MultiplayerNormalState
+from multiplayer.multiplayerlevelcontroller import MultiplayerLevelController
 from planet.planet import Planet
-import pygame
+
 V2 = pygame.math.Vector2
 
 PLAYER_COLORS = [
@@ -24,6 +29,9 @@ PLAYER_COLORS = [
     PICO_ORANGE,
     PICO_GREEN,
     PICO_PINK
+]
+PLAYER_NAMES = [
+    'Blue', 'Orange', 'Green', 'Pink'
 ]
 
 # Preset positions based on the number of players
@@ -50,17 +58,25 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.player_input_sms = {}
         self.player_upgrade_buttons = {}
         self.player_upgrade_texts = {}
+        self.player_targets = {}
+        self.player_game_speed_inputs = {}
+        self.victory_number = 9001
 
     def load_level(self, file):
         # Make a homeworld for each player
         for i, civ in enumerate(self.player_civs):
-            p = Planet(self, HOMEWORLD_POSITIONS[self.num_players][i] + self.game.game_offset, 7, Resources(100,0,0))
+            p = Planet(self, HOMEWORLD_POSITIONS[self.num_players][i] + self.game.game_offset, 8, Resources(100,0,0))
             p.change_owner(civ)
-            p.add_population(5)
+            p.add_population(6)
             p.add_ship("fighter")
             p.add_ship("fighter")
             civ.homeworld = p
             self.game_group.add(p)
+
+        center = V2(self.game.game_resolution / 2)
+        mid = Planet(self, center, 3, Resources(100,0,0))
+        mid.set_time_loop()
+        self.game_group.add(mid)
 
         self.objgrid.generate_grid(self.get_objects_initial())
 
@@ -72,11 +88,14 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
             if uipos.x == 1:
                 uipos.x = self.game.game_resolution.x - 104
             if uipos.y == 1:
-                uipos.y = self.game.game_resolution.y - 45            
+                uipos.y = self.game.game_resolution.y - 60
             c = civ.MultiplayerCiv(self, uipos)
+            c.worker_loss = 1
             c.color = PLAYER_COLORS[i]
+            c.name = PLAYER_NAMES[i]
             self.player_civs.append(c)
             self.player_input_sms[i] = states.Machine(inputstates.CursorState(self, c, self.game.player_inputs[i].input_type))
+            self.player_game_speed_inputs[c] = 0
 
             self.meters[c] = {}
             for j,r in enumerate(['iron', 'ice', 'gas']):
@@ -109,6 +128,11 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
             ut.offset = (0.5, 0)
             self.ui_group.add(ut)
             self.player_upgrade_texts[i] = ut
+
+            # target
+            target = text.Text("", "small", uipos + V2(6, 44), shadow=PICO_BLACK, multiline_width=200)
+            self.ui_group.add(target)
+            self.player_targets[i] = target
 
         self.radar = Explosion(V2(300, 180), [PICO_GREEN], 1.25, self.game.game_resolution.x)
         self.ui_group.add(self.radar)            
@@ -160,6 +184,8 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         #self.game.game_speed_input = 1
         self.stage_name.kill()
 
+        self.level_controller = MultiplayerLevelController(self)
+
     def get_starting_state(self):
         return MultiplayerNormalState(self)
 
@@ -168,6 +194,17 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
 
     def get_fleet_manager(self, civ):
         return self.fleet_managers[civ]        
+
+    def update(self, dt):
+        dt = min(dt,0.1)
+        
+        if self.cinematic:
+            self.game_speed = 1.0
+        else:
+            self.game_speed = sum(self.player_game_speed_inputs.values()) / len(self.player_civs) * 5 + 1
+
+        self.update_game(dt * self.game_speed, dt)
+        self.update_ui(dt)
 
     def update_game(self, dt, base_dt):
         for sm in self.player_input_sms.values():
@@ -189,7 +226,9 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
                 ratio = civ.upgrade_limits.data[res_type] / civ.base_upgrade_limits.data[res_type]
                 #self.meters[civ][res_type].set_width(80 * ratio)
                 self.meters[civ][res_type].max_value = civ.upgrade_limits.data[res_type]
-                self.meters[civ][res_type].value = civ.resources.data[res_type]        
+                self.meters[civ][res_type].value = civ.resources.data[res_type]      
+
+            self.player_targets[self.get_player_id(civ)].set_text("%d to win" % (self.victory_number - civ.total_mined))
 
     def take_player_input(self, player_id, inp, event):
         self.player_input_sms[player_id].state.take_input(inp, event)

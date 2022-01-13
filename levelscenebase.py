@@ -272,13 +272,6 @@ class LevelSceneBase(scene.Scene):
         dt = min(dt,0.1)
         if not self.cinematic:
             self.game_speed = round((self.game.game_speed_input * 3) + 1)
-        # This is correct way to do things, but we need to optimize more for this to work
-        #game_dt = dt * self.game_speed        
-        #self.update_remainder_time += dt
-        #num_updates = int(self.update_remainder_time / TICK_TIME)
-        #for i in range(num_updates):
-        #    self.update_game(TICK_TIME * self.game_speed)
-        #    self.update_remainder_time -= TICK_TIME
 
         self.update_game(dt * self.game_speed, dt)
         self.update_ui(dt)
@@ -447,6 +440,16 @@ class LevelSceneBase(scene.Scene):
         self.pause_sprite.visible = self.paused
         if self.stage_name.time < 2 and self.stage_name.alive():
             self.pause_sprite.visible = False
+            
+        res = self.game.game_resolution
+        tri = [V2(0,0), V2(4,4), V2(0,8)]
+        if self.game_speed > 1:
+            color = PICO_BLUE if ((self.time % 2) > 1) else PICO_WHITE
+            
+            pygame.draw.rect(self.game.screen, PICO_BLUE, (0, 0, res.x, res.y), 1)
+            
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 12, res.y - 12)) for z in tri], 0)
+            pygame.draw.polygon(self.game.screen, color, [(z + V2(res.x - 7, res.y - 12)) for z in tri], 0)
 
         if not self.cinematic:
             self.ui_group.draw(self.game.screen)

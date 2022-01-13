@@ -2,6 +2,8 @@ import math
 import random
 from collections import defaultdict
 
+import pygame
+
 import aliens
 import economy
 import funnotification
@@ -12,7 +14,7 @@ from icontext import IconText
 from optimize import frame_memoize
 from stats import Stats
 from upgrade import upgrades
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -21,6 +23,7 @@ class Civ:
     def __init__(self, scene):
         self.scene = scene
         self.color = PICO_WHITE
+        self.name = ""
         self.is_enemy = True     
         self.is_player = False   
         self.resources = economy.Resources()
@@ -33,6 +36,7 @@ class Civ:
         self.researched_upgrade_names = set()
         self.base_stats = Stats()
         self.frame_stats = {}
+        self.total_mined = 0
 
         self.offered_upgrades = {}
 
@@ -202,6 +206,7 @@ class Civ:
                 self.upgrade_times.append(self.time)        
 
     def earn_resource(self, resource, value, where = None):
+        self.total_mined += value
         if self.frozen.data[resource] <= 0:
             self.resources.set_resource(resource, self.resources.data[resource] + value)
         if not self.is_enemy:
