@@ -109,7 +109,7 @@ def _create_background(width:int, height:int, planets_arr:np.ndarray, t:float) -
                     color = PICO_LIGHTGRAY
 
                 if x % frequency == 0 and y % frequency == 0:
-                    length_pct = min(max(math.sin(density * 8)*0.65 + 0.75, 0.125), 1.5)
+                    length_pct = min(max(math.sin(density * 8)*0.65 + 0.75, 0.125), 1.25)
                     length = round(frequency * length_pct / 8)
                     color = [int(c * COLOR_FADE) for c in color]
                     pixel(x,y,color)
