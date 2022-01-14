@@ -31,6 +31,9 @@ class ObjGrid:
     def get_objects_near(self, pos, radius, ignore_cache=False):
         return self._get_objects_near(pos.x, pos.y, radius, ignore_cache=False)
 
+    def get_objects(self):
+        return self.all_objects[::]
+
     @functools.lru_cache(maxsize=None)
     def _get_objects_near(self, x, y, radius, ignore_cache=False):
         x1 = clamp(math.floor((x - radius) / self.grid_size), 0, len(self.grid[0]) - 1)
