@@ -2,6 +2,7 @@ import math
 import random
 
 import planet
+from debug import print
 from upgrade.upgrades import UPGRADE_CLASSES
 
 from aliens import bossmothership, buildorder

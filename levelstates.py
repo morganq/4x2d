@@ -15,6 +15,7 @@ import starmap
 import text
 import upgrade
 import upgradestate
+from achievements import Achievements
 from aliens import bossmothership
 from anyupgradepanel import AnyUpgradePanel
 from arrow import OrderArrow
@@ -36,7 +37,7 @@ from states import State, UIEnabledState
 from upgrade.upgradebutton import UpgradeButton
 from upgrade.upgradepanel import UpgradePanel
 from upgrade.upgrades import UPGRADE_CLASSES
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -533,9 +534,17 @@ class VictoryState(State):
         self.scene.game.run_info.sectors_cleared += 1
 
         self.scene.game.run_info.choose_path(*self.scene.game.run_info.next_path_segment)
-        self.scene.game.run_info.anticheat_level_started = False
+        self.scene.game.run_info.complete_sector(list(self.scene.player_civ.researched_upgrade_names))
         self.scene.game.save.set_run_state(self.scene.game.run_info)
         self.scene.game.save.save()
+        Achievements.inst.sector_won(
+            self.scene.stage_num,
+            self.scene.time,
+            self.scene.game.run_info.o2,
+            list(self.scene.player_civ.researched_upgrade_names),
+            self.scene.player_civ.ships_lost
+        )
+        
         self.time = 0
         #self.scene.paused = True
 
@@ -579,6 +588,14 @@ class BeatGameState(State):
         self.scene.update_run_stats()
         self.scene.game.run_info.victory = True
         self.scene.game.run_info.sectors_cleared += 1
+
+        Achievements.inst.run_won(
+            self.game.run_info.time_taken,
+            self.game.run_info.o2,
+            self.game.run_info.ships_lost,
+            self.game.run_info.reward_list,
+            self.game.run_info.upgrades_by_sector
+        )
 
         self.scene.ui_group.empty()
         self.scene.pause_sprite.darken()

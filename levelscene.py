@@ -32,7 +32,7 @@ from asteroid import Asteroid
 from button import Button
 from civ import Civ, PlayerCiv
 from colors import *
-from debug import debug_render
+from debug import debug_render, print
 from economy import RESOURCE_COLORS, RESOURCES, Resources
 from explosion import Explosion
 from framesprite import FrameSprite
@@ -50,7 +50,7 @@ from spaceobject import SpaceObject
 from text import FONTS, Text, render_multiline_to
 from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgrades import UPGRADE_CLASSES
-import pygame
+
 V2 = pygame.math.Vector2
 
 TICK_TIME = 0.05

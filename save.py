@@ -83,3 +83,10 @@ class Save:
 
     def get_highscores(self):
         return self.highscores[0:10]
+
+    def set_achievement(self, name):
+        if name not in self.achievements:
+            self.achievements.append(name)
+            return True
+        else:
+            return False

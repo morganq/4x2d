@@ -11,3 +11,4 @@ build
 *.build
 *.dist
 *.onefile-build
+steam_output

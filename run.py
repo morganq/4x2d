@@ -8,6 +8,7 @@ RUN_INFO_SERIALIZE_FIELDS = [
     'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
     'bonus_credits', 'ship_levels', 'score', 'time_taken', 'ships_lost',
     'reward_list', 'sectors_cleared', 'victory', 'started', 'run_challenges', 'run_modifiers',
+    'upgrades_by_sector',
     'anticheat_level_started'
 ]
 
@@ -16,7 +17,7 @@ LEVEL_TITLES = {
     1: {'name':'Surprise Attack', 'description':'We\'ve entered the system undetected - a promising start to our mission.'},
     2: {'name':'Alert!', 'description':'They\'ve issued an alert to the federation. Let\'s make quick work of this before reinforcements are prepared.'},
     3: {'name':'Reinforcements', 'description':'Bad luck, now the whole sector knows we\'re here!'},
-    4: {'name':'All-In', 'description':'All the alien civs have closed ranks. Nowhere to go but forward.'},
+    4: {'name':'All In', 'description':'All the alien civs have closed ranks. Nowhere to go but forward.'},
     5: {'name':'Breakthrough', 'description':'We are nearing the Inner Ring of the galaxy, but these aliens guarding it have some kind of advanced technology.'},
     6: {'name':'Discovery', 'description':'We\'re detecting a temporal anomoly on one of these planets - it\'s locked in a time loop!'},
     7: {'name':'Stronghold', 'description':'The signal is not far off. But the enemy\'s defenses are only getting stronger.'},
@@ -59,12 +60,19 @@ class RunInfo:
         self.run_challenges = [] # Negative mods
         self.run_modifiers = [] # Positive mods
 
+        self.upgrades_by_sector = {}
+
         self.anticheat_level_started = False
 
     def begin_run(self):
         # challenges
         if LOW_OXYGEN in self.run_challenges:
             self.o2 = 60 * 60 * 0.5
+
+    def complete_sector(self, upgrades):
+        current_sector = len(self.path) + 1
+        self.upgrades_by_sector[current_sector] = upgrades[::]
+        self.anticheat_level_started = False
 
     def serialize(self):
         obj = {}

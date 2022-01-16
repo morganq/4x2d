@@ -26,3 +26,12 @@ def debug_render(screen, scene):
 
     #surf.set_alpha(50)
     screen.blit(surf, (0,0))
+
+DEBUG_LOG = []
+
+basic_print = print
+
+def print(*args):
+    out = "  ".join([str(a) for a in args])
+    basic_print(out)
+    DEBUG_LOG.append(out)

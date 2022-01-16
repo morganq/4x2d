@@ -3,6 +3,7 @@ import csv
 import io
 import os
 import pstats
+import random
 import sys
 import time
 import traceback
@@ -11,9 +12,11 @@ from collections import defaultdict
 import pygame
 from pygame.transform import scale
 
+import achievements
 import allupgradesscene
 import buildingcreatorscene
 import creditsscene
+import debug
 import gameprofile
 import introscene
 import leveleditorscene
@@ -57,11 +60,13 @@ class Game:
     INPUT_JOYSTICK = "joystick"
     INPUT_MULTIPLAYER = "multiplayer"
     def __init__(self, save):
+        self.debug_console = False
         global DEV
         #pygame.display.set_icon(pygame.image.load(resource_path("assets/icon_2_256.png")))
         pygame.mixer.pre_init(buffer=256)
         pygame.init()
         self.save = save
+        self.achievements = achievements.Achievements(self.save)
 
         resolution = self.save.get_setting("resolution")
         if resolution == None:
@@ -144,7 +149,6 @@ class Game:
         Game.inst = self
 
     def set_resolution(self, resolution, fullscreen = False, resizable = False):
-        print("set_resolution", resolution, fullscreen, resizable)
         flags = 0
         if fullscreen:
             flags = flags | pygame.FULLSCREEN | pygame.HWSURFACE
@@ -174,6 +178,13 @@ class Game:
             elif event.key == pygame.K_RIGHT: self.scene.take_input("right", event)
             elif event.key == pygame.K_UP: self.scene.take_input("up", event)
             elif event.key == pygame.K_DOWN: self.scene.take_input("down", event)
+            elif event.key == pygame.K_a and DEV:
+                ra = random.choice(list(achievements.ACHIEVEMENT_INFO.values()))
+                self.show_achievement(ra['name'], ra['description'])
+            elif event.key == pygame.K_r and DEV:
+                self.achievements.reset_all()             
+            elif event.key == pygame.K_BACKQUOTE and DEV:
+                self.debug_console = not self.debug_console
             elif event.key == pygame.K_SPACE:
                 self.scene.take_input("action", event)
                 self.game_speed_input = clamp(int(1 - self.game_speed_input), 0, 1)
@@ -328,6 +339,8 @@ class Game:
     def run(self):
         self.clock = pygame.time.Clock()
         self.running = True
+        self.achievements_group = pygame.sprite.LayeredDirty()
+        achievements.init_steam()
         self.scene.start()
 
         while self.running:
@@ -344,6 +357,7 @@ class Game:
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             self.running = False
+
                     self.scaled_screen.fill((0,0,0))
                     text.render_multiline_to(self.scaled_screen, (10,10), str(val), "small", PICO_WHITE)
                     pygame.display.update()
@@ -383,7 +397,21 @@ class Game:
         #optimize.print_memos()
         optimize.reset_frame_memos()
 
+        self.update_achievements(dt)
+
         return True
+
+    def update_achievements(self, dt):
+        y = 0
+        for sprite in self.achievements_group.sprites():
+            sprite.update(dt)
+            if sprite.alive():
+                sprite.y = y
+                y += 66
+
+    def show_achievement(self, name, description):
+        popup = achievements.AchievementPopup(V2(self.game_resolution.x // 2, 0), name, description)
+        self.achievements_group.add(popup)
 
     def scale_xbr(self):
         sc = pygame.Surface(self.screen.get_size(), depth=32)
@@ -396,9 +424,18 @@ class Game:
     def scale_normal(self):
         pygame.transform.scale(self.screen, self.scaled_screen.get_size(), self.scaled_screen)
 
+    def draw_debug_console(self):
+        y = 0
+        for line in debug.DEBUG_LOG[-20:]:
+            surf = text.render_multiline(line, "small", PICO_GREEN, 500, False)
+            pygame.draw.rect(self.scaled_screen, PICO_BLACK, (0, y, self.scaled_screen.get_width(), surf.get_height() + 2), 0)
+            self.scaled_screen.blit(surf, (2, y + 1))
+            y += surf.get_height() + 2
+
     def render(self):
-        self.scaled_screen.fill((128,128,128,255))
+        #self.scaled_screen.fill((128,128,128,255))
         self.scene.render()
+        self.achievements_group.draw(self.screen)
         if self.scale == 1 or not xbrz_scale:
             self.scale_normal()
         else:
@@ -407,6 +444,9 @@ class Game:
             else:
                 self.scale_xbr()
         
+        if self.debug_console:
+            self.draw_debug_console()
+
         t = pygame.time.get_ticks() - self.frame_time
         self.frame_time = pygame.time.get_ticks()
         self.frame_times.append(t)

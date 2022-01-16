@@ -1,3 +1,6 @@
+from debug import print
+
+
 class BuildOrder:
     def __init__(self, steps):
         self.time = 0

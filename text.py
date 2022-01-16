@@ -45,7 +45,6 @@ def preload():
 for name,font in FONTS.items():
     font.antialiased = False
     font.pad = True
-    print(name, font.get_sized_height(), font.get_sized_glyph_height(), font.get_sized_ascender(), font.get_sized_descender())
 
 class Text(spritebase.SpriteBase):
     type = None
@@ -323,8 +322,6 @@ if __name__ == "__main__":
 
     groups = get_groups(body)
     words = get_words(groups)
-    print(groups)
-    print(words)
 
     layout = get_word_layout(words, "small")
     print(layout['rect'])

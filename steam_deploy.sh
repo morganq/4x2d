@@ -1,0 +1,1 @@
+../SteamCMD/steamcmd +login morganquirkdev +run_app_build ../4x2d/steam_app_upload.vdf +quit

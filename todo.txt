@@ -2,6 +2,11 @@
 
 ** Juice **
 
+ - Resource Efficiency: 120%
+ - Attack Coordination: 0 - 9
+ - Technology Level: 1 - 3
+ - Special: --
+
 ** Immediate **
 
 Update upgrade spreadsheet

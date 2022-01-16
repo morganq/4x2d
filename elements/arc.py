@@ -21,7 +21,6 @@ def make_arc(color, radius, a1, a2, width=1):
         #p1 = helper.from_angle(angle) * (radius + width + 1)
         angle += min(max_angle_delta, a2 - angle)
         poly.append((helper.from_angle(angle) * (radius + width + 2) + V2(radius, radius)))
-        print(angle)
     pygame.draw.polygon(mask, (255,255,255), poly, 0)
     surf.blit(mask, (0,0), None, pygame.BLEND_RGBA_MULT)
     return surf
