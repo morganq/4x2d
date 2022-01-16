@@ -665,7 +665,7 @@ class VarietyProduction2bUpgrade(Upgrade):
     category = "ships"
     title = "Refit"
     description = "Convert all fighters on a planet into Interceptors and Bombers. [Iron] is [!Frozen] for [60 seconds]"
-    icon = "ship_default"
+    icon = "refit1"
     cursor = "allied_planet"
     family = {'tree':'variety', 'parents':['s_variety1']}
     requires = ('s_variety1')     
@@ -688,7 +688,7 @@ class VarietyProduction3Upgrade(Upgrade):
     category = "ships"
     title = "Refit II"
     description = "Convert all fighters on a planet into Interceptors and Bombers."
-    icon = "ship_default"
+    icon = "refit2"
     cursor = "allied_planet"
     family = {'tree':'variety', 'parents':['s_variety2a', 's_variety2b']}
     requires = lambda x: 's_variety1' in x and ('s_variety2a' in x or 's_variety2b' in x)
