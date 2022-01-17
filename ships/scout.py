@@ -96,6 +96,7 @@ class Scout(fighter.Fighter):
         mods = super().prepare_bullet_mods()
         mods['shape'] = 'circle'
         mods['size'] = 1
+        mods['grey_goo'] = self.get_stat("grey_goo")
         return mods
 
     def state_siege(self, dt):

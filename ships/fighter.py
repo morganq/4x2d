@@ -130,7 +130,6 @@ class Fighter(Ship):
             
         if self.SHIP_BONUS_NAME == "fighter":
             mods['iron_on_hit'] = self.get_stat("fighter_damage_iron")
-            mods['grey_goo'] = self.get_stat("grey_goo")
 
         return mods        
 

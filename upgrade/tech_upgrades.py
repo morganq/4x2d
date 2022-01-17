@@ -13,7 +13,7 @@ class Mechanics1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Precise Assembly"
-    description = "[Fighters] gain [^+33%] rate of fire"
+    description = "[Fighters] gain [^+33%] Attack Speed"
     icon = "preciseassembly"
     stats = Stats(fighter_fire_rate=0.33)
     family = {'tree':'t_mechanics', 'parents':[]}
@@ -25,8 +25,8 @@ class Mechanics2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Spaceport"
-    description = "Planets with no docked ships gain [^+2] health per second and [^+33%] population growth rate"
-    icon = "tech_default"
+    description = "Planets with no docked ships gain [^+2] Health per second and [^+33%] Population Growth Rate"
+    icon = "spaceports"
     stats = Stats(planet_regen_without_ships = 2, pop_growth_without_ships = 0.33)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
@@ -36,9 +36,9 @@ class Mechanics2bUpgrade(Upgrade):
     name = "t_mechanics2b"
     resource_type = "iron"
     category = "tech"
-    title = "Material Reconstruction"
-    description = "Gain [^+25] ice for each planet you control"
-    icon = "matreconstruction"    
+    title = "Overflow Tanks"
+    description = "Gain [^+25] [Ice] for each planet you control"
+    icon = "overflowtanks"    
     family = {'tree':'t_mechanics', 'parents':['t_mechanics1']}
     requires = ('t_mechanics1',)
     infinite = True
@@ -54,8 +54,8 @@ class Mechanics3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Turbocharger"
-    description = "Ships gain [^+33%] move speed and [^+33%] rate of fire. Every time you issue an order, [!-5] seconds of oxygen"
-    icon = "tech_default"
+    description = "Ships gain [^+33%] Speed and [^+33%] Attack Speed. Every time you issue an order to a fleet, [!-5] Oyxgen"
+    icon = "turbocharger"
     stats = Stats(ship_speed_mul = 0.33, ship_fire_rate = 0.33)
     family = {'tree':'t_mechanics', 'parents':['t_mechanics2a', 't_mechanics2b']}
     requires = lambda x: 't_mechanics1' in x and ('t_mechanics2a' in x or 't_mechanics2b' in x)
@@ -72,7 +72,7 @@ class Atomic1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nuclear Battery"
-    description = "Each planet has [^+100%] mining rate for the first [120 seconds] after capture"
+    description = "Each planet has [^+100%] Mining Rate for the first 120 seconds after capture."
     icon = "nuclearbattery"
     stats = Stats(mining_rate_first_120=1)
     family = {'tree':'t_atomic', 'parents':[]}
@@ -84,7 +84,7 @@ class Atomic2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Isotope Conversion"
-    description = "Gain [^+50% of maximum] [Ice] and [^+50% of maximum] [Gas]"
+    description = "Gain [+50% of Maximum] [Ice] and [+50% of Maximum] [Gas]."
     icon = "isotope"
     stats = Stats()
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
@@ -102,7 +102,7 @@ class Atomic2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Atomic Assembler"
-    description = "[^+50%] faster production of ships other than [Fighters]"
+    description = "[^+50%] Production Rate of ships other than [Fighters]"
     icon = "atomicassembler"
     stats = Stats(bomber_production=0.50, interceptor_production=0.50, battleship_production=0.50)
     family = {'tree':'t_atomic', 'parents':['t_atomic1']}
@@ -114,7 +114,7 @@ class Atomic3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Unstable Reactor"
-    description = "Gain [^+30%] mining rate on each planet. Lose this bonus for 60 seconds if the planet is attacked or launches a ship"
+    description = "[^+30%] Mining Rate on each planet. [!Lose this bonus] for 60 seconds if the planet is attacked or launches a ship"
     icon = "unstablereactor"
     stats = Stats(unstable_reaction = 0.30)
     family = {'tree':'t_atomic', 'parents':['t_atomic2a', 't_atomic2b']}
@@ -127,7 +127,7 @@ class Vanguard1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Vanguard Boosters"
-    description = "Ships fly [^+50%] faster when targeting neutral or enemy planets"
+    description = "Ships have [^+50%] Speed when targeting neutral or enemy planets"
     icon = "vanguardboosters"
     stats = Stats(ship_speed_mul_targeting_planets = 0.5)
     family = {'tree':'t_vanguard', 'parents':[]}
@@ -139,7 +139,7 @@ class Vanguard2aUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Vanguard Armor"
-    description = "Ships gain a [^+10] health shield when far from a planet you control"
+    description = "Ships have [^+10] Shield when far from a planet you control"
     icon = "vanguardarmor"
     stats = Stats(ship_shield_far_from_home = 10)
     family = {'tree':'t_vanguard', 'parents':['t_vanguard1']}
@@ -151,7 +151,7 @@ class Vanguard2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Warp Drive"
-    description = "Ships gain warp drive: they can teleport forward [^+3] units in open space"
+    description = "Ships can warp forward [^+3] units in open space"
     icon = "warpdrive"
     stats = Stats(warp_drive = 3)
     family = {'tree':'t_vanguard', 'parents':['t_vanguard1']}
@@ -164,7 +164,7 @@ class Vanguard3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Quantum Weirdness"
-    description = "A [Worker] ship that uses warp drive has a [33% chance] for [^+3] population"
+    description = "A [Worker Ship] that uses Warp Drive has a [33% chance] to gain [^+3] Population"
     icon = "quantumweirdness"
     stats = Stats(warp_drive_pop_chance=0.33)
     family = {'tree':'t_vanguard', 'parents':['t_vanguard2b']}
@@ -179,8 +179,8 @@ class Quantum1Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Munitions Recycling"
-    description = "When a [Fighter] deals damage to an enemy ship, gain [^+3] Iron"
-    icon = "tech_default"
+    description = "When a [Fighter] deals damage to an enemy ship, gain [^+3] [Iron]"
+    icon = "munitionsrecycling"
     stats = Stats(fighter_damage_iron = 3)
     family = {'tree':'t_quantum', 'parents':[]}
     requires = None
@@ -192,7 +192,7 @@ class Quantum2aUpgrade(Upgrade):
     category = "tech"
     title = "Proximity Alert"
     description = "Planets you control that are near enemy planets produce ships [^+100%] faster"
-    icon = "tech_default"
+    icon = "proximityalert"
     stats = Stats(ship_production_proximity=1)
     family = {'tree':'t_quantum', 'parents':['t_quantum1']}
     requires = ('t_quantum1',)    
@@ -203,7 +203,7 @@ class Quantum2bUpgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Nanothread Plating"
-    description = "Ships have [^+20%] health"
+    description = "Ships have [^+20%] Health"
     icon = "nanothread"
     stats = Stats(ship_health_mul = 0.25)
     family = {'tree':'t_quantum', 'parents':['t_quantum1']}
@@ -216,8 +216,8 @@ class Quantum3Upgrade(Upgrade):
     resource_type = "iron"
     category = "tech"
     title = "Grey Goo"
-    description = "Fighters apply Grey Goo on hit, inflicting damage over time to the target."
-    icon = "tech_default"
+    description = "Scouts apply Grey Goo, inflicting damage over time to the target"
+    icon = "greygoo"
     stats = Stats(grey_goo=1)
     family = {'tree':'t_quantum', 'parents':['t_quantum2a', 't_quantum2b']}
     requires = lambda x: 't_quantum1' in x and ('t_quantum2a' in x or 't_quantum2b' in x)
