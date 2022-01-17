@@ -55,7 +55,7 @@ class GreyGooEffect(StatusEffect):
             if self.owner.owning_civ == self.applier.owning_civ:
                 self.kill()
                 return
-            dmg = (0.1 * len([e for e in self.owner.status_effects if e.name == "Grey Goo"])) + 0.25
+            dmg = (0.1 * len([e for e in self.owner.status_effects if e.name == "Grey Goo"])) + 0.15
             self.owner.take_damage(dmg, self.applier)
             if self.owner.owning_civ and self.owner.owning_civ.get_stat("grey_goo_collection") > 0:
                 self.owner.owning_civ.resources.iron += self.owner.owning_civ.get_stat("grey_goo_collection")
