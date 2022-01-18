@@ -229,8 +229,8 @@ class Crystal1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Crystal Repeater"
-    description = "[Interceptor] missiles bounce to hit a second target"
-    icon = "resonancereloader"
+    description = "[Interceptor] missiles bounce to hit an additional target"
+    icon = "crystalrepeater"
     stats = Stats(interceptor_missile_bounce=1)
     family = {'tree':'t_crystal', 'parents':[]}
     requires = None
@@ -253,7 +253,7 @@ class Crystal2bUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Fragmentation Sequence"
-    description = "If a [Worker] ship is destroyed, it explodes for [^5] damage. Damage and radius increase with ship population"
+    description = "If a [Worker] ship is destroyed, it explodes for [^5] Damage. Damage and radius increase with ship Population"
     icon = "fragmentationsequence"
     stats = Stats(atomic_bomb=1)
     family = {'tree':'t_crystal', 'parents':['t_crystal1']}
@@ -264,9 +264,9 @@ class Crystal3Upgrade(Upgrade):
     name = "t_crystal3"
     resource_type = "ice"
     category = "tech"
-    title = "Crystal Repeater"
-    description = "[Interceptors] gain a 10 health shield, and their missiles bounce to [^+1] target"
-    icon = "crystalrepeater"
+    title = "Crystal Repeater II"
+    description = "[Interceptors] gain [^+10] Shield, and their missiles bounce to [^+1] target"
+    icon = "crystalrepeater2"
     stats = Stats(interceptor_shield=10, interceptor_missile_bounce=1)
     family = {'tree':'t_crystal', 'parents':['t_crystal2a', 't_crystal2b']}
     requires = lambda x: 't_crystal1' in x and ('t_crystal2a' in x or 't_crystal2b' in x)
@@ -280,7 +280,7 @@ class AI1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Orbital Targeting Solution"
-    description = "Ships gain [^+50%] attack speed for [5 seconds] after take-off"
+    description = "Ships gain [^+50%] Attack Speed for 5 seconds after take-off"
     icon = "orbitaltargeting"
     stats = Stats(ship_fire_rate_after_takeoff=0.5)
     family = {'tree':'t_ai', 'parents':[]}
@@ -292,7 +292,7 @@ class AI2aUpgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Artificial Intelligence"
-    description = "Population growth rate [^+33%]. Population grows on planets even with [0] population"
+    description = "[^+33%] Population Growth Rate. Population grows on planets even with 0 [Workers]"
     icon = "ai"
     stats = Stats(pop_growth_min_reduction=1, pop_growth_rate=0.33)
     family = {'tree':'t_ai', 'parents':['t_ai1']}
@@ -303,9 +303,9 @@ class AI2bUpgrade(Upgrade):
     name = "t_ai2b"
     resource_type = "ice"
     category = "tech"
-    title = "?"
-    description = "Ships gain [^+2] damage"
-    icon = "coordination"
+    title = "Smart Rounds"
+    description = "Ships gain [^+2] Damage"
+    icon = "smartrounds"
     stats = Stats(ship_weapon_damage=2)
     family = {'tree':'t_ai', 'parents':['t_ai1']}
     requires = ('t_ai1',)    
@@ -317,7 +317,7 @@ class AI3Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Robotic Assembly"
-    description = "Whenever you gain control of a planet, [^add] a random tier 1 iron building"
+    description = "Whenever you capture a planet, [^add] a random Tier 1 [Iron] Building"
     icon = "roboticassembly"
     stats = Stats(colonize_random_building=1)
     family = {'tree':'t_ai', 'parents':['t_ai2a', 't_ai2b']}
@@ -330,8 +330,8 @@ class Proximity1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Hostile Takeover"
-    description = "A [Bomber] that helps raze a planet sends out a [Worker] ship to colonize it"
-    icon = "tech_default"
+    description = "A [Bomber] that helps raze a planet sends out a [Worker] ship to capture it"
+    icon = "extremehabitat"
     stats = Stats(bomber_colonist=1)
     family = {'tree':'t_proximity', 'parents':[]}
     requires = None
@@ -342,8 +342,8 @@ class Proximity1Upgrade(Upgrade):
     resource_type = "ice"
     category = "tech"
     title = "Fire Bomb"
-    description = "[Bombers] gain [^+25%] damage and have a [^30%] chance to destroy a random building on hit"
-    icon = "tech_default"
+    description = "[Bombers] gain [^+25%] Damage and have a [^30%] chance to destroy a random building on hit"
+    icon = "firebomb"
     stats = Stats(bomber_raze_chance=0.3, bomber_damage_mul=0.25)
     family = {'tree':'t_proximity', 'parents':['t_proximity1']}
     requires = ('t_proximity1',)
@@ -353,9 +353,9 @@ class Proximity2bUpgrade(Upgrade):
     name = "t_proximity2b"
     resource_type = "ice"
     category = "tech"
-    title = "?"
+    title = "Thermal Dissipator"
     description = "Ships gain +1 armor"
-    icon = "tech_default"
+    icon = "thermaldissipator"
     stats = Stats(ship_armor=1)
     family = {'tree':'t_proximity', 'parents':['t_proximity1']}
     requires = ('t_proximity1',)
@@ -365,9 +365,9 @@ class Proximity3Upgrade(Upgrade):
     name = "t_proximity3"
     resource_type = "ice"
     category = "tech"
-    title = "Spoils"
+    title = "Explosive Extraction"
     description = "When you raze a planet, gain [^1 full upgrade] of its primary resource"
-    icon = "tech_default"
+    icon = "explosiveextraction"
     stats = Stats(raze_upgrade=1)
     family = {'tree':'t_proximity', 'parents':['t_proximity2a', 't_proximity2b']}
     requires = lambda x: 't_proximity1' in x and ('t_proximity2a' in x or 't_proximity2b' in x)
@@ -381,7 +381,7 @@ class Optics1Upgrade(Upgrade):
     category = "tech"
     title = "Laser Diode"
     description = "[Battleship] weapon upgrade - rapid laser array replaces missile weapon"
-    icon = "tech_default"
+    icon = "laserdiode"
     stats = Stats(battleship_laser=1)
     family = {'tree':'t_optics', 'parents':[]}
     requires = None
@@ -391,9 +391,9 @@ class Optics2aUpgrade(Upgrade):
     name = "t_optics2a"
     resource_type = "gas"
     category = "tech"
-    title = "Fleet Upgrade"
-    description = "[Battleships] gain [^+67%] health, other ships have [!-33%] health"
-    icon = "tech_default"
+    title = "Interference Plating"
+    description = "[Battleships] gain [^+67%] Maximum Health, other ships have [!-33%] Maximum Health"
+    icon = "interferenceplating"
     stats = Stats(ship_health_mul=-0.33, battleship_health_mul=1)
     family = {'tree':'t_optics', 'parents':['t_optics1']}
     requires = ('t_optics1',)
@@ -404,8 +404,8 @@ class Optics2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Auto Focus"
-    description = "Ships gradually gain attack speed while flying, up to [^+50%] over [60 seconds]"
-    icon = "tech_default"
+    description = "Ships gradually gain Attack Speed while flying, up to [^+50%] over 60 seconds"
+    icon = "autofocus"
     stats = Stats(fire_rate_over_time=0.5)
     family = {'tree':'t_optics', 'parents':['t_optics1']}
     requires = ('t_optics1',)
@@ -415,9 +415,9 @@ class Optics3Upgrade(Upgrade):
     name = "t_optics3"
     resource_type = "gas"
     category = "tech"
-    title = "Refractor Shield"
-    description = "Ships in a fleet of [4 or more] gain a [^20] damage shield"
-    icon = "tech_default"
+    title = "Fleet Refractor"
+    description = "Ships in a fleet of [4 or more] gain [^+10] Shield"
+    icon = "fleetrefractor"
     stats = Stats(enclosure_shield=20)
     family = {'tree':'t_optics', 'parents':['t_optics2a', 't_optics2b']}
     requires = lambda x: 't_optics1' in x and ('t_optics2a' in x or 't_optics2b' in x)
@@ -430,9 +430,9 @@ class Exotic1Upgrade(Upgrade):
     name = "t_exotic1"
     resource_type = "gas"
     category = "tech"
-    title = "Supercritical Materials"
-    description = "Gain [^+200%] resources from asteroids"
-    icon = "tech_default"
+    title = "Supercollector"
+    description = "Gain [^+200%] Resources from asteroids"
+    icon = "supercollector"
     stats = Stats(asteroid_yield_mul=2.0)
     family = {'tree':'t_exotic', 'parents':[]}
     requires = None
@@ -443,9 +443,9 @@ class Exotic2aUpgrade(Upgrade):
     name = "t_exotic2a"
     resource_type = "gas"
     category = "tech"
-    title = "?"
-    description = "Ships gain [^+35%] attack range"
-    icon = "tech_default"
+    title = "Projectile Accelerator"
+    description = "Ships gain [^+35%] Attack Range"
+    icon = "projectileaccelerator"
     stats = Stats(ship_weapon_range=0.35)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
     requires = ('t_exotic1',)
@@ -457,8 +457,8 @@ class Exotic2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Jettison"
-    description = "When you lose a planet, gain [^2 full upgrades] of the planet's primary resource"
-    icon = "tech_default"
+    description = "When a planet you control is razed, gain [^2 full upgrades] of the its Primary Resource"
+    icon = "jettison"
     stats = Stats(lost_planet_upgrade=2)
     family = {'tree':'t_exotic', 'parents':['t_exotic1']}
     requires = ('t_exotic1',)
@@ -468,9 +468,9 @@ class Exotic3Upgrade(Upgrade):
     name = "t_exotic3"
     resource_type = "gas"
     category = "tech"
-    title = "?"
-    description = "Your next 10 ships to die drop a mine upon death"
-    icon = "tech_default"
+    title = "Mine Pack"
+    description = "Your next 10 ships that die drop a Mine upon death"
+    icon = "minepack"
     stats = Stats()
     family = {'tree':'t_exotic', 'parents':['t_exotic2a', 't_exotic2b']}
     requires = lambda x: 't_exotic1' in x and ('t_exotic2a' in x or 't_exotic2b' in x)
@@ -486,9 +486,9 @@ class Alien1Upgrade(Upgrade):
     name = "t_alien1"
     resource_type = "gas"
     category = "tech"
-    title = "?"
-    description = "Scouts gain cloaking"
-    icon = "tech_default"
+    title = "Void Cover"
+    description = "[Scouts] gain Cloaking"
+    icon = "voidcover"
     stats = Stats(scout_stealth=1)
     family = {'tree':'t_alien', 'parents':[]}
     requires = None
@@ -502,9 +502,9 @@ class Alien2aUpgrade(Upgrade):
     name = "t_alien2a"
     resource_type = "gas"
     category = "tech"
-    title = "Unknown Artifact"
-    description = "Gain [^+3] re-rolls"
-    icon = "tech_default"
+    title = "Curious Artifact"
+    description = "Gain [^+3] Rerolls"
+    icon = "curiousartifact"
     stats = Stats()
     family = {'tree':'t_alien', 'parents':['t_alien1']}
     requires = ('t_alien1',)
@@ -519,8 +519,8 @@ class Alien2bUpgrade(Upgrade):
     resource_type = "gas"
     category = "tech"
     title = "Kinetic Sling"
-    description = "Ship weapons deal up to [^+4] damage based on bonus speed"
-    icon = "tech_default"
+    description = "Each ship's weapon deals [^up to +4] Damage based on its bonus speed"
+    icon = "kineticsling"
     stats = Stats(ship_weapon_damage_speed=4)
     family = {'tree':'t_alien', 'parents':['t_alien1']}
     requires = ('t_alien1',)
@@ -531,9 +531,9 @@ class Alien3Upgrade(Upgrade):
     name = "t_alien3"
     resource_type = "gas"
     category = "tech"
-    title = "Alien Core Drill"
-    description = "[^+30] seconds of [Oxygen] for every planet you control"
-    icon = "tech_default"
+    title = "Atmosphere Capture"
+    description = "Gain [+30] Oxygen per planet you control"
+    icon = "atmospherecapture"
     stats = Stats()
     family = {'tree':'t_alien', 'parents':['t_alien2a', 't_alien2b']}
     requires = lambda x: 't_alien1' in x and ('t_alien2a' in x or 't_alien2b' in x)
