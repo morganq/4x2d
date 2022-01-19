@@ -643,7 +643,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
         elif not self.cinematic:
             ctl = "Space"
             if self.game.input_mode == "joystick":
-                ctl = "R1"
+                ctl = "L1"
             t = text.render_multiline(ctl, "small", PICO_LIGHTGRAY, wrap_width=130)
             self.game.screen.blit(t, (res.x - t.get_width() - 16, res.y - 12))
             pygame.draw.polygon(self.game.screen, PICO_LIGHTGRAY, [(z + V2(res.x - 12, res.y - 12)) for z in tri], 0)

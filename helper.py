@@ -68,4 +68,4 @@ def try_normalize(v):
     if v.x == 0 and v.y == 0:
         return v
     else:
-        return v.normalized()
+        return v.normalize()

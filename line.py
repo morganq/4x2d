@@ -1,7 +1,6 @@
 import pygame
 
-impor helper
-
+import helper
 import text
 from colors import PICO_WHITE
 from helper import clamp

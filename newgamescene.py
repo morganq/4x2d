@@ -9,7 +9,7 @@ import states
 from colors import *
 from starmap import starmapscene
 from tutorial import tutorialmessage
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -49,16 +49,20 @@ class NewGameScene(scene.Scene):
     def update(self, dt):
         self.time += dt
         if self.time > 0.5 and not self.msg.target_message:
-            self.msg.set_text("Commander! Another distress beacon, out in deep space. Should we go?")
+            self.msg.set_text("Commander! A distress signal, coming from deep space. It must be other refugees! Should we go?")
             self.msg.set_visible(True)
             self.msg.pos = V2(self.game.game_resolution.x / 2 - self.msg.width / 2, self.game.game_resolution.y - self.msg.height - 5)
             self.msg.fade_in()
-        if self.time > 4 and not self.launch:
-            launchtext = "LAUNCH"
-            if self.game.input_mode == "joystick": launchtext = "[*x*] LAUNCH"
+        if self.time > 4.5 and not self.launch:
+            if self.game.save.tutorial_complete:
+                launch_word = "LAUNCH"
+            else:
+                launch_word = "LAUNCH" # "tutorial"?
+            launchtext = launch_word
+            if self.game.input_mode == "joystick": launchtext = "[*x*] %s" % launch_word
             self.launch = button.Button(V2(self.game.game_resolution.x / 2, self.game.game_resolution.y / 2), launchtext, "huge", self.on_launch, color=PICO_ORANGE)
             self.launch.offset = (0.5, 0.5)
-            self.ui_group.add(self.launch)            
+            self.ui_group.add(self.launch)
         self.bg.update(dt)
         for spr in self.ui_group.sprites():
             spr.update(dt)
@@ -85,8 +89,11 @@ class NewGameScene(scene.Scene):
         self.game.run_info.begin_run()
         self.game.save.set_run_state(self.game.run_info)
         self.game.save.save()
-        self.game.scene = starmapscene.StarMapScene(self.game)
-        self.game.scene.start()
+        if self.game.save.tutorial_complete:
+            self.game.scene = starmapscene.StarMapScene(self.game)
+            self.game.scene.start()
+        else:
+            self.game.set_scene("tutorial")
 
     def on_back(self):
         self.game.scene = menuscene.MenuScene(self.game)

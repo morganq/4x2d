@@ -760,7 +760,7 @@ class Planet(SpaceObject):
             self.ships[type] += 1
         else:
             self.ships[type] = 1
-        if self.owning_civ and self.owning_civ.is_player:
+        if self.owning_civ and self.owning_civ.is_player and notify:
             it = IconText(self.pos, "assets/i-%s.png" % type, "+1", PICO_PINK)
             it.pos = self.pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)      

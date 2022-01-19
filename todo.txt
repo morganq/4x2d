@@ -2,14 +2,12 @@
 
 ** Juice **
 
- - Resource Efficiency: 120%
- - Attack Coordination: 0 - 9
- - Technology Level: 1 - 3
- - Special: --
+Blinking upgrade button
+o2 in shop
 
 ** Immediate **
 
-Update upgrade spreadsheet
+"Game Saved" on star map
 
 ** Missing Sounds **
 

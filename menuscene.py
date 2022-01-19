@@ -536,8 +536,8 @@ class MenuScene(scene.Scene):
         self.bg_newgame.label.visible = False
         self.bg_newgame.hover = True
         ow,oh = self.takeoff_earth.base_image.get_size()
-        nw = int(ow / (self.takeoff_time * 3 + 1))
-        nh = int(oh / (self.takeoff_time * 3 + 1))
+        nw = int(ow / (self.takeoff_time * 4 + 1))
+        nh = int(oh / (self.takeoff_time * 4 + 1))
         offx = 0.05
         offy = 0.8
         self.takeoff_earth.x = (ow - nw) * offx
@@ -550,7 +550,7 @@ class MenuScene(scene.Scene):
                 earth_delta = p.end_pos - ep
                 p.end_pos += V2(-30 * dt * p.degree, 0) - earth_delta * p.degree * dt * 0.3
                 #p.obj.x -= dt * p.degree * 10
-        if self.takeoff_time >= 2.5:
+        if self.takeoff_time >= 1.75:
             if self.game.save.victories > 0:
                 self.mode = MODE_MODS
                 self.create_mods_ui()

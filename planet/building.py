@@ -279,7 +279,7 @@ class AlienHomeDefenseBuilding(Building):
     def __init__(self):
         Building.__init__(self)
         self.load_shapes("aliendefense")
-        self.stats = Stats(planet_health_mul=1)
+        self.stats = Stats(planet_health_mul=0.33)
         self.fire_time = 0
         
     def get_threats(self, planet):

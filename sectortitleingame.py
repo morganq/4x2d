@@ -8,7 +8,7 @@ from colors import *
 from constants import REWARD_ICON_WIDTH, REWARD_ICONS_ORDER
 from helper import clamp
 from resources import resource_path
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -20,7 +20,7 @@ class SectorTitleInGame(spritebase.SpriteBase):
         self.icon_sheet = pygame.image.load(resource_path("assets/reward_icons.png")).convert_alpha()
         self._generate_image()
         self.initial_pos = self.pos
-        self.target_pos = V2(self.pos.x, 9)
+        self.target_pos = V2(self.pos.x, 8)
         self.t = 0
 
     def _generate_image(self):

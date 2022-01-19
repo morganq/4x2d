@@ -541,7 +541,7 @@ class Alien:
 
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
-        self.civ.base_stats['planet_health_mul'] = -0.5 + (difficulty - 1) / 6
+        self.civ.base_stats['planet_health_mul'] = -0.6 + (difficulty - 1) / 6
         self.civ.base_stats['mining_rate'] = 0.45 + 0.125 * difficulty
         self.civ.base_stats['max_ships_per_planet'] = int((difficulty + 5) / 2)
         extra_planets = 0

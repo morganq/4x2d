@@ -36,6 +36,7 @@ class Save:
         self.settings = data.get("settings", DEFAULT_SETTINGS)
         self.achievements = data.get("achievements", [])
         self.victories = data.get("victories", 0)
+        self.tutorial_complete = data.get("tutorial_complete", False)
         SAVE_OBJ = self
 
     def save(self):
@@ -45,7 +46,8 @@ class Save:
             'highscores': self.highscores,
             'settings': self.settings,
             'achievements': self.achievements,
-            'victories': self.victories
+            'victories': self.victories,
+            'tutorial_complete': self.tutorial_complete
         }
         json.dump(data, open(resource_path(FILENAME), "w"))
 

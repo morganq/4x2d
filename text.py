@@ -29,6 +29,9 @@ def preload():
         sy['left'] = ('assets/mouse_left.png', None)
         sy['right'] = ('assets/mouse_right.png', None)
         sy['drag'] = ('assets/mouse_drag.png', None)
+        sy['iron'] = ('assets/i-iron.png', None)
+        sy['ice'] = ('assets/i-ice.png', None)
+        sy['gas'] = ('assets/i-gas.png', None)
         sy['ps_square'] = ('assets/ps_%s.png' % mapping[size], 1)
         sy['ps_triangle'] = ('assets/ps_%s.png' % mapping[size], 2)
         sy['ps_circle'] = ('assets/ps_%s.png' % mapping[size], 3)
@@ -136,9 +139,10 @@ TEXT_COLORS = {'!':PICO_RED,'^':PICO_GREEN, '>': PICO_YELLOW}
 HEIGHTS = {'tiny':12, 'small':12, 'medium':14, 'big':18, 'huge':28, 'bm_army':12, 'pixolde':16, 'logo':50}
 Y_OFFSETS = {'tiny':0, 'small': -2, 'medium': 0, 'big': -4, 'huge':0, 'bm_army':0, 'pixolde':0, 'logo':0}
 Y_SYMBOL_OFFSETS = {'tiny':0, 'small': 0, 'medium': 0, 'big': 0, 'huge':1, 'bm_army':0, 'pixolde':0, 'logo':0}
+SPECIFIC_SYMBOL_Y_OFFSETS = {}
 
 SYMBOLS = [
-    'left', 'right', 'drag', 'x', 'square', 'triangle', 'circle'
+    'left', 'right', 'drag', 'x', 'square', 'triangle', 'circle', 'iron', 'ice', 'gas'
 ]
 
 def get_symbol(size, name):
@@ -175,7 +179,7 @@ def get_groups(line):
 
     while x < len(line):
         if line[x] == "[":
-            if "]" in line:
+            if "]" in line[x:]:
                 if line[x+1] in TEXT_COLORS.keys():
                     color = line[x+1]
                     add_group({'color':TEXT_COLORS[color], 'body':""})
@@ -247,7 +251,8 @@ def get_word_layout(words, size, wrap_width=None, center=True):
                 lines.append([])                
             my = baseline_y - f.get_rect("M").height // 2
             spacing = int(w / 6) + 2
-            rect = pygame.Rect(left_x, my - h // 2, w + spacing, h)
+            specific_offset = SPECIFIC_SYMBOL_Y_OFFSETS.get(word['name'], 0)
+            rect = pygame.Rect(left_x, my - h // 2 + specific_offset, w + spacing, h)
             lines[-1].append({'word':word, 'rect':rect})
             # Adjust running variables
             left_x += rect.width
