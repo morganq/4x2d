@@ -34,9 +34,10 @@ class Bullet(SpriteBase):
         self.mods = mods or {}
         self.speed = VEL * (1 + self.mods.get("missile_speed", 0))
         if vel:
-            self.vel = vel.normalize() * self.speed
+            self.vel = helper.try_normalize(vel) * self.speed
         else:
-            self.vel = (self.get_target_pos() - self.pos).normalize() * self.speed
+            delta = (self.get_target_pos() - self.pos)
+            self.vel = helper.try_normalize(delta) * self.speed
 
         self.death_time = self.mods.get("life", None) or DEATH_TIME
         self.offset = (0.5, 0.5)
@@ -129,14 +130,14 @@ class Bullet(SpriteBase):
                 nearby_targets.remove(self.target)
             if nearby_targets:
                 self.target = random.choice(nearby_targets)
-                self.vel = (self.target.pos - self.pos).normalize() * self.vel.length()
+                self.vel = helper.try_normalize(self.target.pos - self.pos) * self.vel.length()
             else:
                 self.kill()
 
         else:
             if reflect:
                 self.target, self.shooter = self.shooter, self.target
-                self.vel = (self.get_target_pos() - self.pos).normalize() * self.vel.length()
+                self.vel = helper.try_normalize(self.get_target_pos() - self.pos) * self.vel.length()
                 self._generate_image()
             else:
                 self.kill()
@@ -150,7 +151,7 @@ class Bullet(SpriteBase):
         self.image = pygame.Surface((9,9), pygame.SRCALPHA)
         shape = self.mods.get('shape', 'line')
         if shape == 'line':
-            vn = self.vel.normalize()
+            vn = helper.try_normalize(self.vel)
             p1 = V2(4,4)
             p2 = V2(4,4) + vn * self.mods.get("size", 2)
             pygame.draw.line(self.image, self.mods.get("color", PICO_BLUE), tuple(p1), tuple(p2), 1)
@@ -163,10 +164,10 @@ class Bullet(SpriteBase):
         self._recalc_rect()
 
     def homing(self, dt):
-        towards = (self.target.pos - self.pos).normalize()
+        towards = helper.try_normalize(self.target.pos - self.pos)
         speed, angle = self.vel.as_polar()
         angle *= 3.14159 / 180
-        facing = self.vel.normalize()
+        facing = helper.try_normalize(self.vel)
         cp = facing.cross(towards)
         homing_amt = self.mods.get("homing") + self.time / 2
         try:

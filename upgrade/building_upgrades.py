@@ -25,11 +25,11 @@ class EconUpgrade(AddBuildingUpgrade):
     resource_type = "iron"
     category = "buildings"
     title = "Refinery"
-    description = "[^+50%] Mining Rate for primary resource"
+    description = "[^+35%] Mining Rate for primary resource"
     icon = "refinery"
     cursor = "allied_planet"
     family = {'tree':'econ', 'parents':[]}
-    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.5), shape="mine")
+    building = make_simple_stats_building(stats=Stats(top_mining_rate=0.35), shape="mine")
 
 @register_upgrade
 class Econ2AUpgrade(AddBuildingUpgrade):
@@ -486,7 +486,7 @@ class Ultra2bUpgrade(AddBuildingUpgrade):
     def apply(self, to, second):
         if to == second:
             return
-        delta = (second.pos - to.pos).normalize()
+        delta = helper.try_normalize(second.pos - to.pos)
         pos1 = to.pos + delta * (to.radius + 15)
         pos2 = second.pos - delta * (second.radius + 15)
         p1 = portal.Portal(to.scene, pos1, second, to.owning_civ)
@@ -519,7 +519,7 @@ class Ultra3Upgrade(AddBuildingUpgrade):
             pass
         
         delta = second.pos - to.pos
-        dn = delta.normalize()
+        dn = helper.try_normalize(delta)
         pos = to.pos + dn * (to.get_radius() + 10)
         i = 0
         while (pos - second.pos).length_squared() > (10 + second.get_radius()) ** 2:

@@ -1,6 +1,7 @@
 import pygame
 
 import game
+import helper
 import sound
 import text
 from colors import *
@@ -29,7 +30,7 @@ class Arrow(SpriteBase):
 
         w,h = tuple(game.Game.inst.game_resolution)
 
-        forward = delta.normalize()
+        forward = helper.try_normalize(delta)
         side = V2(forward.y, -forward.x)
         points = []
         points.append(pt1 + side * -ht)
@@ -81,7 +82,7 @@ class OrderArrow(SpriteBase):
 
         w,h = tuple(game.Game.inst.game_resolution)
 
-        forward = delta.normalize()
+        forward = helper.try_normalize(delta)
         side = V2(forward.y, -forward.x)
         pt1 += forward * start_offset
         pt2 += forward * -end_offset

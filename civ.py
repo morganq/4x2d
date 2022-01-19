@@ -75,6 +75,7 @@ class Civ:
         self.planet_void = {}
         self.void_expand_timer = 60
         self.void_color = self.color
+        self.max_buildings = 8
 
     def get_ship_fuel(self, ship_name):
         f = 9999

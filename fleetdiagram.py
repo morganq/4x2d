@@ -5,6 +5,7 @@ from os import close
 import pygame
 
 import game
+import helper
 import spritebase
 from colors import *
 from helper import clamp, get_angle_delta, get_nearest
@@ -92,14 +93,14 @@ class FleetDiagram(spritebase.SpriteBase):
             if len(path) > 3:
                 end_backwards = fleet.target.pos - original_path[int(len(original_path) * 0.75)]
                 pygame.draw.circle(self.image, OUTLINE_COLOR, center, 2, 0)
-                end_pt = fleet.target.pos - end_backwards.normalize() * (fleet.target.radius + 8)
+                end_pt = fleet.target.pos - helper.try_normalize(end_backwards) * (fleet.target.radius + 8)
 
                 if (fleet.pos - fleet.target.pos).length_squared() < (fleet.target.radius + 80) ** 2:
                     blended_path = [
                         center,
                         end_pt
                     ]
-                    last_delta = (end_pt - center).normalize()
+                    last_delta = helper.try_normalize(end_pt - center)
                 else:
                     # Blend the end of the path
                     blended_path = path[::]
@@ -118,7 +119,7 @@ class FleetDiagram(spritebase.SpriteBase):
                         blended_path[i] = blended_path[i] - offset * z
                     last_delta = (blended_path[-1] - blended_path[-3])
                     if last_delta.x or last_delta.y:
-                        last_delta = last_delta.normalize()
+                        last_delta = helper.try_normalize(last_delta)
 
                 pygame.draw.lines(self.image, OUTLINE_COLOR, False, [tuple(p) for p in blended_path], 1)
                 

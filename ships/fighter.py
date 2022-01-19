@@ -161,7 +161,7 @@ class Fighter(Ship):
             self.effective_target = None
 
     def fire(self, at):
-        towards = (at.pos - self.pos).normalize()
+        towards = helper.try_normalize(at.pos - self.pos)
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
@@ -176,7 +176,7 @@ class Fighter(Ship):
         sound.play(random.choice(['laser1', 'laser2', 'laser3']))
 
         for i in range(10):
-            pvel = (towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)).normalize() * 30 * (random.random() + 0.25)
+            pvel = helper.try_normalize(towards + V2((random.random() - 0.5) * 1.5, (random.random()-0.5) * 1.5)) * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, V2(self.pos), 0.2 + random.random() * 0.15, pvel)
             self.scene.add_particle(p)   
 
@@ -225,22 +225,17 @@ class Fighter(Ship):
         # Need to get close to the enemy
         delta = self.effective_target.pos - self.pos
         if delta.length_squared() > self.get_weapon_range() ** 2: # Too far
-            dir = delta.normalize()
+            dir = helper.try_normalize(delta)
         elif delta.length_squared() < (self.get_weapon_range() / 2) ** 2: # Too close
-            dir = -delta.normalize()
+            dir = -helper.try_normalize(delta)
         elif self.fire_timer > 0.65: # If we're close and about to fire
-            dir = delta.normalize()
+            dir = helper.try_normalize(delta)
             self.target_heading = dir.as_polar()[1] * 3.14159 / 180
         else:
             _, a = (-delta).as_polar()
             a *= 3.14159 / 180
             a += self.combat_dodge_direction * 3.14159 / 2
             dir = helper.from_angle(a)           
-
-        # Need to stay close to starting spot
-        #delta = self.dogfight_initial_pos - self.pos
-        #if delta.length_squared() > 30 ** 2:
-        #    dir = delta.normalize()
 
         self.target_velocity = dir * self.get_max_speed()
 
@@ -277,7 +272,7 @@ class Fighter(Ship):
                 self.set_state(STATE_RETURNING)
             return
 
-        tp = self.effective_target.pos + (self.pos - self.effective_target.pos).normalize() * self.effective_target.radius
+        tp = self.effective_target.pos + helper.try_normalize(self.pos - self.effective_target.pos) * self.effective_target.radius
         delta = tp - self.pos
         dsq_from_target = delta.length_squared() - self.effective_target.radius ** 2
 
@@ -294,13 +289,13 @@ class Fighter(Ship):
         
         dir = V2(0,0)
         if not in_range():
-            dir = delta.normalize()
+            dir = helper.try_normalize(delta)
             self.target_heading = None
         elif self.fire_timer > 0.95:
-            dir = delta.normalize()
+            dir = helper.try_normalize(delta)
             self.target_heading = dir.as_polar()[1] * 3.14159 / 180
         elif dsq_from_target < (self.get_weapon_range() * 0.66) ** 2:
-            dir = -delta.normalize()
+            dir = -helper.try_normalize(delta)
             self.target_heading = None
         else:
             _, a = (-delta).as_polar()
@@ -418,5 +413,5 @@ class Fighter(Ship):
         for i in range(2):
             pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
             pvel += -self.velocity / 2
-            p = particle.Particle([PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY, PICO_DARKGRAY, PICO_DARKGRAY], 1, self.pos + -self.velocity.normalize() * self.radius, 1, pvel)
+            p = particle.Particle([PICO_YELLOW, PICO_RED, PICO_LIGHTGRAY, PICO_DARKGRAY, PICO_DARKGRAY], 1, self.pos + -helper.try_normalize(self.velocity) * self.radius, 1, pvel)
             self.scene.add_particle(p)

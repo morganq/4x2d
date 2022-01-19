@@ -159,7 +159,13 @@ class Planet(SpaceObject):
         self._population = clamp(value, 0, 999)
 
     def is_buildable(self):
-        return len(self.buildings) < 8 and self.get_stat("prevent_buildings") == 0
+        return len(self.buildings) < self.get_max_buildings() and self.get_stat("prevent_buildings") == 0
+
+    def get_max_buildings(self):
+        if self.owning_civ:
+            return self.owning_civ.max_buildings
+        else:
+            return 8
 
     def regenerate_art(self):
         self.generate_base_art()

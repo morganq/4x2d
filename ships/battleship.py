@@ -2,14 +2,16 @@ import math
 import random
 
 import explosion
+import helper
 import planet
+import pygame
 import sound
 from bullet import Bullet
 from colors import *
 from helper import all_nearby, clamp
 from laserparticle import LaserParticle
 from particle import Particle
-import pygame
+
 V2 = pygame.math.Vector2
 
 from ships.all_ships import register_ship
@@ -91,7 +93,7 @@ class Battleship(Fighter):
             self.fire_laser(at)
             return
 
-        towards = (at.pos - self.pos).normalize()
+        towards = helper.try_normalize(at.pos - self.pos)
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
@@ -100,7 +102,7 @@ class Battleship(Fighter):
         self.scene.game_group.add(b)
 
         for i in range(10):
-            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalize() * 30 * (random.random() + 0.25)
+            pvel = helper.try_normalize(towards + V2(random.random() * 0.75, random.random() * 0.75)) * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.add_particle(p)
 

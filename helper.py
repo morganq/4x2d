@@ -63,3 +63,9 @@ def rect_contain(v, x1, y1, w, h):
     x = min(max(v.x, x1), x1 + w)
     y = min(max(v.y, y1), y1 + h)
     return pygame.math.Vector2(x,y)
+
+def try_normalize(v):
+    if v.x == 0 and v.y == 0:
+        return v
+    else:
+        return v.normalized()

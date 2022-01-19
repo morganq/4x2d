@@ -1,12 +1,13 @@
 import random
 
+import helper
 import pygame
 import pygame.gfxdraw
 from colors import *
 from helper import clamp
 from resources import resource_path
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -33,7 +34,7 @@ class StarPath(SpriteBase):
         h = abs(int(delta.y)) + 32
         
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)        
-        direction = delta.normalize()
+        direction = helper.try_normalize(delta)
         center = V2(w / 2,h / 2)
         distance = delta.length()
         steps = int((distance - 40) / 8)

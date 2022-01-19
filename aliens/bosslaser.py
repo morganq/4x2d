@@ -1,5 +1,6 @@
 import random
 
+import helper
 import laserparticle
 import pygame
 import sound
@@ -31,7 +32,7 @@ class BossLaser(Fighter):
         self.firing_target = None
 
     def special_fire(self, at):
-        towards = (at.pos - self.pos).normalize()
+        towards = helper.try_normalize(at.pos - self.pos)
 
         b = Bullet(at.pos, at, self, mods=self.prepare_bullet_mods())
         self.scene.game_group.add(b)

@@ -82,7 +82,7 @@ class BossMothership(SpaceObject):
 
     def brake(self, dt):
         if self.velocity.length_squared() > 0:
-            brake = -self.velocity.normalize() * BRAKE * dt
+            brake = -helper.try_normalize(self.velocity) * BRAKE * dt
             if self.velocity.length_squared() > brake.length_squared():
                 self.velocity += brake
             else:
@@ -92,9 +92,10 @@ class BossMothership(SpaceObject):
         if other.stationary:
             delta = other.pos - self.pos
             dist = delta.length()
-            overlap = (self.collision_radius + other.collision_radius) - dist
-            push = delta.normalize() * -overlap
-            self.pos += push
+            if dist > 0:
+                overlap = (self.collision_radius + other.collision_radius) - dist
+                push = helper.try_normalize(delta) * -overlap
+                self.pos += push
 
     def wander(self, dt):
         self.wander_time -= dt
@@ -105,7 +106,7 @@ class BossMothership(SpaceObject):
         if delta.length_squared() < 10 ** 2 or self.wander_time < 1:
             self.brake(dt)
         else:
-            self.velocity += delta.normalize() * ACCEL * dt
+            self.velocity += helper.try_normalize(delta) * ACCEL * dt
 
     def update(self, dt):
         self.time += dt
@@ -123,7 +124,7 @@ class BossMothership(SpaceObject):
                     bad_location = False
                 i += 1
             delta = np - self.pos
-            dn = delta.normalize()
+            dn = helper.try_normalize(delta)
             side = V2(dn.y, -dn.x)
             for i in range(12):
                 color = random.choice([PICO_RED, PICO_RED, PICO_ORANGE, PICO_YELLOW, PICO_WHITE])
@@ -223,10 +224,10 @@ class BossMothership(SpaceObject):
         nearest, dsq = helper.get_nearest(self.pos, objs)
         if dsq < 40 ** 2:
             delta = nearest.pos - self.pos
-            self.velocity += -delta.normalize() * ACCEL / 2 * dt
+            self.velocity += -helper.try_normalize(delta) * ACCEL / 2 * dt
 
         if self.velocity.length_squared() > self.max_speed ** 2:
-            self.velocity = self.velocity.normalize() * self.max_speed
+            self.velocity = helper.try_normalize(self.velocity) * self.max_speed
 
         self.pos += self.velocity * dt
         if self.range_indicator:

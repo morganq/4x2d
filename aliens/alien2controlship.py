@@ -1,11 +1,12 @@
 import bullet
+import pygame
 import sound
 from colors import PICO_LIGHTGRAY, PICO_PINK, PICO_YELLOW
 from line import Line
 from ships.all_ships import register_ship
 from ships.fighter import Fighter
 from ships.ship import Ship
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -55,7 +56,7 @@ class Alien2ControlShip(Fighter):
         if self.tethered:
             delta = self.tethered.pos - self.tether_end_pos
             if delta.length_squared() > 2 ** 2:
-                self.tether_end_pos += delta.normalize() * dt * 15
+                self.tether_end_pos += helper.try_normalize(delta) * dt * 15
             else:
                 self.tether_end_pos = self.tethered.pos
                 self.tether_time += dt

@@ -6,6 +6,7 @@ import pygame
 import asteroid
 import game
 import hazard
+import helper
 import planet
 from helper import clamp, get_nearest, tuple_int
 
@@ -56,7 +57,7 @@ class FlowFieldMap:
                         extra = 6
                     if dist < (closest.radius + extra) ** 2:
                         #print(center, closest.pos, closest)
-                        delta = (center - closest.pos).normalize()
+                        delta = helper.try_normalize(center - closest.pos)
                         cell = (closest, delta)
                 grid[-1].append(cell)  
         return grid      
@@ -218,7 +219,7 @@ class FlowField:
                 if inf_exception_dir:
                     self.grid[y][x] = inf_exception_dir
                 elif min is not None:
-                    self.grid[y][x] = (V2(*min) - V2(x,y))#.normalize() # maybe do it here?
+                    self.grid[y][x] = (V2(*min) - V2(x,y))
                 else:
                     print("no min but also no inf exception", x,y)
                     #print(deltas)
@@ -247,9 +248,9 @@ class FlowField:
                 if v:
                     if half > 0:
                         coefficient = 1 / max(((cx - x)) ** 2 + ((cy - y)) ** 2, 1)                    
-                    out += v.normalize() * coefficient # instead of here?
+                    out += helper.try_normalize(v) * coefficient
 
-        return out.normalize()
+        return helper.try_normalize(out)
 
     def walk_field(self, pos, distance):
         walked = 0

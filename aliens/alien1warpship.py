@@ -1,9 +1,11 @@
+import helper
 import line
+import pygame
 from colors import PICO_LIGHTGRAY, PICO_RED
 from helper import get_nearest
 from ships.all_ships import register_ship
 from ships.fighter import Fighter
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -31,7 +33,7 @@ class Alien1WarpShip(Fighter):
 
     def update_lines(self):
         delta = (self.tethered_to.pos - self.pos)
-        nd = delta.normalize()
+        nd = helper.try_normalize(delta)
         self.line2.visible = False
         self.line1.pt1 = self.pos + nd * 4
         self.line1.pt2 = self.tethered_to.pos + -nd * (self.tethered_to.radius)

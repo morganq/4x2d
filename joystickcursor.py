@@ -3,6 +3,7 @@ import math
 import pygame
 
 import game
+import helper
 import store
 import text
 import upgrade
@@ -50,7 +51,7 @@ class JoystickCursor(SpriteBase):
             pygame.draw.arc(self.image, self.color, rect, ang - 1, ang + 1)
 
             if dist > 15:
-                dn = delta.normalize()
+                dn = helper.try_normalize(delta)
                 p1 = self.cursor_pos - dn * 7
                 p2 = self.nearest_obj.get_center() + dn * (self.nearest_obj.radius + 4)
                 pygame.draw.line(self.image, self.color, p1, p2, 1)

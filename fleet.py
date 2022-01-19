@@ -201,7 +201,7 @@ class Fleet:
                 new_pt = self.scene.flowfield.walk_field(self.path[-1], self.target, step)
             else:
                 delta = self.target.pos - self.pos
-                new_pt = self.path[-1] + delta.normalize() * PATH_STEP_SIZE
+                new_pt = self.path[-1] + helper.try_normalize(delta) * PATH_STEP_SIZE
             self.path.append(new_pt)
 
 

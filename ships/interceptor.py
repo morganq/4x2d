@@ -1,14 +1,16 @@
 import math
 import random
 
+import helper
 import particle
 import planet
+import pygame
 import sound
 from bullet import Bullet
 from colors import *
 from helper import all_nearby, clamp
 from particle import Particle
-import pygame
+
 V2 = pygame.math.Vector2
 
 from ships.all_ships import register_ship
@@ -68,7 +70,7 @@ class Interceptor(Fighter):
         return mods
 
     def special_fire(self, at):
-        towards = (at.pos - self.pos).normalize()
+        towards = helper.try_normalize(at.pos - self.pos)
 
         if self.get_stat("ship_take_damage_on_fire"):
             self.health -= self.get_stat("ship_take_damage_on_fire")
@@ -83,7 +85,7 @@ class Interceptor(Fighter):
         self.thrust_particle_time = THRUST_PARTICLE_RATE
 
         for i in range(10):
-            pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalize() * 30 * (random.random() + 0.25)
+            pvel = helper.try_normalize(towards + V2(random.random() * 0.75, random.random() * 0.75)) * 30 * (random.random() + 0.25)
             p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
             self.scene.add_particle(p)             
 
@@ -116,9 +118,9 @@ class Interceptor(Fighter):
     def emit_thrust_particles(self):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 1
         pvel += -self.velocity / 2
-        vn = self.velocity.normalize()
+        vn = helper.try_normalize(self.velocity)
         side = V2(vn.y, -vn.x) # Sideways vector from forward
-        p1 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -self.velocity.normalize() * self.radius + side * 1.5, 1, pvel)
+        p1 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -helper.try_normalize(self.velocity) * self.radius + side * 1.5, 1, pvel)
         self.scene.add_particle(p1)
-        p2 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -self.velocity.normalize() * self.radius - side * 1.5, 1, pvel)
+        p2 = particle.Particle([PICO_WHITE, PICO_WHITE, PICO_YELLOW], 1, self.pos + -helper.try_normalize(self.velocity) * self.radius - side * 1.5, 1, pvel)
         self.scene.add_particle(p2)

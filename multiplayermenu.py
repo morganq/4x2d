@@ -8,7 +8,7 @@ import scene
 import states
 import text
 from colors import *
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -29,7 +29,7 @@ class MultiplayerMenu(scene.Scene):
 
         res = self.game.game_resolution
         self.instructions = text.Text(
-            "Click to add a mouse player\nPress a joystick button to add a joystick player.",
+            "FYI MULTIPLAYER IS VERY [!UNFINISHED]\n Click to add a mouse player\n Press a joystick button to add a joystick player.",
             "small",
             V2(res.x/2, 50),
             multiline_width=400

@@ -88,7 +88,7 @@ class Healthy:
         self.health -= damage
         if origin:
             delta = origin.pos - self.pos
-            dn = delta.normalize()
+            dn = helper.try_normalize(delta)
             hitpos = self.pos + dn * self.radius
             if was_shield:
                 sound.play("shield")

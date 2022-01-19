@@ -36,7 +36,7 @@ PLAYER_NAMES = [
 
 # Preset positions based on the number of players
 HOMEWORLD_POSITIONS = {
-    1: (V2(50,50)), # 1 Player: top left (not intended to be used really)
+    1: (V2(50,50),), # 1 Player: top left (not intended to be used really)
     2: (V2(50, 50), V2(560,310)), # 2 Player positions: top left and bottom right
     3: (V2(50, 320), V2(300, 50), V2(560,310)), # 3 Player positions: bottom left, top middle, bottom right
     4: (V2(50, 50), V2(50, 310), V2(560, 50), V2(560,310)) # 4 Player positions: corners
@@ -44,7 +44,7 @@ HOMEWORLD_POSITIONS = {
 
 # Preset for UI
 UI_POSITIONS = {
-    1: (V2(0,0)),
+    1: (V2(0,0),),
     2: (V2(0,0), V2(1, 1)),
     3: (V2(0,0), V2(1, 0), V2(1,1)),
     4: (V2(0,0), V2(0, 1), V2(1,0), V2(1, 1)),

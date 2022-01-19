@@ -60,6 +60,8 @@ class Alien:
 
     # Expand: figure out a target planet and a source planet, then send ships
     def execute_expand(self, target_type):
+        if self.count_expansions_plus_pending() >= self.get_max_planets():
+            return False
         all_potential_targets = self.scene.get_civ_planets(None)
         # Eliminate targets that already have colonists heading towards them
         all_potential_targets = [
@@ -259,9 +261,16 @@ class Alien:
             return
         for s in ships[0:num_to_send]:
             source.emit_ship(s, {'to':target})
-        if ships and possible_colonist:
+        
+        num_planets = self.count_expansions_plus_pending()
+        if ships and possible_colonist and num_planets < self.get_max_planets():
             if source.population > 1 and random.random() < 0.8:
                 source.emit_ship(self.get_colonist(), {'to':target, 'num':1})
+
+    def count_expansions_plus_pending(self):
+        current = len(self.scene.get_civ_planets(self.civ))
+        pending = self.count_expanding_ships()
+        return current + pending
 
     def get_planet_ship_instances(self, planet):
         ships = []
@@ -328,7 +337,7 @@ class Alien:
             self.update_reactions(duration)
 
     def get_target_num_planets(self, time):
-        return int(time / 70 + 2)
+        return min(int(time / 70 + 2), self.get_max_planets())
 
     def get_next_attack_countdown(self):
         return 90
@@ -564,6 +573,13 @@ class Alien:
         for planet in self.scene.get_civ_planets(self.civ):
             planet.set_health(planet.get_max_health(), False)            
 
+        self.civ.max_buildings = {
+            1:3,
+            2:3,
+            3:5,
+            4:8,5:8,6:8,7:8,8:8,9:8
+        }[difficulty]
+
         self.build_order = buildorder.BuildOrder(self.get_build_order_steps())
 
     def _get_possible_attack_targets(self, planet):
@@ -604,3 +620,16 @@ class Alien:
 
     def render(self, screen):
         pass
+
+    def get_max_planets(self):
+        return {
+            1:3,
+            2:4,
+            3:5,
+            4:999,
+            5:999,
+            6:999,
+            7:999,
+            8:999,
+            9:999
+        }[self.difficulty]

@@ -59,7 +59,7 @@ class WarpLine(SpriteBase):
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
 
         dist = (pt2-pt1).length()
-        dn = (pt2-pt1).normalize()
+        dn = helper.try_normalize(pt2-pt1)
         lp1 = pt1 + (dn * ((self._timers['off'] * 16) % 10 + 5))
         for i in range(int(dist / 10)):
             pygame.draw.line(self.image, PICO_ORANGE, lp1, (lp1 + dn * 3), 1)
@@ -106,7 +106,7 @@ class Alien1Battleship(Battleship):
         if (target.pos - self.pos).length_squared() > 100 ** 2:
             self.is_warping = True
             delta = target.pos - self.pos
-            dn = delta.normalize()
+            dn = helper.try_normalize(delta)
             p = target.pos - dn * (target.radius + 15)
             self.warp_target = WarpWarning(self.scene, p, self)
             self.scene.game_group.add(self.warp_target)
@@ -131,12 +131,12 @@ class Alien1Battleship(Battleship):
             self.health -= self.get_stat("ship_take_damage_on_fire")
 
         for j in range(3):
-            towards = (self.effective_target.pos - self.pos).normalize()
+            towards = helper.try_normalize(self.effective_target.pos - self.pos)
             b = Bullet(self.pos, self.effective_target, self, vel=helper.random_angle() * 10, mods=self.prepare_bullet_mods())
             self.scene.game_group.add(b)
 
             for i in range(3):
-                pvel = (towards + V2(random.random() * 0.75, random.random() * 0.75)).normalize() * 30 * (random.random() + 0.25)
+                pvel = helper.try_normalize(towards + V2(random.random() * 0.75, random.random() * 0.75)) * 30 * (random.random() + 0.25)
                 p = Particle([PICO_WHITE, PICO_WHITE, PICO_BLUE, PICO_DARKBLUE, PICO_DARKBLUE], 1, self.pos, 0.2 + random.random() * 0.15, pvel)
                 self.scene.add_particle(p)
 

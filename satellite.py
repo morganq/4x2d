@@ -51,7 +51,7 @@ class ReflectorShieldObj(SpaceObject):
         self._timers['regen'] = 0
 
     def bullet_hits(self, bullet):
-        delta = (bullet.pos - self.pos).normalize()
+        delta = helper.try_normalize(bullet.pos - self.pos)
         d, a = delta.as_polar()
         a *= 3.14159 / 180
         print(a, self.sat.angle)

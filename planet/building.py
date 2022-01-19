@@ -55,7 +55,7 @@ class Building:
             ang += angle
             new_pt = helper.from_angle(ang) * dist * 1.25 + offset
             if expand:
-                new_pt += (new_pt - center).normalize() * .75
+                new_pt += helper.try_normalize(new_pt - center) * .75
             final_pts.append(new_pt)
         
         pygame.draw.polygon(surface, color, [pt for pt in final_pts], 0)
@@ -421,7 +421,7 @@ class DecoyBuilding(AuraBuilding):
             ship.effective_target = planet
             # Decoy sound effect
             delta = ship.pos - planet.pos
-            dn = delta.normalize()
+            dn = helper.try_normalize(delta)
             dist, ang = delta.as_polar()
             ang *= 3.14159 / 180
             t = 0

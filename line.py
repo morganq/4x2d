@@ -1,10 +1,12 @@
 import pygame
 
+impor helper
+
 import text
 from colors import PICO_WHITE
 from helper import clamp
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -48,7 +50,7 @@ class AssetLine(Line):
         self.time = -999999999
         self.pt_start  = V2(self.pt1)
         self.pt_final  = V2(self.pt2)
-        self.delta = (self.pt2 - self.pt1).normalize()
+        self.delta = helper.try_normalize(self.pt2 - self.pt1)
         self.len = (self.pt2 - self.pt1).length()
         self.pt2  = V2(self.pt1)
         self.visible = False

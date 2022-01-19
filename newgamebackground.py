@@ -4,6 +4,7 @@ import random
 import pygame
 
 import game
+import helper
 import text
 from colors import *
 from helper import clamp, get_nearest_pos, nearest_order_pos
@@ -169,7 +170,7 @@ class NewGameBackground(SpriteBase):
             else:
                 towards = self.current_path[-1] - self.current_path_pt
                 dist = towards.length()
-                self.current_path_pt += towards.normalize() * 200 * dt / clamp(((dist / 50) + 0.25), 0.15, 2)
+                self.current_path_pt += helper.try_normalize(towards) * 200 * dt / clamp(((dist / 50) + 0.25), 0.15, 2)
 
             lines = self.current_path[0:-1] + [V2(self.current_path_pt)]
             
@@ -192,7 +193,7 @@ class NewGameBackground(SpriteBase):
 
                     towards = (self.current_path[i] - pt)
 
-                    pt += towards.normalize() * 5
+                    pt += helper.try_normalize(towards) * 5
                     #pygame.draw.circle(self.image, color, pt, 1, 0)
                     pygame.draw.rect(self.image, color, (pt.x - 1, pt.y - 1, 2, 2), 0)
 

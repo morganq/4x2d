@@ -131,7 +131,7 @@ class Scout(fighter.Fighter):
     def emit_thrust_particles(self):
         pvel = V2(random.random() - 0.5, random.random() - 0.5) * 5
         pvel += -self.velocity / 2
-        p = particle.Particle([PICO_WHITE, PICO_BLUE], 1, self.pos + -self.velocity.normalize() * self.radius, 2, pvel)
+        p = particle.Particle([PICO_WHITE, PICO_BLUE], 1, self.pos + -helper.try_normalize(self.velocity) * self.radius, 2, pvel)
         self.scene.add_particle(p)
 
     def kill(self):
