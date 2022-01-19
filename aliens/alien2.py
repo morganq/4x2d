@@ -192,8 +192,8 @@ class Alien2(alien.Alien):
 
     tips = [
         ("assets/alieninfo-intimidate.png", "THE NETWORK can INTIMIDATE a planet, preventing new buildings or ships from being made there."),
-        ("assets/alieninfo-worm.png", "SUPERVISOR ships can HACK and take control of your ships unless you destroy them quickly."),
-        ("assets/alieninfo-destroyer.png", "DESTROYERS take a long time to build, but can defeat a whole fleet in combat.")
+        ("assets/alieninfo-worm.png", "NETWORK'S SUPERVISOR ships can HACK and take control of your ships unless you destroy them quickly."),
+        ("assets/alieninfo-destroyer.png", "NETWORK'S DESTROYERS take a long time to build, but can defeat a whole fleet in combat.")
     ]    
 
     @classmethod

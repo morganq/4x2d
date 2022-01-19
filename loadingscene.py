@@ -2,6 +2,7 @@ import pygame
 
 import game
 import levelscene
+import rectangle
 from aliens import alien
 from button import Button
 from colors import *
@@ -12,7 +13,7 @@ from scene import Scene
 from simplesprite import SimpleSprite
 from states import Machine, UIEnabledState
 from text import Text
-import pygame
+
 V2 = pygame.math.Vector2
 
 MOD_STRINGS = {
@@ -22,6 +23,18 @@ MOD_STRINGS = {
     'atomic_bomb':'Enemy has atomic bombs attached to their worker ships.',
     'ship_shield_far_from_home':'Enemy ships have a shield when attacking.',
     'battleship':'Enemy starts with a powerful ship.',
+}
+
+DIFFICULTY_VALUES = {
+    1: [1,0,0],
+    2: [1,1,1],
+    3: [2,1,1],
+    4: [2,2,2],
+    5: [2,3,2],
+    6: [3,4,2],
+    7: [4,4,3],
+    8: [0,0,0], # SHOP
+    9: [5,5,3],
 }
 
 class LoadingScene(Scene):
@@ -60,34 +73,70 @@ class LoadingScene(Scene):
 
         self.tips = []
         self.quote = None
-        
+
+        difficulty_width = 150
+        difficulty_pos = V2(game.RES[0] / 2 - difficulty_width / 2, 175) + self.game.game_offset
+
         if galaxy['difficulty'] > 1:
-            tw = 120
-            for i,tip in enumerate(alien_obj.tips):
-                if i == 1 and galaxy['difficulty'] < 4:
-                    tip = ("assets/alieninfo-unknown.png", "We must uncover more of the aliens' secrets")
-                if i == 2 and galaxy['difficulty'] < 7:
-                    tip = ("assets/alieninfo-unknown.png", "We must uncover more of the aliens' secrets")                
-                wp = tw + 20
-                x = wp * i + game.RES[0] / 2 - wp
-                img = pygame.image.load(resource_path(tip[0]))
-                s = SimpleSprite(V2(x, 165) + self.game.game_offset, img)
-                s.offset = (0.5, 0)
-                self.group.add(s)
-                t = Text(tip[1], "small", V2(x - 60, 240) + self.game.game_offset, multiline_width=120, center=False)
-                self.group.add(t)
-                s.visible = False
-                t.visible = False
-                self.tips.append((s, t))
+            difficulty_pos = V2(game.RES[0] * 0.3 - difficulty_width / 2, 215) + self.game.game_offset       
+
+        labels = ['Mining Rate', 'Attack Power', 'Tech Level']
+        images = ['econ', 'attack', 'tech']
+        elements = []
+        for i in range(3):
+            pos = difficulty_pos + V2(0, i * 20)
+            t = Text(labels[i], "small", pos + V2(60, 0), PICO_ORANGE)
+            t.offset = (1,0)
+            self.group.add(t)
+            t.visible = False
+            elements.append(t)
+            maxelem = 5
+            if i == 2: maxelem = 3
+            for z in range(maxelem):
+                f = FrameSprite(pos + V2(70 + z * 14, -3), "assets/enemystrength-%s.png" % images[i], 11)
+                if z >= DIFFICULTY_VALUES[galaxy['difficulty']][i]:
+                    f.frame = 1
+                else:
+                    f.frame = 0
+                self.group.add(f)
+                f.visible = False
+                elements.append(f)
+
+        self.tips.append(elements)
+
+        if galaxy['difficulty'] > 1:
+            tw = 150
+            if galaxy['difficulty'] < 4: i = 0
+            elif galaxy['difficulty'] < 7: i = 1
+            else: i = 2
+            tip = alien_obj.tips[i]
+            x = game.RES[0] * 0.7
+            img = pygame.image.load(resource_path(tip[0]))
+            s = SimpleSprite(V2(x, 165) + self.game.game_offset, img)
+            s.offset = (0.5, 0)
+            self.group.add(s)
+            t = Text(tip[1], "small", V2(x - tw / 2, 240) + self.game.game_offset, multiline_width=tw, center=False)
+            self.group.add(t)
+            s.visible = False
+            t.visible = False
+            r = rectangle.Rectangle(V2(x - tw / 2, 169) + self.game.game_offset, (19, 11), PICO_YELLOW)
+            t2 = Text("TIP", "small", V2(x - tw / 2 + 2, 171) + self.game.game_offset, PICO_BLACK)
+            r.visible = False
+            t2.visible = False
+            self.group.add(r)
+            self.group.add(t2)
+            self.tips.append((r, t2))
+            self.tips.append((s, t))
         else:
-            self.quote = Text(alien_obj.get_quote(), "pixolde", V2(game.RES[0] / 2, 230) + self.game.game_offset, PICO_YELLOW, multiline_width=400)
+            self.quote = Text(alien_obj.get_quote(), "pixolde", V2(game.RES[0] / 2, 270) + self.game.game_offset, PICO_YELLOW, multiline_width=400)
             self.quote.offset = (0.5, 0)
             self.group.add(self.quote)
             self.quote.visible = False
 
+
         if galaxy['mods']:
             self.group.add(SimpleSprite(V2(61, 322) + self.game.game_offset, "assets/exclamation.png"))
-            self.group.add(Text("WARNING", "small", V2(79, 320) + self.game.game_offset, PICO_YELLOW, multiline_width=400, center=False))
+            self.group.add(Text("DANGER", "small", V2(79, 320) + self.game.game_offset, PICO_YELLOW, multiline_width=400, center=False))
             self.group.add(Text(MOD_STRINGS[galaxy['mods'][0]], "small", V2(79, 330) + self.game.game_offset, PICO_WHITE, multiline_width=400, center=False))
             self.warnings = self.group.sprites()[-3:]
             for warning in self.warnings:
@@ -104,9 +153,9 @@ class LoadingScene(Scene):
         if self.time > 1.5:
             self.loading_text.visible = True
         for i,tip in enumerate(self.tips):
-            if self.time > 2.5 + i * 0.35:
-                tip[0].visible = True
-                tip[1].visible = True
+            if self.time > 2.15 + i * 0.35:
+                for z in tip:
+                    z.visible = True
         if self.quote and self.time > 2.5:
             self.quote.visible = True
             

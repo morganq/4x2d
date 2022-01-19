@@ -1,5 +1,6 @@
 import random
 
+import pygame
 from colors import *
 from helper import clamp
 from planet import building as buildings
@@ -8,7 +9,7 @@ from stats import Stats
 from upgrade.building_upgrades import (AddBuildingUpgrade,
                                        make_simple_stats_building)
 from upgrade.upgrades import Upgrade, register_upgrade
-import pygame
+
 V2 = pygame.math.Vector2
 
 from aliens import (alien, alien3battleship, alien3bomber, alien3colonist,
@@ -133,8 +134,8 @@ class Alien3(alien.Alien):
 
     tips = [
         ("assets/alieninfo-void.png", "VOID KEEPERS generate VOID FIELDS around their planets, which grant shields and speed to their ships."),
-        ("assets/alieninfo-stealth.png", "The STEALTH BOMBER is invisible within VOID FIELDS."),
-        ("assets/alieninfo-mothership.png", "The MOTHERSHIP produces its own VOID FIELDS for attacking fleets.")
+        ("assets/alieninfo-stealth.png", "KEEPERS' STEALTH BOMBER is invisible within VOID FIELDS."),
+        ("assets/alieninfo-mothership.png", "KEEPERS' MOTHERSHIP produces its own VOID FIELDS for attacking fleets.")
     ]    
 
     def __init__(self, scene, civ):

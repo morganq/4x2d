@@ -58,7 +58,6 @@ class Achievements:
 
         if USE_STEAMWORKS:
             print("SET ACHIEVEMENT", name)
-            steamworks_sdk.Utils.SetOverlayNotificationPosition()
             steamworks_sdk.UserStats.SetAchievement(name.encode("ascii"))
             steamworks_sdk.UserStats.StoreStats()
             #steamworks_sdk.run_callbacks()

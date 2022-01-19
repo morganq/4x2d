@@ -405,7 +405,7 @@ class MenuScene(scene.Scene):
         self.choices.append(self.bg_options)
         self.bg_options.visible = False
 
-        self.bg_exit = ExitOption(self, V2(res.x * 0.7, res.y * 0.8), "assets/title-exit.png", onclick=sys.exit)
+        self.bg_exit = ExitOption(self, V2(res.x * 0.7, res.y * 0.8), "assets/title-exit.png", onclick=self.click_exit)
         self.parallax.append(Parallaxed(self.bg_exit, 5))
         self.game_group.add(self.bg_exit)        
         self.choices.append(self.bg_exit)
@@ -734,6 +734,9 @@ class MenuScene(scene.Scene):
     def click_tutorial(self):
         self.game.scene = tutorial.introscene.IntroScene(self.game)
         self.game.scene.start()
+
+    def click_exit(self):
+        self.game.running = False
 
     def click_options(self):
         self.game.set_scene("options")
