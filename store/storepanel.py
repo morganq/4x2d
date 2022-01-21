@@ -4,6 +4,7 @@ import text
 from button import Button
 from colors import *
 from framesprite import FrameSprite
+from helper import get_time_string
 from panel import Panel
 from resources import resource_path
 from simplesprite import SimpleSprite
@@ -123,8 +124,7 @@ class StorePanel(Panel):
         self.add(btn, V2(310,260) - V2(btn.width, btn.height))
 
         self.add(text.Text("O2", "small", V2(0,0), PICO_LIGHTGRAY), V2(210, 165))
-        minutes, seconds = divmod(game.Game.inst.run_info.o2, 60)
-        self.add(text.Text("%d:%d" % (minutes,seconds), "big", V2(0,0), PICO_WHITE), V2(210, 175))
+        self.add(text.Text(get_time_string(game.Game.inst.run_info.o2), "big", V2(0,0), PICO_WHITE), V2(210, 175))
 
         self.add(text.Text("Credits", "small", V2(0,0), PICO_LIGHTGRAY), V2(210, 200))
         self.add(text.Text("%dC" % game.Game.inst.run_info.credits, "big", V2(0,0), PICO_WHITE), V2(210, 210))

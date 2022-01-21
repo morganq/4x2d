@@ -1,4 +1,5 @@
 import bullet
+import helper
 import pygame
 import sound
 from colors import PICO_LIGHTGRAY, PICO_PINK, PICO_YELLOW

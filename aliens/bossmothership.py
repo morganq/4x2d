@@ -30,7 +30,7 @@ class Soul(SimpleSprite):
 
     def update(self, dt):
         self.time += dt
-        if self.time > 5:
+        if self.time > 20:
             self.ship.set_health(self.ship.get_max_health())
             self.ship.scene.game_group.add(self.ship)
             self.kill()

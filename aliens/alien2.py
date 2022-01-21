@@ -60,7 +60,7 @@ class Alien2FighterProductionUpgrade2(Alien2FighterProductionUpgrade1):
 class Alien2FighterProductionUpgrade3(Alien2FighterProductionUpgrade1):
     name = "alien2battleship"
     resource_type = "gas"    
-    alien_min_level = 7
+    alien_min_level = 6
 
     def apply(self, to):
         if to.owning_civ.alien.difficulty <= 1:

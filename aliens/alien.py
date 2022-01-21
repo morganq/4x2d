@@ -517,7 +517,7 @@ class Alien:
             3: 3,
             4: 5,
             5: 7,
-            6: 10,
+            6: 7,
         }.get(self.difficulty, 999)        
 
         if self.difficulty > 1 and self.time > 360:
@@ -533,8 +533,8 @@ class Alien:
         # }
         curve = {
             1:0.85, 2:0.95, 3:1.1, 4:1.25,
-            5:1.35, 6:1.5, 7:1.7, 8:2.0,
-            9:2.25
+            5:1.35, 6:1.35, 7:1.6, 8:2.0,
+            9:2.0
         }        
         
         return curve[self.difficulty]
@@ -548,7 +548,7 @@ class Alien:
         if difficulty == 3: extra_planets = 1
         if difficulty == 4: extra_planets = 1
         if difficulty == 5: extra_planets = 1        
-        if difficulty == 6: extra_planets = 2
+        if difficulty == 6: extra_planets = 1
         if difficulty == 7: extra_planets = 2
         if difficulty == 8: extra_planets = 3
         if difficulty == 9: extra_planets = 4

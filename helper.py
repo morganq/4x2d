@@ -69,3 +69,9 @@ def try_normalize(v):
         return v
     else:
         return v.normalize()
+
+def get_time_string(time):
+    if time > 0:
+        return "%d:%02d" % divmod(time, 60)
+    else:
+        return "-%d:%02d" % divmod(-time, 60)

@@ -37,6 +37,7 @@ class Tutorial1Scene(TutorialScene):
             theta = i * -0.65
             pos = helper.from_angle(theta) * (50 + random.random() * 80) + self.homeworld.pos
             a = Asteroid(self, pos, Resources(40, 0, 0))
+            a.health = 10
             self.game_group.add(a)
 
         self.objgrid.generate_grid(self.get_objects_initial())

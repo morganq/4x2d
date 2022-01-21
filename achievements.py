@@ -73,7 +73,7 @@ class Achievements:
 
         else:
             if was_new:
-                game.Game.inst.show_achievement(ACHIEVEMENT_INFO['name'], ACHIEVEMENT_INFO['description'])
+                game.Game.inst.show_achievement(ACHIEVEMENT_INFO[name]['name'], ACHIEVEMENT_INFO[name]['description'])
 
 
     def reset_all(self):
@@ -110,15 +110,14 @@ class Achievements:
         pass
 
     def ship_gained(self, ship, num_ships):
-        print("ship_gained", ship)
-        self.grant_achievement("trained_%s" % ship)
+        self.grant_achievement("%s_trained" % ship)
 
 
 class AchievementPopup(SpriteBase):
     POPUP_TIME = 0.25
     DITHER_TIME = 0.1
     TOTAL_TIME = POPUP_TIME + DITHER_TIME
-    KILL_TIME = 5.0
+    KILL_TIME = 6.0
 
     def __init__(self, pos, name, description):
         super().__init__(pos)
@@ -132,7 +131,7 @@ class AchievementPopup(SpriteBase):
     def _generate_image(self):
         t = clamp((self.time + self.TOTAL_TIME) * (1 / self.TOTAL_TIME), 0, 1)
         t2 = clamp((self.time - (self.KILL_TIME - 0.25)) * 4, 0, 1)
-        self._height = t * 60 + 1
+        self._height = t * 50 + 1
         self._width = (1-t2) * 250
 
         self.image = pygame.Surface((self._width, self._height), pygame.SRCALPHA)
@@ -143,11 +142,11 @@ class AchievementPopup(SpriteBase):
         else:
             self.image.fill(PICO_BLACK)
 
-            s1 = text.render_multiline(self.name, "big", PICO_WHITE, 220, True)
-            self.image.blit(s1, (self._width // 2 - s1.get_width() // 2, 6))
+            s1 = text.render_multiline(self.name, "small", PICO_YELLOW, 220, True)
+            self.image.blit(s1, (self._width // 2 - s1.get_width() // 2, 8))
 
             s2 = text.render_multiline(self.description, "small", PICO_WHITE, 220, True)
-            self.image.blit(s2, (self._width // 2 - s2.get_width() // 2, self._height // 2 + 12 - s2.get_height() // 2))
+            self.image.blit(s2, (self._width // 2 - s2.get_width() // 2, self._height // 2 + 8 - s2.get_height() // 2))
 
         if self._height >= 4:
             pygame.draw.rect(self.image, PICO_PINK, (1,1,self._width - 2, self._height - 2), 1)

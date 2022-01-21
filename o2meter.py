@@ -3,7 +3,7 @@ import pygame
 import spritebase
 import text
 from colors import *
-from helper import clamp
+from helper import clamp, get_time_string
 from resources import resource_path
 
 O2_MAX = 3600
@@ -21,9 +21,9 @@ class O2Meter(spritebase.SpriteBase):
         self.image = self.full_image.copy()
         pxs = (1 - (clamp(self.o2,0, O2_MAX) / O2_MAX)) * 60 + 19
         self.image.blit(self.empty_image, (0,0), (0, 0, pxs, self.image.get_height()))
-        m,s = divmod(self.o2, 60)
-        text.render_multiline_to(self.image, (39, -1), "%d:%02d" % (m,s), "tiny", PICO_BLACK)
-        text.render_multiline_to(self.image, (38, -2), "%d:%02d" % (m,s), "tiny", PICO_WHITE)
+        ts = get_time_string(self.o2)
+        text.render_multiline_to(self.image, (39, -1), ts, "tiny", PICO_BLACK)
+        text.render_multiline_to(self.image, (38, -2), ts, "tiny", PICO_WHITE)
 
     def update(self, dt):
         if self.o2 <= 0:

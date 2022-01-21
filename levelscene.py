@@ -37,7 +37,7 @@ from economy import RESOURCE_COLORS, RESOURCES, Resources
 from explosion import Explosion
 from framesprite import FrameSprite
 from hazard import Hazard
-from helper import all_nearby, get_nearest
+from helper import all_nearby, get_nearest, get_time_string
 from levelbackground import LevelBackground
 from line import AssetLine, Line
 from meter import Meter
@@ -245,7 +245,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
             self.enemy.civ.base_stats['warp_drive'] = 5
         elif mod == "big_planet":
             p = self.get_civ_planets(self.enemy.civ)[0]
-            p.size += 10
+            p.size += 5
             p.regenerate_art()
         elif mod == "reflector":
             for planet in self.get_civ_planets(self.enemy.civ):

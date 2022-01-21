@@ -31,7 +31,7 @@ DIFFICULTY_VALUES = {
     3: [2,1,1],
     4: [2,2,2],
     5: [2,3,2],
-    6: [3,4,2],
+    6: [3,3,3],
     7: [4,4,3],
     8: [0,0,0], # SHOP
     9: [5,5,3],
@@ -107,7 +107,7 @@ class LoadingScene(Scene):
         if galaxy['difficulty'] > 1:
             tw = 150
             if galaxy['difficulty'] < 4: i = 0
-            elif galaxy['difficulty'] < 7: i = 1
+            elif galaxy['difficulty'] < 6: i = 1
             else: i = 2
             tip = alien_obj.tips[i]
             x = game.RES[0] * 0.7

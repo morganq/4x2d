@@ -59,7 +59,7 @@ class Alien1FighterProductionUpgrade(Upgrade):
     alien = True
     alien_name = 'alien1'
     infinite = True
-    alien_min_level = 7
+    alien_min_level = 6
 
     def apply(self, to):
         if to.owning_civ.alien.difficulty > 1:

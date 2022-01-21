@@ -153,13 +153,11 @@ class StarMapScene(Scene):
         self.colonist.offset = (0.5,0.5)
         self.game_group.add(self.colonist)
         ry = self.background.center_y
-        m,s = divmod(self.game.run_info.o2, 60)
-        o2_format = "%d:%02d" % (m,s)
         t1 = text.Text("Credits | [>%d]" % self.game.run_info.credits, "small", V2(res.x / 2 + rewards_width / 2 - 64, ry - 3), PICO_DARKBLUE, multiline_width=150)
         t1.offset = (1, 0)
         self.ui_group.add(t1)
 
-        t2 = text.Text("O2 | [>%s]" % o2_format, "small", V2(res.x / 2 + rewards_width / 2 - 5, ry - 3), PICO_DARKBLUE, multiline_width=150)
+        t2 = text.Text("O2 | [>%s]" % helper.get_time_string(self.game.run_info.o2), "small", V2(res.x / 2 + rewards_width / 2 - 5, ry - 3), PICO_DARKBLUE, multiline_width=150)
         t2.offset = (1, 0)
         self.ui_group.add(t2)    
 

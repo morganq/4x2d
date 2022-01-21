@@ -198,7 +198,7 @@ class Planet(SpaceObject):
             del self.underground_buildings[civ]
 
         if civ is not None:
-            self.health = max(self.health, self.get_max_health() / 4)
+            self.health = max(self.health,0) + self.get_max_health() / 3
             self.flag = flag.Flag(self.pos + V2(1, -self.radius-1), civ.color)
             self.scene.game_group.add(self.flag)
         self._population = 0
@@ -626,8 +626,7 @@ class Planet(SpaceObject):
         
             # o2 degeneration
             if self.scene.game.run_info.o2 <= 0 and self.owning_civ and self.owning_civ.is_player:
-                self.health -= self.get_base_regen() * REGEN_TIMER
-                self.health -= 1 * REGEN_TIMER
+                self.health -= 7
 
         if self.get_stat("ice_per_docked") > 0:
             if self._timers['ice_per_docked'] > 5:
