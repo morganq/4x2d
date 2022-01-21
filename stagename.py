@@ -9,7 +9,7 @@ import text
 from colors import *
 from helper import clamp
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 START_TIME = 2.0
@@ -80,7 +80,10 @@ class StageName(SpriteBase):
             self.played_close_sound = True
         if self.time > KILL_TIME:
             
-            reward = game.Game.inst.run_info.get_current_level_galaxy()['rewards'][0]
+            try:
+                reward = game.Game.inst.run_info.get_current_level_galaxy()['rewards'][0]
+            except:
+                reward = None
             st = sectortitleingame.SectorTitleInGame(self.get_center(), "Sector %d: [%s]" % (self.number, self.name), reward)
             st.offset = (0.5, 0.5)
             self.groups()[0].add(st)

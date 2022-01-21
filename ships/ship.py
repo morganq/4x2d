@@ -104,7 +104,7 @@ class Ship(SpaceObject):
         self._timers['thrust_particle_time'] = 0
         self._timers['staged_booster'] = -self.get_stat("staged_booster_time")
         self._timers['stun_time'] = 0
-        self._timers['warp_drive'] = 0
+        self._timers['warp_drive'] = 1
 
         self._timers['bonus_speed_particle_time'] = 0
 
@@ -570,6 +570,14 @@ class Ship(SpaceObject):
                 self.turnaround_spr.kill()
                 self.turnaround_spr = None
             
+        if self.get_stat("warp_drive"):
+            if self._timers['warp_drive'] > 0:
+                WARP_MIN_PLANET_DIST = 40
+                _,distsq = helper.get_nearest(self.pos, self.scene.get_planets_in_range(self.pos, WARP_MIN_PLANET_DIST))
+                if distsq > WARP_MIN_PLANET_DIST ** 2:
+                    self.warp(self.get_stat("warp_drive") * 10 + 20)
+                    self._timers['warp_drive'] = -20
+
 
         if self.effective_target.owning_civ != self.owning_civ:
             self.set_state(STATE_RETURNING)

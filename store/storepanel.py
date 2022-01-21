@@ -13,7 +13,7 @@ from text import Text
 from tooltippanel import TooltipPanel
 from upgrade import upgradeicon
 from upgrade.upgrades import UPGRADE_CLASSES
-import pygame
+
 V2 = pygame.math.Vector2
 
 OFFER_NAMES = {
@@ -122,8 +122,12 @@ class StorePanel(Panel):
         btn = Button(V2(0,0), "Done", "big", self.on_done, color=PICO_WHITE)
         self.add(btn, V2(310,260) - V2(btn.width, btn.height))
 
-        self.add(text.Text("Credits", "small", V2(0,0), PICO_LIGHTGRAY), V2(210, 190))
-        self.add(text.Text("%dC" % game.Game.inst.run_info.credits, "big", V2(0,0), PICO_WHITE), V2(210, 205))
+        self.add(text.Text("O2", "small", V2(0,0), PICO_LIGHTGRAY), V2(210, 165))
+        minutes, seconds = divmod(game.Game.inst.run_info.o2, 60)
+        self.add(text.Text("%d:%d" % (minutes,seconds), "big", V2(0,0), PICO_WHITE), V2(210, 175))
+
+        self.add(text.Text("Credits", "small", V2(0,0), PICO_LIGHTGRAY), V2(210, 200))
+        self.add(text.Text("%dC" % game.Game.inst.run_info.credits, "big", V2(0,0), PICO_WHITE), V2(210, 210))
         
         self.add_panel(V2(0,0), self.store_data['offerings'][0])
         self.add_panel(V2(1,0), self.store_data['offerings'][1])

@@ -359,7 +359,9 @@ class Game:
                             self.running = False
 
                     self.scaled_screen.fill((0,0,0))
-                    text.render_multiline_to(self.scaled_screen, (10,10), str(val), "small", PICO_WHITE)
+                    text.render_multiline_to(self.scaled_screen, (10,10), "OH NO I CRASHED! Sorry! Please send a screenshot to morganquirk@gmail.com", "big", PICO_RED, wrap_width=500)
+                    text.render_multiline_to(self.scaled_screen, (10,70), str(val), "small", PICO_WHITE, wrap_width=500)
+                    
                     pygame.display.update()
 
     def game_loop(self):

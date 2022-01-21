@@ -117,8 +117,10 @@ class LevelScene(levelscenebase.LevelSceneBase):
                 pos = V2(*obj['pos'])
                 r = [v * 10 for v in obj['data']['resources']]
                 o = bosstimecrystal.TimeCrystal(self, pos + self.game.game_offset, 2, Resources(*r))       
-                o.change_owner(self.enemy.civ)         
+                o.change_owner(self.enemy.civ)
                 o.generate_stranded_ships()
+                o.add_ship("bosslaser")
+                o.add_ship("bossfighter")
             else:
                 print(obj)
             self.game_group.add(o)
@@ -405,7 +407,8 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
         if self.is_first_frame:
             sound.play("radar")
-            self.game.run_info.anticheat_level_started = True
+            if not game.DEV:
+                self.game.run_info.anticheat_level_started = True
             self.game.save.set_run_state(self.game.run_info)
             self.game.save.save()            
 
@@ -419,11 +422,12 @@ class LevelScene(levelscenebase.LevelSceneBase):
         #     self.enemy.civ.enable_scarcity()
         #     fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
         #     self.ui_group.add(fn)
-            
-        self.game.run_info.o2 -= dt
-        #if self.time % 1 < (self.time - dt) % 1:
-        self.o2_meter.o2 = self.game.run_info.o2
-        self.o2_meter._generate_image()
+        
+        if not self.cinematic:
+            self.game.run_info.o2 -= dt
+            #if self.time % 1 < (self.time - dt) % 1:
+            self.o2_meter.o2 = self.game.run_info.o2
+            self.o2_meter._generate_image()
 
         scene.Scene.update(self, dt)
 

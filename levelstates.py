@@ -206,6 +206,9 @@ class PlayState(UIEnabledState):
                 self.arrow.setup(self.dragging_from_sprite, self.dragging_to, dragging_to_sprite)
                 if self.arrow.visible:
                     self.deselect()
+            if selection_info and selection_info['type'] == 'planet' and self.dragging_from_sprite.owning_civ != self.scene.player_civ:
+                self.arrow.visible = False
+                self.dragging_from_sprite = None
         else:
             if self.arrow:
                 self.arrow.visible = False    
@@ -286,7 +289,12 @@ class PlayState(UIEnabledState):
             self.current_panel.update_planet()
 
         if self.joy_controls_state == "arrow":
-            self.arrow.setup(self.joy_arrow_from, self.joystick_overlay.cursor_pos, self.joystick_overlay.nearest_obj)
+            if self.joy_arrow_from.owning_civ and self.joy_arrow_from.owning_civ == self.scene.player_civ:
+                self.arrow.setup(self.joy_arrow_from, self.joystick_overlay.cursor_pos, self.joystick_overlay.nearest_obj)
+            else:
+                self.arrow.kill()
+                self.joy_arrow_from = None
+                self.joy_controls_state = "default"
 
     def set_joystick_input(self):
         if not self.joystick_overlay:
@@ -590,11 +598,11 @@ class BeatGameState(State):
         self.scene.game.run_info.sectors_cleared += 1
 
         Achievements.inst.run_won(
-            self.game.run_info.time_taken,
-            self.game.run_info.o2,
-            self.game.run_info.ships_lost,
-            self.game.run_info.reward_list,
-            self.game.run_info.upgrades_by_sector
+            self.scene.game.run_info.time_taken,
+            self.scene.game.run_info.o2,
+            self.scene.game.run_info.ships_lost,
+            self.scene.game.run_info.reward_list,
+            self.scene.game.run_info.upgrades_by_sector
         )
 
         self.scene.ui_group.empty()

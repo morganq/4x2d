@@ -19,7 +19,7 @@ V2 = pygame.math.Vector2
 REVIVING_PLANET_CLOSE_RANGE = 50
 ACCEL = 4
 BRAKE = 6
-REINCARNATE_RANGE = 85
+REINCARNATE_RANGE = 65
 
 class Soul(SimpleSprite):
     def __init__(self, pos, ship):

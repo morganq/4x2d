@@ -240,7 +240,6 @@ class StoreNodeState(states.UIEnabledState):
             sorted(self.scene.ui_group.sprites()[::], key=lambda x:x.layer, reverse=True)
         )        
         selectable_sprites = [s for s in all_sprites if s.selectable and s.visible and self.hover_filter(s)]
-        print(selectable_sprites)
         nearest, d = get_nearest(self.joystick_overlay.cursor_pos, selectable_sprites)
         if d < 40 ** 2:
             self.joystick_overlay.set_nearest(nearest)

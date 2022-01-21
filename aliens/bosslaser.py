@@ -16,10 +16,10 @@ V2 = pygame.math.Vector2
 @register_ship
 class BossLaser(Fighter):
     SHIP_NAME = "bosslaser"
-    BASE_HEALTH = 35
-    BASE_DAMAGE = 1.5
+    BASE_HEALTH = 55
+    BASE_DAMAGE = 3.5
     FIRE_RATE = 0.25
-    FIRE_RANGE = 70
+    FIRE_RANGE = 55
     MAX_SPEED = 4
     FUEL = 9999
     DISPLAY_NAME = "Predator"
@@ -30,6 +30,7 @@ class BossLaser(Fighter):
         self.fast_fire_timer = 0
         self.bullets_chambered = 0
         self.firing_target = None
+        self.fire_timer = 0.75
 
     def special_fire(self, at):
         towards = helper.try_normalize(at.pos - self.pos)

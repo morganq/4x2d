@@ -1,4 +1,5 @@
 import button
+import funnotification
 import game
 import helper
 import pygame
@@ -178,6 +179,8 @@ class StarMapScene(Scene):
             t2.x = res.x/2 + 30
             
         self.sm = states.Machine(StarMapState(self))
+
+        # TODO: game saved notification if we just beat a level
 
     def update(self, dt):
         self.time += dt

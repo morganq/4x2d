@@ -46,6 +46,11 @@ class TimeCrystal(Planet):
             self.freeze(s)
             theta += random.random() + 0.1
 
+    def add_ship(self, type, notify=True):
+        print(type)
+        super().add_ship(type, notify)
+        print(self.ships)
+
     def generate_base_art(self):
         w = h = self.radius * 2
         self.art = pygame.image.load(resource_path("assets/timecrystal.png"))

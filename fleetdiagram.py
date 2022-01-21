@@ -7,6 +7,7 @@ import pygame
 import game
 import helper
 import spritebase
+from aliens.bossmothership import BossMothership
 from colors import *
 from helper import clamp, get_angle_delta, get_nearest
 
@@ -71,6 +72,8 @@ class FleetDiagram(spritebase.SpriteBase):
             
         for fleet in fleets:
             if not fleet.target:
+                continue
+            if isinstance(fleet.target, BossMothership):
                 continue
             if fleet.mode_state() == 'waiting':
                 pygame.draw.circle(self.image, OUTLINE_COLOR, fleet.target.pos, fleet.target.radius + 15, 3)

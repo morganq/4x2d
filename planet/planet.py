@@ -2,6 +2,7 @@ import math
 import random
 from collections import defaultdict
 
+import achievements
 import bullet
 import economy
 import explosion
@@ -358,7 +359,7 @@ class Planet(SpaceObject):
     def update(self, dt):
         real_dt = dt
         if self._timers['opt_time'] > 0.25:
-            self._timers['opt_time'] -= 0.25
+            self._timers['opt_time'] = 0
             dt = 0.25
         else:
             return super().update(real_dt)
@@ -387,7 +388,6 @@ class Planet(SpaceObject):
 
         for r in self.resources.data.keys():
             rate_modifier = 1
-
             ### Resource Stats ###
 
             if top_resource == r:
@@ -420,6 +420,9 @@ class Planet(SpaceObject):
 
             # Resources mined is based on num workers
             workers = min(self._population, self.get_max_pop())
+
+            if self.cinematic_disable:
+                rate_modifier = 0
 
             # Add to the timers based on the mining rate
             self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * rate_modifier
@@ -764,6 +767,9 @@ class Planet(SpaceObject):
             it = IconText(self.pos, "assets/i-%s.png" % type, "+1", PICO_PINK)
             it.pos = self.pos - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
             self.scene.ui_group.add(it)      
+
+            achievements.Achievements.inst.ship_gained(type, 0)
+
         self.needs_panel_update = True
 
     def add_building(self, upgrade):

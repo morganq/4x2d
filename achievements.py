@@ -39,11 +39,17 @@ ACHIEVEMENT_INFO = {
     'sector_7_won': {'description':'Beat Sector 7', 'name':'Stronghold'},
     'sector_8_won': {'description':'Beat Sector 8', 'name':'Shop'},
     'sector_9_won': {'description':'Beat Sector 9', 'name':'Signal Source'},
-    'sector_won_under_3m': {'description':'Beat a Sector in under 3 minutes', 'name':'Quickest Work'},
-    'sector_won_under_4m': {'description':'Beat a Sector in under 4 minutes', 'name':'Quicker Work'},
-    'sector_won_under_5m': {'description':'Beat a Sector in under 5 minutes', 'name':'Quick Work'},
+    'sector_won_under_3m': {'description':'Beat a Sector in under 3 minutes', 'name':'Quick Work Gold'},
+    'sector_won_under_4m': {'description':'Beat a Sector in under 4 minutes', 'name':'Quick Work Silver'},
+    'sector_won_under_5m': {'description':'Beat a Sector in under 5 minutes', 'name':'Quick Work Bronze'},
     'sector_won_after_o2_depleted': {'description':'Beat a Sector after oxygen has run out', 'name':'In The Red'},
     'sector_won_zero_lost_ships': {'description':'Beat a Sector without losing a ship', 'name':'No-one Left Behind'},
+    'fighter_trained': {'description':'Trained a Fighter - a versatile combat unit with limited range', 'name':'Trained Fighter'},
+    'scout_trained': {'description':'Trained a Scout - a surveillance unit with economy disruption capability', 'name':'Trained Scout'},
+    'interceptor_trained': {'description':'Trained an Interceptor - a powerful dogfighting unit, but cannot attack planets', 'name':'Trained Interceptor'},
+    'bomber_trained': {'description':'Trained a Bomber - a tactical unit for assaulting planets, but cannot defent itself from other ships', 'name':'Trained Bomber'},
+    'battleship_trained': {'description':'Trained a Battleship - a capital ship with unmatched health and damage', 'name':'Trained Battleship'},
+    'beat_game': {'description':'Defeated the Federation Mothership!', 'name':'First Victory!'},
 }
 
 class Achievements:
@@ -53,6 +59,9 @@ class Achievements:
         self.save = save
 
     def grant_achievement(self, name):
+        if name not in ACHIEVEMENT_INFO:
+            return
+
         was_new = self.save.set_achievement(name)
         self.save.save()
 
@@ -88,6 +97,7 @@ class Achievements:
             self.grant_achievement("sector_won_zero_lost_ships")
 
     def run_won(self, run_time_taken, oxygen_left, ships_lost, all_rewards, all_upgrades_by_sector):
+        self.grant_achievement('beat_game')
         all_upgrades_total = []
         for k,v in all_upgrades_by_sector.items():
             all_upgrades_total.extend(v)
@@ -100,7 +110,8 @@ class Achievements:
         pass
 
     def ship_gained(self, ship, num_ships):
-        pass
+        print("ship_gained", ship)
+        self.grant_achievement("trained_%s" % ship)
 
 
 class AchievementPopup(SpriteBase):

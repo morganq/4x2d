@@ -1,8 +1,9 @@
 import game
 import levelcontroller
 import levelstates
-from helper import clamp
 import pygame
+from helper import clamp
+
 V2 = pygame.math.Vector2
 
 from aliens import bossmothership, bosstimecrystal
@@ -22,25 +23,30 @@ class BossLevelController(levelcontroller.LevelController):
     def update(self, dt):
         super().update(dt)
         if self.phase == PHASE_REVIVING:
+            # Make ships go into cinematic mode so they don't fight.
+            for ship in self.scene.get_ships():
+                ship.cinematic_no_combat = True
+            for p in self.scene.get_planets():
+                p.cinematic_disable = True       
+
+            self.scene.player_civ.frozen.iron = 2
+            self.scene.player_civ.frozen.ice = 2
+            self.scene.player_civ.frozen.gas = 2
             self.reviving_time += dt
             self.scene.game_speed = clamp(self.reviving_time / 4, 1, 20)
-            self.scene.game_speed = 20
+            #self.scene.game_speed = 20
+            self.mothership.collidable = False
             if self.mothership.state == self.mothership.STATE_GAME_WAITING:
                 self.post_cinematic_timer -= dt
                 if self.post_cinematic_timer <= 0:
                     self.phase = PHASE_2
+                    self.mothership.collidable = True
                     self.scene.game_speed = 1
                     self.scene.sm.transition(levelstates.PlayState(self.scene))
                     self.mothership.health_bar.visible = True
                     self.mothership.health_bar.stay = True
                     for p in self.scene.get_planets():
-                        p.cinematic_disable = False
-
-            # Make ships go into cinematic mode so they don't fight.
-            for ship in self.scene.get_ships():
-                ship.cinematic_no_combat = True
-            for p in self.scene.get_planets():
-                p.cinematic_disable = True                
+                        p.cinematic_disable = False         
 
     def detect_victory(self):
         if self.phase == PHASE_1:

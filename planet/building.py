@@ -35,7 +35,7 @@ class Building:
                 {'points':[V2(*pt) for pt in shape['points']], 'color':shape['color'], 'blink':shape['blink']} for shape in data
             ]
         except:
-            data = json.load(open(resource_path("assets/buildings/building.json")))
+            data = json.load(open(resource_path("assets/buildings/default.json")))
             self.shapes = [
                 {'points':[V2(*pt) for pt in shape['points']], 'color':shape['color'], 'blink':shape['blink']} for shape in data
             ]            
