@@ -442,7 +442,9 @@ class Planet(SpaceObject):
         # Ship destruction
         
         if sum(self.ships.values()) > self.get_max_ships():
-            self.destroy_excess_ships_timer += dt
+            if not self.cinematic_disable:
+                self.destroy_excess_ships_timer += dt
+                
             if self.destroy_excess_ships_timer >= DESTROY_EXCESS_SHIPS_TIME:
                 # First try to get rid of fighters, than any advanced ships, then battleships if nothing else existed
                 if self.ships['fighter'] > 0:

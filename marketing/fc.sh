@@ -1,7 +1,9 @@
 #!/bin/bash
 animtoconvert=$1
-nframe=$2
-fps=$3
+nframe=$2  # every nth frame
+fps=$3  # 100 / fps actually
+
+# example: ./fc.sh somevid.mp4 2 3
 
 # Split in frames
 convert $animtoconvert +map +adjoin temp_%04d.gif

@@ -207,7 +207,8 @@ class PlayState(UIEnabledState):
                 if self.arrow.visible:
                     self.deselect()
             if selection_info and selection_info['type'] == 'planet' and self.dragging_from_sprite.owning_civ != self.scene.player_civ:
-                self.arrow.visible = False
+                if self.arrow:
+                    self.arrow.visible = False
                 self.dragging_from_sprite = None
         else:
             if self.arrow:

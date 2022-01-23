@@ -191,11 +191,10 @@ class NewGameBackground(SpriteBase):
                             done = True
                             break
 
-                    towards = (self.current_path[i] - pt)
-
-                    pt += helper.try_normalize(towards) * 5
-                    #pygame.draw.circle(self.image, color, pt, 1, 0)
-                    pygame.draw.rect(self.image, color, (pt.x - 1, pt.y - 1, 2, 2), 0)
+                    if i < len(self.current_path):
+                        towards = (self.current_path[i] - pt)
+                        pt += helper.try_normalize(towards) * 5
+                        pygame.draw.rect(self.image, color, (pt.x - 1, pt.y - 1, 2, 2), 0)
 
             if len(self.current_path) > 7 and not self.path_flashing:
                 self.path_flashing = True
