@@ -2,9 +2,6 @@
 
 ** Juice **
 
-Blinking upgrade button
-o2 in shop
-
 ** Immediate **
 
 "Game Saved" on star map

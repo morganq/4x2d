@@ -42,7 +42,7 @@ POPULATION_GROWTH_TIME = 40
 POP_GROWTH_IMPROVEMENT_PER_POP = 5
 POPULATION_GROWTH_MIN_TIME = 20
 HP_PER_BUILDING = 10
-DESTROY_EXCESS_SHIPS_TIME = 10
+DESTROY_EXCESS_SHIPS_TIME = 15
 PLANET_PROXIMITY = 130
 HAZARD_PROXIMITY = 130
 
@@ -444,7 +444,7 @@ class Planet(SpaceObject):
         if sum(self.ships.values()) > self.get_max_ships():
             if not self.cinematic_disable:
                 self.destroy_excess_ships_timer += dt
-                
+
             if self.destroy_excess_ships_timer >= DESTROY_EXCESS_SHIPS_TIME:
                 # First try to get rid of fighters, than any advanced ships, then battleships if nothing else existed
                 if self.ships['fighter'] > 0:
@@ -585,7 +585,7 @@ class Planet(SpaceObject):
 
                 # Any effects to attach to the ship
                 if self.get_stat("ship_pop_boost"):
-                    for i in range(self.population):
+                    for i in range(min(self.population, self.get_max_pop())):
                         s.add_effect(status_effect.ShipBoostEffect(s, self))        
 
     def special_update(self, dt):

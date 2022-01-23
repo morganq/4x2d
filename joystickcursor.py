@@ -114,6 +114,8 @@ class JoystickPanelCursor(SpriteBase):
         self.image = pygame.Surface(tuple(game.Game.inst.game_resolution), pygame.SRCALPHA)
 
         c = self.get_current_control()
+        if c is None:
+            return
         rect = (
             c.x - 4,
             c.y - 4,
