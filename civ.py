@@ -159,7 +159,7 @@ class Civ:
     def get_all_combat_ships(self):
         all_ships = []
         for s in self.scene.get_civ_ships(self, skip_objgrid=True):
-            if s.SHIP_BONUS_NAME != 'colonist' and s.is_alive():
+            if s.is_alive():
                 all_ships.append({'type':'ship', 'object':s, 'name':s.SHIP_NAME})
         
         for p in self.scene.get_civ_planets(self, skip_objgrid=True):
@@ -169,7 +169,7 @@ class Civ:
             for (ship_type, data) in p.emit_ships_queue:
                 all_ships.append({'type':'planet', 'object':p, 'name':ship_type})
 
-        return all_ships
+        return [s for s in all_ships if s['name'].lower() != 'colonist']
 
     def get_all_fighters(self):
         return [s for s in self.get_all_combat_ships() if s['name'] == "fighter"]

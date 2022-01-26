@@ -8,9 +8,13 @@ from helper import clamp
 from resources import resource_path
 from spritebase import SpriteBase
 
+STEAM_ENABLED = False
 USE_STEAMWORKS = False
 steamworks_sdk = None
 def init_steam():
+    if not STEAM_ENABLED:
+        return
+        
     global USE_STEAMWORKS
     global steamworks_sdk
     try:

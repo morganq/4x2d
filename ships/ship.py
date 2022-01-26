@@ -290,7 +290,9 @@ class Ship(SpaceObject):
         self._sheet = self._stealth_sheet
 
     def update(self, dt):
-        self.get_max_speed.cache_clear()
+        if hasattr(self.get_max_speed, 'cache_clear'):
+            self.get_max_speed.cache_clear()
+            
         if not self.updated_color:
             self.update_color()
             self.updated_color = True

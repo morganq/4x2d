@@ -31,6 +31,7 @@ from aliens import bosslevelcontroller, bossmothership, bosstimecrystal
 from asteroid import Asteroid
 from button import Button
 from civ import Civ, PlayerCiv
+from civshipui import CivShipUI
 from colors import *
 from debug import debug_render, print
 from economy import RESOURCE_COLORS, RESOURCES, Resources
@@ -184,6 +185,9 @@ class LevelScene(levelscenebase.LevelSceneBase):
         if game.DEV:
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 50, self.game.game_resolution.y - 20), 'Win', 'small', self.dev_win))
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 110, self.game.game_resolution.y - 20), 'Lose', 'small', self.dev_lose))
+
+        self.player_ship_info = CivShipUI(V2(6, 46), self.player_civ)
+        self.ui_group.add(self.player_ship_info)
 
         self.o2_meter = o2meter.O2Meter(V2(self.game.game_resolution.x - 86, 6))
         

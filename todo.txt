@@ -4,6 +4,7 @@
 
 ** Immediate **
 
+Hide planet ship counter when a ship is over it
 "Game Saved" on star map
 
 ** Missing Sounds **
