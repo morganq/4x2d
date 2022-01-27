@@ -186,7 +186,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 50, self.game.game_resolution.y - 20), 'Win', 'small', self.dev_win))
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 110, self.game.game_resolution.y - 20), 'Lose', 'small', self.dev_lose))
 
-        self.player_ship_info = CivShipUI(V2(6, 46), self.player_civ)
+        self.player_ship_info = CivShipUI(V2(self.game.game_resolution.x - 70, 24), self.player_civ)
         self.ui_group.add(self.player_ship_info)
 
         self.o2_meter = o2meter.O2Meter(V2(self.game.game_resolution.x - 86, 6))
@@ -204,7 +204,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
             self.stage_name.kill()
 
         self.upkeep_indicator = upkeepindicator.UpkeepIndicator(self)
-        self.ui_group.add(self.upkeep_indicator)
+        #self.ui_group.add(self.upkeep_indicator)
 
         self.pause_sprite = pauseoverlay.PauseOverlay()
         self.pause_sprite.layer = 5
@@ -397,6 +397,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
         for res_type in self.player_civ.upgrade_limits.data.keys():
             ratio = self.player_civ.upgrade_limits.data[res_type] / self.player_civ.base_upgrade_limits.data[res_type]
+            ratio = 1
             self.upgrade_texts[res_type].x = 120 * ratio + 20
             self.meters[res_type].set_width(120 * ratio)
             self.meters[res_type].max_value = self.player_civ.upgrade_limits.data[res_type]
@@ -628,7 +629,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
             )
 
         if game.DEV:
-            FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 20, 20), "%d" % self.time, (128,255,128,180))
+            FONTS['tiny'].render_to(self.game.screen, (game.RES[0] - 120, 4), "%d" % self.time, (128,255,128,180))
 
         res = self.game.game_resolution
         if self.cinematic:
@@ -663,3 +664,15 @@ class LevelScene(levelscenebase.LevelSceneBase):
     def update_run_stats(self):
         self.game.run_info.time_taken += self.time
         self.game.run_info.ships_lost += self.player_civ.ships_lost
+
+    def take_input(self, inp, event):
+        if inp in ["mouse_move", "mouse_drag"]:
+            if event.gpos.x > self.game.game_resolution.x - 130:
+                if event.gpos.y > 130:
+                    self.player_ship_info.target_y = 24
+                else:
+                    self.player_ship_info.target_y = self.game.game_resolution.y - self.player_ship_info.height - 19.5
+            else:
+                self.player_ship_info.target_y = 24
+
+        return super().take_input(inp, event)

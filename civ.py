@@ -77,6 +77,20 @@ class Civ:
         self.void_color = self.color
         self.max_buildings = 8
 
+    def get_fleet_soft_cap(self):
+        return 3
+
+    def get_fleet_o2_upkeep(self, num_ships = None):
+        if num_ships is None:
+            num_ships = len(self.get_all_combat_ships())
+        if num_ships >= self.get_fleet_soft_cap() + 4:
+            return 1
+        elif num_ships >= self.get_fleet_soft_cap() + 2:
+            return 0.5            
+        elif num_ships >= self.get_fleet_soft_cap():
+            return 0.25
+        return 0
+
     def get_ship_fuel(self, ship_name):
         f = 9999
         return f
@@ -154,7 +168,7 @@ class Civ:
         self.upgrade_limits.gas = self.base_upgrade_limits.gas * (1 + upkeep)
 
     def get_upkeep_ratio(self):
-        return clamp(len(self.get_all_combat_ships()) - 6, 0, 15) * 0.15
+        return 0 # clamp(len(self.get_all_combat_ships()) - 6, 0, 15) * 0.15
 
     def get_all_combat_ships(self):
         all_ships = []
