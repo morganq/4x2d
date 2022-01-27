@@ -11,7 +11,7 @@ Hide planet ship counter when a ship is over it
 
 ** Bugs and tweaks **
 
-Adjust upgrade curve [num upgrades per sector]
+
 
 ** Release **
 

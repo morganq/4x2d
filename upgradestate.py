@@ -19,7 +19,7 @@ from states import State, UIEnabledState
 from upgrade.upgradebutton import UpgradeButton
 from upgrade.upgradeicon import UpgradeIcon
 from upgrade.upgradepanel import UpgradePanel
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -92,7 +92,7 @@ class UpgradeState(UIEnabledState):
         self.extras = []        
         if not cancel:
             self.scene.player_civ.upgrades_stocked.pop(0)
-            self.scene.player_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+            self.scene.player_civ.register_research(self.pending_upgrade.name)
             self.scene.player_civ.clear_offers()
             sound.play("upgrade2")
             self.scene.pop_asset_button()
@@ -373,7 +373,7 @@ class DevAnyUpgradeState(UpgradeState):
             extra.kill()
         self.extras = []        
         if not cancel:
-            self.scene.player_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+            self.scene.player_civ.register_research(self.pending_upgrade.name)
         if self.panel:
             self.panel.kill()
         self.scene.sm.transition(levelstates.PlayState(self.scene))        
@@ -403,7 +403,7 @@ class SavedUpgradeState(UpgradeState):
         self.extras = []        
         if not cancel:
             self.scene.invalidate_saved_upgrade(self.pending_upgrade)
-            self.scene.player_civ.researched_upgrade_names.add(self.pending_upgrade.name)
+            self.scene.player_civ.register_research(self.pending_upgrade.name)
         self.scene.sm.transition(levelstates.PlayState(self.scene))
 
     def on_back(self):

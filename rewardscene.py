@@ -13,11 +13,11 @@ from scene import Scene
 from spritebase import SpriteBase
 from text import Text
 from upgrade import upgradeicon
-import pygame
+
 V2 = pygame.math.Vector2
 
 REWARDS = {
-    'jump_drive':{'title':'Jump Drive', 'description':'Begin with +2 fighter in future battles'},
+    'jump_drive':{'title':'Jump Drive', 'description':'Begin with +2 fighters and +1 supply in future battles'},
     'life_support':{'title':'Life Support', 'description': 'Begin with +3 population in future battles'},
     'memory_crystal':{'title':'Memory Crystal', 'description': 'Pick a technology to carry on to future battles'},
     'blueprint':{'title':'Blueprint', 'description': 'Pick a construct to carry on to future battles'},
@@ -93,6 +93,7 @@ class JumpDriveRewardState(RewardState):
 
     def on_confirm(self):
         self.scene.game.run_info.bonus_fighters += 2
+        self.scene.game.run_info.bonus_supply += 1
         self.scene.game.run_info.reward_list.append({"name":"jump_drive"})
         return super().on_confirm()
 

@@ -5,7 +5,7 @@ from upgrade.upgrades import UPGRADE_CLASSES
 
 RUN_INFO_SERIALIZE_FIELDS = [
     'data', 'path', 'saved_technologies', 'blueprints',
-    'bonus_population', 'bonus_fighters', 'rerolls', 'o2', 'credits',
+    'bonus_population', 'bonus_fighters', 'bonus_supply', 'rerolls', 'o2', 'credits',
     'bonus_credits', 'ship_levels', 'score', 'time_taken', 'ships_lost',
     'reward_list', 'sectors_cleared', 'victory', 'started', 'run_challenges', 'run_modifiers',
     'upgrades_by_sector',
@@ -44,6 +44,7 @@ class RunInfo:
         self.blueprints = [] # ['b_launchpad1', 'b_launchpad2a', 'b_launchpad3']
         self.bonus_population = 0
         self.bonus_fighters = 0
+        self.bonus_supply = 0
         self.rerolls = 3
         self.o2 = 60 * 60 * 1 # 1 hr
         self.credits = 20

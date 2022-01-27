@@ -182,7 +182,7 @@ class Alien:
         print("Researching %s" % asset_name)
         up = UPGRADE_CLASSES[asset_name]
         up().apply(target)
-        self.civ.researched_upgrade_names.add(up.name)
+        self.civ.register_research(up.name)
         self.civ.upgrades.append(up)        
 
     def execute_attack(self, attack_type, attack_strength=1):
@@ -557,6 +557,10 @@ class Alien:
         extra_pops = difficulty // 2
         my_planet = self.scene.get_civ_planets(self.civ)[0]
         my_planet.population += extra_pops
+        if difficulty >= 6:
+            my_planet.resources.iron = 70
+            my_planet.resources.gas = 30
+            my_planet.regenerate_art()
 
         near_planets = self.scene.get_planets()
         near_planets.sort(key=lambda x:(x.pos - my_planet.pos).length_squared())

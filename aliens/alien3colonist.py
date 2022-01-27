@@ -5,7 +5,7 @@ from ships.colonist import Colonist
 @register_ship
 class Alien3Colonist(Colonist):
     MAX_SPEED = 7
-    BASE_HEALTH = 50
+    BASE_HEALTH = 35
     SHIP_NAME = "alien3colonist"
     SHIP_BONUS_NAME = 'colonist'
     

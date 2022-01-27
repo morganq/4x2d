@@ -1,6 +1,7 @@
 import random
 
 import helper
+import pygame
 import sound
 from colors import *
 from explosion import Explosion
@@ -9,7 +10,7 @@ from particle import Particle
 from planet import planet
 from text import Text
 from upgrade.upgrades import UPGRADE_CLASSES
-import pygame
+
 V2 = pygame.math.Vector2
 
 from ships.all_ships import register_ship
@@ -58,7 +59,7 @@ class Colonist(Ship):
                     ]
                     u = random.choice(available_upgrades)
                     u().apply(other)  
-                    self.owning_civ.researched_upgrade_names.add(u.name)       
+                    self.owning_civ.register_research(u.name)       
 
                 self.colonized(other)
                 if self.origin:

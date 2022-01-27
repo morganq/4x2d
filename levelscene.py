@@ -6,6 +6,7 @@ import traceback
 from collections import defaultdict
 
 import pygame
+from numpy import place
 
 import aliens
 import fleet
@@ -187,7 +188,11 @@ class LevelScene(levelscenebase.LevelSceneBase):
             self.ui_group.add(Button(V2(self.game.game_resolution.x - 110, self.game.game_resolution.y - 20), 'Lose', 'small', self.dev_lose))
 
         self.player_ship_info = CivShipUI(V2(self.game.game_resolution.x - 70, 24), self.player_civ)
-        self.ui_group.add(self.player_ship_info)
+        #self.ui_group.add(self.player_ship_info)
+
+        self.player_pop_info = text.Text("Ships: 0/0", "small", V2(self.game.game_resolution.x - 6, 24), PICO_WHITE, shadow=PICO_BLACK)
+        self.player_pop_info.offset = (1, 0)
+        self.ui_group.add(self.player_pop_info)
 
         self.o2_meter = o2meter.O2Meter(V2(self.game.game_resolution.x - 86, 6))
         
@@ -241,6 +246,8 @@ class LevelScene(levelscenebase.LevelSceneBase):
         if "void" in self.game.run_info.run_modifiers:
             self.player_civ.base_stats['void'] = 1
 
+        self.player_civ.bonus_supply += self.game.run_info.bonus_supply
+
         galaxy = self.game.run_info.get_current_level_galaxy()
         if not galaxy['mods']:
             return
@@ -271,6 +278,7 @@ class LevelScene(levelscenebase.LevelSceneBase):
         AlienClass = aliens.alien.ALIENS[civ_name]
         self.enemies = [AlienClass(self, Civ(self))]
         self.enemy = self.enemies[0]        
+        self.enemy.bonus_supply = 999
         
         if self.levelfile:
             self.load_level(self.levelfile)
@@ -289,8 +297,6 @@ class LevelScene(levelscenebase.LevelSceneBase):
         self.background.generate_image(self.objgrid)
         print("done generate image")
         self.add_ui_elements()    
-
-        
 
         self.fleet_managers = {
             'my':fleet.FleetManager(self, self.player_civ),
@@ -421,6 +427,16 @@ class LevelScene(levelscenebase.LevelSceneBase):
 
         if self.level_controller:
             self.level_controller.update(dt)
+
+        num_ships = len(self.player_civ.get_all_combat_ships())
+        hard_cap = self.player_civ.get_fleet_hard_cap()
+
+        if num_ships >= hard_cap:
+            self.player_pop_info.color = PICO_RED
+        else:
+            self.player_pop_info.color = PICO_YELLOW
+        self.player_pop_info.set_text("Supply: %d/%d" % (num_ships, hard_cap))
+
 
         # if self.time > 300 and not self.player_civ.scarcity:
         #     self.player_civ.enable_scarcity()

@@ -385,62 +385,62 @@ class Planet(SpaceObject):
         resource_order.sort(key=lambda x:x[1])
         top_resource = resource_order[0][0]
         bottom_resource = resource_order[-1][0]
+        if self.owning_civ:
+            for r in self.resources.data.keys():
+                rate_modifier = 1
+                ### Resource Stats ###
 
-        for r in self.resources.data.keys():
-            rate_modifier = 1
-            ### Resource Stats ###
+                if top_resource == r:
+                    rate_modifier += self.get_stat("top_mining_rate")
+                    rate_modifier *= 1 + self.get_stat("top_mining_per_building") * len(self.buildings)
 
-            if top_resource == r:
-                rate_modifier += self.get_stat("top_mining_rate")
-                rate_modifier *= 1 + self.get_stat("top_mining_per_building") * len(self.buildings)
+                if bottom_resource == r:
+                    rate_modifier += self.get_stat("scarcest_mining_rate")
 
-            if bottom_resource == r:
-                rate_modifier += self.get_stat("scarcest_mining_rate")
+                rate_modifier *= (1 + self.get_stat("mining_rate"))
+                if self.unstable_reaction > 0:
+                    rate_modifier *= (1 + self.get_stat("unstable_reaction"))
 
-            rate_modifier *= (1 + self.get_stat("mining_rate"))
-            if self.unstable_reaction > 0:
-                rate_modifier *= (1 + self.get_stat("unstable_reaction"))
+                if r == "ice" and self.get_stat("ice_mining_rate"):
+                    rate_modifier *= 1 + self.get_stat("ice_mining_rate")
 
-            if r == "ice" and self.get_stat("ice_mining_rate"):
-                rate_modifier *= 1 + self.get_stat("ice_mining_rate")
+                if r == "gas" and self.get_stat("gas_mining_rate"):
+                    rate_modifier *= 1 + self.get_stat("gas_mining_rate")
 
-            if r == "gas" and self.get_stat("gas_mining_rate"):
-                rate_modifier *= 1 + self.get_stat("gas_mining_rate")
+                if self.get_stat("mining_rate_first_120") and self.owned_time < 120:
+                    rate_modifier *= self.get_stat("mining_rate_first_120")
 
-            if self.get_stat("mining_rate_first_120") and self.owned_time < 120:
-                rate_modifier *= self.get_stat("mining_rate_first_120")
+                if self.get_stat("mining_rate_proximity"):
+                    _, distsq = get_nearest(self.pos,self.scene.get_hazards())
+                    if distsq < HAZARD_PROXIMITY ** 2:
+                        rate_modifier *= 1 + self.get_stat("mining_rate_proximity")
 
-            if self.get_stat("mining_rate_proximity"):
-                _, distsq = get_nearest(self.pos,self.scene.get_hazards())
-                if distsq < HAZARD_PROXIMITY ** 2:
-                    rate_modifier *= 1 + self.get_stat("mining_rate_proximity")
+                if self._population >= self.get_max_pop():
+                    rate_modifier *= 1 + self.get_stat("mining_rate_at_max_pop")
 
-            if self._population >= self.get_max_pop():
-                rate_modifier *= 1 + self.get_stat("mining_rate_at_max_pop")
+                # Resources mined is based on num workers
+                workers = min(self._population, self.get_max_pop())
 
-            # Resources mined is based on num workers
-            workers = min(self._population, self.get_max_pop())
+                if self.cinematic_disable:
+                    rate_modifier = 0
 
-            if self.cinematic_disable:
-                rate_modifier = 0
-
-            # Add to the timers based on the mining rate
-            self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * rate_modifier
-            v = (self.resources.data[r] / 10.0) # if planet has 100% iron, you get 10 iron every 10 resource ticks.
-            if self.resources.data[r] > 0 and self.resource_timers.data[r] > v:
-                self.resource_timers.data[r] -= v
-                self.owning_civ.earn_resource(r, v, where=self)
-                if self.get_stat("mining_ice_per_iron"):
-                    self.owning_civ.earn_resource("ice", v * self.get_stat("mining_ice_per_iron"), where=self)
-                if self.get_stat("mining_gas_per_iron"):
-                    self.owning_civ.earn_resource("gas", v * self.get_stat("mining_gas_per_iron"), where=self)
+                # Add to the timers based on the mining rate
+                self.resource_timers.data[r] += dt * self.resources.data[r] * RESOURCE_BASE_RATE * workers * rate_modifier
+                v = (self.resources.data[r] / 10.0) # if planet has 100% iron, you get 10 iron every 10 resource ticks.
+                if self.resources.data[r] > 0 and self.resource_timers.data[r] > v:
+                    self.resource_timers.data[r] -= v
+                    self.owning_civ.earn_resource(r, v, where=self)
+                    if self.get_stat("mining_ice_per_iron"):
+                        self.owning_civ.earn_resource("ice", v * self.get_stat("mining_ice_per_iron"), where=self)
+                    if self.get_stat("mining_gas_per_iron"):
+                        self.owning_civ.earn_resource("gas", v * self.get_stat("mining_gas_per_iron"), where=self)
 
         # Ship production
-        if self.owning_civ and (not self.owning_civ.army_max or len(self.owning_civ.get_all_combat_ships()) < self.owning_civ.army_max):
-            self.production_update(dt)
+        if self.owning_civ:
+            if not self.owning_civ.is_fleet_maxed():
+                self.production_update(dt)
 
         # Ship destruction
-        
         if sum(self.ships.values()) > self.get_max_ships():
             if not self.cinematic_disable:
                 self.destroy_excess_ships_timer += dt

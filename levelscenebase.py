@@ -92,7 +92,7 @@ class LevelSceneBase(scene.Scene):
 
     def give_building(self, planet, upgrade):
         planet.add_building(upgrade)
-        planet.owning_civ.researched_upgrade_names.add(upgrade.name)
+        planet.owning_civ.register_research(upgrade.name)
 
     def create_layers(self):
         self.objgrid = ObjGrid(self.game.game_resolution.x, self.game.game_resolution.y, 50)

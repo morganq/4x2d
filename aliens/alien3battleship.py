@@ -1,10 +1,11 @@
 import random
 
+import pygame
 from colors import *
 from particle import Particle
 from ships.all_ships import register_ship
 from ships.battleship import Battleship
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -16,8 +17,8 @@ class Alien3Battleship(Battleship):
     DISPLAY_NAME = "Mothership"
 
     BASE_HEALTH = 200
-    FIRE_RATE = 1.0
-    BASE_DAMAGE = 5
+    FIRE_RATE = 1.85
+    BASE_DAMAGE = 7
     FUEL = 9999
 
     def __init__(self, scene, pos, owning_civ):

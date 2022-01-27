@@ -411,7 +411,7 @@ class OrderShipsState(MultiplayerState):
 
 def apply_upgrade_with_target(civ, up, targets):
     up().apply(*targets)
-    civ.researched_upgrade_names.add(up.name)
+    civ.register_research(up.name)
     civ.upgrades.append(up)
     civ.upgrades_stocked.pop(0)
     civ.clear_offers()

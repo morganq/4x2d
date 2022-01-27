@@ -34,9 +34,12 @@ class Civ:
         self.upgrades_stocked = []
         self.upgrades = []
         self.researched_upgrade_names = set()
+        self.researched_upgrades_list = []
         self.base_stats = Stats()
         self.frame_stats = {}
         self.total_mined = 0
+
+        self.bonus_supply = 2
 
         self.offered_upgrades = {}
 
@@ -46,6 +49,8 @@ class Civ:
         self.upkeep_timer = 0
 
         self.homeworld = None
+
+        self.total_population = 0
 
         # Analytics
         self.num_upgrades = 0
@@ -77,8 +82,37 @@ class Civ:
         self.void_color = self.color
         self.max_buildings = 8
 
+    def register_research(self, name):
+        self.researched_upgrade_names.add(name)
+        self.researched_upgrades_list.append(name)
+
+    def get_fleet_hard_cap(self):
+        ups = [upgrades.UPGRADE_CLASSES[n] for n in self.researched_upgrades_list]
+        upgrades_max_pop = len([u for u in ups if u.category != 'ships']) + self.bonus_supply
+        if self.army_max:
+            return min(self.army_max, upgrades_max_pop)
+        else:
+            return upgrades_max_pop
+
+    def is_fleet_maxed(self):
+        return len(self.get_all_combat_ships()) >= self.get_fleet_hard_cap()
+
     def get_fleet_soft_cap(self):
         return 3
+
+    def update_total_population(self):
+        pop = 0
+        for planet in self.scene.get_civ_planets(self):
+            pop += planet._population
+        for colonist in [c for c in self.get_all_ships() if c['name'] == 'colonist']:
+            if 'pop' in colonist:
+                pop += colonist['pop']
+            if colonist['type'] == 'ship':
+                pop += colonist['object'].population
+        self.total_population = pop
+
+    def get_total_population(self):
+        return self.total_population
 
     def get_fleet_o2_upkeep(self, num_ships = None):
         if num_ships is None:
@@ -124,6 +158,7 @@ class Civ:
         self.upgrades_update(dt)
         self.upkeep_update()
         self.modifiers_update(dt)
+        self.update_total_population()
         self.time += dt
 
     def modifiers_update(self, dt):
@@ -170,7 +205,7 @@ class Civ:
     def get_upkeep_ratio(self):
         return 0 # clamp(len(self.get_all_combat_ships()) - 6, 0, 15) * 0.15
 
-    def get_all_combat_ships(self):
+    def get_all_ships(self):
         all_ships = []
         for s in self.scene.get_civ_ships(self, skip_objgrid=True):
             if s.is_alive():
@@ -181,8 +216,14 @@ class Civ:
                 for i in range(v):
                     all_ships.append({'type':'planet', 'object':p, 'name':k})
             for (ship_type, data) in p.emit_ships_queue:
-                all_ships.append({'type':'planet', 'object':p, 'name':ship_type})
+                o = {'type':'planet', 'object':p, 'name':ship_type}
+                if 'num' in data:
+                    o['pop'] = data['num']
+                all_ships.append(o)
+        return all_ships        
 
+    def get_all_combat_ships(self):
+        all_ships = self.get_all_ships()
         return [s for s in all_ships if s['name'].lower() != 'colonist']
 
     def get_all_fighters(self):

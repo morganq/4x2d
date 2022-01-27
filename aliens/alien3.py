@@ -188,7 +188,7 @@ class Alien3(alien.Alien):
             # Create void for ships
             for ship in self.scene.get_civ_ships(self.civ):
                 if isinstance(ship, Alien3Battleship) and ship not in self.ship_void:
-                    void = Alien3Void(self.scene, ship, 15)
+                    void = Alien3Void(self.scene, ship, 21, self.civ.color)
                     self.ship_void[ship] = void
                     self.scene.game_group.add(void)
 
@@ -196,7 +196,10 @@ class Alien3(alien.Alien):
             for ship in list(self.ship_void.keys()):
                 if ship.owning_civ != self.civ or not ship.is_alive():
                     self.ship_void[ship].kill()
-                    del self.ship_void[ship]                    
+                    del self.ship_void[ship]        
+
+            for ship,void in self.ship_void.items():
+                void.pos = V2(ship.pos)
 
         self.civ.voids = list(self.planet_void.values()) + list(self.ship_void.values())
         return super().update(dt)
