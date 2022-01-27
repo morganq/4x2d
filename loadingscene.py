@@ -62,7 +62,6 @@ class LoadingScene(Scene):
         self.group.add(typewriter.Typewriter("ALIEN FORCES", "big", V2(50, 15) + self.game.game_offset, PICO_LIGHTGRAY, multiline_width=300, center=False))
         self.loading_text = Text("Loading...", "small", V2(game.RES[0] - 70, 326) + self.game.game_offset, center=False)
         self.loading_text.offset = (0.5, 0)
-        self.loading_text.visible = False
         self.group.add(self.loading_text)
 
         self.portrait = SimpleSprite(V2(50, 65) + self.game.game_offset, "assets/%sgraphic.png" % alien_code)
@@ -143,6 +142,21 @@ class LoadingScene(Scene):
                 warning.visible = False
 
         self.sm = Machine(UIEnabledState(self))
+        self.game.load_in_thread(self.load_level, self.on_loaded_level)
+
+    def load_level(self):
+        print("in thread - start")
+        self.levelscene = levelscene.LevelScene(
+            self.game,
+            self.galaxy['level'],
+            self.galaxy['alien'],
+            self.galaxy['difficulty'],
+            self.galaxy['difficulty'],
+            self.galaxy['name'],
+            self.galaxy['description']
+            )
+        self.levelscene.start()
+        print("in thread - done")
 
     def update(self, dt):
         for spr in self.group.sprites():
@@ -150,8 +164,6 @@ class LoadingScene(Scene):
         self.time += dt
         if self.time > 1.5:
             self.portrait.pos = V2(50, 65) + self.game.game_offset
-        if self.time > 1.5:
-            self.loading_text.visible = True
         for i,tip in enumerate(self.tips):
             if self.time > 2.15 + i * 0.35:
                 for z in tip:
@@ -163,18 +175,7 @@ class LoadingScene(Scene):
             for warning in self.warnings:
                 warning.visible = True
 
-        if not self.loaded and self.rendered and self.time > 4:
-            self.levelscene = levelscene.LevelScene(
-                self.game,
-                self.galaxy['level'],
-                self.galaxy['alien'],
-                self.galaxy['difficulty'],
-                self.galaxy['difficulty'],
-                self.galaxy['name'],
-                self.galaxy['description']
-                )
-            self.levelscene.start()
-            self.loaded = True
+        if self.loaded and self.loading_text.alive():
             t = "Start"
             if self.game.input_mode == "joystick":
                 t = "[*x*] Start"
@@ -184,6 +185,11 @@ class LoadingScene(Scene):
             self.ui_group.add(b)
             self.loading_text.kill()
         return super().update(dt)
+
+    def on_loaded_level(self, level):
+        print("loaded level callback")
+        self.loaded = True
+        self.levelscene = level
 
     def on_click_start(self):
         self.game.scene = self.levelscene

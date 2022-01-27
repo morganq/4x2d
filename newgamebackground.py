@@ -180,6 +180,8 @@ class NewGameBackground(SpriteBase):
                 i = 1
                 pt = V2(self.current_path[0])
                 while not done:
+                    if i >= len(self.current_path):
+                        break
                     towards = (self.current_path[i] - pt)
                     if towards.length_squared() < 8 ** 2:
                         pt  = V2(self.current_path[i])

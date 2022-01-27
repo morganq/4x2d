@@ -6,9 +6,11 @@ import newgamebackground
 import run
 import scene
 import states
+import text
 from colors import *
 from starmap import starmapscene
 from tutorial import tutorialmessage
+from tutorial.tutorial1scene import Tutorial1Scene
 
 V2 = pygame.math.Vector2
 
@@ -28,6 +30,7 @@ class NewGameScene(scene.Scene):
         self.background_group.add(self.bg)
 
         self.launch = None
+        self.loading = False
         self.time = 0
 
         backtext = "BACK"
@@ -93,8 +96,23 @@ class NewGameScene(scene.Scene):
             self.game.scene = starmapscene.StarMapScene(self.game)
             self.game.scene.start()
         else:
-            self.game.set_scene("tutorial")
+            self.loading = True
+            self.game.load_in_thread(self.load_tutorial, self.on_tutorial_loaded)
+            self.launch.visible = False
+            t = text.Text("Loading...", "huge", V2(self.launch.pos))
+            t.offset = (0.5, 0.5)
+            self.ui_group.add(t)
+
+    def load_tutorial(self):
+        tut = Tutorial1Scene(self.game)
+        tut.start()
+        return tut
+
+    def on_tutorial_loaded(self, tutorial):
+        self.game.scene = tutorial
 
     def on_back(self):
+        if self.loading:
+            return
         self.game.scene = menuscene.MenuScene(self.game)
         self.game.scene.start()

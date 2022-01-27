@@ -41,6 +41,8 @@ class Tutorial1Scene(TutorialScene):
             self.game_group.add(a)
 
         self.objgrid.generate_grid(self.get_objects_initial())
+
+        self.player_civ.bonus_supply = 99
         
 
     def setup_players(self):

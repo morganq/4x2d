@@ -5,6 +5,7 @@ import os
 import pstats
 import random
 import sys
+import threading
 import time
 import traceback
 from collections import defaultdict
@@ -91,6 +92,10 @@ class Game:
         
         self.input_mode = self.INPUT_MOUSE
         self.player_inputs = []
+
+        self.threads = {}
+        self.thread_return_values = {}
+        self.thread_index = 0
 
         if len(sys.argv) > 1:
             DEV = True            
@@ -384,6 +389,13 @@ class Game:
             elif self.input_mode == self.INPUT_MULTIPLAYER:
                 self.process_input_multiplayer(event)
 
+        # This code sucks but it works. Go through all the threads
+        # see if they're done and call their callbacks.
+        for thread_index, (thread, callback) in self.threads.items():
+            if not thread.is_alive():
+                callback(self.thread_return_values[thread_index])
+        self.threads = {k:v for k,v in self.threads.items() if v[0].is_alive()}
+
         max_framerate = 60
         if self.fps_limited_pause:
             pygame.time.wait(20)
@@ -506,3 +518,12 @@ class Game:
         if self.joysticks:
             return self.joysticks[0].get_numbuttons() != 14
         return False
+
+    def load_in_thread(self, func, callback):
+        t = self.thread_index
+        def wrapped_func():
+            self.thread_return_values[t] = func()
+        thread = threading.Thread(target=wrapped_func, daemon=True)
+        thread.start()
+        self.threads[t] = (thread, callback)
+        self.thread_index += 1
