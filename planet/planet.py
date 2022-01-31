@@ -21,6 +21,7 @@ from framesprite import FrameSprite
 from funnotification import FunNotification
 from helper import all_nearby, clamp, get_nearest
 from icontext import IconText
+from intel import inteldata
 from line import IndicatorLine, Line
 from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
@@ -770,6 +771,7 @@ class Planet(SpaceObject):
             self.scene.ui_group.add(it)      
 
             achievements.Achievements.inst.ship_gained(type, 0)
+            inteldata.IntelManager.inst.give_intel(type)
 
         self.needs_panel_update = True
 

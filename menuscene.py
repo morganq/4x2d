@@ -26,6 +26,7 @@ import tooltippanel
 import tutorial.introscene
 from colors import *
 from helper import clamp
+from intel.intelscene import IntelScene
 from particle import Particle
 from run import RunInfo
 from slider import Slider
@@ -759,7 +760,8 @@ class MenuScene(scene.Scene):
         self.logo.kill()
 
     def click_intel(self):
-        pass                    
+        self.game.scene = IntelScene(self.game)
+        self.game.scene.start()
 
     def take_input(self, inp, event):
         if self.mode == MODE_MODS:

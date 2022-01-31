@@ -48,11 +48,6 @@ ACHIEVEMENT_INFO = {
     'sector_won_under_5m': {'description':'Beat a Sector in under 5 minutes', 'name':'Quick Work Bronze'},
     'sector_won_after_o2_depleted': {'description':'Beat a Sector after oxygen has run out', 'name':'In The Red'},
     'sector_won_zero_lost_ships': {'description':'Beat a Sector without losing a ship', 'name':'No-one Left Behind'},
-    'fighter_trained': {'description':'Trained a Fighter - a versatile combat unit with limited range', 'name':'Trained Fighter'},
-    'scout_trained': {'description':'Trained a Scout - a surveillance unit with economy disruption capability', 'name':'Trained Scout'},
-    'interceptor_trained': {'description':'Trained an Interceptor - a powerful dogfighting unit, but cannot attack planets', 'name':'Trained Interceptor'},
-    'bomber_trained': {'description':'Trained a Bomber - a tactical unit for assaulting planets, but cannot defent itself from other ships', 'name':'Trained Bomber'},
-    'battleship_trained': {'description':'Trained a Battleship - a capital ship with unmatched health and damage', 'name':'Trained Battleship'},
     'beat_game': {'description':'Defeated the Federation Mothership!', 'name':'First Victory!'},
 }
 
@@ -114,7 +109,8 @@ class Achievements:
         pass
 
     def ship_gained(self, ship, num_ships):
-        self.grant_achievement("%s_trained" % ship)
+        pass
+        #self.grant_achievement("%s_trained" % ship)
 
 
 class AchievementPopup(SpriteBase):

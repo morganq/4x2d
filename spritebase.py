@@ -116,6 +116,9 @@ class SpriteBase(pygame.sprite.DirtySprite):
     def on_mouse_up(self, pos):
         self.dispatch_event("mouse_up", pos)
 
+    def on_mouse_move(self, pos):
+        self.dispatch_event("mouse_move", pos)
+
     def on_drag(self, pos):
         self.dispatch_event("drag", pos)
 

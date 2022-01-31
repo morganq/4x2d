@@ -35,6 +35,7 @@ class Save:
         self.highscores = data.get("highscores", [])
         self.settings = data.get("settings", DEFAULT_SETTINGS)
         self.achievements = data.get("achievements", [])
+        self.intel = data.get("intel", [])
         self.victories = data.get("victories", 0)
         self.tutorial_complete = data.get("tutorial_complete", False)
         SAVE_OBJ = self
@@ -46,6 +47,7 @@ class Save:
             'highscores': self.highscores,
             'settings': self.settings,
             'achievements': self.achievements,
+            'intel': self.intel,
             'victories': self.victories,
             'tutorial_complete': self.tutorial_complete
         }
@@ -89,6 +91,13 @@ class Save:
     def set_achievement(self, name):
         if name not in self.achievements:
             self.achievements.append(name)
+            return True
+        else:
+            return False
+
+    def set_intel(self, name):
+        if name not in self.intel:
+            self.intel.append(name)
             return True
         else:
             return False

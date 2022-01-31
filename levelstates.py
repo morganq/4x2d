@@ -26,6 +26,7 @@ from elements import expandingtext
 from funnotification import FunNotification
 from helper import clamp, get_nearest
 from helppanel import HelpPanel
+from intel.intelstate import IntelState
 from orderpanel import OrderPanel
 from planet.planetpanel import PlanetPanel
 from rangeindicator import RangeIndicator
@@ -744,7 +745,7 @@ class PauseState(UIEnabledState):
     is_basic_joystick_panel = True
     def enter(self):
         self.scene.paused = True
-        self.panel = pausepanel.PausePanel(V2(0,0), None, self.on_resume, self.on_quit)
+        self.panel = pausepanel.PausePanel(V2(0,0), None, self.on_resume, self.on_intel, self.on_quit)
         self.panel.position_nicely(self.scene)
         self.panel.fade_in()
         self.panel.add_all_to_group(self.scene.ui_group)
@@ -757,6 +758,9 @@ class PauseState(UIEnabledState):
 
     def on_resume(self):
         self.scene.sm.transition(PlayState(self.scene))
+
+    def on_intel(self):
+        self.scene.sm.transition(IntelState(self.scene))
 
     def on_quit(self):
         self.scene.game.fps_limited_pause = False

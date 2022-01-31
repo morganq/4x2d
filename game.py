@@ -39,6 +39,7 @@ import tilemap
 import tutorial.tutorial1scene
 from colors import *
 from helper import clamp, tuple_int
+from intel.inteldata import IntelManager, IntelPopup
 from resources import resource_path
 from starmap import starmapscene
 
@@ -68,6 +69,7 @@ class Game:
         pygame.init()
         self.save = save
         self.achievements = achievements.Achievements(self.save)
+        self.intel = IntelManager(self.save)
 
         resolution = self.save.get_setting("resolution")
         if resolution == None:
@@ -421,10 +423,14 @@ class Game:
             sprite.update(dt)
             if sprite.alive():
                 sprite.y = y
-                y += 66
+                y += sprite.height + 6
 
     def show_achievement(self, name, description):
         popup = achievements.AchievementPopup(V2(self.game_resolution.x // 2, 0), name, description)
+        self.achievements_group.add(popup)
+
+    def show_intel(self, name):
+        popup = IntelPopup(V2(self.game_resolution.x // 2, 0), name)
         self.achievements_group.add(popup)
 
     def scale_xbr(self):

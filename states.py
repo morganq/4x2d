@@ -5,7 +5,7 @@ import pygame
 import framesprite
 import helper
 import joystickcursor
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -159,6 +159,8 @@ class UIEnabledState(State):
                     self.hover_sprite.on_mouse_exit(event.gpos)
                     self.hover_sprite = sprite_found
                     self.hover_sprite.on_mouse_enter(event.gpos)
+                if sprite_found and self.hover_sprite == sprite_found:
+                    self.hover_sprite.on_mouse_move(event.gpos)
 
                 if input == "mouse_drag" and self.clicking_sprite:
                     self.dragging_from_sprite = self.clicking_sprite
