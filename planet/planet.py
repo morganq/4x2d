@@ -357,6 +357,14 @@ class Planet(SpaceObject):
     def get_max_pop(self):
         return round(self.size * (self.get_stat("pop_max_mul") + 1)) + self.get_stat("pop_max_add") + self.housing_max_pop
 
+    def is_production_blocked(self):
+        return (
+            self.owning_civ and
+            self.owning_civ.is_fleet_maxed() and
+            len(self.production) > 0
+        )
+            
+    
     def update(self, dt):
         real_dt = dt
         if self._timers['opt_time'] > 0.25:
@@ -370,7 +378,7 @@ class Planet(SpaceObject):
             self.set_health(self.get_max_health())
 
         self.warning.visible = (
-            (self.is_zero_pop() or self.has_extra_ships()) and 
+            (self.is_zero_pop() or self.has_extra_ships() or self.is_production_blocked()) and 
             (self.owning_civ and not self.owning_civ.is_enemy) and
             not self.hide_warnings
         )

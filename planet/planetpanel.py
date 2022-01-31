@@ -1,5 +1,6 @@
 from re import M
 
+import pygame
 from colors import *
 from economy import RESOURCE_COLORS, RESOURCES
 from line import Line
@@ -10,7 +11,7 @@ from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from text import Text
 from upgrade.upgradeicon import UpgradeIcon
-import pygame
+
 V2 = pygame.math.Vector2
 
 
@@ -69,6 +70,12 @@ class PlanetPanel(Panel):
 
         if is_mine and planet.has_extra_ships():
             t = Text("Too many ships!", "small", (0,0), PICO_BLACK, multiline_width=120)
+            self.add(Rectangle(V2(0,0), (t.width + 2, 12), PICO_YELLOW), V2(0,y-1))
+            self.add(t, V2(1,y + 1))
+            y += 17
+
+        if is_mine and planet.is_production_blocked():
+            t = Text("Max Supply!", "small", (0,0), PICO_BLACK, multiline_width=120)
             self.add(Rectangle(V2(0,0), (t.width + 2, 12), PICO_YELLOW), V2(0,y-1))
             self.add(t, V2(1,y + 1))
             y += 17

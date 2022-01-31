@@ -493,6 +493,11 @@ class OrderShipsState(UIEnabledState):
         controls = list(self.panel.sliders.values())
         return [[c] for c in controls]
 
+    def take_input(self, input, event):
+        if input == "other":
+            if event.key in [pygame.K_RETURN, pygame.K_TAB]:
+                self.panel.launch_auto()
+        return super().take_input(input, event)
 
 
 class GameOverState(State):

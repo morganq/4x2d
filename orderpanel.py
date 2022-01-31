@@ -1,5 +1,8 @@
+import pygame
+
 import asteroid
 import game
+import planet
 from button import Button
 from colors import *
 from panel import Panel
@@ -7,13 +10,13 @@ from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from slider import Slider
 from text import Text
-import pygame
+
 V2 = pygame.math.Vector2
 
 
 class OrderPanel(Panel):
     def __init__(self, pos, planet_from, planet_to, on_order):
-        super().__init__(pos, planet_from)
+        super().__init__(pos, planet_to)
         self.planet_from = planet_from
         self.planet_to = planet_to
         self.on_order = on_order
@@ -69,3 +72,11 @@ class OrderPanel(Panel):
         if 'colonist' in values and values['colonist'] > 0 and values['colonist'] < self.planet_from.owning_civ.worker_loss + 1:
             return
         self.on_order(values)
+
+    def launch_auto(self):
+        if isinstance(self.planet_to, asteroid.Asteroid):
+            for ship in ['fighter', 'scout', 'bomber', 'battleship']:
+                if ship in self.planet_from.ships and self.planet_from.ships[ship] > 0:
+                    self.sliders[ship].set_value(1)
+                    self.on_launch_click()
+                    return
