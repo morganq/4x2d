@@ -11,6 +11,7 @@ import sound
 from colors import *
 from helper import clamp
 from icontext import IconText
+from intel.inteldata import IntelManager
 from optimize import frame_memoize
 from stats import Stats
 from upgrade import upgrades
@@ -236,8 +237,6 @@ class Civ:
                 self.resources.set_resource(res_type, self.resources.data[res_type] - self.upgrade_limits.data[res_type])
                 self.num_resource_upgrades.data[res_type] += 1
                 self.base_upgrade_limits.data[res_type] = int(self.base_upgrade_limits.data[res_type] + self.get_upgrade_increase_amts()[res_type])
-                if self.is_player:
-                    print(self.base_upgrade_limits.data)
                 self.upkeep_update()
                 self.num_upgrades += 1
                 self.on_resource_overflow(res_type)
@@ -260,6 +259,21 @@ class Civ:
             sound.play("upgrade")
             if res_type == 'iron':
                 self.upgrade_times.append(self.time)        
+
+            # Award "upgrades" intel after we've gotten at least one of each upgrade
+            if (
+                self.base_upgrade_limits.iron > 25 and
+                self.base_upgrade_limits.ice > 80 and
+                self.base_upgrade_limits.gas > 150
+            ):
+                IntelManager.inst.give_intel("upgrades")
+
+            if self.base_upgrade_limits.iron > 450:
+                IntelManager.inst.give_intel("iron")
+            if self.base_upgrade_limits.ice > 350:
+                IntelManager.inst.give_intel("ice")                
+            if self.base_upgrade_limits.gas > 450:
+                IntelManager.inst.give_intel("gas")
 
     def earn_resource(self, resource, value, where = None):
         self.total_mined += value

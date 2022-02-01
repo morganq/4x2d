@@ -3,6 +3,7 @@ import levelcontroller
 import levelstates
 import pygame
 from helper import clamp
+from intel.inteldata import IntelManager
 
 V2 = pygame.math.Vector2
 
@@ -68,6 +69,7 @@ class BossLevelController(levelcontroller.LevelController):
                 self.scene.game_group.add(self.mothership)
                 all_planets_by_x = sorted(self.scene.get_planets(), key=lambda p:p.x, reverse=True)
                 self.mothership.planets_to_revive = all_planets_by_x[0:len(all_planets_by_x) // 2]
+                IntelManager.inst.give_intel("mothership") 
 
         if self.phase == PHASE_2:
             if self.mothership.health <= 0:

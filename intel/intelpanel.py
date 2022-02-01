@@ -14,6 +14,7 @@ class IntelBox(SpriteBase):
     def __init__(self, pos, intel_id):
         super().__init__(pos)
         self.intel = INTEL_LOOKUP[intel_id]
+        self.icon_sheet = pygame.image.load(resource_path("assets/intel_icons.png")).convert_alpha()
         self.enabled = IntelManager.inst.has_intel(intel_id)
         self._generate_image()
 
@@ -21,23 +22,33 @@ class IntelBox(SpriteBase):
         w = 400
         nw = 100
         pad = 4
-        description = self.intel['description']
-        title = self.intel['name']
-        color = PICO_WHITE
-        if not self.enabled:
-            title = "?"
-            description = "Gather this intel by exploring more of the game"
-            color = PICO_DARKGRAY
+        icon = None
+        icon_size = 0
+        title = "?"
+        description = "Gather this intel by exploring more of the game"
+        color = PICO_DARKGRAY        
+        title_offset = 0
+        if self.enabled:
+            description = self.intel['description']
+            title = self.intel['name']
+            color = PICO_WHITE            
+            icon = self.icon_sheet.subsurface((self.intel['icon'] * 23, 0, 23, 23))
+            title_offset = 4
+            icon_size = 26
         description_surf = text.render_multiline(description, "small", color, wrap_width=w - nw - pad * 2, center=False)
         title_surf = text.render_multiline(title, 'small', color, wrap_width=nw - pad * 2, center=False)
         h1 = description_surf.get_height()
-        h2 = title_surf.get_height()
+        h2 = title_surf.get_height() + icon_size
         h = max(h1, h2) + pad * 2
         self.image = pygame.Surface((w,h), pygame.SRCALPHA)
         self.image.fill(PICO_BLACK)
         pygame.draw.rect(self.image, PICO_DARKGRAY, (nw, 0, 1, h), 0)
-        self.image.blit(title_surf, (nw // 2 - title_surf.get_width() // 2, h // 2 - h2 // 2))
-        self.image.blit(description_surf, (pad * 2 + nw, h // 2 - h1 // 2))
+        
+        self.image.blit(title_surf, (nw // 2 - title_surf.get_width() // 2, h // 2 - h2 // 2 + title_offset + 2))
+        if icon:
+            self.image.blit(icon, (nw // 2 - icon.get_width() // 2, h // 2 - h2 // 2 + 12))
+
+        self.image.blit(description_surf, (pad * 2 + nw, h // 2 - h1 // 2 + 2))
         self._width, self._height = w,h
         self._recalc_rect()
 
@@ -71,7 +82,10 @@ class IntelPanel(panel.Panel):
         self.add(sf, pygame.Vector2(0,0))
         self.scroll_frame = sf
 
-        back = button.Button(pygame.Vector2(0,0), "Back", "small", self.on_back)
+        back_text = "Back"
+        if game.Game.inst.input_mode == "joystick":
+            back_text = "[*circle*] Back"
+        back = button.Button(pygame.Vector2(0,0), back_text, "small", self.on_back)
         self.add(back, pygame.Vector2(400 - back.width, 350))
 
         self.redraw()

@@ -22,6 +22,7 @@ from funnotification import FunNotification
 from helper import all_nearby, clamp, get_nearest
 from icontext import IconText
 from intel import inteldata
+from intel.inteldata import IntelManager
 from line import IndicatorLine, Line
 from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
@@ -446,6 +447,8 @@ class Planet(SpaceObject):
 
         # Ship production
         if self.owning_civ:
+            if self.is_production_blocked() and self.owning_civ.is_player:
+                IntelManager.inst.give_intel("supply")
             if not self.owning_civ.is_fleet_maxed():
                 self.production_update(dt)
 
@@ -737,7 +740,10 @@ class Planet(SpaceObject):
                 t = "%d" % num
             it = IconText(self.pos, "assets/i-pop.png", t, PICO_GREEN)
             it.pos = self.pos + V2(0, -self.get_radius() - 5) - V2(it.width, it.height) * 0.5 + V2(random.random(), random.random()) * 15
-            self.scene.ui_group.add(it)        
+            self.scene.ui_group.add(it)
+
+            if self._population >= 7 and self.scene.difficulty >= 2:
+                IntelManager.inst.give_intel("pop")
 
     def get_max_ships(self):
         s = round(self.get_max_pop() * (self.get_stat("max_ships_mul") + 1))
@@ -764,6 +770,8 @@ class Planet(SpaceObject):
         if 'colonist' in type:
             self.emit_ships_queue.append((type, data))
             self._population -= data['num']
+            if self.owning_civ and self.owning_civ.is_player:
+                IntelManager.inst.give_intel("workership")
         elif self.ships[type] > 0:
             self.emit_ships_queue.append((type, data))
             self.ships[type] -= 1
@@ -779,7 +787,13 @@ class Planet(SpaceObject):
             self.scene.ui_group.add(it)      
 
             achievements.Achievements.inst.ship_gained(type, 0)
-            inteldata.IntelManager.inst.give_intel(type)
+            if ( type == 'fighter' or
+                (type == 'scout' and self.scene.difficulty > 1) or 
+                (type == 'interceptor' and self.scene.difficulty > 2) or
+                (type == 'bomber' and self.scene.difficulty > 3) or
+                (type == 'battleship' and self.scene.difficulty > 4)
+            ):
+                inteldata.IntelManager.inst.give_intel(type)
 
         self.needs_panel_update = True
 

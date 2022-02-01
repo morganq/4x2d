@@ -40,6 +40,7 @@ from explosion import Explosion
 from framesprite import FrameSprite
 from hazard import Hazard
 from helper import all_nearby, get_nearest, get_time_string
+from intel.inteldata import IntelManager
 from levelbackground import LevelBackground
 from line import AssetLine, Line
 from meter import Meter
@@ -423,6 +424,12 @@ class LevelScene(levelscenebase.LevelSceneBase):
             self.game.save.set_run_state(self.game.run_info)
             self.game.save.save()            
 
+            if self.difficulty >= 6:
+                IntelManager.inst.give_intel("timeloop") 
+            if self.difficulty == 9:
+                IntelManager.inst.give_intel("censors") 
+                IntelManager.inst.give_intel("timecrystal") 
+
         self.time += dt
 
         if self.level_controller:
@@ -436,17 +443,11 @@ class LevelScene(levelscenebase.LevelSceneBase):
         else:
             self.player_pop_info.color = PICO_YELLOW
         self.player_pop_info.set_text("Supply: %d/%d" % (num_ships, hard_cap))
-
-
-        # if self.time > 300 and not self.player_civ.scarcity:
-        #     self.player_civ.enable_scarcity()
-        #     self.enemy.civ.enable_scarcity()
-        #     fn = funnotification.FunNotification("SCARCITY! Upgrade costs increased")
-        #     self.ui_group.add(fn)
         
         if not self.cinematic:
             self.game.run_info.o2 -= dt
-            #if self.time % 1 < (self.time - dt) % 1:
+            if self.game.run_info.o2 <= 40 * 60:
+                IntelManager.inst.give_intel("o2")
             self.o2_meter.o2 = self.game.run_info.o2
             self.o2_meter._generate_image()
 

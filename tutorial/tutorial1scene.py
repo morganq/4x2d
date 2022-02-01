@@ -64,6 +64,7 @@ class Tutorial1Scene(TutorialScene):
         }
 
         self.game.run_info.rerolls = 0
+        self.player_pop_info.kill()
 
     def update(self, dt):
         if self.time_edge(1.5, dt):

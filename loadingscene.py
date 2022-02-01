@@ -157,6 +157,7 @@ class LoadingScene(Scene):
             )
         self.levelscene.start()
         print("in thread - done")
+        return self.levelscene
 
     def update(self, dt):
         for spr in self.group.sprites():
@@ -187,12 +188,13 @@ class LoadingScene(Scene):
         return super().update(dt)
 
     def on_loaded_level(self, level):
-        print("loaded level callback")
+        print("loaded level callback", level)
         self.loaded = True
         self.levelscene = level
 
     def on_click_start(self):
         self.game.scene = self.levelscene
+        print("set game scene", self.game.scene)
 
     def take_input(self, inp, event):
         if inp == "confirm" and self.loaded:

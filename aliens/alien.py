@@ -3,6 +3,7 @@ import random
 
 import planet
 from debug import print
+from intel.inteldata import IntelManager
 from upgrade.upgrades import UPGRADE_CLASSES
 
 from aliens import bossmothership, buildorder
@@ -569,7 +570,7 @@ class Alien:
         for i in range(extra_planets):
             if difficulty in [6,7,8] and not time_looped:
                 near_unclaimed[i].set_time_loop()
-                time_looped = True                
+                time_looped = True               
             near_unclaimed[i].change_owner(self.civ)
             near_unclaimed[i].population = extra_pops
             near_unclaimed[i].set_health(near_unclaimed[i].get_max_health(), False)

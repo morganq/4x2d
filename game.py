@@ -112,7 +112,7 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             elif sys.argv[1] == "game":
-                self.scene = levelscene.LevelScene(self, "cross", "alien3", 7, 7, "Testing", "This is a test string for the description")
+                self.scene = levelscene.LevelScene(self, "cross", "alien3", 6, 6, "Testing", "This is a test string for the description")
             elif sys.argv[1] == "boss":
                 self.scene = levelscene.LevelScene(self, "boss2", "boss", 9, 9, "Boss", "It's the boss")
             elif sys.argv[1] == "planet":
@@ -529,6 +529,7 @@ class Game:
         t = self.thread_index
         def wrapped_func():
             self.thread_return_values[t] = func()
+            print("set thread return values for", t, self.thread_return_values[t])
         thread = threading.Thread(target=wrapped_func, daemon=True)
         thread.start()
         self.threads[t] = (thread, callback)

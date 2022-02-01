@@ -1,3 +1,4 @@
+import imp
 import random
 
 import pygame
@@ -8,6 +9,7 @@ import starmap
 import states
 from button import Button
 from colors import *
+from intel.inteldata import IntelManager
 from rectangle import Rectangle
 from scene import Scene
 from spritebase import SpriteBase
@@ -72,6 +74,7 @@ class CreditsRewardState(RewardState):
     def on_confirm(self):
         self.scene.game.run_info.credits += self.quantity
         self.scene.game.run_info.bonus_credits = 0
+        IntelManager.inst.give_intel("credits")
         return super().on_confirm()
 
 class OxygenRewardState(RewardState):
