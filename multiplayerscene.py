@@ -155,7 +155,7 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
     def load(self):
         self.create_layers()        
 
-        self.difficulty = 20
+        self.difficulty = 7
         
         self.setup_players()
 

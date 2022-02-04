@@ -4,6 +4,9 @@
 
 ** Immediate **
 
+MP menu look and act better
+MP random starting upgrade
+MP less planets
 Hide planet ship counter when a ship is over it
 "Game Saved" on star map
 
