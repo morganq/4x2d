@@ -6,7 +6,7 @@ from colors import *
 from fadeinmixin import FadeInMixin
 from resources import resource_path
 from spritebase import SpriteBase
-import pygame
+
 V2 = pygame.math.Vector2
 
 SIZE_PADDING = {'tiny':3, 'small':4, 'medium':5, 'big':7, 'huge':10}
@@ -33,7 +33,8 @@ class Button(SpriteBase, FadeInMixin):
     def onclick(self):
         if self.disabled: return
         sound.play("click1")
-        self.onclick_callback()
+        if self.onclick_callback:
+            self.onclick_callback()
 
     def _generate_image(self, hover=False):
         if self.image_path:
@@ -122,11 +123,13 @@ class Button(SpriteBase, FadeInMixin):
         self._recalc_rect()
 
     def on_mouse_enter(self, pos):
+        if self.disabled: return
         if self.onclick:
             self._generate_image(True)
         return super().on_mouse_enter(pos)
 
     def on_mouse_exit(self, pos):
+        if self.disabled: return
         if self.onclick:
             self._generate_image(False)
         return super().on_mouse_exit(pos)

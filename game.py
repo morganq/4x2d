@@ -253,9 +253,6 @@ class Game:
             self.game_speed_input = [0,1][self.joysticks[0].get_button(reverse_bindings['game_speed'])]                
 
     def process_input_multiplayer(self, event):
-        #print(event)
-        self.scene.take_raw_input(event)
-
         def get_mouse_player():
             for inp in self.player_inputs:
                 if inp.input_type == playerinput.Player.INPUT_MOUSE:
@@ -342,6 +339,7 @@ class Game:
             if p:      
                 self.scene.take_player_input(p.player_id, "un_game_speed", event)       
 
+        self.scene.take_raw_input(event)
 
     def run(self):
         self.clock = pygame.time.Clock()
