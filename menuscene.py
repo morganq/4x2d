@@ -429,9 +429,12 @@ class MenuScene(scene.Scene):
             self.bg_continue.label = l
             self.ui_group.add(l)              
 
-        l = MenuOptionLabel(self.bg_newgame.pos + V2(38,26) + V2(22,6) + V2(-4,-4), self.bg_newgame.pos + V2(38,26) + V2(-4,-4), "New Game")
+        t = "New Game"
+        if self.game.save.victories > 0:
+            t = "New Game [^+]"
+        l = MenuOptionLabel(self.bg_newgame.pos + V2(38,26) + V2(22,6) + V2(-4,-4), self.bg_newgame.pos + V2(38,26) + V2(-4,-4), t)
         self.bg_newgame.label = l
-        self.ui_group.add(l)        
+        self.ui_group.add(l)
 
         l = MenuOptionLabel(self.bg_options.pos + V2(-30,2) + V2(-22,-3) + V2(-4,-4), self.bg_options.pos + V2(-30,2) + V2(-4,-4), "Options")
         self.bg_options.label = l

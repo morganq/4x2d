@@ -237,6 +237,8 @@ class Alien2(alien.Alien):
         return bo
 
     def update(self, dt):
+        if not self.scene.get_civ_planets(self.civ):
+            return
         if self.duration_edge(60):
             if self.attack_to:
                 self.attack_to.upgradeable = True

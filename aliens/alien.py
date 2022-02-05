@@ -325,6 +325,8 @@ class Alien:
             self.fear_attack = False
 
     def update(self, dt):
+        if not self.scene.get_civ_planets(self.civ):
+            return        
         self._last_time = self.time
         self.time += dt
         duration = 1

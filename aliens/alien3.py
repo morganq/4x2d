@@ -171,6 +171,8 @@ class Alien3(alien.Alien):
         #self.EXPAND_DURATION = max(30 - (difficulty * 2), 10)
 
     def update(self, dt):
+        if not self.scene.get_civ_planets(self.civ):
+            return        
         if self.difficulty > 1:
             # Create void for planets
             for planet in self.scene.get_civ_planets(self.civ):
