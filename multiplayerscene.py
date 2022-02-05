@@ -51,7 +51,7 @@ UI_POSITIONS = {
 }
 
 class MultiplayerScene(levelscenebase.LevelSceneBase):
-    def __init__(self, game, num_players):
+    def __init__(self, game, num_players, player_random_upgrades):
         super().__init__(game, "choke")
         self.num_players = num_players
         self.player_civs = []
@@ -59,6 +59,7 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.player_upgrade_buttons = {}
         self.player_upgrade_texts = {}
         self.player_targets = {}
+        self.player_random_upgrades = player_random_upgrades
         self.player_game_speed_inputs = {}
         self.victory_number = 9001
 
@@ -79,6 +80,8 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.game_group.add(mid)
 
         self.objgrid.generate_grid(self.get_objects_initial())
+
+        self.first_frame = True
 
     def setup_players(self):
         self.meters = {}
@@ -207,6 +210,14 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
         self.update_ui(dt)
 
     def update_game(self, dt, base_dt):
+        if self.first_frame:
+            self.first_frame = False
+            for i,civ in enumerate(self.player_civs):
+                up = self.player_random_upgrades[i]
+                civ.upgrades_stocked.append(up.resource_type)
+                civ.offered_upgrades = {up.category:up.name}
+                self.show_player_upgrade_button(civ, up.resource_type)
+
         for sm in self.player_input_sms.values():
             sm.state.update(dt)
 

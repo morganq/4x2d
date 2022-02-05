@@ -121,12 +121,13 @@ class MultiplayerMenu(scene.Scene):
 
         self.ui_group.add(self.instructions)
 
-        self.back = button.Button(V2(10,10), "Back", "big", self.on_back)
+        self.back = button.Button(V2(10,10), "[*circle*] Back", "big", self.on_back)
         self.ui_group.add(self.back)
 
         self.start_btn = button.Button(V2(res.x/2,res.y - 40), "[*x*] Ready", "big", None)
         self.start_btn.disabled = True
         self.start_btn.offset = (0.5, 0)
+        self.start_btn.visible = False
         self.ui_group.add(self.start_btn)
 
         self.sm = states.Machine(MultiplayerUIState(self))
@@ -137,6 +138,7 @@ class MultiplayerMenu(scene.Scene):
     def add_player(self, input_type, joystick_id=None):
         if len(self.game.player_inputs) > 3:
             return
+        self.start_btn.visible = True
         self.start_btn.disabled = False
         self.start_btn.onclick_callback = self.on_roll
         if input_type == "joystick":
@@ -163,8 +165,6 @@ class MultiplayerMenu(scene.Scene):
         print(self.game.player_inputs)
 
     def take_raw_input(self, event):
-        if self.mode != 'add_players':
-            return
         if event.type == pygame.JOYBUTTONDOWN:
             found = False
             for pi in self.game.player_inputs:
@@ -178,7 +178,8 @@ class MultiplayerMenu(scene.Scene):
                 if pi.get_binding(event.button) == 'back':
                     self.on_back()
                 if pi.get_binding(event.button) == 'menu':
-                    self.add_player("joystick", event.instance_id)
+                    if self.mode == "add_players":
+                        self.add_player("joystick", event.instance_id)
 
 
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -209,6 +210,8 @@ class MultiplayerMenu(scene.Scene):
                 self.on_roll()
             if self.mode == "ready":
                 self.on_start()
+        if inp == "back":
+            self.on_back()
 
         self.sm.state.take_input(inp, event)
         self.game.input_mode = game.Game.INPUT_MULTIPLAYER
@@ -236,7 +239,7 @@ class MultiplayerMenu(scene.Scene):
         self.start_btn.disabled = True
 
     def load_scene(self):
-        mps = multiplayerscene.MultiplayerScene(self.game, len(self.player_panels))
+        mps = multiplayerscene.MultiplayerScene(self.game, len(self.player_panels), [pip.upgrade for pip in self.player_panels])
         mps.start()
         return mps
 

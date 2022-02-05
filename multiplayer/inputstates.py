@@ -424,7 +424,8 @@ class UpgradeState(MultiplayerState):
         uppos = self.civ.pos + V2(3,3)
         if self.civ.pos.y > 200:
             uppos = uppos + V2(0, - 80)
-        self.panel = upgradepanel.UpgradePanel(uppos, self.civ, self.civ.offer_upgrades(res), res, self.on_select, self.on_reroll)
+        ups = self.civ.offer_upgrades(res)
+        self.panel = upgradepanel.UpgradePanel(uppos, self.civ, ups, res, self.on_select, self.on_reroll)
         position_panel(self.panel, self.civ)
         self.panel.add_all_to_group(self.scene.ui_group)
         self.panel.fade_in()
@@ -456,11 +457,18 @@ class UpgradeState(MultiplayerState):
     def on_back(self): # Should back if you click off the panel or press back on joy
         self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
 
+    def mouse_input(self, input, event):
+        if input in ["back","menu","rightclick"]:
+            self.on_back()
+        return super().mouse_input(input, event)
+
     def joystick_input(self, input, event):
         if input == "joymotion":
             self.joystick_overlay.joystick_delta(event['delta'])
         if input == "confirm":
             self.joystick_overlay.confirm()  
+        if input == "back":
+            self.on_back()
 
 
 class UpgradeTargetState(MultiplayerState):
@@ -563,6 +571,9 @@ class UpgradeTargetState(MultiplayerState):
             if input in ["mouse_move", "mouse_drag"]:
                 self.cursor_icon.pos = event.gpos + V2(10,10)
 
+        if input == "rightclick":
+            self.on_back()
+
         if self.current_cursor:
             if input == "menu":
                 self.on_back()
@@ -578,7 +589,7 @@ class UpgradeTargetState(MultiplayerState):
                     if self.current_cursor == "any_planet" and sel['type'] == "planet":
                         self.targets.append(self.hover_sprite)
                         self.next_cursor()
-                        return                        
+                        return
 
                     if self.current_cursor == "allied_fleet" and sel['type'] == "fleet":
                         self.targets.append(self.hover_sprite)
