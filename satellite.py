@@ -6,8 +6,9 @@ import pygame
 import bullet
 import helper
 from asteroid import Asteroid
-from colors import PICO_BLUE, PICO_PINK
+from colors import *
 from laserparticle import LaserParticle
+from particle import Particle
 from spaceobject import SpaceObject
 from spritebase import SpriteBase
 
@@ -21,14 +22,21 @@ class Satellite(SpaceObject):
         super().__init__(scene, V2(-50,-50))
         self.owning_civ = planet.owning_civ
         self.inst_angle_offset = random.random() * 0.6 - 0.3
+        self.time = 0
+        self.first_frame = True
 
-    def set_pos(self):
-        self.angle = self.scene.time / (self.planet.radius + 10) * 3 + self.ANGLE_OFFSET + self.inst_angle_offset
+    def get_target_pos(self):
+        self.angle = self.time * 6.2818 / 45
         self.angle = self.angle % (math.pi * 2)
-        self.pos = self.planet.pos + helper.from_angle(self.angle) * (self.planet.radius + 10)
+        target_pos = self.planet.pos + helper.from_angle(self.angle) * (self.planet.radius + 15)
+        return target_pos
 
     def update(self, dt):
-        self.set_pos()
+        if self.first_frame:
+            self.pos = self.get_target_pos()
+            self.first_frame = False
+        self.time += dt
+        self.pos = self.pos * 0.8 + self.get_target_pos() * 0.2
         return super().update(dt)
 
 
@@ -125,9 +133,9 @@ class OrbitalLaser(Satellite):
             return isinstance(t, Asteroid) or (t.owning_civ and t.owning_civ != self.planet.owning_civ and t.health > 0)
         d = helper.from_angle(self.angle) * 5
         steps = 0
-        p = self.pos
+        p = V2(self.pos + helper.from_angle(self.angle) * 6)
         self.target = None
-        while (p.x > 0 and p.x < 600) and (p.y > 0 and p.y < 360):
+        while (p.x > 0 and p.x < self.scene.game.game_resolution.x) and (p.y > 0 and p.y < self.scene.game.game_resolution.y):
             p += d
             steps += 1
             possible = [o for o in self.scene.get_objects_in_range(p, 25) if not isinstance(o, bullet.Bullet)]
@@ -147,8 +155,16 @@ class OrbitalLaser(Satellite):
             self.new_target_timer = 0
             self.find_new_target()
             if self.target:
-                lp = LaserParticle(self.pos, self.target.pos, PICO_PINK, 0.25)
+                delta = (self.target.pos - self.pos).normalize()
+                lp = LaserParticle(self.pos + delta * 6, V2(self.target.pos), PICO_PINK, 0.25)
                 self.scene.add_particle(lp)
                 b = bullet.Bullet(self.target.pos, self.target, self, mods={'damage_base':3 * self.planet.planet_weapon_mul})
                 self.scene.game_group.add(b)
+                self.pos += delta * -2
+        if self.target:
+            delta = helper.from_angle(self.angle)
+            off = delta * 0
+            vel = delta * -15 + helper.random_angle() * 15
+            p = Particle([PICO_WHITE, PICO_PINK], 1, self.pos + off, 0.25, vel)
+            self.scene.game_group.add(p)
         return super().update(dt)
