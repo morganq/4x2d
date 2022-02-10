@@ -118,6 +118,8 @@ class RunInfo:
         mods = []
 
         rewards = [self.reward_pool.pop()]
+        if row == 7:
+            rewards.append(self.reward_pool.pop())
 
         if row == 5:
             mods = [random.choice(["warp_drive", "big_planet", "ship_shield_far_from_home", "atomic_bomb"])]
@@ -255,7 +257,6 @@ class RunInfo:
 
         while len(get_paths(self.data, (0,0))) > 35:
             prune_one()
-
 
         row = 0
         col = 0

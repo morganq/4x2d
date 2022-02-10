@@ -119,10 +119,16 @@ class StarMapScene(Scene):
                         img = "assets/si-signal.png"
                     obj = NodeSprite(self.game.run_info, (r,i), V2(x,y), img)
                     obj.offset = (0.5,0.5)
-                    if column['rewards']:
-                        reward = FrameSprite(V2(x + 7,y + 15), "assets/reward_icons.png", 23)
-                        reward.frame = REWARD_ICONS_ORDER[column['rewards'][0]]
-                        reward.offset = (0.5,0.5)    
+                    rdx = 0
+                    if len(column['rewards']) > 1:
+                        rdx = -13
+                    rewards = []
+                    for rew in column['rewards']:
+                        reward = FrameSprite(V2(x + 7 + rdx,y + 15), "assets/reward_icons.png", 23)
+                        reward.frame = REWARD_ICONS_ORDER[rew]
+                        reward.offset = (0.5,0.5)
+                        rdx += 16
+                        rewards.append(reward)
 
                 elif column['node_type'] == 'store':
                     obj = NodeSprite(self.game.run_info, (r,i), V2(x,y), "assets/si-shop.png")
@@ -143,8 +149,9 @@ class StarMapScene(Scene):
                 else:
                     self.nodes.append(obj)
                     self.game_group.add(obj)
-                    if reward:
-                        self.ui_group.add(reward)
+                    if rewards:
+                        for reward in rewards:
+                            self.ui_group.add(reward)
 
             x += 60
 

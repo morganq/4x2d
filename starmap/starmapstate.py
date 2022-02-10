@@ -151,7 +151,11 @@ class StarMapState(states.UIEnabledState):
 
         if node['rewards']:
             rew = rewardscene.REWARDS[node['rewards'][0]]['title']
-            t3 = typewriter.Typewriter("Reward: %s" % rew, "small", V2(60, self.scene.background.center_y + 88), PICO_WHITE, multiline_width=500)
+            if len(node['rewards']) == 1:
+                rt = "Reward: %s" % rew
+            else:
+                rt = "Rewards: %s" % (", ".join([rewardscene.REWARDS[r]['title'] for r in node['rewards']]))
+            t3 = typewriter.Typewriter(rt, "small", V2(60, self.scene.background.center_y + 88), PICO_WHITE, multiline_width=500)
             self.scene.ui_group.add(t3)                
             self.display_objs.append(t3)
 
