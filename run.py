@@ -8,8 +8,7 @@ RUN_INFO_SERIALIZE_FIELDS = [
     'bonus_population', 'bonus_fighters', 'bonus_supply', 'rerolls', 'o2', 'credits',
     'bonus_credits', 'ship_levels', 'score', 'time_taken', 'ships_lost',
     'reward_list', 'sectors_cleared', 'victory', 'started', 'run_challenges', 'run_modifiers',
-    'upgrades_by_sector',
-    'anticheat_level_started'
+    'upgrades_by_sector', 'anticheat_level_started', 'no_score'
 ]
 
 LEVEL_TITLES = {
@@ -60,6 +59,7 @@ class RunInfo:
         self.started = False
         self.run_challenges = [] # Negative mods
         self.run_modifiers = [] # Positive mods
+        self.no_score = False # If we restarted or cheated, no score.
 
         self.upgrades_by_sector = {}
 
@@ -173,18 +173,24 @@ class RunInfo:
 
 
     def generate_run(self):
+        highest_avg_cols = 0
+        best_run = None
         for i in range(10):
             data = self._generate_run()
             max_cols = max([len(r) for r in data])
-            if max_cols < 3 or max_cols > 4:
+            if max_cols != 4:
                 continue
             avg_cols = sum([len(r) for r in data]) / len(data)
-            if avg_cols < 2.1:
-                continue
-            if avg_cols > 2.4:
-                continue
-            break
-        return data
+            if avg_cols > highest_avg_cols:
+                best_run = data
+                highest_avg_cols = avg_cols
+            #if avg_cols < 3:
+            #    continue
+            #if avg_cols > 3:
+            #    continue
+            #break
+            
+        return best_run
 
     def _generate_run(self):
         self.data = []
@@ -247,7 +253,7 @@ class RunInfo:
         #for _ in range(10):
         #    prune_one()
 
-        while len(get_paths(self.data, (0,0))) > 7:
+        while len(get_paths(self.data, (0,0))) > 35:
             prune_one()
 
 

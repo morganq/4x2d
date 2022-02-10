@@ -4,10 +4,11 @@
 
 ** Immediate **
 
-MP menu look and act better
-MP random starting upgrade
-MP less planets
-Hide planet ship counter when a ship is over it
+Make starmap routes better.
+ - Add an "event" type? Some work, potential bugs, maybe good. What would it do? 
+ 
+
+Move planet ship counter when a ship is over it
 "Game Saved" on star map
 
 ** Missing Sounds **
@@ -19,11 +20,6 @@ Hide planet ship counter when a ship is over it
 ** Release **
 
 Finish mockup alien portraits
-Make game harder
-Complete upgrade designs and implementation
-Complete upgrade icons and art
-Intel menu
 Any necessary Alien upgrade and ship revisions
-Building art
-Multiplayer with unique upgrade balance tweaks
-Tutorial improvements
+
+

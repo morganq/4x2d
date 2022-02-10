@@ -85,7 +85,7 @@ class Game:
         try:
             self.run_info = self.save.get_run_state()
             if not DEV and self.run_info.anticheat_level_started:
-                self.run_info = run.RunInfo()
+                self.run_info.no_score = True
                 self.save.set_run_state(self.run_info)
                 self.save.save()
         except Exception as e:
@@ -106,6 +106,7 @@ class Game:
             elif sys.argv[1] == "editor":
                 self.scene = leveleditorscene.LevelEditorScene(self)
             elif sys.argv[1] == "star":
+                self.run_info = run.RunInfo()
                 self.scene = starmapscene.StarMapScene(self)
             elif sys.argv[1] == "upgrades":
                 self.scene = allupgradesscene.AllUpgradesScene(self)

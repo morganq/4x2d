@@ -524,10 +524,61 @@ class GameOverState(State):
 
     def paused_update(self, dt):
         self.time += dt
-        if self.time > 2:
-            self.scene.sm.transition(HighScoreState(self.scene))
+        if self.time > 1:
+            self.scene.sm.transition(RetryPromptState(self.scene))
         return super().paused_update(dt)
                 
+
+class RetryPromptState(UIEnabledState):
+    def enter(self):
+        super().enter()
+
+        self.info = text.Text("The hope of humanity is gone... or is it? You can lose your score, but carry on the struggle...", "small", self.scene.game.game_resolution / 2, multiline_width=250, shadow=PICO_BLACK)
+        self.info.offset = (0.5,0.5)
+        self.info.layer = 10
+        self.scene.ui_group.add(self.info)
+
+        self.retry_button = Button(V2(self.scene.game.game_resolution.x / 3, self.scene.game.game_resolution.y * 0.6), "Continue", "big", self.on_retry)
+        self.retry_button.offset = (0.5, 0.5)
+        self.retry_button.layer = 10
+        self.scene.ui_group.add(self.retry_button)
+
+        self.give_up_button = Button(V2(self.scene.game.game_resolution.x * 2 / 3, self.scene.game.game_resolution.y * 0.6), "Game Over", "big", self.on_give_up)
+        self.give_up_button.offset = (0.5, 0.5)
+        self.give_up_button.layer = 10
+        self.scene.ui_group.add(self.give_up_button)        
+
+    def exit(self):
+        self.info.kill()
+        self.retry_button.kill()
+        self.give_up_button.kill()
+        return super().exit()
+
+    def on_give_up(self):
+        self.scene.sm.transition(HighScoreState(self.scene))
+
+    def on_retry(self):
+        self.scene.game.run_info.o2 += self.scene.time
+        self.scene.game.run_info.no_score = True
+        self.scene.game.save.set_run_state(self.scene.game.run_info)
+        self.scene.game.save.save()
+        self.info.kill()
+        self.retry_button.kill()
+        self.give_up_button.kill()
+        self.loading_text = text.Text("LOADING...", "big", self.scene.game.game_resolution / 2, multiline_width=200)
+        self.loading_text.layer = 10
+        self.loading_text.offset = (0.5, 0.5)
+        self.scene.ui_group.add(self.loading_text)
+        self.scene.game.load_in_thread(self.load, self.on_loaded)
+
+    def load(self):
+        levelscene = self.scene.create_scene_copy()
+        levelscene.start()
+        return levelscene
+
+    def on_loaded(self, scene):
+        self.scene.game.scene = scene
+
 
 class VictoryState(State):
     def enter(self):
@@ -677,6 +728,10 @@ class HighScoreState(State):
             pct = 10 * len(ri.run_challenges)
             self.add_score_part("Challenge Bonus +%d%%:" % pct, challenge_bonus)
             self.score += challenge_bonus
+
+        if ri.no_score:
+            self.add_score_part("Lost and retried", -(self.score - 1))
+            self.score = 1
         self.add_score_part("Total:", self.score)
 
         self.highscores = []

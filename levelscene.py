@@ -93,6 +93,11 @@ class LevelScene(levelscenebase.LevelSceneBase):
     def score(self, value):
         self._score = value
 
+    def create_scene_copy(self):
+        scene_copy = LevelScene(self.game, self.levelfile, self.alienrace, self.difficulty, self.stage_num, self.title, self.description, self.options)
+        scene_copy.start()
+        return scene_copy
+
     def load_level(self, levelfile):
         print("load level")
         data = json.load(open(resource_path("levels/%s.json" % levelfile)))
@@ -388,6 +393,10 @@ class LevelScene(levelscenebase.LevelSceneBase):
                 #planet.change_owner(self.player_civ)
                 #planet.add_population(3)
                 #planet.add_ship("fighter")
+        for spr in self.game_group.sprites():
+            if isinstance(spr, bossmothership.BossMothership):
+                spr.health = 0
+                spr.take_damage(1)
 
     def dev_lose(self):
         for planet in self.get_civ_planets(self.player_civ):
