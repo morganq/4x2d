@@ -12,6 +12,7 @@ import sound
 import spaceobject
 import states
 import text
+from button import Button
 from colors import *
 from helper import *
 from planet import planetpanel
@@ -268,7 +269,16 @@ class CursorState(MultiplayerState):
             self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos[pid], color=self.civ.color, player_id=pid)
             self.scene.ui_group.add(self.joystick_overlay)
 
+    def mouse_input(self, input, event):
+        if input == "menu":
+            self.scene.menu_pause(self.civ)
+
+        return super().mouse_input(input, event)
+
     def joystick_input(self, input, event):
+        if input == "menu":
+            self.scene.menu_pause(self.civ)
+
         if input == "joymotion":
             self.joystick_overlay.joystick_delta(event['delta'])
 
@@ -391,6 +401,9 @@ class OrderShipsState(MultiplayerState):
         self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
 
     def mouse_input(self, input, event):
+        if input == "menu":
+            self.scene.menu_pause(self.civ)
+
         if input == "click":
             pr = pygame.Rect(self.panel.x, self.panel.y, self.panel.width, self.panel.height)
             if not pr.collidepoint(event.gpos):
@@ -398,6 +411,9 @@ class OrderShipsState(MultiplayerState):
         return super().mouse_input(input, event)
 
     def joystick_input(self, input, event):
+        if input == "menu":
+            self.scene.menu_pause(self.civ)
+
         if input == "back":
             self.scene.get_civ_sm(self.civ).transition(CursorState(self.scene, self.civ, self.input_mode))
 
@@ -672,3 +688,27 @@ class UpgradeTargetState(MultiplayerState):
             pid = self.scene.get_player_id(self.civ)
             self.joystick_overlay = joystickcursor.JoystickCursor(self.scene, self.scene.game.last_joystick_pos[pid], color=self.civ.color, player_id=pid)
             self.scene.ui_group.add(self.joystick_overlay)
+
+class NoInputState(MultiplayerState):
+    pass
+
+class MenuState(MultiplayerState):
+    is_basic_joystick_panel = True
+    def enter(self):
+        self.panel = self.scene.sm.state.panel
+        if self.input_mode == "joystick":
+            self.set_joystick_input()
+        return super().enter()
+
+    def joystick_input(self, input, event):
+        if input == "menu":
+            self.scene.menu_unpause()
+        return super().joystick_input(input, event)
+
+    def get_joystick_cursor_controls(self):
+        return [[b] for b in self.panel.get_controls_of_type(Button)]
+
+    def mouse_input(self, input, event):
+        if input == "menu":
+            self.scene.menu_unpause()        
+        return super().mouse_input(input, event)

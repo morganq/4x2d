@@ -14,7 +14,8 @@ class PausePanel(panel.Panel):
         self.add(text.Text("- Paused -", "big", V2(0,0), multiline_width=120), V2(0,0))
 
         self.add(button.Button(V2(0,0), "Resume", "small", on_resume), V2(0, 40))
-        self.add(button.Button(V2(0,0), "Intel", "small", on_intel), V2(0, 60))
+        if on_intel:
+            self.add(button.Button(V2(0,0), "Intel", "small", on_intel), V2(0, 60))
         self.on_quit = on_quit
         self.quit_button = button.Button(V2(0,0), "Give Up", "small", self.verify_quit)
         self.add(self.quit_button, V2(0, 80))

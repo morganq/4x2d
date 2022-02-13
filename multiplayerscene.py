@@ -18,7 +18,8 @@ from colors import *
 from economy import RESOURCE_COLORS, Resources
 from explosion import Explosion
 from multiplayer import inputstates
-from multiplayer.levelstates import MultiplayerNormalState
+from multiplayer.levelstates import (MultiplayerInGameMenuState,
+                                     MultiplayerNormalState)
 from multiplayer.multiplayerlevelcontroller import MultiplayerLevelController
 from planet.planet import Planet
 
@@ -273,3 +274,9 @@ class MultiplayerScene(levelscenebase.LevelSceneBase):
 
     def finish_player_upgrade(self, civ):
         self.update_upgrade_ui(civ)
+
+    def menu_pause(self, civ):
+        self.sm.transition(MultiplayerInGameMenuState(self, civ))
+
+    def menu_unpause(self):
+        self.sm.transition(MultiplayerNormalState(self))

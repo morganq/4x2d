@@ -512,6 +512,7 @@ class Game:
             "starmap":starmapscene.StarMapScene,
             "tutorial":tutorial.tutorial1scene.Tutorial1Scene,
         }[scene_name](self, *args)
+        self.fps_limited_pause = False
         self.scene.start()
 
     def end_run(self):
