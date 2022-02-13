@@ -41,7 +41,7 @@ class Alien1FighterProductionUpgradeIce(Alien1FighterProductionUpgrade):
     alien = True
     alien_name = 'alien1'
     infinite = True
-    alien_min_level = 4
+    alien_min_level = 3
 
     def apply(self, to):
         p = ProductionOrder("alien1warpship", 2, 90)

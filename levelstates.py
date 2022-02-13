@@ -713,8 +713,6 @@ class HighScoreState(State):
             ships_bonus = 0
 
         self.score = victory_bonus + sectors_bonus + time_bonus + ships_bonus
-        scores = save.SAVE_OBJ.add_highscore(self.score)
-        save.SAVE_OBJ.save()
 
         self.add_score_part("Cleared %d hostile sectors:" % num_sectors, sectors_bonus)
         self.add_score_part("Victory Bonus:", victory_bonus)
@@ -733,6 +731,9 @@ class HighScoreState(State):
             self.add_score_part("Lost and retried", -(self.score - 1))
             self.score = 1
         self.add_score_part("Total:", self.score)
+
+        scores = save.SAVE_OBJ.add_highscore(self.score)
+        save.SAVE_OBJ.save()
 
         self.highscores = []
         self.add_scores()

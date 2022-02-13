@@ -50,7 +50,7 @@ class Alien2FighterProductionUpgrade2(Alien2FighterProductionUpgrade1):
     alien = True
     alien_name = 'alien2'
     infinite = True
-    alien_min_level = 4
+    alien_min_level = 3
 
     def apply(self, to):
         p = ProductionOrder("alien2controlship", 1, 10)

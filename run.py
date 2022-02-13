@@ -1,6 +1,7 @@
 import random
 from math import radians
 
+import game
 from upgrade.upgrades import UPGRADE_CLASSES
 
 RUN_INFO_SERIALIZE_FIELDS = [
@@ -198,8 +199,9 @@ class RunInfo:
         self.data = []
         self.generate_reward_pool()
 
-        aliens = ['alien1', 'alien2', 'alien3']
-        random.shuffle(aliens)
+        aliens = ['alien1', 'alien3', 'alien2']
+        if game.Game.inst.save.victories > 0:
+            random.shuffle(aliens)
 
         all_levels = ['belt', 'slash', 'orbs', 'enemysplit', 'choke', 'neighbors', 'tunnel', 'bases', 'cross']
         #all_levels = ['orbs'] * 10

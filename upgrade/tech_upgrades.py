@@ -279,10 +279,10 @@ class AI1Upgrade(Upgrade):
     name = "t_ai1"
     resource_type = "ice"
     category = "tech"
-    title = "Orbital Targeting Solution"
-    description = "Ships gain [^+50%] Attack Speed for 5 seconds after take-off"
-    icon = "orbitaltargeting"
-    stats = Stats(ship_fire_rate_after_takeoff=0.5)
+    title = "Artificial Intelligence"
+    description = "[^+33%] Population Growth Rate. Population grows on planets even with 0 [Workers]"
+    icon = "ai"
+    stats = Stats(pop_growth_min_reduction=1, pop_growth_rate=0.33)
     family = {'tree':'t_ai', 'parents':[]}
     requires = None
 
@@ -291,12 +291,12 @@ class AI2aUpgrade(Upgrade):
     name = "t_ai2a"
     resource_type = "ice"
     category = "tech"
-    title = "Artificial Intelligence"
-    description = "[^+33%] Population Growth Rate. Population grows on planets even with 0 [Workers]"
-    icon = "ai"
-    stats = Stats(pop_growth_min_reduction=1, pop_growth_rate=0.33)
+    title = "Orbital Targeting Solution"
+    description = "Ships gain [^+50%] Attack Speed for 5 seconds after take-off"
+    icon = "orbitaltargeting"
+    stats = Stats(ship_fire_rate_after_takeoff=0.5)
     family = {'tree':'t_ai', 'parents':['t_ai1']}
-    requires = ('t_ai1',)
+    requires = ('t_ai1',)    
 
 @register_upgrade
 class AI2bUpgrade(Upgrade):

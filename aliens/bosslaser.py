@@ -16,8 +16,8 @@ V2 = pygame.math.Vector2
 @register_ship
 class BossLaser(Fighter):
     SHIP_NAME = "bosslaser"
-    BASE_HEALTH = 55
-    BASE_DAMAGE = 3.5
+    BASE_HEALTH = 45
+    BASE_DAMAGE = 3.0
     FIRE_RATE = 0.25
     FIRE_RANGE = 55
     MAX_SPEED = 4

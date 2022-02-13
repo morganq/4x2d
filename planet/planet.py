@@ -28,6 +28,8 @@ from ships.all_ships import SHIPS_BY_NAME
 from simplesprite import SimpleSprite
 from spaceobject import SpaceObject
 
+from planet.poppctcircle import PopPctCircle
+
 V2 = pygame.math.Vector2
 
 from planet import flag, timeloop
@@ -40,9 +42,9 @@ EMIT_SHIPS_RATE = 0.125
 
 RESOURCE_BASE_RATE = 1/190.0
 
-POPULATION_GROWTH_TIME = 40
-POP_GROWTH_IMPROVEMENT_PER_POP = 5
-POPULATION_GROWTH_MIN_TIME = 20
+#POPULATION_GROWTH_TIME = 60
+#POP_GROWTH_IMPROVEMENT_PER_POP = 15
+POPULATION_GROWTH_MIN_TIME = 15
 HP_PER_BUILDING = 10
 DESTROY_EXCESS_SHIPS_TIME = 15
 PLANET_PROXIMITY = 130
@@ -139,6 +141,9 @@ class Planet(SpaceObject):
         self.warning.visible = False
         self.hide_warnings = False
 
+        self.pop_pct_circle = PopPctCircle(self)
+        self.scene.game_group.add(self.pop_pct_circle)
+
         self.set_health(self.get_max_health())        
 
     def __str__(self) -> str:
@@ -203,6 +208,7 @@ class Planet(SpaceObject):
             self.health = max(self.health,0) + self.get_max_health() / 3
             self.flag = flag.Flag(self.pos + V2(1, -self.radius-1), civ.color)
             self.scene.game_group.add(self.flag)
+            
         self._population = 0
         self.emit_ships_queue = []
         self.ships = defaultdict(int)
@@ -352,7 +358,8 @@ class Planet(SpaceObject):
         rate *= 1 + (self.get_stat("pop_growth_rate_per_docked_ship") * sum(self.ships.values()))
         if sum(self.ships.values()) == 0:
             rate *= 1 + (self.get_stat("pop_growth_without_ships"))
-        growth_time = max(POPULATION_GROWTH_TIME - POP_GROWTH_IMPROVEMENT_PER_POP * self.population, POPULATION_GROWTH_MIN_TIME)
+        #growth_time = max(POPULATION_GROWTH_TIME - POP_GROWTH_IMPROVEMENT_PER_POP * self.population, POPULATION_GROWTH_MIN_TIME)
+        growth_time = 100 / (self.population + 2) + 5
         return growth_time / rate
 
     def get_max_pop(self):

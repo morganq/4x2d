@@ -197,6 +197,8 @@ class Ship(SpaceObject):
         if self._timers['staged_booster'] < 0:
             accel *= 3
         accel *= (1 - self.slow_aura)
+        speed_ratio = self.get_max_speed() / self.MAX_SPEED
+        accel *= speed_ratio ** 2
         return accel
 
     def is_target_enemy(self):

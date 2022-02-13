@@ -17,7 +17,7 @@ class Alien2Battleship(Battleship):
     SHIP_BONUS_NAME = 'battleship'
     DISPLAY_NAME = "Destroyer"
 
-    BASE_HEALTH = 400
+    BASE_HEALTH = 300
     FIRE_RATE = 2.0
     BASE_DAMAGE = 7
     FUEL = 9999
@@ -33,6 +33,9 @@ class Alien2Battleship(Battleship):
         if self.constructed:
             return super().update(dt)
         else:
+            if not self.updated_color:
+                self.update_color()
+                self.updated_color = True            
             self._timers['construction_particle'] += dt
             if self._timers['construction_particle'] > 0.4:
                 for i in range(3):
@@ -40,7 +43,7 @@ class Alien2Battleship(Battleship):
                     y = random.randint(0,self.height-1)
                     color = self.image.get_at((x,y))
                     if color[3] > 128 and color[0:3] != PICO_BLACK:
-                        p = Particle([PICO_WHITE, PICO_RED, PICO_BROWN], 1, self.pos + V2(x - 9, y - 9), 0.25, helper.random_angle() * 5)
+                        p = Particle([PICO_WHITE, PICO_YELLOW, PICO_BROWN], 1, self.pos + V2(x - 9, y - 9), 1.25, helper.random_angle() * 5)
                         self.scene.add_particle(p)
 
         if self.health <= 0:

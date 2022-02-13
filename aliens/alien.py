@@ -516,9 +516,9 @@ class Alien:
     def get_max_attackers(self):
         curve = {
             1: 0,
-            2: 2,
-            3: 3,
-            4: 5,
+            2: 3,
+            3: 5,
+            4: 6,
             5: 7,
             6: 7,
         }.get(self.difficulty, 999)        
@@ -536,7 +536,7 @@ class Alien:
         # }
         curve = {
             1:0.85, 2:0.95, 3:1.1, 4:1.25,
-            5:1.35, 6:1.35, 7:1.6, 8:2.0,
+            5:1.35, 6:1.55, 7:1.8, 8:2.0,
             9:2.0
         }        
         
@@ -545,14 +545,14 @@ class Alien:
     def set_difficulty(self, difficulty):
         self.difficulty = difficulty
         self.civ.base_stats['planet_health_mul'] = -0.6 + (difficulty - 1) / 6
-        self.civ.base_stats['mining_rate'] = 0.45 + 0.125 * difficulty
+        self.civ.base_stats['mining_rate'] = 0.65 + 0.1 * difficulty
         self.civ.base_stats['max_ships_per_planet'] = int((difficulty + 5) / 2)
         extra_planets = 0
-        if difficulty == 3: extra_planets = 1
-        if difficulty == 4: extra_planets = 1
-        if difficulty == 5: extra_planets = 1        
-        if difficulty == 6: extra_planets = 1
-        if difficulty == 7: extra_planets = 2
+        if difficulty == 3: extra_planets = 2
+        if difficulty == 4: extra_planets = 2
+        if difficulty == 5: extra_planets = 2
+        if difficulty == 6: extra_planets = 2
+        if difficulty == 7: extra_planets = 3
         if difficulty == 8: extra_planets = 3
         if difficulty == 9: extra_planets = 4
 
@@ -586,6 +586,10 @@ class Alien:
             3:5,
             4:8,5:8,6:8,7:8,8:8,9:8
         }[difficulty]
+
+        self.civ.earn_resource("iron", 150)
+        self.civ.earn_resource("ice", 150)
+        self.civ.earn_resource("gas", 150)
 
         self.build_order = buildorder.BuildOrder(self.get_build_order_steps())
 

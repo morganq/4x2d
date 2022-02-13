@@ -105,7 +105,7 @@ class LoadingScene(Scene):
 
         if galaxy['difficulty'] > 1:
             tw = 150
-            if galaxy['difficulty'] < 4: i = 0
+            if galaxy['difficulty'] < 3: i = 0
             elif galaxy['difficulty'] < 6: i = 1
             else: i = 2
             tip = alien_obj.tips[i]

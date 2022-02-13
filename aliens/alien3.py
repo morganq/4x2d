@@ -48,7 +48,7 @@ class Alien3FighterProductionUpgrade2(Alien3FighterProductionUpgrade1):
     alien = True
     alien_name = 'alien3'
     infinite = True
-    alien_min_level = 4
+    alien_min_level = 3
 
     def apply(self, to):
         to.add_production(ProductionOrder("alien3bomber", 2, 60))

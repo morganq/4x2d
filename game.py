@@ -62,6 +62,7 @@ class Game:
     INPUT_JOYSTICK = "joystick"
     INPUT_MULTIPLAYER = "multiplayer"
     def __init__(self, save):
+        Game.inst = self
         self.debug_console = False
         global DEV
         #pygame.display.set_icon(pygame.image.load(resource_path("assets/icon_2_256.png")))
@@ -113,7 +114,7 @@ class Game:
             elif sys.argv[1] == "tutorial":
                 self.scene = tutorial.tutorial1scene.Tutorial1Scene(self)
             elif sys.argv[1] == "game":
-                self.scene = levelscene.LevelScene(self, "cross", "alien3", 6, 6, "Testing", "This is a test string for the description")
+                self.scene = levelscene.LevelScene(self, "cross", "alien2", 6, 6, "Testing", "This is a test string for the description")
             elif sys.argv[1] == "boss":
                 self.scene = levelscene.LevelScene(self, "boss2", "boss", 9, 9, "Boss", "It's the boss")
             elif sys.argv[1] == "planet":
@@ -154,7 +155,6 @@ class Game:
         self._profiling = False
         self._profile_start_time = 0
         self._profiler = None
-        Game.inst = self
 
     def set_resolution(self, resolution, fullscreen = False, resizable = False):
         flags = 0
